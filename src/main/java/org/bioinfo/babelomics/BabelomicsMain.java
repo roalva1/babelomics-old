@@ -1,5 +1,7 @@
 package org.bioinfo.babelomics;
 
+import java.io.IOException;
+
 import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.tools.BabelomicsFactory;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
@@ -31,9 +33,11 @@ public class BabelomicsMain {
 		
 		BabelomicsTool tool = BabelomicsFactory.createTool(toolName, args);
 		if(tool == null) {
-			System.out.println("tool no valid!!!!");
+			System.out.println("tool no valid!!!! ==> "+toolName);
 			return;
 		}
+		System.out.println("==> "+toolName);
+		tool.setToolName(toolName);
 		
 		
 		// if the tool is ok:
@@ -43,7 +47,9 @@ public class BabelomicsMain {
 			tool.run();
 		} catch (ParseException e) {
 			tool.printUsage("lkjdaslkj");
-			e.printStackTrace();
+			tool.printError("parseexception_main_babelomicsmain", "An error while parsing the command line", e.toString(), e);
+		} catch (IOException e) {
+			tool.printError("ioexception_main_babelomicsmain", "An error while parsing the command line", e.toString(), e);
 		}
 		
 	}

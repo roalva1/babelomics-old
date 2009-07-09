@@ -80,7 +80,7 @@ public class Preprocessing extends BabelomicsTool {
 				//					return;
 				//				}
 				catch (CloneNotSupportedException e) {
-					e.printStackTrace();
+					printError("cloneexecption_logbase_execute_preprocessing", "pedazo de error", e.toString(), e);
 				}
 			}
 
