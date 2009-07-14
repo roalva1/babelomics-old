@@ -1,13 +1,15 @@
 package org.bioinfo.babelomics.tools.preprocessing;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.biodata.data.Dataset;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
+import org.bioinfo.utils.StringUtils;
 
 public class Preprocessing extends BabelomicsTool {
 
@@ -36,7 +38,6 @@ public class Preprocessing extends BabelomicsTool {
 
 		Dataset dataset;
 		try {
-			dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
 
 			String logBase = commandLine.getOptionValue("logarithm-base", null);
 			String mergeMethod = commandLine.getOptionValue("merge-replicates", null);
@@ -44,98 +45,119 @@ public class Preprocessing extends BabelomicsTool {
 			String imputeMethod = commandLine.getOptionValue("impute-missing", null);
 			String kvalue = commandLine.getOptionValue("impute-missing", "15");
 
+			System.out.println("impute method = " + imputeMethod);
+			
+			int progress = 1, finalProgress = 3;
+			if ( imputeMethod != null && !("none".equalsIgnoreCase(imputeMethod)) ) finalProgress++; 
+			if ( filterPercentage != null && !("none".equalsIgnoreCase(filterPercentage)) ) finalProgress++;
+			if ( mergeMethod != null && !("none".equalsIgnoreCase(mergeMethod)) ) finalProgress++;
+			if ( logBase != null && !("none".equalsIgnoreCase(logBase)) ) finalProgress++;
+			
+			jobStatus.addStatusMessage("" + (progress*100/finalProgress), "reading dataset");
+			dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));			
 			if(commandLine.hasOption("sample-filter") || commandLine.hasOption("feature-filter")) {
 				dataset = dataset.getSubDataset(commandLine.getOptionValue("sample-filter"), "4", commandLine.getOptionValue("feature-filter"), ""); 
 			}
+			progress++;
 
 			//System.out.println("before executing preprocessing...\n" + dataset.toString() + "\n");
 
 			// apply logarithm
 			//
-			if ( logBase != null ) {
+			if ( logBase != null && !("none".equalsIgnoreCase(logBase)) ) {
+				
+				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "applying logarithm base " + logBase);
+				logger.debug("executing logarithm base " + logBase + "...\n");
+				
 				try {
 					if ( dataset.getDoubleMatrix() == null ) { 
 						dataset.load();
 						dataset.validate();
 					}
 					
-					jobStatus.addStatusMessage("25", "reading data");
-					logger.debug("executing logarithm...\n");
 					dataset.setDoubleMatrix(dataset.getDoubleMatrix().applyLogarithm(logBase));
 					
-					logger.debug("validating...\n");
-					jobStatus.addStatusMessage("40", "reading data");
+//					logger.debug("validating...\n");
+//					jobStatus.addStatusMessage("40", "reading data");
 					dataset.validate();
 					
-					logger.debug("saving...\n");
-					jobStatus.addStatusMessage("80", "saving data");
-					dataset.save(outdir+"/preprocessed.txt");
-					result.addOutputItem(new Item("prepocessed_file",outdir+"/preprocessed.txt", "The preprocessed file is: ", TYPE.FILE));
-					jobStatus.addStatusMessage("100", "done");
+//					logger.debug("saving...\n");
+//					jobStatus.addStatusMessage("80", "saving data");
+//					dataset.write(new File(outdir+"/preprocessed.txt"));
+//					result.addOutputItem(new Item("prepocessed_file",outdir+"/preprocessed.txt", "The preprocessed file is: ", TYPE.FILE));
+//					jobStatus.addStatusMessage("100", "done");
+					
+					//System.out.println("end of logarithm (base " + logBase + ")");
+					
 				} 
-				//				catch (InvalidParameterException e) {				
-				//					logger.error("Invalid logarithm base '" + logBase + "', valid values are e, 2, 10");
-				//					System.out.println("Invalid logarithm base '" + logBase + "', valid values are e, 2, 10\n");
-				//					printUsage();
-				//					return;
-				//				}
 				catch (CloneNotSupportedException e) {
-					printError("cloneexecption_logbase_execute_preprocessing", "pedazo de error", e.toString(), e);
+					printError("cloneexecption_logbase_execute_preprocessing", "logarithm base preprocessing error", e.toString(), e);
 				}
+				logger.debug("end of executing logarithm base " + logBase + "\n");
+				progress++;
 			}
-
+			
 			// merge replicated rows
 			//
-			if ( mergeMethod != null ) {
+			if ( mergeMethod != null && !("none".equalsIgnoreCase(mergeMethod)) ) {
+				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "merging replicated rows (" + mergeMethod + ")");
+				logger.debug("merging replicated rows (" + mergeMethod + ")...\n");
+
 				if ( dataset.getDoubleMatrix() == null ) { 
 					dataset.load();
 					dataset.validate();
 				}
 
-				System.out.println("merge replicated (" + mergeMethod + "), input :\n" + dataset.toString());
+				//System.out.println("merge replicated (" + mergeMethod + "), input :\n" + dataset.toString());
 				dataset = dataset.mergeReplicatedFeatures(mergeMethod);
-				System.out.println("merge replicated (" + mergeMethod + "), output :\n" + dataset.toString());
+				//System.out.println("merge replicated (" + mergeMethod + "), output :\n" + dataset.toString());
+				
+				logger.debug("end of merging replicated rows (" + mergeMethod + ")\n");
+				progress++;
 			}
 
 
 			// filter missing values according to the given percentage
 			//
-			if ( filterPercentage != null ) {
+			if ( filterPercentage != null && !("none".equalsIgnoreCase(filterPercentage)) ) {
+				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "filtering missing values by percentage " + filterPercentage);
+				logger.debug("filtering missing values by percentage " + filterPercentage + "...\n");
 				try {
 					double perc = Double.parseDouble(filterPercentage);					
 
-					System.out.println("input :\n" + dataset.toString());
-					System.out.println("executing filter missing values " + filterPercentage + "% ...\n");
+					//System.out.println("input :\n" + dataset.toString());
+					//System.out.println("executing filter missing values " + filterPercentage + "% ...\n");
 					dataset = dataset.filterRowsByPercOfMissingValues(perc);
 					dataset.validate();
-					System.out.println("output :\n" + dataset.toString());
-					System.out.println("end of filter missing values " + filterPercentage + "% ...\n");
+					//System.out.println("output :\n" + dataset.toString());
+					//System.out.println("end of filter missing values " + filterPercentage + "% ...\n");
 
 				} catch (Exception e) {
+					printError("execption_filterpercentage_execute_preprocessing", "filter percentage preprocessing error", e.toString(), e);
 					e.printStackTrace();
-					logger.error("Invalid percentage value '" + filterPercentage + "' to filter missing values, it must range from 0 to 100");
-					System.out.println("Invalid percentage value '" + filterPercentage + "' to filter missing values, it must range from 0 to 100\n");
-					printUsage();
-					return;
 				}
+				logger.debug("end of filtering missing values by percentage " + filterPercentage + "\n");
+				progress++;
 			}
 
 
 			// imputing missing values
 			//
-			if ( imputeMethod != null ) {
+			if ( imputeMethod != null && !("none".equalsIgnoreCase(imputeMethod)) ) {
+				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "imputing missing values (" + imputeMethod + ")");
+				logger.debug("imputing missing values (" + imputeMethod + ")...\n");
 				try {
 					if ( dataset.getDoubleMatrix() == null ) { 
 						dataset.load();
 						dataset.validate();
 					}
 
-					System.out.println("input :\n" + dataset.toString());
-					System.out.println("executing impute missing values...\n");
+					//System.out.println("input :\n" + dataset.toString());
+					//System.out.println("executing impute missing values...\n");
 					dataset.setDoubleMatrix(dataset.getDoubleMatrix().imputeMissingValuesInRows(imputeMethod));
 					dataset.validate();
-					System.out.println("output :\n" + dataset.toString());
-					System.out.println("end of impute missing values...\n");
+					//System.out.println("output :\n" + dataset.toString());
+					//System.out.println("end of impute missing values...\n");
 
 				} 
 				//				catch (InvalidParameterException e) {				
@@ -145,8 +167,11 @@ public class Preprocessing extends BabelomicsTool {
 				//					return;
 				//				}
 				catch (CloneNotSupportedException e) {
+					printError("cloneexecption_impute_execute_preprocessing", "impute missing values preprocessing error", e.toString(), e);
 					e.printStackTrace();
 				}	
+				logger.debug("imputing missing values (" + imputeMethod + ")\n");
+				progress++;
 				/*				
 				int k;
 				try {
@@ -160,7 +185,21 @@ public class Preprocessing extends BabelomicsTool {
 				}
 				 */
 			}
+			
+			logger.debug("saving dataset...\n");
+			jobStatus.addStatusMessage("" + (progress*100/finalProgress), "saving data");
+			dataset.write(new File(outdir+"/preprocessed.txt"));
+			
+			result.addOutputItem(new Item("prepocessed_file",outdir+"/preprocessed.txt", "The preprocessed file is: ", TYPE.FILE));
+			jobStatus.addStatusMessage("100", "done");
+
+			System.out.println("job status :\n" + StringUtils.arrayToString(jobStatus.getStatusMessages(), "\n"));
 		} catch (IOException e1) {
+			try {
+				jobStatus.addStatusMessage("100", "error");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
 			e1.printStackTrace();
 		}
 
