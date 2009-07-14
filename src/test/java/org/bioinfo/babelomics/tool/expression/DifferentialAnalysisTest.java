@@ -1,6 +1,7 @@
 package org.bioinfo.babelomics.tool.expression;
 
 
+import org.bioinfo.babelomics.BabelomicsMain;
 import org.bioinfo.babelomics.tools.expression.DifferentialAnalysis;
 import org.junit.After;
 import org.junit.Before;
@@ -17,8 +18,7 @@ public class DifferentialAnalysisTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
-	public void test1() {
+	public void test() {
 		System.out.println("-----     ------");
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
@@ -33,4 +33,58 @@ public class DifferentialAnalysisTest {
 			//System.out.println(e.toString());
 		}		
 	}
+	
+	
+	@Test
+	public void test1() {
+		System.out.println("-----     ------");
+		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
+		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
+		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--merge-replicates", "mean"};
+		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/correlationPearsonFinal", "-test", "pearson", "-class", "only_males"};
+		
+		try {
+			BabelomicsMain.main(args); 
+//			DifferentialAnalysis diffexpr = new DifferentialAnalysis(args);
+//			diffexpr.execute();
+		} catch (Exception e) {
+			e.printStackTrace();
+			//System.out.println(e.toString());
+		}		
+	}
+	
+	public void test2() {
+		System.out.println("-----     ------");
+		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
+		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
+		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--merge-replicates", "mean"};
+		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/pearson", "-test", "pearson", "-class", "only_males"};
+		
+		try {
+			BabelomicsMain.main(args); 
+//			DifferentialAnalysis diffexpr = new DifferentialAnalysis(args);
+//			diffexpr.execute();
+		} catch (Exception e) {
+			e.printStackTrace();
+			//System.out.println(e.toString());
+		}		
+	}
+	
+	public void test3() {
+		System.out.println("-----     ------");
+		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
+		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
+		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--merge-replicates", "mean"};
+		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp", "-test", "regression", "-class", "O2_conc"};
+		
+		try {
+			BabelomicsMain.main(args); 
+//			DifferentialAnalysis diffexpr = new DifferentialAnalysis(args);
+//			diffexpr.execute();
+		} catch (Exception e) {
+			e.printStackTrace();
+			//System.out.println(e.toString());
+		}		
+	}
+
 }

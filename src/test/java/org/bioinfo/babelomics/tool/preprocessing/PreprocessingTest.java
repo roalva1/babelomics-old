@@ -37,7 +37,6 @@ public class PreprocessingTest {
 //		}
 //	}
 	
-	@Test	
 	public void Test3() {
 		System.out.println("-----     ------");
 		//String []args = {"-dataset", "/mnt/commontest/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};

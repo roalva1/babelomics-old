@@ -23,6 +23,10 @@ public class BabelomicsFactory {
 		if(toolName.equalsIgnoreCase("differential-expression")) {
 			return new DifferentialAnalysis(args);
 		}
+		
+		if(toolName.equalsIgnoreCase("regression")) {
+			return new DifferentialAnalysis(args);
+		}
 
 		if(toolName.equalsIgnoreCase("clustering")) {
 			return new Clustering(args);

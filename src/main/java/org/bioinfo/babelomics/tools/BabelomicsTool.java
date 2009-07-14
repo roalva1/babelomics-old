@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
+
 import org.bioinfo.tool.GenericBioTool;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
@@ -31,9 +32,9 @@ public abstract class BabelomicsTool extends GenericBioTool {
 	}
 	
 	public void parse() throws ParseException, IOException {
-		commandLine = parser.parse( options, args, true);
-		
+		commandLine = parser.parse( options, args, true);		
 		if(commandLine.hasOption("outdir")) {
+			System.out.println("takin outdir");
 			this.outdir = commandLine.getOptionValue("outdir");
 		}
 		if(commandLine.hasOption("log-file")) {
