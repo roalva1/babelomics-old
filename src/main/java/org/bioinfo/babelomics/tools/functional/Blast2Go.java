@@ -11,7 +11,6 @@ public class Blast2Go extends BabelomicsTool {
 
 
 	public Blast2Go(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -25,12 +24,12 @@ public class Blast2Go extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("blastHit-DescriptPosition", "Number of partitions "));
 		options.addOption(OptionFactory.createOption("blastId", "Add ID to Blast definition", false));
 		options.addOption(OptionFactory.createOption("descriptAnno", "Sort list", false));
-		
+
 		options.addOption(OptionFactory.createOption("eValue-filter", "E-value hit filter ((1e-)"));
 		options.addOption(OptionFactory.createOption("annCutOff-filter", "Annotation cut-off (0-100)"));
 		options.addOption(OptionFactory.createOption("goWeight-filter", "GO weight (0-30)"));
 		options.addOption(OptionFactory.createOption("hsp-filter", "Hsp hit coverage cut-off (0-100)"));
-		
+
 		//EC codes
 		options.addOption(OptionFactory.createOption("ida", "ida", false));
 		options.addOption(OptionFactory.createOption("imp", "imp", false));
@@ -45,63 +44,57 @@ public class Blast2Go extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("iea", "iea", false));
 		options.addOption(OptionFactory.createOption("nd", "nd", false));
 		options.addOption(OptionFactory.createOption("nr", "nr", false));
-		
-		
-		
-		
+
+
+
+
 	}
 
 	@Override
 	public void execute() {
-		try {
-			CommandLine cmd = parse(args);
+		//			CommandLine cmd = parse(args);
 
-			File xmlfile = new File(cmd.getOptionValue("xmlfile"));
-			String xmlVersion = cmd.getOptionValue("xmlVersion");
-			String blastMinNum = cmd.getOptionValue("blastMin-NumberFilter");
-			String blastHit = cmd.getOptionValue("blastHit-DescriptFilter");
-			String blastHitDescPosition = cmd.getOptionValue("blastHit-DescriptPosition");	
-			String blastId = cmd.getOptionValue("blastId", null);
-			String descriptAnno = cmd.getOptionValue("descriptAnno", null);			
-			
-			File eValue = new File(cmd.getOptionValue("eValue-filter"));
-			File annCutOff = new File(cmd.getOptionValue("annCutOff-filter"));
-			File goWeight = new File(cmd.getOptionValue("goWeight-filter"));
-			File hsp = new File(cmd.getOptionValue("hsp-filter"));
-			
-			String ida = cmd.getOptionValue("ida", null);
-			String ima = cmd.getOptionValue("ima", null);
-			String igi = cmd.getOptionValue("igi", null);
-			String ipi = cmd.getOptionValue("ipi", null);
-			String iep = cmd.getOptionValue("iep", null);
-			String tas = cmd.getOptionValue("tas", null);
-			String nac = cmd.getOptionValue("nac", null);
-			String ic = cmd.getOptionValue("ic", null);
-			String iss = cmd.getOptionValue("iss", null);
-			String rca = cmd.getOptionValue("rca", null);
-			String iea = cmd.getOptionValue("iea", null);
-			String nd = cmd.getOptionValue("nd", null);
-			String nr = cmd.getOptionValue("nr", null);
-			
-			
-			
-			//executeBlast2Go(xmlfile, xmlVersion, blastMinNum, blastHit,blastHitDescPosition, blastId, descriptAnno,  eValue,annCutOff,goWeight,hsp,ida,ima);
-			
-		} catch (ParseException e) {
-			logger.error("Error parsing command line", e.toString());
-			System.out.println("\n");
-			printUsage();
-		} 
-//		catch (IOException e) {
-//			logger.error("Error opening the dataset", e.toString());
-//		}
-		
-		
-		
+		File xmlfile = new File(commandLine.getOptionValue("xmlfile"));
+		String xmlVersion = commandLine.getOptionValue("xmlVersion");
+		String blastMinNum = commandLine.getOptionValue("blastMin-NumberFilter");
+		String blastHit = commandLine.getOptionValue("blastHit-DescriptFilter");
+		String blastHitDescPosition = commandLine.getOptionValue("blastHit-DescriptPosition");	
+		String blastId = commandLine.getOptionValue("blastId", null);
+		String descriptAnno = commandLine.getOptionValue("descriptAnno", null);			
+
+		File eValue = new File(commandLine.getOptionValue("eValue-filter"));
+		File annCutOff = new File(commandLine.getOptionValue("annCutOff-filter"));
+		File goWeight = new File(commandLine.getOptionValue("goWeight-filter"));
+		File hsp = new File(commandLine.getOptionValue("hsp-filter"));
+
+		String ida = commandLine.getOptionValue("ida", null);
+		String ima = commandLine.getOptionValue("ima", null);
+		String igi = commandLine.getOptionValue("igi", null);
+		String ipi = commandLine.getOptionValue("ipi", null);
+		String iep = commandLine.getOptionValue("iep", null);
+		String tas = commandLine.getOptionValue("tas", null);
+		String nac = commandLine.getOptionValue("nac", null);
+		String ic = commandLine.getOptionValue("ic", null);
+		String iss = commandLine.getOptionValue("iss", null);
+		String rca = commandLine.getOptionValue("rca", null);
+		String iea = commandLine.getOptionValue("iea", null);
+		String nd = commandLine.getOptionValue("nd", null);
+		String nr = commandLine.getOptionValue("nr", null);
+
+
+
+		//executeBlast2Go(xmlfile, xmlVersion, blastMinNum, blastHit,blastHitDescPosition, blastId, descriptAnno,  eValue,annCutOff,goWeight,hsp,ida,ima);
+
+		//		catch (IOException e) {
+		//			logger.error("Error opening the dataset", e.toString());
+		//		}
+
+
+
 	}
-	
+
 	private void executeBlast2Go(File xmlfile, String xmlVersion, String blastMinNum, String bioentityNumberFilter,String geneNameList, String partitionNumber, String significance, String sort) {
 		logger.info("executing svm, not implemented yet");
 	}
-	
+
 }

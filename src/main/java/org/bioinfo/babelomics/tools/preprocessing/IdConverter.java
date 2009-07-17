@@ -15,7 +15,6 @@ public class IdConverter extends BabelomicsTool  {
 
 	
 		public IdConverter(String[] args) {
-			super(args);
 			initOptions();
 		}
 
@@ -35,13 +34,13 @@ public class IdConverter extends BabelomicsTool  {
 			try {
 				
 				
-				CommandLine cmd = parse(args, true);
+//				CommandLine cmd = parse(args, true);
 				
-				Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
-				String microarray = cmd.getOptionValue("microarray", null);
-				String go = cmd.getOptionValue("go", null);
-				String pdb = cmd.getOptionValue("pdb", null);
-				String refseq = cmd.getOptionValue("refseq", null);
+				Dataset dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
+				String microarray = commandLine.getOptionValue("microarray", null);
+				String go = commandLine.getOptionValue("go", null);
+				String pdb = commandLine.getOptionValue("pdb", null);
+				String refseq = commandLine.getOptionValue("refseq", null);
 				
 				System.out.println(dataset.toString()+"\n");
 				
@@ -61,12 +60,6 @@ public class IdConverter extends BabelomicsTool  {
 				if ( refseq != null ) {
 					logger.info("refseq converter, not yet implemented");
 					}
-				
-
-			} catch (ParseException e) {
-				logger.error("Error parsing command line", e.toString());
-				System.out.println("\n");
-				printUsage();
 			} catch (IOException e) {
 				logger.error("Error opening the dataset", e.toString());
 			} 

@@ -53,9 +53,8 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	public static String GREATER = "greater";
 	public static String TWO_SIDED = "two_sided";
 
-	public FunctionalProfilingTool(String[] args) {
-		super(args);
-	}
+//	public FunctionalProfilingTool(String[] args) {
+//	}
 
 	@Override
 	public void initOptions() {

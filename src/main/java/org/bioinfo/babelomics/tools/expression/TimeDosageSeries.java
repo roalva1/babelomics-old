@@ -13,7 +13,6 @@ public class TimeDosageSeries extends BabelomicsTool {
 	//Time/dosage series
 	
 	public TimeDosageSeries(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -36,24 +35,19 @@ public class TimeDosageSeries extends BabelomicsTool {
 		// TODO Auto-generated method stub
 		
 		try {
-			CommandLine cmd = parse(this.args, true);
-			Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
-			String time = cmd.getOptionValue("time");
-			String series = cmd.getOptionValue("series");
-			String names = cmd.getOptionValue("names");
-			String degree = cmd.getOptionValue("degree");
-			String comparison = cmd.getOptionValue("comparison", null);
-			String significance = cmd.getOptionValue("significance", null);
-			String clusterComparison = cmd.getOptionValue("cluster_comparison", null);
-			String kmeansOptions = cmd.getOptionValue("kmeans_options", null);
+			Dataset dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
+			String time = commandLine.getOptionValue("time");
+			String series = commandLine.getOptionValue("series");
+			String names = commandLine.getOptionValue("names");
+			String degree = commandLine.getOptionValue("degree");
+			String comparison = commandLine.getOptionValue("comparison", null);
+			String significance = commandLine.getOptionValue("significance", null);
+			String clusterComparison = commandLine.getOptionValue("cluster_comparison", null);
+			String kmeansOptions = commandLine.getOptionValue("kmeans_options", null);
 			
 			executeDetds(dataset, time,series ,names,degree,comparison,significance,clusterComparison,kmeansOptions);
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

@@ -11,7 +11,6 @@ import org.bioinfo.tool.OptionFactory;
 
 public class Association extends BabelomicsTool {
 	public Association(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -25,25 +24,15 @@ public class Association extends BabelomicsTool {
 	@Override
 	public void execute() {
 		try {
-			
-			
-			CommandLine cmd = parse(args, true);
-			
-			Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
-			String fisher = cmd.getOptionValue("fisher");
-			String duplicates = cmd.getOptionValue("duplicates");			
+			Dataset dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
+			String fisher = commandLine.getOptionValue("fisher");
+			String duplicates = commandLine.getOptionValue("duplicates");			
 			
 			System.out.println(dataset.toString()+"\n");
 		
 			logger.info("Agilent microarray G2518A converter, not yet implemented");
 		
 			executeAssociation(dataset,fisher,duplicates);
-					
-
-		} catch (ParseException e) {
-			logger.error("Error parsing command line", e.toString());
-			System.out.println("\n");
-			printUsage();
 		} catch (IOException e) {
 			logger.error("Error opening the dataset", e.toString());
 		} 

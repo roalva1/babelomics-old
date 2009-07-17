@@ -14,7 +14,6 @@ public class MarmiteScan extends BabelomicsTool {
 
 
 	public MarmiteScan(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -42,22 +41,18 @@ public class MarmiteScan extends BabelomicsTool {
 			String censoredClass = commandLine.getOptionValue("censor-class", null);
 
 			
-			Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
-			String bioEntityName = cmd.getOptionValue("bioentity-name");
-			String bioentityScoreFilter = cmd.getOptionValue("bioentity-score-filter");
-			String bioentityNumberFilter = cmd.getOptionValue("bioentity-mumber-filter");			
-			String geneNameList = cmd.getOptionValue("gene-name-list", null);
-			String partitionNumber = cmd.getOptionValue("partition-number");	
-			String significance = cmd.getOptionValue("significance");
-			String sort = cmd.getOptionValue("sort");
+			Dataset dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
+			String bioEntityName = commandLine.getOptionValue("bioentity-name");
+			String bioentityScoreFilter = commandLine.getOptionValue("bioentity-score-filter");
+			String bioentityNumberFilter = commandLine.getOptionValue("bioentity-mumber-filter");			
+			String geneNameList = commandLine.getOptionValue("gene-name-list", null);
+			String partitionNumber = commandLine.getOptionValue("partition-number");	
+			String significance = commandLine.getOptionValue("significance");
+			String sort = commandLine.getOptionValue("sort");
 			System.out.println(dataset.toString()+"\n");
 			
 			executeMarmiteScan(dataset, bioEntityName, bioentityScoreFilter, bioentityNumberFilter,geneNameList, partitionNumber, significance,  sort);
 			
-		} catch (ParseException e) {
-			logger.error("Error parsing command line", e.toString());
-			System.out.println("\n");
-			printUsage();
 		} catch (IOException e) {
 			logger.error("Error opening the dataset", e.toString());
 		}

@@ -9,6 +9,7 @@ import org.bioinfo.babelomics.tools.expression.TimeDosageSeries;
 import org.bioinfo.babelomics.tools.functional.Blast2Go;
 import org.bioinfo.babelomics.tools.functional.FatiGO;
 import org.bioinfo.babelomics.tools.functional.FatiScan;
+import org.bioinfo.babelomics.tools.functional.Marmite;
 import org.bioinfo.babelomics.tools.functional.MarmiteScan;
 import org.bioinfo.babelomics.tools.preprocessing.IdConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
@@ -62,6 +63,10 @@ public class BabelomicsFactory {
 
 		if(toolName.equalsIgnoreCase("fatiscan")) {
 			return new FatiScan(args);
+		}
+
+		if(toolName.equalsIgnoreCase("marmite")) {
+			return new Marmite(args);
 		}
 
 		if(toolName.equalsIgnoreCase("marmitescan")) {

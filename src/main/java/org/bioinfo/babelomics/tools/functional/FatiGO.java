@@ -18,7 +18,6 @@ import org.bioinfo.utils.ListUtils;
 public class FatiGO extends FunctionalProfilingTool{
 
 	public FatiGO(String[] args) {
-		super(args);
 		initOptions();
 	}
 	
@@ -77,8 +76,8 @@ public class FatiGO extends FunctionalProfilingTool{
 	@Override
 	public void execute() {
 		try {
-			CommandLine cmdLine = parse(args);
-			prepare(cmdLine);			
+//			CommandLine cmdLine = parse(args);
+			prepare(commandLine);			
 
 			DBConnector dbConnector = new DBConnector(getSpecies());
 			logger.info("db connector (" + dbConnector.toString() + ")");
@@ -161,7 +160,7 @@ public class FatiGO extends FunctionalProfilingTool{
 		} catch (ParseException e) {
 			logger.error("Error parsing command line", e.toString());
 			System.out.println("\n");
-			printUsage();
+			this.printUsage("script !!!");
 		} catch (IOException e) {
 			logger.error("Error opening the feature data", e.toString());
 		} catch (IndexOutOfBoundsException e) {
