@@ -13,7 +13,6 @@ public class Clustering extends BabelomicsTool {
 
 
 	public Clustering(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -31,16 +30,14 @@ public class Clustering extends BabelomicsTool {
 	@Override
 	public void execute() {
 		try {
-			CommandLine cmd = parse(args);
+			Dataset dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
+			String method = commandLine.getOptionValue("method");
 
-			Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
-			String method = cmd.getOptionValue("method");
-
-			String distance = cmd.getOptionValue("distance", "euclidean");
-			String kvalue = cmd.getOptionValue("time-class", "15");
+			String distance = commandLine.getOptionValue("distance", "euclidean");
+			String kvalue = commandLine.getOptionValue("time-class", "15");
 				
-			if(cmd.hasOption("sample-filter") || cmd.hasOption("feature-filter")) {
-				dataset = dataset.getSubDataset(cmd.getOptionValue("sample-filter"), "4", cmd.getOptionValue("feature-filter"), ""); 
+			if(commandLine.hasOption("sample-filter") || commandLine.hasOption("feature-filter")) {
+				dataset = dataset.getSubDataset(commandLine.getOptionValue("sample-filter"), "4", commandLine.getOptionValue("feature-filter"), ""); 
 			}
 			System.out.println(dataset.toString()+"\n");
 			
@@ -71,10 +68,6 @@ public class Clustering extends BabelomicsTool {
 			}
 
 			logger.warn("que raroo....");
-		} catch (ParseException e) {
-			logger.error("Error parsing command line", e.toString());
-			System.out.println("\n");
-			printUsage();
 		} catch (IOException e) {
 			logger.error("Error opening the dataset", e.toString());
 		} 

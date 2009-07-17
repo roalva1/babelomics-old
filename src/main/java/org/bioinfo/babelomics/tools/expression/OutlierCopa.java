@@ -13,7 +13,6 @@ public class OutlierCopa extends BabelomicsTool {
 
 
 	public OutlierCopa(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -28,17 +27,11 @@ public class OutlierCopa extends BabelomicsTool {
 	@Override
 	public void execute() {
 		try {
-			CommandLine cmd = parse(args);
-
-			Dataset expresionDataset = new Dataset(new File(cmd.getOptionValue("dataset")));
+			Dataset expresionDataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
 			
-			String permutation = cmd.getOptionValue("permutation");
-			String percentile = cmd.getOptionValue("percentile");
+			String permutation = commandLine.getOptionValue("permutation");
+			String percentile = commandLine.getOptionValue("percentile");
 			executeOutLRS(expresionDataset,permutation,percentile);
-		} catch (ParseException e) {
-			logger.error("Error parsing command line", e.toString());
-			System.out.println("\n");
-			printUsage();
 		} catch (IOException e) {
 			logger.error("Error opening the dataset", e.toString());
 		} 

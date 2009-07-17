@@ -17,7 +17,6 @@ import org.bioinfo.utils.StringUtils;
 public class FatiScan extends FunctionalProfilingTool{
 
 	public FatiScan(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -41,14 +40,13 @@ public class FatiScan extends FunctionalProfilingTool{
 	public void execute() {
 		try {
 			logger.info("begin of fatiscan");
-			CommandLine cmdLine = parse(args);
-			prepare(cmdLine);			
+			prepare(commandLine);			
 
 			DBConnector dbConnector = new DBConnector(getSpecies());
 			logger.info("db connector (" + dbConnector.toString() + ")");
 
 			List<String> list1, list2;
-			int partitionSize = getFeatureData().getDataFrame().getNumberOfRows() / getNumberOfPartitions();
+			int partitionSize = getFeatureData().getDataFrame().getRowNumber() / getNumberOfPartitions();
 
 			Filter filter = getFilter();
 			String dbTarget = getDbTarget();
@@ -56,7 +54,7 @@ public class FatiScan extends FunctionalProfilingTool{
 			for (int p=0 ; p<getNumberOfPartitions()-1 ; p++) {
 				logger.info("************** partition " + p + ":");
 				list1 = getFeatureData().getDataFrame().getColumn(0).subList(0, (p*partitionSize) + partitionSize - 1); 
-				list2 = getFeatureData().getDataFrame().getColumn(0).subList((p*partitionSize) + partitionSize, getFeatureData().getDataFrame().getNumberOfRows() - 1);
+				list2 = getFeatureData().getDataFrame().getColumn(0).subList((p*partitionSize) + partitionSize, getFeatureData().getDataFrame().getRowNumber() - 1);
 
 				logger.info("list1: " + StringUtils.arrayToString(list1, "---"));
 				logger.info("list2: " + StringUtils.arrayToString(list2, "---"));
@@ -70,10 +68,6 @@ public class FatiScan extends FunctionalProfilingTool{
 				}
 			}
 			logger.info("end of fatiscan");
-		} catch (ParseException e) {
-			logger.error("Error parsing command line", e.toString());
-			System.out.println("\n");
-			printUsage();
 		} catch (IOException e) {
 			logger.error("Error opening the feature data", e.toString());
 		} catch (IndexOutOfBoundsException e) {
@@ -87,6 +81,9 @@ public class FatiScan extends FunctionalProfilingTool{
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (InvalidParameterException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

@@ -19,12 +19,7 @@
     <dependency>
     	<groupId>org.bioinfo</groupId>
     	<artifactId>bioinfo-tool</artifactId>
-    	<version>0.5.0</version>
-    </dependency>
-    <dependency>
-    	<groupId>org.bioinfo</groupId>
-    	<artifactId>bioinfo-data</artifactId>
-    	<version>0.2.0</version>
+    	<version>0.6.0</version>
     </dependency>
     <dependency>
     	<groupId>org.bioinfo</groupId>
@@ -35,6 +30,26 @@
     	<groupId>org.bioinfo</groupId>
     	<artifactId>infrared</artifactId>
     	<version>0.8.0</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.bioinfo</groupId>
+    	<artifactId>bioinfo-utils</artifactId>
+    	<version>0.6.0</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.bioinfo</groupId>
+    	<artifactId>bioinfo-data</artifactId>
+    	<version>0.3.0</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.bioinfo</groupId>
+    	<artifactId>bioinfo-chart</artifactId>
+    	<version>0.2.0</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.bioinfo</groupId>
+    	<artifactId>bioinfo-collections</artifactId>
+    	<version>0.2.0</version>
     </dependency>
   </dependencies>
   <build>

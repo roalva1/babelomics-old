@@ -16,8 +16,8 @@ import org.bioinfo.infrared.funcannot.filter.KeggFilter;
 import org.bioinfo.math.data.IntegerMatrix;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.stats.inference.FisherExactTest;
-import org.bioinfo.math.stats.result.FisherTestResult;
-import org.bioinfo.math.stats.result.TestResultList;
+import org.bioinfo.math.result.FisherTestResult;
+import org.bioinfo.math.result.TestResultList;
 import org.bioinfo.utils.StringUtils;
 
 public class FuncTest {
