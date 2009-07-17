@@ -7,6 +7,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.tool.OptionFactory;
 
 public class MarmiteScan extends BabelomicsTool {
@@ -33,8 +34,14 @@ public class MarmiteScan extends BabelomicsTool {
 	@Override
 	public void execute() {
 		try {
-			CommandLine cmd = parse(args);
+			FeatureData fd1 = new FeatureData(new File(commandLine.getOptionValue("dat")));
+			String className = commandLine.getOptionValue("class");
+			String test = commandLine.getOptionValue("test");
 
+			String timeClass = commandLine.getOptionValue("time-class", null);
+			String censoredClass = commandLine.getOptionValue("censor-class", null);
+
+			
 			Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
 			String bioEntityName = cmd.getOptionValue("bioentity-name");
 			String bioentityScoreFilter = cmd.getOptionValue("bioentity-score-filter");

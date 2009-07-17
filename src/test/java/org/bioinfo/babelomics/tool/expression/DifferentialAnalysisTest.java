@@ -1,6 +1,13 @@
 package org.bioinfo.babelomics.tool.expression;
 
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.bioinfo.babelomics.BabelomicsMain;
 import org.bioinfo.babelomics.tools.expression.DifferentialAnalysis;
 import org.junit.After;
@@ -26,7 +33,7 @@ public class DifferentialAnalysisTest {
 		String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example2.txt", "-o", "/mnt/commons/test/biodata/example/out", "-test", "t-test", "-class", "sex"};
 		
 		try {
-			DifferentialAnalysis diffexpr = new DifferentialAnalysis(args);
+			DifferentialAnalysis diffexpr = new DifferentialAnalysis();
 			diffexpr.execute();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -37,7 +44,9 @@ public class DifferentialAnalysisTest {
 	
 	@Test
 	public void test1() {
-		System.out.println("-----     ------");
+				
+	    
+		System.out.println("-----   pearson correlation  ------");
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--merge-replicates", "mean"};

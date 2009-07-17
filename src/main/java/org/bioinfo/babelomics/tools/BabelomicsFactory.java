@@ -21,11 +21,11 @@ public class BabelomicsFactory {
 		BabelomicsTool babelomicsTool = null;
 
 		if(toolName.equalsIgnoreCase("differential-expression")) {
-			return new DifferentialAnalysis(args);
+			return new DifferentialAnalysis();
 		}
 		
 		if(toolName.equalsIgnoreCase("regression")) {
-			return new DifferentialAnalysis(args);
+			return new DifferentialAnalysis();
 		}
 
 		if(toolName.equalsIgnoreCase("clustering")) {

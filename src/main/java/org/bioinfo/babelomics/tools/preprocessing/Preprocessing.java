@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.biodata.data.Dataset;
+import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
