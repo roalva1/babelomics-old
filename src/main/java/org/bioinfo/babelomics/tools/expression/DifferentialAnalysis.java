@@ -16,8 +16,9 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.linear.MatrixIndexException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.collections.array.NamedArrayList;
+import org.bioinfo.collections.list.NamedArrayList;
 import org.bioinfo.collections.matrix.DataFrame;
+import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.graphics.canvas.Canvas;
@@ -68,10 +69,14 @@ public class DifferentialAnalysis extends BabelomicsTool {
 //	FATAL_LEVEL = 5;
 	@Override
 	public void execute() {
-		try {
-//			CommandLine cmd = parse(args);
 
-			Dataset dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
+			Dataset dataset = null;
+			try {
+				dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
+			} catch (Exception e) {
+				logger.error("Error opening the dataset", e.toString());
+				return;
+			}
 			String className = commandLine.getOptionValue("class");
 			String test = commandLine.getOptionValue("test");
 
@@ -79,7 +84,12 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			String censoredClass = commandLine.getOptionValue("censor-class", null);
 				
 			if(commandLine.hasOption("sample-filter") || commandLine.hasOption("feature-filter")) {
-				dataset = dataset.getSubDataset(commandLine.getOptionValue("sample-filter"), "4", commandLine.getOptionValue("feature-filter"), ""); 
+				try {
+					dataset = dataset.getSubDataset(commandLine.getOptionValue("sample-filter"), "4", commandLine.getOptionValue("feature-filter"), "");
+				} catch (Exception e) {
+					logger.error("Error filtering the dataset", e.toString());
+					return;
+				}
 			}
 			
 			
@@ -122,9 +132,6 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			}
 
 			logger.warn("que raroo....");
-		} catch (IOException e) {
-			logger.error("Error opening the dataset", e.toString());
-		} 
 	}
 
 
@@ -176,11 +183,11 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				//DataFrame dataFrame = new DataFrame(names, tTestResultList.size());
 				DataFrame dataFrame = null;
 				for(int i=0 ; i<tTestResultList.size() ; i++) {
-					dataFrame.setSingleValue(i, 0, dataset.getFeatureNames().get(i));
-					dataFrame.setSingleValue(i, 1, ""+tTestResultList.get(i).getStatistic());
-					dataFrame.setSingleValue(i, 2, ""+tTestResultList.get(i).getPValue());
-					dataFrame.setSingleValue(i, 3, ""+tTestResultList.get(i).getDf());
-					dataFrame.setSingleValue(i, 4, ""+tTestResultList.get(i).getAdjPValue());
+					dataFrame.setEntry(i, 0, dataset.getFeatureNames().get(i));
+					dataFrame.setEntry(i, 1, ""+tTestResultList.get(i).getStatistic());
+					dataFrame.setEntry(i, 2, ""+tTestResultList.get(i).getPValue());
+					dataFrame.setEntry(i, 3, ""+tTestResultList.get(i).getDf());
+					dataFrame.setEntry(i, 4, ""+tTestResultList.get(i).getAdjPValue());
 				}
 				FeatureData featureData = new FeatureData(dataFrame);
 				System.out.println("result in feature format\n" + featureData.toString()+"\n");
@@ -272,6 +279,8 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		} catch (org.bioinfo.math.exception.InvalidParameterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("Error opening the dataset", e.toString());
 		}
 	}
 
@@ -298,7 +307,12 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		try {
 			//dataset loadding
 			if ( dataset.getDoubleMatrix() == null ) { 
-				dataset.load();
+				try {
+					dataset.load();
+				} catch (Exception e) {
+					logger.error("Error loading dataset", e.toString());
+					return;
+				}
 				dataset.validate();
 			}
 			//job status+logger
@@ -410,7 +424,12 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			logger.debug("reading data...\n");
 			
 			if ( dataset.getDoubleMatrix() == null ) { 
-				dataset.load();
+				try {
+					dataset.load();
+				} catch (Exception e) {
+					logger.error("Error loading the dataset", e.toString());
+					return;
+				}
 				dataset.validate();
 			}
 			
@@ -597,6 +616,9 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			// TODO Auto-generated catch block
 			logger.error("IOException: executePearson");
 			e.printStackTrace();
+		} catch (InvalidColumnIndexException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -611,7 +633,12 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		try {
 			
 			if ( dataset.getDoubleMatrix() == null ) { 
-				dataset.load();
+				try {
+					dataset.load();
+				} catch (Exception e) {
+					logger.error("Error loading the dataset", e.toString());
+					return;
+				}
 				dataset.validate();
 			}
 			
@@ -787,7 +814,12 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		try {
 			
 			if ( dataset.getDoubleMatrix() == null ) { 
-				dataset.load();
+				try {
+					dataset.load();
+				} catch (Exception e) {
+					logger.error("Error loading the dataset", e.toString());
+					return;
+				}
 				dataset.validate();
 			}
 			
@@ -842,7 +874,12 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		try {
 			
 			if ( dataset.getDoubleMatrix() == null ) { 
-				dataset.load();
+				try {
+					dataset.load();
+				} catch (Exception e) {
+					logger.error("Error loading the dataset", e.toString());
+					return;
+				}
 				dataset.validate();
 			}
 			

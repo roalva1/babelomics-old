@@ -13,7 +13,8 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.linear.MatrixIndexException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.collections.array.NamedArrayList;
+import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
+import org.bioinfo.collections.list.NamedArrayList;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
@@ -188,6 +189,9 @@ public class Marmite extends BabelomicsTool {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidParameterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidColumnIndexException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

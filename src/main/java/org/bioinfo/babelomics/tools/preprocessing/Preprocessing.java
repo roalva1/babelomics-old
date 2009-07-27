@@ -193,7 +193,7 @@ public class Preprocessing extends BabelomicsTool {
 			jobStatus.addStatusMessage("100", "done");
 
 			System.out.println("job status :\n" + StringUtils.arrayToString(jobStatus.getStatusMessages(), "\n"));
-		} catch (IOException e1) {
+		} catch (Exception e1) {
 			try {
 				jobStatus.addStatusMessage("100", "error");
 			} catch (FileNotFoundException e) {

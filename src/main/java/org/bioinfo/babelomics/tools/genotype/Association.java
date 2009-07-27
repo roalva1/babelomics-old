@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.OptionFactory;
 
@@ -33,10 +34,9 @@ public class Association extends BabelomicsTool {
 			logger.info("Agilent microarray G2518A converter, not yet implemented");
 		
 			executeAssociation(dataset,fisher,duplicates);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Error opening the dataset", e.toString());
-		} 
-				
+		} 				
 	}
 	
 	private void executeAssociation(Dataset dataset, String fisher,String duplicates ) {

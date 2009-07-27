@@ -53,7 +53,7 @@ public class MarmiteScan extends BabelomicsTool {
 			
 			executeMarmiteScan(dataset, bioEntityName, bioentityScoreFilter, bioentityNumberFilter,geneNameList, partitionNumber, significance,  sort);
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Error opening the dataset", e.toString());
 		}
 		

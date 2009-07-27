@@ -32,7 +32,7 @@ public class OutlierCopa extends BabelomicsTool {
 			String permutation = commandLine.getOptionValue("permutation");
 			String percentile = commandLine.getOptionValue("percentile");
 			executeOutLRS(expresionDataset,permutation,percentile);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Error opening the dataset", e.toString());
 		} 
 	}
