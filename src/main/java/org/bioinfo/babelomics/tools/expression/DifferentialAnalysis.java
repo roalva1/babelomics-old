@@ -218,9 +218,9 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
 				
 				Canvas canvas = new Canvas("");
-				canvas.setBorder(1);
+				canvas.setBorderWidth(1);
 				canvas.setBorderColor(Color.BLACK);
-				canvas.setBgColor(Color.WHITE);
+				canvas.setBackGroundColor(Color.WHITE);
 				
 				GridPanel gridPanel = new GridPanel("", (rowDimension * cellSide) + rowLabelsWidth + infoWidth, (columnDimension * cellSide) + colLabelsWidth, x, y);
 				GridTrack gridTrack = new GridTrack(rowDimension, columnDimension, cellSide, cellSide);
@@ -346,9 +346,9 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
 			
 			Canvas canvas = new Canvas("");
-			canvas.setBorder(1);
+			canvas.setBorderWidth(1);
 			canvas.setBorderColor(Color.BLACK);
-			canvas.setBgColor(Color.WHITE);
+			canvas.setBackGroundColor(Color.WHITE);
 			
 			GridPanel gridPanel = new GridPanel("", (rowDimension * cellSide) + rowLabelsWidth + infoWidth, (columnDimension * cellSide) + colLabelsWidth, xHeatMap, yHeatMap);
 			GridTrack gridTrack = new GridTrack(rowDimension, columnDimension, cellSide, cellSide);
@@ -464,9 +464,9 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
 			
 			Canvas canvas = new Canvas("");
-			canvas.setBorder(1);
+			canvas.setBorderWidth(1);
 			canvas.setBorderColor(Color.BLACK);
-			canvas.setBgColor(Color.WHITE);
+			canvas.setBackGroundColor(Color.WHITE);
 			
 			GridPanel gridPanel = new GridPanel("", (rowDimension * cellSide) + rowLabelsWidth + infoWidth, (columnDimension * cellSide) + colLabelsWidth, xHeatMap, yHeatMap);
 			GridTrack gridTrack = new GridTrack(rowDimension, columnDimension, cellSide, cellSide);
@@ -745,9 +745,9 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
 			
 			Canvas canvas = new Canvas("");
-			canvas.setBorder(1);
+			canvas.setBorderWidth(1);
 			canvas.setBorderColor(Color.BLACK);
-			canvas.setBgColor(Color.WHITE);
+			canvas.setBackGroundColor(Color.WHITE);
 			
 			GridPanel gridPanel = new GridPanel("", (rowDimension * cellSide) + rowLabelsWidth + infoWidth, (columnDimension * cellSide) + colLabelsWidth, xHeatMap, yHeatMap);
 			GridTrack gridTrack = new GridTrack(rowDimension, columnDimension, cellSide, cellSide);
