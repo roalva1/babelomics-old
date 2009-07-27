@@ -42,7 +42,7 @@ public class PreprocessingTest {
 		//String []args = {"-dataset", "/mnt/commontest/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--merge-replicates", "mean"};
-		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp","--merge-replicates", "none", "--logarithm-base", "\"log base 2\"",  "--jobname", "\"sample name\"", "--impute-missing_1", "none", "--submit_button Run","--comparison4", "none", "--logarithm-base_2", "log base 2", "--merge-replicates", "none", "--impute-missing","none", "--session-id", "QIVn13S0VRgTvluw1dwbOxcYXfVusjoyhINlcuouYIZc7jPT5IWc8nRDVPfAYZrP"};
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp","--merge-replicates", "none", "--logarithm-base", "2",  "--jobname", "sample name", "--impute-missing_1", "none", "--submit_button Run","--comparison4", "none", "--merge-replicates", "none", "--impute-missing","none", "--session-id", "QIVn13S0VRgTvluw1dwbOxcYXfVusjoyhINlcuouYIZc7jPT5IWc8nRDVPfAYZrP"};
 		
 		try {
 			BabelomicsMain.main(args); 

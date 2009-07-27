@@ -247,7 +247,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				canvas.render();
 				
 				
-				//saving hitMap		
+				//saving heatMap		
 				logger.info("saving heatMap");
 				jobStatus.addStatusMessage("70", "saving heatMap");
 				canvas.save(outdir + "/heatmap");
