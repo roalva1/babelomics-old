@@ -1,7 +1,14 @@
+<<<<<<< HEAD:.settings/org.eclipse.jdt.core.prefs
 #Tue Jul 21 11:45:46 CEST 2009
+=======
+#Tue Jul 14 10:53:16 CEST 2009
+>>>>>>> 7eefe8251f8ce750dcf3eb374b350207ec974c4e:.settings/org.eclipse.jdt.core.prefs
 eclipse.preferences.version=1
 org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.6
 org.eclipse.jdt.core.compiler.compliance=1.6
+<<<<<<< HEAD:.settings/org.eclipse.jdt.core.prefs
 org.eclipse.jdt.core.compiler.problem.assertIdentifier=error
 org.eclipse.jdt.core.compiler.problem.enumIdentifier=error
+=======
+>>>>>>> 7eefe8251f8ce750dcf3eb374b350207ec974c4e:.settings/org.eclipse.jdt.core.prefs
 org.eclipse.jdt.core.compiler.source=1.6

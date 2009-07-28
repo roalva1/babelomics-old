@@ -13,7 +13,6 @@ public class OutlierLrs extends BabelomicsTool {
 
 
 	public OutlierLrs(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -27,17 +26,11 @@ public class OutlierLrs extends BabelomicsTool {
 	@Override
 	public void execute() {
 		try {
-			CommandLine cmd = parse(args);
-
-			Dataset expresionDataset = new Dataset(new File(cmd.getOptionValue("dataset")));
+			Dataset expresionDataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
 			
-			String permutation = cmd.getOptionValue("low-end");
-			String percentile = cmd.getOptionValue("up-end");
+			String permutation = commandLine.getOptionValue("low-end");
+			String percentile = commandLine.getOptionValue("up-end");
 			executeOutLRS(expresionDataset,permutation,percentile);
-		} catch (ParseException e) {
-			logger.error("Error parsing command line", e.toString());
-			System.out.println("\n");
-			printUsage();
 		} catch (IOException e) {
 			logger.error("Error opening the dataset", e.toString());
 		} 

@@ -39,10 +39,14 @@ public class PreprocessingTest {
 	@Test
 	public void Test3() {
 		System.out.println("-----     ------");
-		//String []args = {"-dataset", "/mnt/commontest/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
+		//String []args = {"--tool", "preprocessing", "-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--merge-replicates", "mean"};
+<<<<<<< HEAD:src/test/java/org/bioinfo/babelomics/tool/preprocessing/PreprocessingTest.java
 		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp","--merge-replicates", "none", "--logarithm-base", "2",  "--jobname", "sample name", "--impute-missing_1", "none", "--submit_button Run","--comparison4", "none", "--merge-replicates", "none", "--impute-missing","none", "--session-id", "QIVn13S0VRgTvluw1dwbOxcYXfVusjoyhINlcuouYIZc7jPT5IWc8nRDVPfAYZrP"};
+=======
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp","--merge-replicates", "mean", "--logarithm-base", "2", "--impute-missing", "zero", "--filter-missing", "90", "--jobname", "sample name", "--submit_button Run", "--session-id", "QIVn13S0VRgTvluw1dwbOxcYXfVusjoyhINlcuouYIZc7jPT5IWc8nRDVPfAYZrP"};
+>>>>>>> 7eefe8251f8ce750dcf3eb374b350207ec974c4e:src/test/java/org/bioinfo/babelomics/tool/preprocessing/PreprocessingTest.java
 		
 		try {
 			BabelomicsMain.main(args); 

@@ -10,23 +10,21 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.MathException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.biodata.data.Dataset;
-import org.bioinfo.biodata.data.FeatureData;
-import org.bioinfo.biotools.tool.OptionFactory;
-import org.bioinfo.graph.annotfeat.Canvas;
-import org.bioinfo.graph.annotfeat.feature.ScoreFeature;
-import org.bioinfo.graph.annotfeat.panel.GridPanel;
-import org.bioinfo.graph.annotfeat.track.GridTrack;
+import org.bioinfo.collections.matrix.DataFrame;
+import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.graphics.canvas.Canvas;
+import org.bioinfo.graphics.canvas.feature.ScoreFeature;
+import org.bioinfo.graphics.canvas.panel.GridPanel;
+import org.bioinfo.graphics.canvas.track.GridTrack;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.math.exception.InvalidParameterException;
-import org.bioinfo.math.stats.FisherExactTest;
-import org.bioinfo.math.stats.MultipleTestCorrection;
-import org.bioinfo.math.stats.TTest;
-import org.bioinfo.math.stats.result.FisherTestResult;
-import org.bioinfo.math.stats.result.TTestResult;
-import org.bioinfo.math.stats.result.TestResultList;
+import org.bioinfo.math.result.TTestResult;
+import org.bioinfo.math.result.TestResultList;
+import org.bioinfo.math.stats.inference.MultipleTestCorrection;
+import org.bioinfo.math.stats.inference.TTest;
+import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.utils.StringUtils;
-import org.bioinfo.utils.collections.DataFrame;
 
 public class DifferentialExpression extends BabelomicsTool {
 

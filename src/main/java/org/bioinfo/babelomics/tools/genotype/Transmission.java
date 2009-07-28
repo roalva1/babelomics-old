@@ -7,7 +7,6 @@ import org.bioinfo.tool.OptionFactory;
 
 public class Transmission extends BabelomicsTool {
 	public Transmission(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -20,19 +19,8 @@ public class Transmission extends BabelomicsTool {
 
 
 	@Override
-	public void execute() {
-		try {
-			CommandLine cmd = parse(args, true);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// TODO Auto-generated method stub
-		
-		// TODO Auto-generated method stub
-		
+	public void execute() {		
 		logger.info("executing transmid¡ssion SNP, not implemented yet");
-		
 	}
 	
 	

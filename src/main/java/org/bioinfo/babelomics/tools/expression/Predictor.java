@@ -13,7 +13,6 @@ public class Predictor extends BabelomicsTool {
 
 
 	public Predictor(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -32,17 +31,15 @@ public class Predictor extends BabelomicsTool {
 	@Override
 	public void execute() {
 		try {
-			CommandLine cmd = parse(args);
+			Dataset dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
+			String className = commandLine.getOptionValue("class");
+			String algorithms = commandLine.getOptionValue("algorithms");
 
-			Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
-			String className = cmd.getOptionValue("class");
-			String algorithms = cmd.getOptionValue("algorithms");
-
-			String nbOfGenes = cmd.getOptionValue("trainning-size", "2,5,10,20,35,50");
-			String geneSelection = cmd.getOptionValue("gene-selection", "none");
+			String nbOfGenes = commandLine.getOptionValue("trainning-size", "2,5,10,20,35,50");
+			String geneSelection = commandLine.getOptionValue("gene-selection", "none");
 				
-			if(cmd.hasOption("sample-filter") || cmd.hasOption("feature-filter")) {
-				dataset = dataset.getSubDataset(cmd.getOptionValue("sample-filter"), "4", cmd.getOptionValue("feature-filter"), ""); 
+			if(commandLine.hasOption("sample-filter") || commandLine.hasOption("feature-filter")) {
+				dataset = dataset.getSubDataset(commandLine.getOptionValue("sample-filter"), "4", commandLine.getOptionValue("feature-filter"), ""); 
 			}
 			System.out.println(dataset.toString()+"\n");
 			
@@ -69,10 +66,6 @@ public class Predictor extends BabelomicsTool {
 			
 
 			logger.warn("que raroo....");
-		} catch (ParseException e) {
-			logger.error("Error parsing command line", e.toString());
-			System.out.println("\n");
-			printUsage();
 		} catch (IOException e) {
 			logger.error("Error opening the dataset", e.toString());
 		} 

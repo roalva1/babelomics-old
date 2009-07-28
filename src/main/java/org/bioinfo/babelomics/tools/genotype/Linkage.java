@@ -7,11 +7,7 @@ import org.bioinfo.tool.OptionFactory;
 
 public class Linkage extends BabelomicsTool {
 	public Linkage(String[] args) {
-		super(args);
 		initOptions();
-		
-		
-		
 	}
 
 	@Override
@@ -21,16 +17,6 @@ public class Linkage extends BabelomicsTool {
 
 	@Override
 	public void execute() {
-		// TODO Auto-generated method stub
-		
-		try {
-			CommandLine cmd = parse(args, true);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// TODO Auto-generated method stub
-		logger.info("executing transmid¡ssion SNP, not implemented yet");
-		
+		logger.info("executing transmid¡ssion SNP, not implemented yet");		
 	}
 }

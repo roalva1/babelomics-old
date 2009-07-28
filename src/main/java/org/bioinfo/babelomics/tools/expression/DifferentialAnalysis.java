@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -15,7 +16,8 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.linear.MatrixIndexException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.chart.XYPlotChart;
+import org.bioinfo.collections.array.NamedArrayList;
+import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.graphics.canvas.Canvas;
@@ -38,17 +40,14 @@ import org.bioinfo.math.survival.CoxTest;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
+import org.bioinfo.utils.ListUtils;
 import org.bioinfo.utils.StringUtils;
 import org.bioinfo.collections.matrix.DataFrame;
-
-
-
 
 public class DifferentialAnalysis extends BabelomicsTool {
 
 
-	public DifferentialAnalysis(String[] args) {
-		super(args);
+	public DifferentialAnalysis() {
 		initOptions();
 	}
 
@@ -70,17 +69,17 @@ public class DifferentialAnalysis extends BabelomicsTool {
 	@Override
 	public void execute() {
 		try {
-			CommandLine cmd = parse(args);
+//			CommandLine cmd = parse(args);
 
-			Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
-			String className = cmd.getOptionValue("class");
-			String test = cmd.getOptionValue("test");
+			Dataset dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
+			String className = commandLine.getOptionValue("class");
+			String test = commandLine.getOptionValue("test");
 
-			String timeClass = cmd.getOptionValue("time-class", "");
-			String censoredClass = cmd.getOptionValue("censor-class", "");
+			String timeClass = commandLine.getOptionValue("time-class", null);
+			String censoredClass = commandLine.getOptionValue("censor-class", null);
 				
-			if(cmd.hasOption("sample-filter") || cmd.hasOption("feature-filter")) {
-				dataset = dataset.getSubDataset(cmd.getOptionValue("sample-filter"), "4", cmd.getOptionValue("feature-filter"), ""); 
+			if(commandLine.hasOption("sample-filter") || commandLine.hasOption("feature-filter")) {
+				dataset = dataset.getSubDataset(commandLine.getOptionValue("sample-filter"), "4", commandLine.getOptionValue("feature-filter"), ""); 
 			}
 			
 			
@@ -123,10 +122,6 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			}
 
 			logger.warn("que raroo....");
-		} catch (ParseException e) {
-			logger.error("Error parsing command line", e.toString());
-			System.out.println("\n");
-			printUsage();
 		} catch (IOException e) {
 			logger.error("Error opening the dataset", e.toString());
 		} 
@@ -172,15 +167,14 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				System.out.println("result\n" + tTestResultList.toString()+"\n");
 				
 
-				
-				
 				// creating output result (feature data format)
 				//
 				logger.info("creating output result");
 				jobStatus.addStatusMessage("30", "creating output result");
 				List<String> names = new ArrayList<String> (5);
 				names.add("names");names.add("statistic");names.add("p-value");names.add("df");names.add("adj value");
-				DataFrame dataFrame = new DataFrame(names, tTestResultList.size());
+				//DataFrame dataFrame = new DataFrame(names, tTestResultList.size());
+				DataFrame dataFrame = null;
 				for(int i=0 ; i<tTestResultList.size() ; i++) {
 					dataFrame.setSingleValue(i, 0, dataset.getFeatureNames().get(i));
 					dataFrame.setSingleValue(i, 1, ""+tTestResultList.get(i).getStatistic());
@@ -194,9 +188,9 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				//saving data
 				logger.info("saving output result");
 				jobStatus.addStatusMessage("50", "saving output result");
-				PrintWriter writer = new PrintWriter(outdir+"/stats.txt");
+				PrintWriter writer = new PrintWriter(this.getOutdir() + "/stats.txt");
 				writer.close();
-				featureData.write(new File(outdir + "/stats.txt"));
+				featureData.write(new File(this.getOutdir() + "/stats.txt"));
 				
 				
 				
@@ -250,7 +244,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				//saving heatMap		
 				logger.info("saving heatMap");
 				jobStatus.addStatusMessage("70", "saving heatMap");
-				canvas.save(outdir + "/heatmap");
+				canvas.save(this.getOutdir() + "/heatmap");
 
 				
 				tTestResultList.setOrderCriteria(TTestResult.PVALUE_ORDER);
@@ -263,8 +257,8 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				tTestResultList.setOrderCriteria(TTestResult.STATISTIC_ORDER);
 				System.out.println("order by statistic\n" + ordered.sort().toString()+"\n");
 				
-				result.addOutputItem(new Item("t-test_file",outdir+"/stats.txt", "the t-test analisys file is: ", TYPE.FILE));				
-				result.addOutputItem(new Item("heatMap_image",outdir+"heatmap.png", "The heat map image is: ", TYPE.IMAGE));				
+				result.addOutputItem(new Item("t-test_file", this.getOutdir() + "/stats.txt", "the t-test analisys file is: ", TYPE.FILE));				
+				result.addOutputItem(new Item("heatMap_image", this.getOutdir() + "heatmap.png", "The heat map image is: ", TYPE.IMAGE));				
 				
 			}else {
 				logger.error("Number of labels distinct of 2");
@@ -319,7 +313,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			logger.info("saving anova analisys");			
 			System.out.println("result = " + res.toString());
 			jobStatus.addStatusMessage("80", "saving data");
-			PrintWriter writer = new PrintWriter(outdir+"/anovaAnalisys.txt");
+			PrintWriter writer = new PrintWriter(this.getOutdir() + "/anovaAnalisys.txt");
 			writer.write(res.toString());
 			writer.close();
 			
@@ -367,12 +361,12 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			jobStatus.addStatusMessage("95", "saving heatmap");
 			canvas.addPanel(gridPanel);		
 			canvas.render();		
-			canvas.save(outdir+"/heatmap");
+			canvas.save(this.getOutdir() + "/heatmap");
 			jobStatus.addStatusMessage("100", "done");
 			
 			
 			//add outputResult file
-			result.addOutputItem(new Item("anova_file",outdir+"/anovaAnalisys.txt", "The anova analisys file is: ", TYPE.FILE));			
+			result.addOutputItem(new Item("anova_file", this.getOutdir()+ "/anovaAnalisys.txt", "The anova analisys file is: ", TYPE.FILE));			
 			result.addOutputItem(new Item("heatMap_image","heatmap.png", "The pearson correlation image is: ", TYPE.IMAGE));
 			jobStatus.addStatusMessage("100", "done");
 			
@@ -397,6 +391,8 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			e.printStackTrace();
 		} 
 }
+	
+	
 		
 	private void executePearson(Dataset dataset, String className) {
 		logger.info("executing pearson");
@@ -408,87 +404,42 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		
 		try {
 			
+			// reading data
+			//
+			jobStatus.addStatusMessage("20", "reading data");
+			logger.debug("reading data...\n");
 			
-			//dataset loadding
 			if ( dataset.getDoubleMatrix() == null ) { 
 				dataset.load();
 				dataset.validate();
 			}
-			//job status+logger
-			jobStatus.addStatusMessage("25", "reading data");
-			logger.info("executing pearson correlation...\n");
 			
-			//pearson test
+			// pearson test
+			//
+			jobStatus.addStatusMessage("40", "computing pearson correlation");
+			logger.debug("computing pearson correlation...\n");
+									
 			CorrelationTest pearson = new CorrelationTest(dataset.getDoubleMatrix(), doubleVars, "pearson");
 			TestResultList<CorrelationTestResult> res = pearson.compute();
-			
-			//saving data			
-			logger.info("saving pearson analisys");			
-			System.out.println("result = " + res.toString());			
-			logger.info("saving pearson analisis\n");
-			jobStatus.addStatusMessage("80", "saving data");
-			PrintWriter writer = new PrintWriter(outdir+"/pearsonCorrelation.txt");
-			writer.write(res.toString());
-			writer.close();
 
-			//generating boxplot
-			XYPlotChart xyplot = new XYPlotChart();
-			xyplot.setMainTitle("correlation Box plot");
-			CommandLine cmd = parse(args);
-			//XYSeries xyseries = new XYSeries(dataset.getDoubleMatrix());
-			Dataset x = dataset.getSubDataset(cmd.getOptionValue("class"), "1", "", "");
-			Dataset y = dataset.getSubDataset(cmd.getOptionValue("class"), "0", "", "");		
+			int[] columnOrder = ListUtils.order(vars);
+			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getCorrelations()), true);
 			
-						
-			double [] meanRowX = new double[dataset.getDoubleMatrix().getRowDimension()];
-			List<Double> lx  = new ArrayList<Double>(dataset.getDoubleMatrix().getRowDimension());
-			List<Double> ly  = new ArrayList<Double>(dataset.getDoubleMatrix().getRowDimension());
+//			System.out.println("corr = " + ListUtils.toString(corr));
+//			System.out.println("sorted corr = " + ListUtils.toString(ListUtils.ordered(corr, rowOrder)));
 			
-			for(int j=0; j<dataset.getDoubleMatrix().getRowDimension(); j++) {
-				lx.add(x.getDoubleMatrix().getRowMean(j));				
-				meanRowX[j] = x.getDoubleMatrix().getRowMean(j);
-			}
-			
-			double [] meanRowY = new double[dataset.getDoubleMatrix().getRowDimension()];
-			for(int j=0; j<dataset.getDoubleMatrix().getRowDimension(); j++) {
-				meanRowY[j] = 0;
-				ly.add(y.getDoubleMatrix().getRowMean(j));				
-				meanRowY[j] = y.getDoubleMatrix().getRowMean(j);
-			}
-			xyplot.addSeries(meanRowX,meanRowY, "male-female:");
-			xyplot.render();
-			File out = new File(outdir+"/correlationimage.png" );
-			logger.info("saving pearson correlation Box Plot");			
-			jobStatus.addStatusMessage("90", "saving pearson Box PLot");			
-			ImageIO.write(xyplot.getBufferedImage(), "png", out);
-			//int[] order = ArrayUtils.order(lx);
-//			List<Double> slx = ListUtils.ordered(lx, order);
-//			List<Double> sly = ListUtils.ordered(ly, order);
-			
-//			xyplot.addSeries(ListUtils.toArray(slx),ListUtils.toArray(sly), "male-female");
-		
-			
-			
-//			for(int row=0 ; row < x.getDoubleMatrix().getRowDimension(); row++)
-//			{		
-//				rowListMeanX.add(x.getDoubleMatrix().getRowMean(row));
-//				rowListMeanY.add(y.getDoubleMatrix().getRowMean(row));
-//								
-//			}
-			//			
-//			xyplot.addSeries(dataset.getSubDataset("only_males", "1", "", ""), dataset.getSubDataset("only_males", "1", "", ""), "") ;
-			
-			
-			//generating heatmap
+			// generating heatmap
 			//
+			jobStatus.addStatusMessage("60", "generating heatmap");
+			logger.debug("generating heatmap...\n");
 			int xHeatMap = 2;				
 			int yHeatMap = 2;
 			int rowDimension = dataset.getColumnDimension();
 			int columnDimension = dataset.getRowDimension();
-			int cellSide = 20;
+			int cellSide = 16;
 			int rowLabelsWidth = 70;
 			int colLabelsWidth = 70;
-			int infoWidth = 0;
+			int infoWidth = 140;
 			double min = dataset.getDoubleMatrix().getMinValue();
 			double max = dataset.getDoubleMatrix().getMaxValue();
 			System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
@@ -500,35 +451,132 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			
 			GridPanel gridPanel = new GridPanel("", (rowDimension * cellSide) + rowLabelsWidth + infoWidth, (columnDimension * cellSide) + colLabelsWidth, xHeatMap, yHeatMap);
 			GridTrack gridTrack = new GridTrack(rowDimension, columnDimension, cellSide, cellSide);
-			gridTrack.setRowLabels(dataset.getFeatureNames());
+			gridTrack.setRowLabels(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 			List<String> columnLabels = new ArrayList<String>(dataset.getSampleNames().size());
-			for(int i=0 ; i <dataset.getSampleNames().size() ; i++) {
-				columnLabels.add(dataset.getSampleNames().get(i) + " (" + dataset.getVariables().getByName(className).getValues().get(i) + ")");
+			for(int i=0 ; i <columnOrder.length ; i++) {
+				columnLabels.add(dataset.getSampleNames().get(columnOrder[i]) + " (" + dataset.getVariables().getByName(className).getValues().get(columnOrder[i]) + ")");
 			}
 			gridTrack.setColumnLabels(columnLabels);
 			//gridTrack.setName();
 			gridTrack.setTopRegion(colLabelsWidth);
 			gridTrack.setLeftRegion(rowLabelsWidth);
+			gridTrack.setRightRegion(infoWidth);
+
 			ScoreFeature feature;
-			for(int row=0 ; row<gridTrack.getColumnDimension() ; row++) {
-				for(int column=0 ; column<gridTrack.getRowDimension() ; column++) {
-//					System.out.print("row, column = " + row + ", " + column + ": value = "); System.out.println(dataset.getDoubleMatrix().get(row, column));
+			for(int i=0 ; i<rowOrder.length ; i++) {
+				int row = rowOrder[i];
+				for(int j=0 ; j<columnOrder.length ; j++) {
+					int column = columnOrder[j];
+					//System.out.print("row, column = " + row + ", " + column + ": value = "); System.out.println(dataset.getDoubleMatrix().get(row, column));
 					feature = new ScoreFeature("name (" + column + ", " + row + ")", "", 0, 0, (dataset.getDoubleMatrix().get(row, column)-min)/(max-min));
 					//feature.setJsFunction("http://www.cipf.es");
-					gridTrack.setFeature(row, column, feature);
+//					gridTrack.setFeature(row, column, feature);
+					gridTrack.setFeature(i, j, feature);
 				}
 			}
+			
+			gridTrack.addInfo(new NamedArrayList("correlation", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getCorrelations()), rowOrder))));
+			gridTrack.addInfo(new NamedArrayList("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder))));
+
 			gridPanel.add(gridTrack);
-			logger.info("saving heatmap");
-			jobStatus.addStatusMessage("95", "saving heatmap");
 			canvas.addPanel(gridPanel);		
 			canvas.render();		
-			canvas.save(outdir+"/heatmap");
+			canvas.save(getOutdir() + "/pearson_heatmap");
+					
+			// saving data
+			//
+			jobStatus.addStatusMessage("80", "saving results");
+			logger.debug("saving results...");
+			
+//			PrintWriter writer = new PrintWriter(getOutdir() + "/pearson_correlation.txt");
+//			writer.write(res.toString());
+//			writer.close();
+						
+			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
+			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
+			
+//			System.out.println("columns ==> " + dataFrame.getColumnNames().size());
+//			System.out.println("rows ==> "+dataFrame.getRowNames().size());
+//			System.out.println("data size ==> "+dataFrame.getData().size());
+			
+			//dataFrame.addColumn("id", ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
+			dataFrame.addColumn("correlation", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getCorrelations()), rowOrder)));
+			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
+			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
+			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
+			
+//			System.out.println("dataframe : \n" + dataFrame.toString());
+
+			
+			FeatureData featureData = new FeatureData(dataFrame);
+//			System.out.println("--- id column = " + featureData.getDataFrame().getColumn("id").toString());
+//			System.out.println("--- correlation column = " + featureData.getDataFrame().getColumn("correlation").toString());
+//			System.out.println("--- statistic column = " + featureData.getDataFrame().getColumn("statistic").toString());
+//
+//			
+			featureData.write(new File(getOutdir() + "/pearson_correlation.txt"));
+			
+//			System.out.println("featuredata : \n" + featureData.toString());
+			
+			result.addOutputItem(new Item("pearson_correlation_file", getOutdir() + "/pearson_correlation.txt", "The pearson correlation file is: ", TYPE.FILE));
+			result.addOutputItem(new Item("pearson_correlation_heatmap", getOutdir() + "/pearson_heatmap.png", "The pearson correlation heatmap is: ", TYPE.IMAGE));
+//			result.addOutputItem(new Item("pearson_correlation_image","heatmap.png", "The pearson correlation image is: ", TYPE.IMAGE));
+
+//			//generating boxplot
+//			XYPlotChart xyplot = new XYPlotChart();
+//			xyplot.setMainTitle("correlation Box plot");
+//			CommandLine commandLine = parse(args);
+//			//XYSeries xyseries = new XYSeries(dataset.getDoubleMatrix());
+//			Dataset x = dataset.getSubDataset(commandLine.getOptionValue("class"), "1", "", "");
+//			Dataset y = dataset.getSubDataset(commandLine.getOptionValue("class"), "0", "", "");		
+//			
+//						
+//			double [] meanRowX = new double[dataset.getDoubleMatrix().getRowDimension()];
+//			List<Double> lx  = new ArrayList<Double>(dataset.getDoubleMatrix().getRowDimension());
+//			List<Double> ly  = new ArrayList<Double>(dataset.getDoubleMatrix().getRowDimension());
+//			
+//			for(int j=0; j<dataset.getDoubleMatrix().getRowDimension(); j++) {
+//				lx.add(x.getDoubleMatrix().getRowMean(j));				
+//				meanRowX[j] = x.getDoubleMatrix().getRowMean(j);
+//			}
+//			
+//			double [] meanRowY = new double[dataset.getDoubleMatrix().getRowDimension()];
+//			for(int j=0; j<dataset.getDoubleMatrix().getRowDimension(); j++) {
+//				meanRowY[j] = 0;
+//				ly.add(y.getDoubleMatrix().getRowMean(j));				
+//				meanRowY[j] = y.getDoubleMatrix().getRowMean(j);
+//			}
+//			xyplot.addSeries(meanRowX,meanRowY, "male-female:");
+//			xyplot.render();
+//			File out = new File(outdir+"/correlationimage.png" );
+//			logger.debug("saving pearson correlation Box Plot");			
+//			jobStatus.addStatusMessage("90", "saving pearson Box PLot");			
+//			ImageIO.write(xyplot.getBufferedImage(), "png", out);
+//			//int[] order = ArrayUtils.order(lx);
+////			List<Double> slx = ListUtils.ordered(lx, order);
+////			List<Double> sly = ListUtils.ordered(ly, order);
+//			
+////			xyplot.addSeries(ListUtils.toArray(slx),ListUtils.toArray(sly), "male-female");
+//		
+//			
+//			
+////			for(int row=0 ; row < x.getDoubleMatrix().getRowDimension(); row++)
+////			{		
+////				rowListMeanX.add(x.getDoubleMatrix().getRowMean(row));
+////				rowListMeanY.add(y.getDoubleMatrix().getRowMean(row));
+////								
+////			}
+//			//			
+////			xyplot.addSeries(dataset.getSubDataset("only_males", "1", "", ""), dataset.getSubDataset("only_males", "1", "", ""), "") ;
+			
+			// done
+			//
 			jobStatus.addStatusMessage("100", "done");
-			result.addOutputItem(new Item("spearman_correlation_file",outdir+"/pearsonCorrelation.txt", "The spearman correlation file is: ", TYPE.FILE));
-			result.addOutputItem(new Item("pearson_correlation_image","correlationimage.png", "The pearson correlation image is: ", TYPE.IMAGE));
-			result.addOutputItem(new Item("pearson_heatMap_image","heatmap.png", "The pearson correlation image is: ", TYPE.IMAGE));
-			jobStatus.addStatusMessage("100", "done");
+			logger.debug("pearson correlation done\n");
+//			result.addOutputItem(new Item("spearman_correlation_file",outdir+"/pearsonCorrelation.txt", "The spearman correlation file is: ", TYPE.FILE));
+//			result.addOutputItem(new Item("pearson_correlation_image","correlationimage.png", "The pearson correlation image is: ", TYPE.IMAGE));
+//			result.addOutputItem(new Item("pearson_correlation_image","heatmap.png", "The pearson correlation image is: ", TYPE.IMAGE));
+//			jobStatus.addStatusMessage("100", "done");
 			
 			
 			
@@ -548,10 +596,6 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			logger.error("IOException: executePearson");
-			e.printStackTrace();
-		} catch (ParseException e) {
-			logger.error("ParseException: executePearson");
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -584,45 +628,43 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			
 			logger.info("saving...\n");
 			jobStatus.addStatusMessage("80", "saving data");
-			PrintWriter writer = new PrintWriter(outdir+"/spearmanCorrelation.txt");
+			PrintWriter writer = new PrintWriter(getOutdir() + "/spearmanCorrelation.txt");
 			writer.write(res.toString());
 			writer.close();
 			
-			result.addOutputItem(new Item("spearman_correlation_file",outdir+"/spearmanCorrelation.txt", "The spearman correlation file is: ", TYPE.FILE));			
+			result.addOutputItem(new Item("spearman_correlation_file",getOutdir() + "/spearmanCorrelation.txt", "The spearman correlation file is: ", TYPE.FILE));			
 			jobStatus.addStatusMessage("100", "done");
-				
-			
-			
-			//generating boxplot
-			XYPlotChart xyplot = new XYPlotChart();
-			xyplot.setMainTitle("correlation Box plot");
-			CommandLine cmd = parse(args);
-			//XYSeries xyseries = new XYSeries(dataset.getDoubleMatrix());
-			Dataset x = dataset.getSubDataset(cmd.getOptionValue("class"), "1", "", "");
-			Dataset y = dataset.getSubDataset(cmd.getOptionValue("class"), "0", "", "");		
-			
 						
-			double [] meanRowX = new double[dataset.getDoubleMatrix().getRowDimension()];
-			List<Double> lx  = new ArrayList<Double>(dataset.getDoubleMatrix().getRowDimension());
-			List<Double> ly  = new ArrayList<Double>(dataset.getDoubleMatrix().getRowDimension());
-			
-			for(int j=0; j<dataset.getDoubleMatrix().getRowDimension(); j++) {
-				lx.add(x.getDoubleMatrix().getRowMean(j));				
-				meanRowX[j] = x.getDoubleMatrix().getRowMean(j);
-			}
-			
-			double [] meanRowY = new double[dataset.getDoubleMatrix().getRowDimension()];
-			for(int j=0; j<dataset.getDoubleMatrix().getRowDimension(); j++) {
-				meanRowY[j] = 0;
-				ly.add(y.getDoubleMatrix().getRowMean(j));				
-				meanRowY[j] = y.getDoubleMatrix().getRowMean(j);
-			}
-			xyplot.addSeries(meanRowX,meanRowY, "male-female:");
-			xyplot.render();
-			File out = new File(outdir+"/correlationimage.png" );
-			logger.info("saving spearman correlation Box Plot");			
-			jobStatus.addStatusMessage("90", "saving spearman Box PLot");			
-			ImageIO.write(xyplot.getBufferedImage(), "png", out);
+			//generating boxplot
+//			XYPlotChart xyplot = new XYPlotChart();
+//			xyplot.setMainTitle("correlation Box plot");
+//			CommandLine cmd = parse(args);
+//			//XYSeries xyseries = new XYSeries(dataset.getDoubleMatrix());
+//			Dataset x = dataset.getSubDataset(cmd.getOptionValue("class"), "1", "", "");
+//			Dataset y = dataset.getSubDataset(cmd.getOptionValue("class"), "0", "", "");		
+//			
+//						
+//			double [] meanRowX = new double[dataset.getDoubleMatrix().getRowDimension()];
+//			List<Double> lx  = new ArrayList<Double>(dataset.getDoubleMatrix().getRowDimension());
+//			List<Double> ly  = new ArrayList<Double>(dataset.getDoubleMatrix().getRowDimension());
+//			
+//			for(int j=0; j<dataset.getDoubleMatrix().getRowDimension(); j++) {
+//				lx.add(x.getDoubleMatrix().getRowMean(j));				
+//				meanRowX[j] = x.getDoubleMatrix().getRowMean(j);
+//			}
+//			
+//			double [] meanRowY = new double[dataset.getDoubleMatrix().getRowDimension()];
+//			for(int j=0; j<dataset.getDoubleMatrix().getRowDimension(); j++) {
+//				meanRowY[j] = 0;
+//				ly.add(y.getDoubleMatrix().getRowMean(j));				
+//				meanRowY[j] = y.getDoubleMatrix().getRowMean(j);
+//			}
+//			xyplot.addSeries(meanRowX,meanRowY, "male-female:");
+//			xyplot.render();
+//			File out = new File(this.getOutdir() + "/correlationimage.png" );
+//			logger.info("saving spearman correlation Box Plot");			
+//			jobStatus.addStatusMessage("90", "saving spearman Box PLot");			
+//			ImageIO.write(xyplot.getBufferedImage(), "png", out);
 			//int[] order = ArrayUtils.order(lx);
 //			List<Double> slx = ListUtils.ordered(lx, order);
 //			List<Double> sly = ListUtils.ordered(ly, order);
@@ -637,8 +679,28 @@ public class DifferentialAnalysis extends BabelomicsTool {
 //				rowListMeanY.add(y.getDoubleMatrix().getRowMean(row));
 //								
 //			}
-			//			
-//			xyplot.addSeries(dataset.getSubDataset("only_males", "1", "", ""), dataset.getSubDataset("only_males", "1", "", ""), "") ;
+//			xyplot.addSeries(meanRowX,meanRowY, "male-female:");
+//			xyplot.render();
+//			File out = new File(outdir+"/correlationimage.png" );
+//			logger.debug("saving spearman correlation Box Plot");			
+//			jobStatus.addStatusMessage("90", "saving spearman Box PLot");			
+//			ImageIO.write(xyplot.getBufferedImage(), "png", out);
+//			//int[] order = ArrayUtils.order(lx);
+////			List<Double> slx = ListUtils.ordered(lx, order);
+////			List<Double> sly = ListUtils.ordered(ly, order);
+//			
+////			xyplot.addSeries(ListUtils.toArray(slx),ListUtils.toArray(sly), "male-female");
+//		
+//			
+//			
+////			for(int row=0 ; row < x.getDoubleMatrix().getRowDimension(); row++)
+////			{		
+////				rowListMeanX.add(x.getDoubleMatrix().getRowMean(row));
+////				rowListMeanY.add(y.getDoubleMatrix().getRowMean(row));
+////								
+////			}
+//			//			
+////			xyplot.addSeries(dataset.getSubDataset("only_males", "1", "", ""), dataset.getSubDataset("only_males", "1", "", ""), "") ;
 			
 			
 			//generating heatmap
@@ -685,9 +747,9 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			jobStatus.addStatusMessage("95", "saving heatmap");
 			canvas.addPanel(gridPanel);		
 			canvas.render();		
-			canvas.save(outdir+"/heatmap");
+			canvas.save(getOutdir() + "/heatmap");
 			jobStatus.addStatusMessage("100", "done");
-			result.addOutputItem(new Item("spearman_correlation_file",outdir+"/spearmanCorrelation.txt", "The spearman correlation file is: ", TYPE.FILE));
+			result.addOutputItem(new Item("spearman_correlation_file", getOutdir() + "/spearmanCorrelation.txt", "The spearman correlation file is: ", TYPE.FILE));
 			result.addOutputItem(new Item("spearman_correlation_image","correlationimage.png", "The spearman correlation image is: ", TYPE.IMAGE));
 			result.addOutputItem(new Item("spearman_heatMap_image","heatmap.png", "The spearman correlation image is: ", TYPE.IMAGE));
 			jobStatus.addStatusMessage("100", "done");
@@ -709,10 +771,6 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			logger.error("IOException: executePearson");
-			e.printStackTrace();
-		} catch (ParseException e) {
-			logger.error("ParseException: executePearson");
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -742,7 +800,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 						
 			logger.info("saving...\n");
 			jobStatus.addStatusMessage("80", "saving data");
-			PrintWriter writer = new PrintWriter(outdir+"/regression.txt");
+			PrintWriter writer = new PrintWriter(getOutdir() + "/regression.txt");
 			writer.write(res.toString());
 			writer.close();
 			
@@ -813,7 +871,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				System.out.println("Results cox test:\n" + coxtest.compute().toString());
 				logger.info("saving...\n");
 				jobStatus.addStatusMessage("80", "saving data");
-				PrintWriter writer = new PrintWriter(outdir+"/cox.txt");
+				PrintWriter writer = new PrintWriter(this.getOutdir() + "/cox.txt");
 				writer.write(res.toString());
 				writer.close();
 			

@@ -1,6 +1,13 @@
 package org.bioinfo.babelomics.tool.expression;
 
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.bioinfo.babelomics.BabelomicsMain;
 import org.bioinfo.babelomics.tools.expression.DifferentialAnalysis;
 import org.junit.After;
@@ -38,12 +45,15 @@ public class DifferentialAnalysisTest {
 	
 	
 	
+	@Test
 	public void test1() {
-		System.out.println("-----     ------");
+				
+	    
+		System.out.println("-----   pearson correlation  ------");
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--merge-replicates", "mean"};
-		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/correlationPearsonFinal", "-test", "pearson", "-class", "only_males"};
+		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/correlationPearsonFinal", "-test", "pearson", "-class", "O2_conc"};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -60,7 +70,7 @@ public class DifferentialAnalysisTest {
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--merge-replicates", "mean"};
-		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/pearson", "-test", "pearson", "-class", "only_males"};
+		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/pearson", "-test", "pearson", "-class", "O2_conc"};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -107,7 +117,6 @@ public class DifferentialAnalysisTest {
 		}		
 	}
 	
-	@Test
 	public void test5() {
 		System.out.println("-----     ------");
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
