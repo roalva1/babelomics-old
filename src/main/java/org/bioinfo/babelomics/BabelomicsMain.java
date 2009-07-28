@@ -42,7 +42,7 @@ public class BabelomicsMain {
 		
 		// if the tool is ok:
 		try {
-			tool.parse(args);
+			tool.parse(args, false);
 			
 			tool.run();
 		} catch (ParseException e) {

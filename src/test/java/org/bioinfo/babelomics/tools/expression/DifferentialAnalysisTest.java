@@ -33,59 +33,41 @@ public class DifferentialAnalysisTest {
 		}		
 	}
 	
-	
-	
 	@Test
 	public void test1() {
-				
-	    
-		System.out.println("-----   pearson correlation  ------");
-		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
-		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
-		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--merge-replicates", "mean"};
-		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/correlationPearsonFinal", "-test", "pearson", "-class", "O2_conc"};
+					    
+		System.out.println("-----   pearson ------");
+		//String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/pearson", "-test", "pearson", "-class", "O2_conc"};
+		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/correlation.txt", "-o", "/tmp/pearson", "-test", "pearson", "-class", "indep"};
 		
 		try {
 			BabelomicsMain.main(args); 
-//			DifferentialAnalysis diffexpr = new DifferentialAnalysis(args);
-//			diffexpr.execute();
 		} catch (Exception e) {
 			e.printStackTrace();
-			//System.out.println(e.toString());
 		}		
 	}
 	
 	public void test2() {
-		System.out.println("-----     ------");
-		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
-		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
-		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--merge-replicates", "mean"};
-		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/pearson", "-test", "pearson", "-class", "O2_conc"};
+		System.out.println("-----  spearman ------");
+		//String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/spearman", "-test", "spearman", "-class", "O2_conc"};
+		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/correlation.txt", "-o", "/tmp/spearman", "-test", "spearman", "-class", "indep"};
 		
 		try {
 			BabelomicsMain.main(args); 
-//			DifferentialAnalysis diffexpr = new DifferentialAnalysis(args);
-//			diffexpr.execute();
 		} catch (Exception e) {
 			e.printStackTrace();
-			//System.out.println(e.toString());
 		}		
 	}
 	
 	public void test3() {
-		System.out.println("-----     ------");
-		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
-		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
-		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--merge-replicates", "mean"};
-		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp", "-test", "regression", "-class", "O2_conc"};
+		System.out.println("-----  regression  ------");
+		//String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/regression", "-test", "regression", "-class", "O2_conc"};
+		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/correlation.txt", "-o", "/tmp/regression", "-test", "regression", "-class", "indep"};
 		
 		try {
 			BabelomicsMain.main(args); 
-//			DifferentialAnalysis diffexpr = new DifferentialAnalysis(args);
-//			diffexpr.execute();
 		} catch (Exception e) {
 			e.printStackTrace();
-			//System.out.println(e.toString());
 		}		
 	}
 	
