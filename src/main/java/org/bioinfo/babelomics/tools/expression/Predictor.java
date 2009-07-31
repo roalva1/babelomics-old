@@ -18,57 +18,31 @@ public class Predictor extends BabelomicsTool {
 
 	@Override
 	public void initOptions() {
+		
+		// data 
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("algorithms", "the algorithms separated by commas, possible values: svn, knn, dlda, pam, som"));
 		options.addOption(OptionFactory.createOption("class", "class variable"));
-		options.addOption(OptionFactory.createOption("trainning-size", "number of genes to use in trainning separated by commas, default:2,5,10,20,35,50", false));
-		options.addOption(OptionFactory.createOption("gene-selection", "the gene selection, valid values: f-ratio, wilcoxon", false));
 		options.addOption(OptionFactory.createOption("sample-filter", "class variable", false));
 		options.addOption(OptionFactory.createOption("feature-filter", "class variable", false));
+		
+		// feature selection (gene selection)
+		options.addOption(OptionFactory.createOption("gene-selection", "the gene selection, valid values: f-ratio, wilcoxon", false));
+		//options.addOption(OptionFactory.createOption("trainning-size", "number of genes to use in trainning separated by commas, default:2,5,10,20,35,50", false));		
+
+		// classifiers
+		  // knn
+		options.addOption(OptionFactory.createOption("knn", "Knn classifier"));
+		options.addOption(OptionFactory.createOption("knn-neighbors", " number of neighbors (5 by default) or auto for automated tunning", true));
+		  // svn
+		options.addOption(OptionFactory.createOption("svn", "Support vector machine"));
+
+		
 
 	}
 
 	@Override
 	public void execute() {
-		try {
-			Dataset dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
-			String className = commandLine.getOptionValue("class");
-			String algorithms = commandLine.getOptionValue("algorithms");
-
-			String nbOfGenes = commandLine.getOptionValue("trainning-size", "2,5,10,20,35,50");
-			String geneSelection = commandLine.getOptionValue("gene-selection", "none");
-				
-			if(commandLine.hasOption("sample-filter") || commandLine.hasOption("feature-filter")) {
-				dataset = dataset.getSubDataset(commandLine.getOptionValue("sample-filter"), "4", commandLine.getOptionValue("feature-filter"), ""); 
-			}
-			System.out.println(dataset.toString()+"\n");
-			
-
-			String[] algs = algorithms.split(",");
-			for(String algorithm: algs) {
-				if (algorithm.equals("svm")) {
-					executeSvm(dataset, className, nbOfGenes, geneSelection);
-				}
-				if (algorithm.equals("knn")) {
-					executeKnn(dataset, className, nbOfGenes, geneSelection);
-				}
-				if (algorithm.equals("dlda")) {
-					executeDlda(dataset, className, nbOfGenes, geneSelection);
-				}
-				if (algorithm.equals("pam")) {
-					executePam(dataset, className, nbOfGenes, geneSelection);
-				}				
-				if (algorithm.equals("som")) {
-					executeSom(dataset, className, nbOfGenes, geneSelection);
-				}				
-			}
-			// create global graph
-			
-
-			logger.warn("que raroo....");
-		} catch (Exception e) {
-			logger.error("Error opening the dataset", e.toString());
-		} 
+		logger.info("hasta aqui llegó mi ejecución");
 	}
 
 	private void executeSvm(Dataset dataset, String className, String nbOfGenes, String geneSelection) {
