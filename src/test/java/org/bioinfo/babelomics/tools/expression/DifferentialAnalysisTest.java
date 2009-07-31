@@ -8,14 +8,19 @@ import org.junit.Test;
 
 public class DifferentialAnalysisTest {
 
-	@Before
+//	@Before
 	public void setUp() throws Exception {
 	}
 
-	@After
+//	@After
 	public void tearDown() throws Exception {
 	}
-
+	
+	@Test
+	public void notest(){
+		
+	}
+	
 	public void test() {
 		System.out.println("-----     ------");
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
@@ -33,7 +38,7 @@ public class DifferentialAnalysisTest {
 		}		
 	}
 	
-	@Test
+//	@Test
 	public void test1() {
 					    
 		System.out.println("-----   pearson ------");
