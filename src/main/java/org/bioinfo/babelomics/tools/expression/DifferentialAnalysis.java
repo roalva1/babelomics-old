@@ -57,7 +57,9 @@ public class DifferentialAnalysis extends BabelomicsTool {
 	public void initOptions() {
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
 		options.addOption(OptionFactory.createOption("test", "the test, possible values: t-test, bayes, sam, fold-change, anova, pearson, spearman, regression, cox"));
-		options.addOption(OptionFactory.createOption("class", "class variable"));
+		options.addOption(OptionFactory.createOption("class", "class variable", false));
+		options.addOption(OptionFactory.createOption("time-class", "class variable", false));
+		options.addOption(OptionFactory.createOption("censored-class", "class variable", false));
 		options.addOption(OptionFactory.createOption("sample-filter", "class variable", false));
 		options.addOption(OptionFactory.createOption("feature-filter", "class variable", false));
 	}
@@ -78,11 +80,11 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			logger.error("Error opening the dataset", e.toString());
 			return;
 		}
-		String className = commandLine.getOptionValue("class");
 		String test = commandLine.getOptionValue("test");
 
+		String className = commandLine.getOptionValue("class", null);
 		String timeClass = commandLine.getOptionValue("time-class", null);
-		String censoredClass = commandLine.getOptionValue("censor-class", null);
+		String censoredClass = commandLine.getOptionValue("censored-class", null);
 
 		if(commandLine.hasOption("sample-filter") || commandLine.hasOption("feature-filter")) {
 			try {
@@ -128,7 +130,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			return;
 		}
 		if(test.equals("cox")) {
-			executeCox(dataset, className, timeClass, censoredClass);
+			executeCox(dataset, timeClass, censoredClass);
 			return;
 		}
 
@@ -138,150 +140,101 @@ public class DifferentialAnalysis extends BabelomicsTool {
 
 	private void executeTTest(Dataset dataset, String className) {
 		logger.info("executing t-test");
+		
 		try {
+			// reading data
+			//
+			jobStatus.addStatusMessage("20", "reading data");
+			logger.debug("reading data...\n");
 
-			if(dataset.getVariables().getByName(className).getLabels().size() == 2) {
-
-				System.out.println("input dataset:\n" + dataset.toString());
-
-				//loding data
-				logger.info("2 classes t-test");
-				jobStatus.addStatusMessage("10", "loading data");
-				String label1 = dataset.getVariables().getByName(className).getLabels().get(0);
-				String label2 = dataset.getVariables().getByName(className).getLabels().get(1);
-
-				if ( dataset.getDoubleMatrix() == null ) { 
-					dataset.load();
-					dataset.validate();
-				}
-				System.out.println("input matrix:\n" + dataset.getDoubleMatrix().toString());
-
-				System.out.println("input feature names:\n" + StringUtils.arrayToString(dataset.getFeatureNames(), "\t"));
-
-				int[] colOrder = new int[dataset.getColumnDimension()];
-				int[] cols = dataset.getColumnIndexesByVariableValue(className, label1);
-				DoubleMatrix sample1 = dataset.getSubMatrixByColumns(cols);
-
-				cols = dataset.getColumnIndexesByVariableValue(className, label2);
-				DoubleMatrix sample2 = dataset.getSubMatrixByColumns(cols);
-
-				System.out.println("sample 1, matrix:\n" + sample1.toString());
-				System.out.println("sample 2, matrix:\n" + sample2.toString());
-
-				//t-test
-				TTest tTest = new TTest();
-				TestResultList<TTestResult> tTestResultList = tTest.tTest(sample1, sample2);				
-				MultipleTestCorrection.BHCorrection(tTestResultList);
-				System.out.println("result\n" + tTestResultList.toString()+"\n");
-
-
-				// creating output result (feature data format)
-				//
-				logger.info("creating output result");
-				jobStatus.addStatusMessage("30", "creating output result");
-				List<String> names = new ArrayList<String> (5);
-				names.add("names");names.add("statistic");names.add("p-value");names.add("df");names.add("adj value");
-				//DataFrame dataFrame = new DataFrame(names, tTestResultList.size());
-				DataFrame dataFrame = null;
-				for(int i=0 ; i<tTestResultList.size() ; i++) {
-					dataFrame.setEntry(i, 0, dataset.getFeatureNames().get(i));
-					dataFrame.setEntry(i, 1, ""+tTestResultList.get(i).getStatistic());
-					dataFrame.setEntry(i, 2, ""+tTestResultList.get(i).getPValue());
-					dataFrame.setEntry(i, 3, ""+tTestResultList.get(i).getDf());
-					dataFrame.setEntry(i, 4, ""+tTestResultList.get(i).getAdjPValue());
-				}
-				FeatureData featureData = new FeatureData(dataFrame);
-				System.out.println("result in feature format\n" + featureData.toString()+"\n");
-
-				//saving data
-				logger.info("saving output result");
-				jobStatus.addStatusMessage("50", "saving output result");
-				PrintWriter writer = new PrintWriter(this.getOutdir() + "/stats.txt");
-				writer.close();
-				featureData.write(new File(this.getOutdir() + "/stats.txt"));
-
-
-
-				// creating output heatmap
-				//
-				logger.info("creating output heatmap");
-				jobStatus.addStatusMessage("70", "creating output heatmap");
-				int x = 2;				
-				int y = 2;
-				int rowDimension = dataset.getColumnDimension();
-				int columnDimension = dataset.getRowDimension();
-				int cellSide = 20;
-				int rowLabelsWidth = 70;
-				int colLabelsWidth = 70;
-				int infoWidth = 0;
-				double min = dataset.getDoubleMatrix().getMinValue();
-				double max = dataset.getDoubleMatrix().getMaxValue();
-				System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
-
-				Canvas canvas = new Canvas("");
-				canvas.setBorderWidth(1);
-				canvas.setBorderColor(Color.BLACK);
-				canvas.setBackGroundColor(Color.WHITE);
-
-				GridPanel gridPanel = new GridPanel("", (rowDimension * cellSide) + rowLabelsWidth + infoWidth, (columnDimension * cellSide) + colLabelsWidth, x, y);
-				GridTrack gridTrack = new GridTrack(rowDimension, columnDimension, cellSide, cellSide);
-				gridTrack.setRowLabels(dataset.getFeatureNames());
-				List<String> columnLabels = new ArrayList<String>(dataset.getSampleNames().size());
-				for(int i=0 ; i <dataset.getSampleNames().size() ; i++) {
-					columnLabels.add(dataset.getSampleNames().get(i) + " (" + dataset.getVariables().getByName(className).getValues().get(i) + ")");
-				}
-				gridTrack.setColumnLabels(columnLabels);
-				//gridTrack.setName();
-				gridTrack.setTopRegion(colLabelsWidth);
-				gridTrack.setLeftRegion(rowLabelsWidth);
-				ScoreFeature feature;
-				for(int row=0 ; row<gridTrack.getColumnDimension() ; row++) {
-					for(int column=0 ; column<gridTrack.getRowDimension() ; column++) {
-						//						System.out.print("row, column = " + row + ", " + column + ": value = "); System.out.println(dataset.getDoubleMatrix().get(row, column));
-						feature = new ScoreFeature("name (" + column + ", " + row + ")", "", 0, 0, (dataset.getDoubleMatrix().get(row, column)-min)/(max-min));
-						//feature.setJsFunction("http://www.cipf.es");
-						gridTrack.setFeature(row, column, feature);
-					}
-				}
-				gridPanel.add(gridTrack);
-
-				canvas.addPanel(gridPanel);		
-				canvas.render();
-
-
-				//saving hitMap		
-				logger.info("saving heatMap");
-				jobStatus.addStatusMessage("70", "saving heatMap");
-				canvas.save(this.getOutdir() + "/heatmap");
-
-
-				tTestResultList.setOrderCriteria(TTestResult.PVALUE_ORDER);
-				TestResultList<TTestResult> ordered = tTestResultList.sort();
-				System.out.println("order by p-value\n" + ordered.toString()+"\n");
-
-				MultipleTestCorrection.FDRCorrection(ordered);
-				System.out.println("order by fdr\n" + ordered.toString()+"\n");
-
-				tTestResultList.setOrderCriteria(TTestResult.STATISTIC_ORDER);
-				System.out.println("order by statistic\n" + ordered.sort().toString()+"\n");
-
-				result.addOutputItem(new Item("t-test_file", this.getOutdir() + "/stats.txt", "the t-test analisys file is: ", TYPE.FILE));				
-				result.addOutputItem(new Item("heatMap_image", this.getOutdir() + "heatmap.png", "The heat map image is: ", TYPE.IMAGE));				
-
-			}else {
-				logger.error("Number of labels distinct of 2");
+			if(dataset.getVariables().getByName(className).getLabels().size() != 2) { 
+				throw new InvalidParameterException("Number of labels distinct of 2");
 			}
-		} catch (InvalidParameterException e) {
-			logger.error("Error opening the dataset", e.toString());
-		} catch (MathException e) {
-			logger.error("Error opening the dataset", e.toString());
-		} catch (IOException e) {
-			logger.error("Error opening the dataset", e.toString());
-		} catch (org.bioinfo.math.exception.InvalidParameterException e) {
-			// TODO Auto-generated catch block
+
+			String label1 = dataset.getVariables().getByName(className).getLabels().get(0);
+			String label2 = dataset.getVariables().getByName(className).getLabels().get(1);
+
+			if ( dataset.getDoubleMatrix() == null ) { 
+				try {
+					dataset.load();
+				} catch (Exception e) {
+					logger.error("Error loading the dataset", e.toString());
+					return;
+				}
+				dataset.validate();
+			}			
+			
+//			int[] colOrder = new int[dataset.getColumnDimension()];
+			int[] cols = dataset.getColumnIndexesByVariableValue(className, label1);
+			DoubleMatrix sample1 = dataset.getSubMatrixByColumns(cols);
+
+			cols = dataset.getColumnIndexesByVariableValue(className, label2);
+			DoubleMatrix sample2 = dataset.getSubMatrixByColumns(cols);
+
+//			System.out.println("sample 1, matrix:\n" + sample1.toString());
+//			System.out.println("sample 2, matrix:\n" + sample2.toString());
+
+			// t-test
+			//
+			jobStatus.addStatusMessage("40", "computing t-test");
+			logger.debug("computing t-test...\n");
+
+			TTest tTest = new TTest();
+			TestResultList<TTestResult> res = tTest.tTest(sample1, sample2);				
+			MultipleTestCorrection.BHCorrection(res);
+
+			int[] columnOrder = ListUtils.order(dataset.getVariables().getByName(className).getValues());
+			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
+			
+			// generating heatmap
+			//
+			jobStatus.addStatusMessage("60", "generating heatmap");
+			logger.debug("generating heatmap...\n");
+
+			Canvas heatmap = generateHeatmap(dataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());
+			heatmap.save(getOutdir() + "/ttest_heatmap");
+			
+			// saving data
+			//
+			jobStatus.addStatusMessage("80", "saving results");
+			logger.debug("saving results...");
+
+			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
+			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
+
+			//dataFrame.addColumn("id", ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
+			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
+			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
+			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
+
+			FeatureData featureData = new FeatureData(dataFrame);
+			featureData.write(new File(getOutdir() + "/ttest.txt"));
+
+			result.addOutputItem(new Item("ttest_file", getOutdir() + "/ttest.txt", "The t-test file is: ", TYPE.FILE));
+			result.addOutputItem(new Item("ttest_heatmap", getOutdir() + "/ttest_heatmap.png", "The t-test heatmap is: ", TYPE.IMAGE));
+
+			// done
+			//
+			jobStatus.addStatusMessage("100", "done");
+			logger.debug("t-test done\n");
+		} catch (java.security.InvalidParameterException e) {
+			logger.error("not valid parameter: execute t-test");
 			e.printStackTrace();
-		} catch (Exception e) {
-			logger.error("Error opening the dataset", e.toString());
+		} catch (MatrixIndexException e) {
+			logger.error("MatrixIndexException: execute t-test");
+			e.printStackTrace();
+		} catch (MathException e) {
+			logger.error("math exception: execute t-test");
+			e.printStackTrace();
+		} catch (IOException e) {
+			logger.error("IOException: execute t-test");
+			e.printStackTrace();
+		} catch (InvalidColumnIndexException e) {
+			logger.error("IOException: execute t-test");
+			e.printStackTrace();
+		} catch (org.bioinfo.math.exception.InvalidParameterException e) {
+			logger.error("IOException: execute t-test");
+			e.printStackTrace();
 		}
 	}
 
@@ -297,114 +250,89 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		logger.info("executing sam, not implemented yet");
 	}
 
+	// anova test
+    //
 	private void executeAnova(Dataset dataset, String className) {
-		logger.info("executing anova");
+		logger.info("executing anova test");
 		List<String> vars = dataset.getVariables().getByName(className).getValues();
-		List<Double> doubleVars = new ArrayList<Double>(vars.size());
-		for(String str: vars) {
-			doubleVars.add(Double.parseDouble(str));
-		}
 
 		try {
-			//dataset loadding
+			// reading data
+			//
+			jobStatus.addStatusMessage("20", "reading data");
+			logger.debug("reading data...\n");
+
 			if ( dataset.getDoubleMatrix() == null ) { 
 				try {
 					dataset.load();
 				} catch (Exception e) {
-					logger.error("Error loading dataset", e.toString());
+					logger.error("Error loading the dataset", e.toString());
 					return;
 				}
 				dataset.validate();
 			}
-			//job status+logger
-			jobStatus.addStatusMessage("25", "reading data");
-			logger.info("executing anova analisys...\n");
 
-			//anova test
+			// anova test
+			//
+			jobStatus.addStatusMessage("40", "computing anova test");
+			logger.debug("computing anova test...\n");
+
 			AnovaTest anova = new AnovaTest(dataset.getDoubleMatrix(), vars);			
 			TestResultList<AnovaTestResult> res = anova.compute();			
 
-			//saving data			
-			logger.info("saving anova analisys");			
-			System.out.println("result = " + res.toString());
-			jobStatus.addStatusMessage("80", "saving data");
-			PrintWriter writer = new PrintWriter(this.getOutdir() + "/anovaAnalisys.txt");
-			writer.write(res.toString());
-			writer.close();
+			int[] columnOrder = ListUtils.order(vars);
+			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
 
-			//generating heatmap
+			
+			// generating heatmap
 			//
-			int xHeatMap = 2;				
-			int yHeatMap = 2;
-			int rowDimension = dataset.getColumnDimension();
-			int columnDimension = dataset.getRowDimension();
-			int cellSide = 20;
-			int rowLabelsWidth = 70;
-			int colLabelsWidth = 70;
-			int infoWidth = 0;
-			double min = dataset.getDoubleMatrix().getMinValue();
-			double max = dataset.getDoubleMatrix().getMaxValue();
-			System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
+			jobStatus.addStatusMessage("60", "generating heatmap");
+			logger.debug("generating heatmap...\n");
 
-			Canvas canvas = new Canvas("");
-			canvas.setBorderWidth(1);
-			canvas.setBorderColor(Color.BLACK);
-			canvas.setBackGroundColor(Color.WHITE);
+			Canvas heatmap = generateHeatmap(dataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());
+			heatmap.save(getOutdir() + "/anova_heatmap");
+			
+			// saving data
+			//
+			jobStatus.addStatusMessage("80", "saving results");
+			logger.debug("saving results...");
 
-			GridPanel gridPanel = new GridPanel("", (rowDimension * cellSide) + rowLabelsWidth + infoWidth, (columnDimension * cellSide) + colLabelsWidth, xHeatMap, yHeatMap);
-			GridTrack gridTrack = new GridTrack(rowDimension, columnDimension, cellSide, cellSide);
-			gridTrack.setRowLabels(dataset.getFeatureNames());
-			List<String> columnLabels = new ArrayList<String>(dataset.getSampleNames().size());
-			for(int i=0 ; i <dataset.getSampleNames().size() ; i++) {
-				columnLabels.add(dataset.getSampleNames().get(i) + " (" + dataset.getVariables().getByName(className).getValues().get(i) + ")");
-			}
-			gridTrack.setColumnLabels(columnLabels);
-			//gridTrack.setName();
-			gridTrack.setTopRegion(colLabelsWidth);
-			gridTrack.setLeftRegion(rowLabelsWidth);
-			ScoreFeature feature;
-			for(int row=0 ; row<gridTrack.getColumnDimension() ; row++) {
-				for(int column=0 ; column<gridTrack.getRowDimension() ; column++) {
-					//					System.out.print("row, column = " + row + ", " + column + ": value = "); System.out.println(dataset.getDoubleMatrix().get(row, column));
-					feature = new ScoreFeature("name (" + column + ", " + row + ")", "", 0, 0, (dataset.getDoubleMatrix().get(row, column)-min)/(max-min));
-					//feature.setJsFunction("http://www.cipf.es");
-					gridTrack.setFeature(row, column, feature);
-				}
-			}
-			gridPanel.add(gridTrack);
-			logger.info("saving heatmap");
-			jobStatus.addStatusMessage("95", "saving heatmap");
-			canvas.addPanel(gridPanel);		
-			canvas.render();		
-			canvas.save(this.getOutdir() + "/heatmap");
+			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
+			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
+
+			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
+			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
+			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
+
+			FeatureData featureData = new FeatureData(dataFrame);
+			featureData.write(new File(getOutdir() + "/anova.txt"));
+
+			result.addOutputItem(new Item("anova_file", getOutdir() + "/anova.txt", "The anova file is: ", TYPE.FILE));
+			result.addOutputItem(new Item("anova_heatmap", getOutdir() + "/anova_heatmap.png", "The anova heatmap is: ", TYPE.IMAGE));
+
+			// done
+			//
 			jobStatus.addStatusMessage("100", "done");
-
-
-			//add outputResult file
-			result.addOutputItem(new Item("anova_file", this.getOutdir()+ "/anovaAnalisys.txt", "The anova analisys file is: ", TYPE.FILE));			
-			result.addOutputItem(new Item("heatMap_image","heatmap.png", "The pearson correlation image is: ", TYPE.IMAGE));
-			jobStatus.addStatusMessage("100", "done");
-
-
-
-			//	System.out.println("\n\n" + pearson.getMethod() + " results:\n" + pearson.compute().toString());
-
+			logger.debug("anova test done\n");
 		} catch (java.security.InvalidParameterException e) {
-			logger.error("not valid parametter: executePearson");
+			logger.error("not valid parameter: execute anova");
 			e.printStackTrace();
 		} catch (MatrixIndexException e) {
-			logger.error("MatrixIndexException: executePearson");
+			logger.error("MatrixIndexException: execute anova");
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (MathException e) {
 			// TODO Auto-generated catch block
-			logger.error("math exception: executePearson");
+			logger.error("math exception: execute anova");
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			logger.error("IOException: executePearson");
+			logger.error("IOException: execute anova");
 			e.printStackTrace();
-		} 
+		} catch (InvalidColumnIndexException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void executeCorrelation(Dataset dataset, String className, String test) {
@@ -530,7 +458,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			TestResultList<SimpleRegressionTestResult> res = regression.compute(dataset.getDoubleMatrix(), doubleVars);
 
 			int[] columnOrder = ListUtils.order(vars);
-			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getSlopes()), true);
+			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
 
 			
 			
@@ -589,15 +517,25 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		}
 	}
 
-	private void executeCox(Dataset dataset, String className, String timeClass, String censoredClass) {
-		logger.info("executing Cox");
-		List<String> vars = dataset.getVariables().getByName(className).getValues();
-		List<Double> doubleVars = new ArrayList<Double>(vars.size());
+	private void executeCox(Dataset dataset, String timeClass, String censoredClass) {
+		logger.info("executing cox");
+		
+		List<String> vars = dataset.getVariables().getByName(timeClass).getValues();
+		List<Double> timeVars = new ArrayList<Double>(vars.size());
 		for(String str: vars) {
-			doubleVars.add(Double.parseDouble(str));
+			timeVars.add(Double.parseDouble(str));
+		}
+		vars = dataset.getVariables().getByName(censoredClass).getValues();
+		List<Double> censoredVars = new ArrayList<Double>(vars.size());
+		for(String str: vars) {
+			censoredVars.add(Double.parseDouble(str));
 		}
 
 		try {
+			// reading data
+			//
+			jobStatus.addStatusMessage("20", "reading data");
+			logger.debug("reading data...\n");
 
 			if ( dataset.getDoubleMatrix() == null ) { 
 				try {
@@ -609,60 +547,69 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				dataset.validate();
 			}
 
-			jobStatus.addStatusMessage("25", "reading data");
+			// cox test
+			//
+			jobStatus.addStatusMessage("40", "computing cox");
+			logger.debug("computing cox...\n");
 
+			CoxTest coxtest = new CoxTest();
+			//System.out.println("input matrix = \n" + dataset.getDoubleMatrix().toString());
+			TestResultList<CoxTestResult> res = coxtest.compute(dataset.getDoubleMatrix(), timeVars, censoredVars);
 
-			logger.info("executing cox analisis...\n");
+			int[] columnOrder = ListUtils.order(vars);
+			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
+			
+			// generating heatmap
+			//
+			jobStatus.addStatusMessage("60", "generating heatmap");
+			logger.debug("generating heatmap...\n");
 
-			List<String> strTimeVar = StringUtils.stringToList(",", "156,1040,59,421,329,769");
-			List<String> strCensorVar = StringUtils.stringToList(",", "1,0,1,0,1,0");
+			Canvas heatmap = generateHeatmap(dataset, timeClass, columnOrder, rowOrder, "coeff.", res.getCoefs(), "adj. p-value", res.getAdjPValues());
+			heatmap.save(getOutdir() + "/cox_heatmap");
+			
+			// saving data
+			//
+			jobStatus.addStatusMessage("80", "saving results");
+			logger.debug("saving results...");
 
-			List<Double> timeVar = new ArrayList<Double>(strTimeVar.size());
-			for(String str: strTimeVar) {
-				timeVar.add(Double.parseDouble(str));
-			}
-			List<Double> censorVar = new ArrayList<Double>(strCensorVar.size());
-			for(String str: strCensorVar) {
-				censorVar.add(Double.parseDouble(str));
-			}
+			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
+			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
-			CoxTest coxtest = new CoxTest(dataset.getDoubleMatrix(), timeVar, censorVar);
-			TestResultList<CoxTestResult> res ;
-			jobStatus.addStatusMessage("50", "cox test running");
-			res = coxtest.compute(dataset.getDoubleMatrix(), timeVar, censorVar);
-			jobStatus.addStatusMessage("50", "cox test finished");
-			System.out.println("Results cox test:\n" + coxtest.compute().toString());
-			logger.info("saving...\n");
-			jobStatus.addStatusMessage("80", "saving data");
-			PrintWriter writer = new PrintWriter(this.getOutdir() + "/cox.txt");
-			writer.write(res.toString());
-			writer.close();
+			//dataFrame.addColumn("id", ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
+			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
+			dataFrame.addColumn("coeff.", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getCoefs()), rowOrder)));
+			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
+			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
 
+			FeatureData featureData = new FeatureData(dataFrame);
+			featureData.write(new File(getOutdir() + "/cox.txt"));
 
-			result.addOutputItem(new Item("coxAnalisis_file","cox.txt", "The cox file is: ", TYPE.FILE));
+			result.addOutputItem(new Item("cox_file", getOutdir() + "/cox.txt", "The cox file is: ", TYPE.FILE));
+			result.addOutputItem(new Item("cox_heatmap", getOutdir() + "/cox_heatmap.png", "The cox heatmap is: ", TYPE.IMAGE));
+
+			// done
+			//
 			jobStatus.addStatusMessage("100", "done");
-
-
-
-			//	System.out.println("\n\n" + spearman.getMethod() + " results:\n" + spearman.compute().toString());
-
-
+			logger.debug("regression done\n");
 		} catch (java.security.InvalidParameterException e) {
-			logger.error("not valid parametter: executePearson");
+			logger.error("not valid parameter: execute regression");
 			e.printStackTrace();
 		} catch (MatrixIndexException e) {
-			logger.error("MatrixIndexException: executePearson");
+			logger.error("MatrixIndexException: execute regression");
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (MathException e) {
 			// TODO Auto-generated catch block
-			logger.error("math exception: executePearson");
+			logger.error("math exception: execute regression");
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			logger.error("IOException: executePearson");
+			logger.error("IOException: execute regression");
 			e.printStackTrace();
-		} 
+		} catch (InvalidColumnIndexException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 
@@ -675,10 +622,10 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		int rowLabelsWidth = 70;
 		int colLabelsWidth = 70;
 		int infoWidth = 140;
-		double min = dataset.getDoubleMatrix().getMinValue();
-		double max = dataset.getDoubleMatrix().getMaxValue();
-		double mean, deviation, standard;
-		System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
+		//double min = dataset.getDoubleMatrix().getMinValue();
+		//double max = dataset.getDoubleMatrix().getMaxValue();
+		//double mean, deviation, standard;
+		//System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
 
 		Canvas canvas = new Canvas("");
 		canvas.setBorderWidth(0);
@@ -698,18 +645,19 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		gridTrack.setLeftRegion(rowLabelsWidth);
 		gridTrack.setRightRegion(infoWidth);
 
+		int row, column;
 		ScoreFeature feature;
 		for(int i=0 ; i<rowOrder.length ; i++) {
-			int row = rowOrder[i];
-			mean = dataset.getDoubleMatrix().getRowMean(row);
-			deviation = dataset.getDoubleMatrix().getRowStdDeviation(row);
+			row = rowOrder[i];
+			//mean = dataset.getDoubleMatrix().getRowMean(row);
+			//deviation = dataset.getDoubleMatrix().getRowStdDeviation(row);
 			for(int j=0 ; j<columnOrder.length ; j++) {
-				int column = columnOrder[j];
+				column = columnOrder[j];
 				//System.out.print("row, column = " + row + ", " + column + ": value = "); System.out.println(dataset.getDoubleMatrix().get(row, column));
 //				feature = new ScoreFeature("name (" + column + ", " + row + ")", "", 0, 0, (dataset.getDoubleMatrix().get(row, column)-min)/(max-min));
-				standard = (deviation == 0) ? 0 : (dataset.getDoubleMatrix().get(row, column)-mean)/(deviation);
+				//standard = (deviation == 0) ? 0 : (dataset.getDoubleMatrix().get(row, column)-mean)/(deviation);
 				//System.out.println("(value, standard) = (" + dataset.getDoubleMatrix().get(row, column) + ", " + standard + ")");
-				feature = new ScoreFeature("name (" + column + ", " + row + ")", "", 0, 0, standard);
+				feature = new ScoreFeature("name (" + row + ", " + column + ")", "", 0, 0, dataset.getDoubleMatrix().get(row, column));
 				//feature.setJsFunction("http://www.cipf.es");
 				//				gridTrack.setFeature(row, column, feature);
 				gridTrack.setFeature(i, j, feature);

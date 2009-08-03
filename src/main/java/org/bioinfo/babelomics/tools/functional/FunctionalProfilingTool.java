@@ -12,6 +12,7 @@ import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.core.Gene;
 import org.bioinfo.infrared.core.dbsql.GeneDBManager;
+import org.bioinfo.infrared.core.dbsql.XRefDBManager;
 import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.bioinfo.math.stats.inference.FisherExactTest;
@@ -146,9 +147,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			
 			//List<FeatureList<Gene>> list = new GeneDBManager(dbConnector).getAllByExternalIds(ids);
 			
-			// commeted and replaced by JT, 2009.07.01
-			//List<List<String>> list = new XRefDBManager(dbConnector).getIdsByDBName(ids, "ensembl_gene");
-			List<List<String>> list = null;
+			List<List<String>> list = new XRefDBManager(dbConnector).getIdsByDBName(ids, "ensembl_gene");
 			
 			List<String> ensemblIds = new ArrayList<String>();
 			if ( list == null ) {
