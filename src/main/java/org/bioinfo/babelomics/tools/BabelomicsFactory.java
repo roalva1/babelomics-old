@@ -7,7 +7,6 @@ import org.bioinfo.babelomics.tools.expression.OutlierLrs;
 import org.bioinfo.babelomics.tools.expression.Predictor;
 import org.bioinfo.babelomics.tools.expression.TimeDosageSeries;
 import org.bioinfo.babelomics.tools.functional.Blast2Go;
-import org.bioinfo.babelomics.tools.functional.FatiGO;
 import org.bioinfo.babelomics.tools.functional.FatiScan;
 import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
