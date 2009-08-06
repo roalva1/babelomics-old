@@ -41,6 +41,8 @@ import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 import org.bioinfo.utils.ListUtils;
 import org.bioinfo.utils.StringUtils;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.plot.PlotOrientation;
 
 public class Marmite extends BabelomicsTool {
 
@@ -140,7 +142,6 @@ public class Marmite extends BabelomicsTool {
 				}								
 			}
 
-<<<<<<< HEAD:src/main/java/org/bioinfo/babelomics/tools/functional/textmining/Marmite.java
 //			System.out.println("matrix1 :");
 //			for (int i=0 ; i<scoreMatrix1.length; i++) {
 //				for (int j=0 ; j<scoreMatrix1[i].length; j++) {
@@ -156,23 +157,7 @@ public class Marmite extends BabelomicsTool {
 //				}
 //				System.out.println("");
 //			}						
-=======
-			System.out.println("matrix1 :");
-			for (int i=0 ; i<scoreMatrix1.length; i++) {
-				for (int j=0 ; j<scoreMatrix1[i].length; j++) {
-					System.out.print(scoreMatrix1[i][j] + "\t");
-				}
-				System.out.println("");
-			}						
 
-			System.out.println("matrix2 :");
-			for (int i=0 ; i<scoreMatrix2.length; i++) {
-				for (int j=0 ; j<scoreMatrix2[i].length; j++) {
-					System.out.print(scoreMatrix2[i][j] + "\t");
-				}
-				System.out.println("");
-			}						
->>>>>>> 94f382a670978c4b877696498d2c8e9f38315427:src/main/java/org/bioinfo/babelomics/tools/functional/Marmite.java
 
 
 			System.out.println("scoreMatrix1 size = " + scoreMatrix1.length + ", " + scoreMatrix1[0].length);
@@ -272,14 +257,13 @@ public class Marmite extends BabelomicsTool {
 		} catch (InvalidParameterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-<<<<<<< HEAD:src/main/java/org/bioinfo/babelomics/tools/functional/Marmite.java
-
-=======
 		} catch (InvalidColumnIndexException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
->>>>>>> 885e75bd50960bbf4980fe6165b3f90d44d4ae1b:src/main/java/org/bioinfo/babelomics/tools/functional/Marmite.java
 	}
 
 	private Map<String, List<Score>> getEntityMap(List<String> genes, String entity) {
@@ -328,7 +312,6 @@ public class Marmite extends BabelomicsTool {
 		return map;
 	}
 	
-<<<<<<< HEAD:src/main/java/org/bioinfo/babelomics/tools/functional/textmining/Marmite.java
 	
 	public BoxPlotChart createBoxplot(String entity, double pValue, List<Double> list1, List<Double> list2) {
 
@@ -341,103 +324,5 @@ public class Marmite extends BabelomicsTool {
 
 		return bpc;
 	}
-=======
-	private void executeMarmite(Dataset dataset, String bioEntityName, String bioentityScoreFilter, String bioentityNumberFilter,String geneNameList, String partitionNumber, String significance, String sort) {
-		logger.info("executing svm, not implemented yet");
-	}
 
-	//	private void executeMarmite(FeatureData fd1, FeatureData fd2, String bioentity, int scoreFilter, int numberFilter) {		
-	//		try {
-	//			
-	//			// reading data
-	//			//
-	//			jobStatus.addStatusMessage("20", "reading data");
-	//			logger.debug("reading data...\n");
-	//			
-	//			
-	//			// marmite functional enrichment
-	//			//
-	//			jobStatus.addStatusMessage("40", "computing marmite functional enrichment");
-	//			logger.debug("computing marmite functional enrichment...\n");
-	//			
-	//			Map<String, List<Score>> entityMap1 = getEntityMap(fd1.getDataFrame().getColumn(0));	
-	//			Map<String, List<Score>> entityMap2 = getEntityMap(fd2.getDataFrame().getColumn(0));	
-	//			
-	//			List<String> entities = new ArrayList<String> ();
-	//			for(String entity: entityMap1.keySet()) {
-	//				if ( entityMap1.get(entity) != null && entityMap1.get(entity).size() >= scoreFilter && 
-	//					 entityMap2.get(entity) != null && entityMap2.get(entity).size() >= scoreFilter ) {
-	//					entities.add(entity);
-	//				}				
-	//			}
-	//
-	//			String entity;
-	//			List<Score> scoreList1, scoreList2;
-	//			double[][] scoreMatrix1 = new double[entities.size()][];
-	//			double[][] scoreMatrix2 = new double[entities.size()][];
-	//			for(int i=0 ; i<entities.size() ; i++) {
-	//				entity = entities.get(i);
-	//				scoreList1 = entityMap1.get(entity); 
-	//				scoreList2 = entityMap1.get(entity); 
-	//				if ( scoreList1 != null && scoreList1.size() >= scoreFilter && scoreList2 != null && scoreList2.size() >= scoreFilter ) {
-	//					
-	//						scoreMatrix1[i] = new double[scoreList1.size()];
-	//						for (int j=0 ; j<scoreList1.size(); j++) {
-	//							scoreMatrix1[i][j] = scoreList1.get(j).getValue();
-	//						}
-	//						
-	//						scoreMatrix2[i] = new double[scoreList2.size()];
-	//						for (int j=0 ; j<scoreList2.size(); j++) {
-	//							scoreMatrix2[i][j] = scoreList2.get(j).getValue();
-	//						}						
-	//					}								
-	//			}
-	//			TestResultList<KolmogorovSmirnovTestResult> res = new KolmogorovSmirnovTest().compute(scoreMatrix1, scoreMatrix2);
-	//			System.out.println("kolmogorov result :\n" +  res.toString());
-	//						
-	//			// generating boxplots
-	//			//
-	//			jobStatus.addStatusMessage("60", "generating boxplots");
-	//			logger.debug("generating boxplots...\n");
-	//					
-	//
-	//			// saving data
-	//			//
-	//			jobStatus.addStatusMessage("80", "saving results");
-	//			logger.debug("saving results...");
-	//			
-	////			DataFrame dataFrame = new DataFrame(entities.size(), 0);
-	////			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
-	////						
-	////			//dataFrame.addColumn("id", ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
-	////			dataFrame.addColumn("correlation", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getCorrelations()), rowOrder)));
-	////			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
-	////			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
-	////			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
-	////						
-	////			FeatureData featureData = new FeatureData(dataFrame);
-	////			featureData.write(new File(getOutdir() + "/pearson_correlation.txt"));
-	//
-	//			
-	//			// done
-	//			//
-	//			jobStatus.addStatusMessage("100", "done");
-	//			logger.debug("marmite funcitonal enrichment done\n");
-	//						
-	//		} catch (java.security.InvalidParameterException e) {
-	//			// TODO Auto-generated catch block
-	//			e.printStackTrace();
-	//		} catch (MatrixIndexException e) {
-	//			// TODO Auto-generated catch block
-	//			e.printStackTrace();
-	//		} catch (IOException e) {
-	//			// TODO Auto-generated catch block
-	//			e.printStackTrace();
-	//		} catch (InvalidParameterException e) {
-	//			// TODO Auto-generated catch block
-	//			e.printStackTrace();
-	//		}
-	//	}
-
->>>>>>> 94f382a670978c4b877696498d2c8e9f38315427:src/main/java/org/bioinfo/babelomics/tools/functional/Marmite.java
 }
