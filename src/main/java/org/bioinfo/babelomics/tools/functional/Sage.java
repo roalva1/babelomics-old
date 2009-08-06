@@ -13,7 +13,6 @@ public class Sage extends BabelomicsTool {
 
 
 	public Sage(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -33,7 +32,6 @@ public class Sage extends BabelomicsTool {
 	@Override
 	public void execute() {
 		try {
-			CommandLine cmd = parse(args);
 
 			Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
 			String bioEntityName = cmd.getOptionValue("org-filter");
@@ -48,11 +46,9 @@ public class Sage extends BabelomicsTool {
 			executeSageAnalisys(dataset, bioEntityName, bientityTissueName, bioentityListFilter,bioentityHistologyName,bioentityNullValuesGenes,bioentityNullValuesLibraries,bioentityCellLines);
 			
 		} catch (ParseException e) {
-			logger.error("Error parsing command line", e.toString());
-			System.out.println("\n");
-			printUsage();
+			e.printStackTrace();
 		} catch (IOException e) {
-			logger.error("Error opening the dataset", e.toString());
+			e.printStackTrace();
 		}		
 	}
 	

@@ -13,7 +13,6 @@ public class Affimetrix extends BabelomicsTool {
 
 
 	public Affimetrix(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -43,11 +42,9 @@ public class Affimetrix extends BabelomicsTool {
 			executeAffyAnalisys(dataset, bioEntityName, bientityTissueName, bioentityListFilter,bioentityNormalizationFilter, bientityExpressionFilter);
 			
 		} catch (ParseException e) {
-			logger.error("Error parsing command line", e.toString());
-			System.out.println("\n");
-			printUsage();
+			e.printStackTrace();
 		} catch (IOException e) {
-			logger.error("Error opening the dataset", e.toString());
+			e.printStackTrace();
 		}		
 	}
 	

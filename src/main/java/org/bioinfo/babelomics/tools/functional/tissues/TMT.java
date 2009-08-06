@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.math.util.MathUtils;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.babelomics.tools.functional.FunctionalProfilingTool;
 import org.bioinfo.chart.BoxPlotChart;
@@ -20,7 +21,6 @@ import org.bioinfo.db.handler.MatrixHandler;
 import org.bioinfo.db.handler.ResultSetHandler;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.io.FileSystemUtils;
-import org.bioinfo.math.MathUtils;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.math.result.TTestResult;
 import org.bioinfo.math.result.TestResultList;
