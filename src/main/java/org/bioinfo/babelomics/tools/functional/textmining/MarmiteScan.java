@@ -14,6 +14,7 @@ public class MarmiteScan extends BabelomicsTool {
 
 
 	public MarmiteScan(String[] args) {
+		super(args);
 		initOptions();
 	}
 

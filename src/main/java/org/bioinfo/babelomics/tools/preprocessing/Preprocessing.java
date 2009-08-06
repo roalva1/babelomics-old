@@ -15,6 +15,7 @@ public class Preprocessing extends BabelomicsTool {
 
 
 	public Preprocessing(String[] args) {
+		super(args);
 		initOptions();
 	}
 

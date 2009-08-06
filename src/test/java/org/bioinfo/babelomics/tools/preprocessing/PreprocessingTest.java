@@ -45,6 +45,7 @@ public class PreprocessingTest {
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--merge-replicates", "mean"};
 		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp/preprocessing","--merge-replicates", "mean", "--logarithm-base", "2", "--impute-missing", "zero", "--filter-missing", "90"};
+
 		
 		try {
 			BabelomicsMain.main(args); 
