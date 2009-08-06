@@ -45,7 +45,6 @@ import org.bioinfo.utils.StringUtils;
 public class Marmite extends BabelomicsTool {
 
 	public Marmite(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -87,16 +86,15 @@ public class Marmite extends BabelomicsTool {
 
 		try {
 
-			CommandLine cmd = parse(args);
 
-			Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
-			String bioEntityName = cmd.getOptionValue("bioentity-name");
-			String bioentityScoreFilter = cmd.getOptionValue("bioentity-score-filter");
-			String bioentityNumberFilter = cmd.getOptionValue("bioentity-mumber-filter");			
-			String geneNameList = cmd.getOptionValue("gene-name-list", null);
-			String partitionNumber = cmd.getOptionValue("partition-number");	
-			double significance = Double.parseDouble(cmd.getOptionValue("significance", "0.05"));
-			String sort = cmd.getOptionValue("sort");
+			Dataset dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
+			String bioEntityName = commandLine.getOptionValue("bioentity-name");
+			String bioentityScoreFilter = commandLine.getOptionValue("bioentity-score-filter");
+			String bioentityNumberFilter = commandLine.getOptionValue("bioentity-mumber-filter");			
+			String geneNameList = commandLine.getOptionValue("gene-name-list", null);
+			String partitionNumber = commandLine.getOptionValue("partition-number");	
+			double significance = Double.parseDouble(commandLine.getOptionValue("significance", "0.05"));
+			String sort = commandLine.getOptionValue("sort");
 			System.out.println(dataset.toString()+"\n");
 
 

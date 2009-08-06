@@ -13,7 +13,6 @@ public class Sage extends BabelomicsTool {
 
 
 	public Sage(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -32,28 +31,28 @@ public class Sage extends BabelomicsTool {
 
 	@Override
 	public void execute() {
-		try {
-			CommandLine cmd = parse(args);
-
-			Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
-			String bioEntityName = cmd.getOptionValue("org-filter");
-			String bientityTissueName = cmd.getOptionValue("tissue-name");
-			String bioentityListFilter = cmd.getOptionValue("list-filter");
-			String bioentityHistologyName = cmd.getOptionValue("histology-name");			
-			String bioentityNullValuesGenes = cmd.getOptionValue("null-values-genes");
-			String bioentityNullValuesLibraries = cmd.getOptionValue("null-values-libraries");
-			String bioentityCellLines = cmd.getOptionValue("cell-lines",null);
-			System.out.println(dataset.toString()+"\n");
-			
-			executeSageAnalisys(dataset, bioEntityName, bientityTissueName, bioentityListFilter,bioentityHistologyName,bioentityNullValuesGenes,bioentityNullValuesLibraries,bioentityCellLines);
-			
-		} catch (ParseException e) {
-			logger.error("Error parsing command line", e.toString());
-			System.out.println("\n");
-			printUsage();
-		} catch (IOException e) {
-			logger.error("Error opening the dataset", e.toString());
-		}		
+//		try {
+//			CommandLine cmd = parse(args);
+//
+//			Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
+//			String bioEntityName = cmd.getOptionValue("org-filter");
+//			String bientityTissueName = cmd.getOptionValue("tissue-name");
+//			String bioentityListFilter = cmd.getOptionValue("list-filter");
+//			String bioentityHistologyName = cmd.getOptionValue("histology-name");			
+//			String bioentityNullValuesGenes = cmd.getOptionValue("null-values-genes");
+//			String bioentityNullValuesLibraries = cmd.getOptionValue("null-values-libraries");
+//			String bioentityCellLines = cmd.getOptionValue("cell-lines",null);
+//			System.out.println(dataset.toString()+"\n");
+//			
+//			executeSageAnalisys(dataset, bioEntityName, bientityTissueName, bioentityListFilter,bioentityHistologyName,bioentityNullValuesGenes,bioentityNullValuesLibraries,bioentityCellLines);
+//			
+//		} catch (ParseException e) {
+//			logger.error("Error parsing command line", e.toString());
+//			System.out.println("\n");
+//			printUsage();
+//		} catch (IOException e) {
+//			logger.error("Error opening the dataset", e.toString());
+//		}		
 	}
 	
 	private void executeSageAnalisys(Dataset dataset, String bioEntityName,	String bientityTissueName, String bioentityListFilter,	String bioentityHistologyName, String bioentityNullValuesGenes,	String bioentityNullValuesLibraries, String bioentityCellLines) {
