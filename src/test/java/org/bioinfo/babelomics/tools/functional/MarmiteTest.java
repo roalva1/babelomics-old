@@ -21,11 +21,10 @@ public class MarmiteTest {
 		
 	}
 	
-	@Test
 	public void test1() {
 		System.out.println("-----     ------");
-//		String []args = {"-tool", "marmite", "-list1", "/mnt/commons/test/tools/marmite/marmite1.txt",  "-list2", "/mnt/commons/test/tools/marmite/marmite2.txt", "-o", "/mnt/commons/test/tools/marmite/out/", "-bioentity-name", "diseases", "-bioentity-score-filter", "5"};
-		String []args = {"-tool", "marmite", "-list1", "/mnt/commons/test/tools/marmite/marmite1a.txt",  "-list2", "/mnt/commons/test/tools/marmite/marmite2a.txt", "-o", "/mnt/commons/test/tools/marmite/out/", "-bioentity-name", "diseases", "-bioentity-score-filter", "5"};
+		String []args = {"-tool", "marmite", "-list1", "/mnt/commons/test/tools/marmite/marmite1.txt",  "-list2", "/mnt/commons/test/tools/marmite/marmite2.txt", "-o", "/mnt/commons/test/tools/marmite/out/", "-bioentity-name", "diseases", "-bioentity-score-filter", "5"};
+//		String []args = {"-tool", "marmite", "-list1", "/mnt/commons/test/tools/marmite/marmite1a.txt",  "-list2", "/mnt/commons/test/tools/marmite/marmite2a.txt", "-o", "/mnt/commons/test/tools/marmite/out/", "-bioentity-name", "diseases", "-bioentity-score-filter", "5"};
 		
 		try {
 			BabelomicsMain.main(args); 

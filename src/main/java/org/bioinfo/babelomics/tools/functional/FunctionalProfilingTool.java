@@ -2,7 +2,9 @@ package org.bioinfo.babelomics.tools.functional;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
@@ -173,6 +175,39 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		}
 	}
 	
+	public static Map<String, List<String>> getEnsemblMap(DBConnector dbConnector, List<String> ids) {
+		try {
+			Map<String, List<String>> map = new HashMap<String, List<String>>();
+			
+			List<List<String>> lists = new XRefDBManager(dbConnector).getIdsByDBName(ids, "ensembl_gene");
+
+//			System.out.println("ids size = " + ids.size() + ", list size " + lists.size());
+			List<String> ensemblIds = new ArrayList<String>();
+			if ( lists == null ) {
+				System.out.println(">>>>> getAllByExternalIds returns null");
+				map = null;
+			} else {
+				for(int i=0 ; i<lists.size() ; i++) {
+					if ( lists.get(i) == null || lists.get(i).size() <= 0) {
+						map.put(ids.get(i), null);
+					} else {
+//						if ( lists.get(i).size() > 1 ) {
+//							System.out.println("-------------->>>> gene " + ids.get(i) + ", more than one ensemblId : " + ListUtils.toString(lists.get(i)));
+//						}
+						if ( !map.containsKey(ids.get(i)) ) {
+							map.put(ids.get(i), new ArrayList<String>());
+						}
+						map.get(ids.get(i)).addAll(lists.get(i));
+					}
+				}
+			}
+			return map;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	public Filter getFilter() {
 		if ( isGoBpDB() ) {
 			logger.info("go biological process");
