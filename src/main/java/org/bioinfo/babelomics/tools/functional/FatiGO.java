@@ -8,6 +8,8 @@ import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.ParseException;
+import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
+import org.bioinfo.collections.exceptions.InvalidRowIndexException;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
@@ -20,11 +22,11 @@ public class FatiGO extends FunctionalProfilingTool{
 	public FatiGO(String[] args) {
 		initOptions();
 	}
-	
+
 	@Override
 	public void initOptions() {
 		super.initOptions();
-		
+
 		options.addOption(OptionFactory.createOption("list1", "the feature data containig the list #1 of genes, or the feature data file"));
 
 		OptionGroup input2 = new OptionGroup();
@@ -50,16 +52,25 @@ public class FatiGO extends FunctionalProfilingTool{
 	public void prepare(CommandLine cmdLine) throws IOException, ParseException {
 		super.prepare(cmdLine);
 
-		setFeatureData(new FeatureData(new File(cmdLine.getOptionValue("list1")), true));
-		if ( cmdLine.hasOption("filter-name1") && cmdLine.hasOption("filter-value1") ) {
-			setFeatureData(getFeatureData().getSubFeatureData(cmdLine.getOptionValue("filter-name1"), cmdLine.getOptionValue("filter-value1"))); 
+		try {
+			setFeatureData(new FeatureData(new File(cmdLine.getOptionValue("list1")), true));
+			if ( cmdLine.hasOption("filter-name1") && cmdLine.hasOption("filter-value1") ) {
+				setFeatureData(getFeatureData().getSubFeatureData(cmdLine.getOptionValue("filter-name1"), cmdLine.getOptionValue("filter-value1")));
+			}
+		} catch (Exception e) {
+			throw new IOException(e.toString());
 		}
 
 		if ( cmdLine.hasOption("list2") ) {
-			setFeatureData2(new FeatureData(new File(cmdLine.getOptionValue("list2")), true));
-			if ( cmdLine.hasOption("filter-name2") && cmdLine.hasOption("filter-value2") ) {
-				setFeatureData2(getFeatureData2().getSubFeatureData(cmdLine.getOptionValue("filter-name2"), cmdLine.getOptionValue("filter-value2"))); 
+			try {
+				setFeatureData2(new FeatureData(new File(cmdLine.getOptionValue("list2")), true));
+				if ( cmdLine.hasOption("filter-name2") && cmdLine.hasOption("filter-value2") ) {
+					setFeatureData2(getFeatureData2().getSubFeatureData(cmdLine.getOptionValue("filter-name2"), cmdLine.getOptionValue("filter-value2"))); 
+				}
+			} catch (Exception e) {
+				throw new IOException(e.toString());
 			}
+
 		} else if ( cmdLine.hasOption("rest-of-genome") ) {
 			this.setRestOfGenome(true);
 		} else if ( cmdLine.hasOption("chromosome") ) {
@@ -72,11 +83,11 @@ public class FatiGO extends FunctionalProfilingTool{
 
 		setRemoveDuplicates(cmdLine.getOptionValue("remove-duplicates", "never"));
 	}
-	
+
 	@Override
 	public void execute() {
 		try {
-//			CommandLine cmdLine = parse(args);
+			//			CommandLine cmdLine = parse(args);
 			prepare(commandLine);			
 
 			DBConnector dbConnector = new DBConnector(getSpecies());
@@ -95,7 +106,7 @@ public class FatiGO extends FunctionalProfilingTool{
 			} else {
 				throw new ParseException("No comparison provided, use list2, rest-of-genome or chromosome options to set your comparison");				
 			}
-			
+
 			//System.out.println("before removing duplictes ********* list1 (" + list1.size() + "):\n" + StringUtils.arrayToString(list1, "\n"));		
 			//System.out.println("before removing duplicates ********* list2 (" + list2.size() + "):\n" + StringUtils.arrayToString(list2, "\n"));		
 
@@ -115,7 +126,7 @@ public class FatiGO extends FunctionalProfilingTool{
 					}
 				}				
 			}
-			
+
 			System.out.println("after removing duplicates ********* list1 size (" + list1.size() + ")\n");		
 			System.out.println("after removing duplicates ********* list2 size (" + list2.size() + ")\n");		
 			//System.out.println("after removing duplictes ********* list1 (" + list1.size() + ") :\n" + StringUtils.arrayToString(list1, "\n"));		
@@ -134,20 +145,20 @@ public class FatiGO extends FunctionalProfilingTool{
 					logger.info("adding the keywords: " + getGoBpDBKeywords());
 					gof.addKeyword(getGoBpDBKeywords());
 				}
-				
+
 				FuncTest test = new FuncTest(list1, list2, FuncTest.GO, dbConnector);
 				test.setFilter(gof);
 
 				if ( isGoBpInclusive() ) {
 					logger.info("inclusive, creating the annotation file for go biological process");
-										
+
 					for(int i = getGoBpMinLevel() ; i<=getGoBpMaxLevel() ; i++) {
 						gof.setMinLevel(i);
 						gof.setMaxLevel(i);
-						
+
 						test.setFilter(gof);
 						logger.info("\ninclusive, level " + i + ", fisher, result :\n" + test.run().toString());
-						
+
 					}
 				} else {
 					logger.info("\nno inclusive, fisher, result :\n" + test.run().toString());					
@@ -155,8 +166,8 @@ public class FatiGO extends FunctionalProfilingTool{
 				logger.info("go-bp-db executed");
 			}
 
-			
-			
+
+
 		} catch (ParseException e) {
 			logger.error("Error parsing command line", e.toString());
 			System.out.println("\n");
@@ -174,6 +185,9 @@ public class FatiGO extends FunctionalProfilingTool{
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (InvalidParameterException e) {
+			e.printStackTrace();
+		} catch (InvalidColumnIndexException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

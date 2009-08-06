@@ -1,4 +1,5 @@
-package org.bioinfo.babelomics.tool.preprocessing;
+package org.bioinfo.babelomics.tools.preprocessing;
+
 
 import static org.junit.Assert.fail;
 
@@ -43,10 +44,14 @@ public class PreprocessingTest {
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
 		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--merge-replicates", "mean"};
 <<<<<<< HEAD:src/test/java/org/bioinfo/babelomics/tool/preprocessing/PreprocessingTest.java
+<<<<<<< HEAD:src/test/java/org/bioinfo/babelomics/tool/preprocessing/PreprocessingTest.java
 		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp","--merge-replicates", "none", "--logarithm-base", "2",  "--jobname", "sample name", "--impute-missing_1", "none", "--submit_button Run","--comparison4", "none", "--merge-replicates", "none", "--impute-missing","none", "--session-id", "QIVn13S0VRgTvluw1dwbOxcYXfVusjoyhINlcuouYIZc7jPT5IWc8nRDVPfAYZrP"};
 =======
 		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp","--merge-replicates", "mean", "--logarithm-base", "2", "--impute-missing", "zero", "--filter-missing", "90", "--jobname", "sample name", "--submit_button Run", "--session-id", "QIVn13S0VRgTvluw1dwbOxcYXfVusjoyhINlcuouYIZc7jPT5IWc8nRDVPfAYZrP"};
 >>>>>>> 7eefe8251f8ce750dcf3eb374b350207ec974c4e:src/test/java/org/bioinfo/babelomics/tool/preprocessing/PreprocessingTest.java
+=======
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp/preprocessing","--merge-replicates", "mean", "--logarithm-base", "2", "--impute-missing", "zero", "--filter-missing", "90", "--jobname", "sample name", "--submit_button Run", "--session-id", "QIVn13S0VRgTvluw1dwbOxcYXfVusjoyhINlcuouYIZc7jPT5IWc8nRDVPfAYZrP"};
+>>>>>>> 885e75bd50960bbf4980fe6165b3f90d44d4ae1b:src/test/java/org/bioinfo/babelomics/tools/preprocessing/PreprocessingTest.java
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -56,7 +61,5 @@ public class PreprocessingTest {
 			fail(e.toString());
 			//System.out.println(e.toString());
 		}
-	}
-
-
+	}	
 }

@@ -11,7 +11,8 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.linear.MatrixIndexException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.collections.array.NamedArrayList;
+import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
+import org.bioinfo.collections.list.NamedArrayList;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
@@ -207,7 +208,14 @@ public class Marmite extends BabelomicsTool {
 		} catch (InvalidParameterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+<<<<<<< HEAD:src/main/java/org/bioinfo/babelomics/tools/functional/Marmite.java
 
+=======
+		} catch (InvalidColumnIndexException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+>>>>>>> 885e75bd50960bbf4980fe6165b3f90d44d4ae1b:src/main/java/org/bioinfo/babelomics/tools/functional/Marmite.java
 	}
 
 	private Map<String, List<Score>> getEntityMap(List<String> genes, String entity) {

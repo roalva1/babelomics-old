@@ -68,7 +68,7 @@ public class Clustering extends BabelomicsTool {
 			}
 
 			logger.warn("que raroo....");
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Error opening the dataset", e.toString());
 		} 
 	}

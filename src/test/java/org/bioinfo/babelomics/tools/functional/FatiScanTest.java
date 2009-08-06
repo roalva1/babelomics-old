@@ -1,7 +1,6 @@
-package org.bioinfo.babelomics.tool.functional;
+package org.bioinfo.babelomics.tools.functional;
 
 
-import org.bioinfo.babelomics.tools.functional.FatiScan;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +14,7 @@ public class FatiScanTest {
 	@After
 	public void tearDown() throws Exception {
 	}
-
+	
 	@Test
 	public void Test0() {
 		
@@ -33,4 +32,5 @@ public class FatiScanTest {
 			//System.out.println(e.toString());
 		}
 	}	
+
 }

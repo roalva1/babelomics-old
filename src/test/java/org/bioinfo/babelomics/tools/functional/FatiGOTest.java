@@ -1,11 +1,9 @@
-package org.bioinfo.babelomics.tool.functional;
+package org.bioinfo.babelomics.tools.functional;
 
 
-import org.bioinfo.babelomics.tools.functional.FatiGO;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 
 public class FatiGOTest {
 
@@ -16,7 +14,7 @@ public class FatiGOTest {
 	@After
 	public void tearDown() throws Exception {
 	}
-
+	
 	@Test
 	public void Test0() {
 		

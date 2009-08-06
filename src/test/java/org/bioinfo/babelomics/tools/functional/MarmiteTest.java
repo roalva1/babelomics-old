@@ -1,4 +1,4 @@
-package org.bioinfo.babelomics.tool.functional;
+package org.bioinfo.babelomics.tools.functional;
 
 
 import org.bioinfo.babelomics.BabelomicsMain;
@@ -15,7 +15,7 @@ public class MarmiteTest {
 	@After
 	public void tearDown() throws Exception {
 	}
-
+	
 	@Test
 	public void test0() {
 		
