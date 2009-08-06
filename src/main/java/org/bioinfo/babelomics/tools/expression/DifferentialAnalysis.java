@@ -16,7 +16,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.linear.MatrixIndexException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.collections.array.NamedArrayList;
+import org.bioinfo.collections.list.NamedArrayList;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
@@ -53,11 +53,11 @@ public class DifferentialAnalysis extends BabelomicsTool {
 
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("test", "the test, possible values: t-test, bayes, sam, fold-change, anova, pearson, spearman, regression, cox"));
-		options.addOption(OptionFactory.createOption("class", "class variable"));
-		options.addOption(OptionFactory.createOption("sample-filter", "class variable", false));
-		options.addOption(OptionFactory.createOption("feature-filter", "class variable", false));
+		getOptions().addOption(OptionFactory.createOption("dataset", "the data"));
+		getOptions().addOption(OptionFactory.createOption("test", "the test, possible values: t-test, bayes, sam, fold-change, anova, pearson, spearman, regression, cox"));
+		getOptions().addOption(OptionFactory.createOption("class", "class variable"));
+		getOptions().addOption(OptionFactory.createOption("sample-filter", "class variable", false));
+		getOptions().addOption(OptionFactory.createOption("feature-filter", "class variable", false));
 	}
 
 //	
@@ -176,11 +176,11 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				//DataFrame dataFrame = new DataFrame(names, tTestResultList.size());
 				DataFrame dataFrame = null;
 				for(int i=0 ; i<tTestResultList.size() ; i++) {
-					dataFrame.setSingleValue(i, 0, dataset.getFeatureNames().get(i));
-					dataFrame.setSingleValue(i, 1, ""+tTestResultList.get(i).getStatistic());
-					dataFrame.setSingleValue(i, 2, ""+tTestResultList.get(i).getPValue());
-					dataFrame.setSingleValue(i, 3, ""+tTestResultList.get(i).getDf());
-					dataFrame.setSingleValue(i, 4, ""+tTestResultList.get(i).getAdjPValue());
+					dataFrame.setEntry(i, 0, dataset.getFeatureNames().get(i));
+					dataFrame.setEntry(i, 1, ""+tTestResultList.get(i).getStatistic());
+					dataFrame.setEntry(i, 2, ""+tTestResultList.get(i).getPValue());
+					dataFrame.setEntry(i, 3, ""+tTestResultList.get(i).getDf());
+					dataFrame.setEntry(i, 4, ""+tTestResultList.get(i).getAdjPValue());
 				}
 				FeatureData featureData = new FeatureData(dataFrame);
 				System.out.println("result in feature format\n" + featureData.toString()+"\n");
@@ -211,7 +211,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
 				
 				Canvas canvas = new Canvas("");
-				canvas.setBorder(1);
+				canvas.setBorderPadding(1);
 				canvas.setBorderColor(Color.BLACK);
 				canvas.setBgColor(Color.WHITE);
 				
@@ -332,7 +332,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
 			
 			Canvas canvas = new Canvas("");
-			canvas.setBorder(1);
+			canvas.setBorderPadding(1);
 			canvas.setBorderColor(Color.BLACK);
 			canvas.setBgColor(Color.WHITE);
 			
@@ -445,7 +445,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
 			
 			Canvas canvas = new Canvas("");
-			canvas.setBorder(1);
+			canvas.setBorderPadding(1);
 			canvas.setBorderColor(Color.BLACK);
 			canvas.setBgColor(Color.WHITE);
 			
@@ -718,7 +718,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
 			
 			Canvas canvas = new Canvas("");
-			canvas.setBorder(1);
+			canvas.setBorderPadding(1);
 			canvas.setBorderColor(Color.BLACK);
 			canvas.setBgColor(Color.WHITE);
 			

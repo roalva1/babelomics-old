@@ -18,9 +18,9 @@ public class OutlierCopa extends BabelomicsTool {
 
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("permutation", "Number of permutations"));
-		options.addOption(OptionFactory.createOption("percentile", "Percentile variable"));
+		getOptions().addOption(OptionFactory.createOption("dataset", "the data"));
+		getOptions().addOption(OptionFactory.createOption("permutation", "Number of permutations"));
+		getOptions().addOption(OptionFactory.createOption("percentile", "Percentile variable"));
 		
 	}
 

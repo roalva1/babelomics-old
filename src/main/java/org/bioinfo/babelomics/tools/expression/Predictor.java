@@ -18,13 +18,13 @@ public class Predictor extends BabelomicsTool {
 
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("algorithms", "the algorithms separated by commas, possible values: svn, knn, dlda, pam, som"));
-		options.addOption(OptionFactory.createOption("class", "class variable"));
-		options.addOption(OptionFactory.createOption("trainning-size", "number of genes to use in trainning separated by commas, default:2,5,10,20,35,50", false));
-		options.addOption(OptionFactory.createOption("gene-selection", "the gene selection, valid values: f-ratio, wilcoxon", false));
-		options.addOption(OptionFactory.createOption("sample-filter", "class variable", false));
-		options.addOption(OptionFactory.createOption("feature-filter", "class variable", false));
+		getOptions().addOption(OptionFactory.createOption("dataset", "the data"));
+		getOptions().addOption(OptionFactory.createOption("algorithms", "the algorithms separated by commas, possible values: svn, knn, dlda, pam, som"));
+		getOptions().addOption(OptionFactory.createOption("class", "class variable"));
+		getOptions().addOption(OptionFactory.createOption("trainning-size", "number of genes to use in trainning separated by commas, default:2,5,10,20,35,50", false));
+		getOptions().addOption(OptionFactory.createOption("gene-selection", "the gene selection, valid values: f-ratio, wilcoxon", false));
+		getOptions().addOption(OptionFactory.createOption("sample-filter", "class variable", false));
+		getOptions().addOption(OptionFactory.createOption("feature-filter", "class variable", false));
 
 	}
 

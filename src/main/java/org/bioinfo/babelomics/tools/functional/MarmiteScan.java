@@ -19,14 +19,14 @@ public class MarmiteScan extends BabelomicsTool {
 
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("bioentity-name", "possibilities: Disease associated words,Chemical products,Word roots"));
-		options.addOption(OptionFactory.createOption("bioentity-score-filter", "Minimum number of genes with a score (0-10000)"));
-		options.addOption(OptionFactory.createOption("bioentity-number-filter", "Number of bio-entities in results (0-10000)"));
-		options.addOption(OptionFactory.createOption("gene-name-list", "gene name in list", false));
-		options.addOption(OptionFactory.createOption("partition-number", "Number of partitions "));
-		options.addOption(OptionFactory.createOption("significance", "p-value for statistical significance"));
-		options.addOption(OptionFactory.createOption("sort", "Sort list"));
+		getOptions().addOption(OptionFactory.createOption("dataset", "the data"));
+		getOptions().addOption(OptionFactory.createOption("bioentity-name", "possibilities: Disease associated words,Chemical products,Word roots"));
+		getOptions().addOption(OptionFactory.createOption("bioentity-score-filter", "Minimum number of genes with a score (0-10000)"));
+		getOptions().addOption(OptionFactory.createOption("bioentity-number-filter", "Number of bio-entities in results (0-10000)"));
+		getOptions().addOption(OptionFactory.createOption("gene-name-list", "gene name in list", false));
+		getOptions().addOption(OptionFactory.createOption("partition-number", "Number of partitions "));
+		getOptions().addOption(OptionFactory.createOption("significance", "p-value for statistical significance"));
+		getOptions().addOption(OptionFactory.createOption("sort", "Sort list"));
 
 	}
 

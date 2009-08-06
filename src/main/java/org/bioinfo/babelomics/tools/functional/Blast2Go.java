@@ -16,34 +16,34 @@ public class Blast2Go extends BabelomicsTool {
 
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("xmlfile", "Blast file (xml format)"));
-		options.addOption(OptionFactory.createOption("xmlVersion", ""));
-		options.addOption(OptionFactory.createOption("blastNumber", "Minimum number of genes with a score (0-10000)"));
-		options.addOption(OptionFactory.createOption("blastMin-NumberFilter", "Number of bio-entities in results (0-10000)"));
-		options.addOption(OptionFactory.createOption("blastHit-DescriptFilter", "gene name in list"));
-		options.addOption(OptionFactory.createOption("blastHit-DescriptPosition", "Number of partitions "));
-		options.addOption(OptionFactory.createOption("blastId", "Add ID to Blast definition", false));
-		options.addOption(OptionFactory.createOption("descriptAnno", "Sort list", false));
+		getOptions().addOption(OptionFactory.createOption("xmlfile", "Blast file (xml format)"));
+		getOptions().addOption(OptionFactory.createOption("xmlVersion", ""));
+		getOptions().addOption(OptionFactory.createOption("blastNumber", "Minimum number of genes with a score (0-10000)"));
+		getOptions().addOption(OptionFactory.createOption("blastMin-NumberFilter", "Number of bio-entities in results (0-10000)"));
+		getOptions().addOption(OptionFactory.createOption("blastHit-DescriptFilter", "gene name in list"));
+		getOptions().addOption(OptionFactory.createOption("blastHit-DescriptPosition", "Number of partitions "));
+		getOptions().addOption(OptionFactory.createOption("blastId", "Add ID to Blast definition", false));
+		getOptions().addOption(OptionFactory.createOption("descriptAnno", "Sort list", false));
 
-		options.addOption(OptionFactory.createOption("eValue-filter", "E-value hit filter ((1e-)"));
-		options.addOption(OptionFactory.createOption("annCutOff-filter", "Annotation cut-off (0-100)"));
-		options.addOption(OptionFactory.createOption("goWeight-filter", "GO weight (0-30)"));
-		options.addOption(OptionFactory.createOption("hsp-filter", "Hsp hit coverage cut-off (0-100)"));
+		getOptions().addOption(OptionFactory.createOption("eValue-filter", "E-value hit filter ((1e-)"));
+		getOptions().addOption(OptionFactory.createOption("annCutOff-filter", "Annotation cut-off (0-100)"));
+		getOptions().addOption(OptionFactory.createOption("goWeight-filter", "GO weight (0-30)"));
+		getOptions().addOption(OptionFactory.createOption("hsp-filter", "Hsp hit coverage cut-off (0-100)"));
 
 		//EC codes
-		options.addOption(OptionFactory.createOption("ida", "ida", false));
-		options.addOption(OptionFactory.createOption("imp", "imp", false));
-		options.addOption(OptionFactory.createOption("igi", "igi", false));
-		options.addOption(OptionFactory.createOption("ipi", "ipi", false));
-		options.addOption(OptionFactory.createOption("iep", "iep", false));
-		options.addOption(OptionFactory.createOption("tas", "tas", false));
-		options.addOption(OptionFactory.createOption("nac", "nac", false));
-		options.addOption(OptionFactory.createOption("ic", "ic", false));
-		options.addOption(OptionFactory.createOption("iss", "iss", false));
-		options.addOption(OptionFactory.createOption("rca", "rca", false));		
-		options.addOption(OptionFactory.createOption("iea", "iea", false));
-		options.addOption(OptionFactory.createOption("nd", "nd", false));
-		options.addOption(OptionFactory.createOption("nr", "nr", false));
+		getOptions().addOption(OptionFactory.createOption("ida", "ida", false));
+		getOptions().addOption(OptionFactory.createOption("imp", "imp", false));
+		getOptions().addOption(OptionFactory.createOption("igi", "igi", false));
+		getOptions().addOption(OptionFactory.createOption("ipi", "ipi", false));
+		getOptions().addOption(OptionFactory.createOption("iep", "iep", false));
+		getOptions().addOption(OptionFactory.createOption("tas", "tas", false));
+		getOptions().addOption(OptionFactory.createOption("nac", "nac", false));
+		getOptions().addOption(OptionFactory.createOption("ic", "ic", false));
+		getOptions().addOption(OptionFactory.createOption("iss", "iss", false));
+		getOptions().addOption(OptionFactory.createOption("rca", "rca", false));		
+		getOptions().addOption(OptionFactory.createOption("iea", "iea", false));
+		getOptions().addOption(OptionFactory.createOption("nd", "nd", false));
+		getOptions().addOption(OptionFactory.createOption("nr", "nr", false));
 
 
 

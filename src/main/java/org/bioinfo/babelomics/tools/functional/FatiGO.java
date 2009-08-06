@@ -25,25 +25,25 @@ public class FatiGO extends FunctionalProfilingTool{
 	public void initOptions() {
 		super.initOptions();
 		
-		options.addOption(OptionFactory.createOption("list1", "the feature data containig the list #1 of genes, or the feature data file"));
+		getOptions().addOption(OptionFactory.createOption("list1", "the feature data containig the list #1 of genes, or the feature data file"));
 
 		OptionGroup input2 = new OptionGroup();
 		input2.setRequired(true);
 		input2.addOption(OptionFactory.createOption("list2", "the file containig the list #2 of genes, or the feature data file"));
 		input2.addOption(OptionFactory.createOption("rest-of-genome", "compares list #1 with the rest of genome"));
 		input2.addOption(OptionFactory.createOption("chromosome", "the chromosome to compare with list #1. Use chromosome-start and chromosome-end options tp delimite the region within the chromosome"));
-		options.addOptionGroup(input2);
+		getOptions().addOptionGroup(input2);
 
-		options.addOption(OptionFactory.createOption("chromosome-start", "the region start position within the chromosome", false));
-		options.addOption(OptionFactory.createOption("chromosome-end", "the region end position within the chromosome, -1 means the last position of the chromosome", false));
+		getOptions().addOption(OptionFactory.createOption("chromosome-start", "the region start position within the chromosome", false));
+		getOptions().addOption(OptionFactory.createOption("chromosome-end", "the region end position within the chromosome, -1 means the last position of the chromosome", false));
 
-		options.addOption(OptionFactory.createOption("filter-name1", "the feature filter name, requires a feature data file in list #1", false));
-		options.addOption(OptionFactory.createOption("filter-value1", "the feature filter value, requires a feature data file in list #1", false));
+		getOptions().addOption(OptionFactory.createOption("filter-name1", "the feature filter name, requires a feature data file in list #1", false));
+		getOptions().addOption(OptionFactory.createOption("filter-value1", "the feature filter value, requires a feature data file in list #1", false));
 
-		options.addOption(OptionFactory.createOption("filter-name2", "the feature filter name, requires a feature data file in list #2", false));
-		options.addOption(OptionFactory.createOption("filter-value2", "the feature filter value, requires a feature data file in list #2", false));
+		getOptions().addOption(OptionFactory.createOption("filter-name2", "the feature filter name, requires a feature data file in list #2", false));
+		getOptions().addOption(OptionFactory.createOption("filter-value2", "the feature filter value, requires a feature data file in list #2", false));
 
-		options.addOption(OptionFactory.createOption("remove-duplicates", "to remove duplicated IDs, valid values: never, each, ref. By default, never", false));
+		getOptions().addOption(OptionFactory.createOption("remove-duplicates", "to remove duplicated IDs, valid values: never, each, ref. By default, never", false));
 	}
 
 	@Override

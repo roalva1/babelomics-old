@@ -18,12 +18,12 @@ public class Clustering extends BabelomicsTool {
 
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("method", "the method, possible values: upgma, sota, som, kmeans"));
-		options.addOption(OptionFactory.createOption("distance", "the distance, possible values: euclidean, spearman, pearson. Default value: euclidean, false"));
-		options.addOption(OptionFactory.createOption("kvalue", "k-value for kmeans clustering. Default value: 15", false));
-		options.addOption(OptionFactory.createOption("sample-filter", "class variable", false));
-		options.addOption(OptionFactory.createOption("feature-filter", "class variable", false));
+		getOptions().addOption(OptionFactory.createOption("dataset", "the data"));
+		getOptions().addOption(OptionFactory.createOption("method", "the method, possible values: upgma, sota, som, kmeans"));
+		getOptions().addOption(OptionFactory.createOption("distance", "the distance, possible values: euclidean, spearman, pearson. Default value: euclidean, false"));
+		getOptions().addOption(OptionFactory.createOption("kvalue", "k-value for kmeans clustering. Default value: 15", false));
+		getOptions().addOption(OptionFactory.createOption("sample-filter", "class variable", false));
+		getOptions().addOption(OptionFactory.createOption("feature-filter", "class variable", false));
 
 	}
 

@@ -61,19 +61,19 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 
 		// commons options
 		//
-		options.addOption(OptionFactory.createOption("test-mode", "the Fisher test mode, valid values: less, greater, two_sided. By default, two_sided", false));
+		getOptions().addOption(OptionFactory.createOption("test-mode", "the Fisher test mode, valid values: less, greater, two_sided. By default, two_sided", false));
 		
 		// GO biological process options
 		//
-		options.addOption(OptionFactory.createOption("go-bp-db", "GO biological process database",false,false));
-		options.addOption(OptionFactory.createOption("go-bp-inclusive", "GO biological process, inclusive analysis (one per GO level), otherwise joins GO levels",false,false));
-		options.addOption(OptionFactory.createOption("go-bp-min-level", "GO biological process, min go level to take into account, default 3",false));
-		options.addOption(OptionFactory.createOption("go-bp-max-level", "GO biological process, max GO level to take into account, default 15",false));
-		options.addOption(OptionFactory.createOption("go-bp-min-num-genes", "GO biological process, min number of genes filter",false));
-		options.addOption(OptionFactory.createOption("go-bp-max-num-genes", "GO biological process, max number of genes filter",false));
-		options.addOption(OptionFactory.createOption("go-bp-all-genome", "GO biological process, computes the number of annotated genes from all genome, otherwise from you input list",false,false));
-		options.addOption(OptionFactory.createOption("go-bp-keywords", "GO biological process, keywords filter",false));
-		options.addOption(OptionFactory.createOption("go-bp-keywords-logic", "GO biological process, keywords filter logic: all or any",false));
+		getOptions().addOption(OptionFactory.createOption("go-bp-db", "GO biological process database",false,false));
+		getOptions().addOption(OptionFactory.createOption("go-bp-inclusive", "GO biological process, inclusive analysis (one per GO level), otherwise joins GO levels",false,false));
+		getOptions().addOption(OptionFactory.createOption("go-bp-min-level", "GO biological process, min go level to take into account, default 3",false));
+		getOptions().addOption(OptionFactory.createOption("go-bp-max-level", "GO biological process, max GO level to take into account, default 15",false));
+		getOptions().addOption(OptionFactory.createOption("go-bp-min-num-genes", "GO biological process, min number of genes filter",false));
+		getOptions().addOption(OptionFactory.createOption("go-bp-max-num-genes", "GO biological process, max number of genes filter",false));
+		getOptions().addOption(OptionFactory.createOption("go-bp-all-genome", "GO biological process, computes the number of annotated genes from all genome, otherwise from you input list",false,false));
+		getOptions().addOption(OptionFactory.createOption("go-bp-keywords", "GO biological process, keywords filter",false));
+		getOptions().addOption(OptionFactory.createOption("go-bp-keywords-logic", "GO biological process, keywords filter logic: all or any",false));
 
 		// GO molecular function options
 		//

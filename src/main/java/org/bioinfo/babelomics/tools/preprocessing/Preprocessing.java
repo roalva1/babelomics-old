@@ -21,14 +21,14 @@ public class Preprocessing extends BabelomicsTool {
 	@Override
 	public void initOptions() {
 		//super.initOptions();
-		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("logarithm-base", "the logarithm base to apply transformation, possible values: e, 2 10 for log base 2, log base 2 and log base 10"));
-		options.addOption(OptionFactory.createOption("merge-replicates", "method to merge replicates, valid values are: mean, median", false));
-		options.addOption(OptionFactory.createOption("filter-missing", "minimum percentage of existing values, from 0 to 100", false));
-		options.addOption(OptionFactory.createOption("impute-missing", "method to impute missing values, valid values are: zero, mean, median, knn", false));
-		options.addOption(OptionFactory.createOption("kvalue", "kvalue for knn impute method, default 15", false));
-		options.addOption(OptionFactory.createOption("sample-filter", "class variable", false));
-		options.addOption(OptionFactory.createOption("feature-filter", "class variable", false));
+		getOptions().addOption(OptionFactory.createOption("dataset", "the data"));
+		getOptions().addOption(OptionFactory.createOption("logarithm-base", "the logarithm base to apply transformation, possible values: e, 2 10 for log base 2, log base 2 and log base 10"));
+		getOptions().addOption(OptionFactory.createOption("merge-replicates", "method to merge replicates, valid values are: mean, median", false));
+		getOptions().addOption(OptionFactory.createOption("filter-missing", "minimum percentage of existing values, from 0 to 100", false));
+		getOptions().addOption(OptionFactory.createOption("impute-missing", "method to impute missing values, valid values are: zero, mean, median, knn", false));
+		getOptions().addOption(OptionFactory.createOption("kvalue", "kvalue for knn impute method, default 15", false));
+		getOptions().addOption(OptionFactory.createOption("sample-filter", "class variable", false));
+		getOptions().addOption(OptionFactory.createOption("feature-filter", "class variable", false));
 	}
 
 

@@ -22,10 +22,10 @@ public abstract class BabelomicsTool extends GenericBioTool {
 	
 	private void initCommonsOptions() {
 //		options.addOption(OptionFactory.createOption("outdir", "o",  "outdir to save the results"));
-		options.addOption(OptionFactory.createOption("tool", "to", "tool name", true));
+		getOptions().addOption(OptionFactory.createOption("tool", "to", "tool name", true));
 //		options.addOption(OptionFactory.createOption("log-file", "name of the log file, default: result.log", false));
 //		options.addOption(OptionFactory.createOption("log-level", "DEBUG -1, INFO -2, WARNING - 3, ERROR - 4, FATAL - 5", false));
-		options.addOption(OptionFactory.createOption("species", "The specie of the ids", false));	
+		getOptions().addOption(OptionFactory.createOption("species", "The specie of the ids", false));	
 	}
 	
 //	public void parse() throws ParseException, IOException {

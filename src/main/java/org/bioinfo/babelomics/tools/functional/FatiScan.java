@@ -24,8 +24,8 @@ public class FatiScan extends FunctionalProfilingTool{
 	public void initOptions() {
 		super.initOptions();
 
-		options.addOption(OptionFactory.createOption("list", "the feature data containig the list of genes and its corresponding statistic"));
-		options.addOption(OptionFactory.createOption("nb-partitions", "Number of partitions, 30",false));
+		getOptions().addOption(OptionFactory.createOption("list", "the feature data containig the list of genes and its corresponding statistic"));
+		getOptions().addOption(OptionFactory.createOption("nb-partitions", "Number of partitions, 30",false));
 	}
 
 	@Override

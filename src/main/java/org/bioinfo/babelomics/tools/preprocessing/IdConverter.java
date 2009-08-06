@@ -20,11 +20,11 @@ public class IdConverter extends BabelomicsTool  {
 
 		@Override
 		public void initOptions() {
-			options.addOption(OptionFactory.createOption("dataset", "the data"));
-			options.addOption(OptionFactory.createOption("microarray", "Agilent microarray G2518A", false));
-			options.addOption(OptionFactory.createOption("go", "GO converter", false,false));			
-			options.addOption(OptionFactory.createOption("pdb", "PDB converter", false,false));
-			options.addOption(OptionFactory.createOption("refseq", "RefSeq DNA predicted", false,false));
+			getOptions().addOption(OptionFactory.createOption("dataset", "the data"));
+			getOptions().addOption(OptionFactory.createOption("microarray", "Agilent microarray G2518A", false));
+			getOptions().addOption(OptionFactory.createOption("go", "GO converter", false,false));			
+			getOptions().addOption(OptionFactory.createOption("pdb", "PDB converter", false,false));
+			getOptions().addOption(OptionFactory.createOption("refseq", "RefSeq DNA predicted", false,false));
 			
 
 		}

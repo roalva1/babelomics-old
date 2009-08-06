@@ -19,15 +19,15 @@ public class TimeDosageSeries extends BabelomicsTool {
 	@Override
 	public void initOptions() {
 		// TODO Auto-generated method stub
-		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("time", "time variable"));
-		options.addOption(OptionFactory.createOption("series", "series variable"));
-		options.addOption(OptionFactory.createOption("names", "names variable"));
-		options.addOption(OptionFactory.createOption("degree", "class variable"));
-		options.addOption(OptionFactory.createOption("comparison", "Multiple testing adjustment", false));
-		options.addOption(OptionFactory.createOption("significance", "Significance Level for model variable(0-0.9)", false));
-		options.addOption(OptionFactory.createOption("cluster_comparison", "Cluster method", false));
-		options.addOption(OptionFactory.createOption("kmeans_options", "Number of clusters", false));
+		getOptions().addOption(OptionFactory.createOption("dataset", "the data"));
+		getOptions().addOption(OptionFactory.createOption("time", "time variable"));
+		getOptions().addOption(OptionFactory.createOption("series", "series variable"));
+		getOptions().addOption(OptionFactory.createOption("names", "names variable"));
+		getOptions().addOption(OptionFactory.createOption("degree", "class variable"));
+		getOptions().addOption(OptionFactory.createOption("comparison", "Multiple testing adjustment", false));
+		getOptions().addOption(OptionFactory.createOption("significance", "Significance Level for model variable(0-0.9)", false));
+		getOptions().addOption(OptionFactory.createOption("cluster_comparison", "Cluster method", false));
+		getOptions().addOption(OptionFactory.createOption("kmeans_options", "Number of clusters", false));
 	}
 
 	@Override

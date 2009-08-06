@@ -18,9 +18,9 @@ public class OutlierLrs extends BabelomicsTool {
 
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("low-end", "Low-end of permutations", false));
-		options.addOption(OptionFactory.createOption("up-end", "Up-end variable", false));		
+		getOptions().addOption(OptionFactory.createOption("dataset", "the data"));
+		getOptions().addOption(OptionFactory.createOption("low-end", "Low-end of permutations", false));
+		getOptions().addOption(OptionFactory.createOption("up-end", "Up-end variable", false));		
 	}
 
 	@Override

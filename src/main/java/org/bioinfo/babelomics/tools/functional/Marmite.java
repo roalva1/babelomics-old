@@ -13,7 +13,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.linear.MatrixIndexException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.collections.array.NamedArrayList;
+import org.bioinfo.collections.list.NamedArrayList;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
@@ -47,11 +47,11 @@ public class Marmite extends BabelomicsTool {
 
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("list1", "the feature data containig the list #1 of genes, or the feature data file"));
-		options.addOption(OptionFactory.createOption("list2", "the feature data containig the list #2 of genes, or the feature data file"));
-		options.addOption(OptionFactory.createOption("bioentity-name", "Valid values are: diseases (for disease associated words), products (for chemical products) or roots (for word roots)"));
-		options.addOption(OptionFactory.createOption("bioentity-score-filter", "Minimum number of genes with a score (0-10000)", false));
-		options.addOption(OptionFactory.createOption("bioentity-number-filter", "Number of bio-entities in results (0-10000)", false));
+		getOptions().addOption(OptionFactory.createOption("list1", "the feature data containig the list #1 of genes, or the feature data file"));
+		getOptions().addOption(OptionFactory.createOption("list2", "the feature data containig the list #2 of genes, or the feature data file"));
+		getOptions().addOption(OptionFactory.createOption("bioentity-name", "Valid values are: diseases (for disease associated words), products (for chemical products) or roots (for word roots)"));
+		getOptions().addOption(OptionFactory.createOption("bioentity-score-filter", "Minimum number of genes with a score (0-10000)", false));
+		getOptions().addOption(OptionFactory.createOption("bioentity-number-filter", "Number of bio-entities in results (0-10000)", false));
 	}
 
 	@Override

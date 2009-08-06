@@ -16,9 +16,9 @@ public class Association extends BabelomicsTool {
 
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("fisher", "Fisher exact test"));
-		options.addOption(OptionFactory.createOption("duplicates", "Remove duplicates"));
+		getOptions().addOption(OptionFactory.createOption("dataset", "the data"));
+		getOptions().addOption(OptionFactory.createOption("fisher", "Fisher exact test"));
+		getOptions().addOption(OptionFactory.createOption("duplicates", "Remove duplicates"));
 	}
 
 	@Override

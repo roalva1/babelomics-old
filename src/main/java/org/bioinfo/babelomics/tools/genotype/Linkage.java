@@ -12,7 +12,7 @@ public class Linkage extends BabelomicsTool {
 
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("dataset", "the data"));
+		getOptions().addOption(OptionFactory.createOption("dataset", "the data"));
 	}
 
 	@Override
