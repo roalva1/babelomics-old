@@ -60,7 +60,7 @@ public class IdConverter extends BabelomicsTool  {
 				if ( refseq != null ) {
 					logger.info("refseq converter, not yet implemented");
 					}
-			} catch (IOException e) {
+			} catch (Exception e) {
 				logger.error("Error opening the dataset", e.toString());
 			} 
 		}

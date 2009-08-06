@@ -31,7 +31,7 @@ public class OutlierLrs extends BabelomicsTool {
 			String permutation = commandLine.getOptionValue("low-end");
 			String percentile = commandLine.getOptionValue("up-end");
 			executeOutLRS(expresionDataset,permutation,percentile);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Error opening the dataset", e.toString());
 		} 
 	}

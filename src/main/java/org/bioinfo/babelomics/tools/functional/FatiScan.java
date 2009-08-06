@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
+import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.funcannot.filter.Filter;
@@ -29,10 +30,15 @@ public class FatiScan extends FunctionalProfilingTool{
 	}
 
 	@Override
-	public void prepare(CommandLine cmdLine) throws IOException, ParseException {
+	public void prepare(CommandLine cmdLine) throws IOException, ParseException  {
 		super.prepare(cmdLine);
-		
-		setFeatureData(new FeatureData(new File(cmdLine.getOptionValue("list")), true));
+		try {
+			setFeatureData(new FeatureData(new File(cmdLine.getOptionValue("list")), true));
+		} catch (InvalidColumnIndexException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		setNumberOfPartitions(Integer.parseInt(cmdLine.getOptionValue("nb-partitions", "30")));
 	}
 
@@ -83,6 +89,9 @@ public class FatiScan extends FunctionalProfilingTool{
 		} catch (InvalidParameterException e) {
 			e.printStackTrace();
 		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidColumnIndexException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

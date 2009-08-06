@@ -47,7 +47,7 @@ public class TimeDosageSeries extends BabelomicsTool {
 			
 			executeDetds(dataset, time,series ,names,degree,comparison,significance,clusterComparison,kmeansOptions);
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
