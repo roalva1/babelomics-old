@@ -38,7 +38,7 @@ public class PreprocessingTest {
 //		}
 //	}
 	
-	
+	@Test
 	public void Test3() {
 		System.out.println("-----     ------");
 		//String []args = {"--tool", "preprocessing", "-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};

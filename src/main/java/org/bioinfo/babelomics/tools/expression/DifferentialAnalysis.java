@@ -1,19 +1,15 @@
 package org.bioinfo.babelomics.tools.expression;
 
 import java.awt.Color;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.security.InvalidParameterException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import javax.imageio.ImageIO;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.linear.MatrixIndexException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
@@ -43,8 +39,6 @@ import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 import org.bioinfo.utils.ListUtils;
-import org.bioinfo.utils.StringUtils;
-import org.bioinfo.collections.matrix.DataFrame;
 
 public class DifferentialAnalysis extends BabelomicsTool {
 
@@ -171,8 +165,9 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			cols = dataset.getColumnIndexesByVariableValue(className, label2);
 			DoubleMatrix sample2 = dataset.getSubMatrixByColumns(cols);
 
-//			System.out.println("sample 1, matrix:\n" + sample1.toString());
-//			System.out.println("sample 2, matrix:\n" + sample2.toString());
+//			FileUtils.writeStringToFile(new File("/tmp/ttest/matrix1.txt"), sample1.toString());
+//			FileUtils.writeStringToFile(new File("/tmp/ttest/matrix2.txt"), sample2.toString());
+//			FileUtils.writeStringToFile(new File("/tmp/ttest/rownames.txt"), ListUtils.toString(dataset.getFeatureNames(), "\n"));
 
 			// t-test
 			//
@@ -185,6 +180,8 @@ public class DifferentialAnalysis extends BabelomicsTool {
 
 			int[] columnOrder = ListUtils.order(dataset.getVariables().getByName(className).getValues());
 			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
+
+			System.out.println("result size = " + res.size());
 			
 			// generating heatmap
 			//
@@ -210,9 +207,17 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(new File(getOutdir() + "/ttest.txt"));
 
-			result.addOutputItem(new Item("ttest_file", getOutdir() + "/ttest.txt", "The t-test file is: ", TYPE.FILE));
-			result.addOutputItem(new Item("ttest_heatmap", getOutdir() + "/ttest_heatmap.png", "The t-test heatmap is: ", TYPE.IMAGE));
+			BufferedWriter bw = new BufferedWriter(new FileWriter(getOutdir() + "/ttest_table.txt"));
+			bw.write(dataFrame.toString(true, true));
+			bw.close();
 
+			result.addOutputItem(new Item("ttest_file", "ttest.txt", "The t-test file is: ", TYPE.FILE));
+			result.addOutputItem(new Item("ttest_heatmap", "ttest_heatmap.png", "The t-test heatmap is: ", TYPE.IMAGE));
+
+			Item item = new Item("ttest_table", "ttest_table.txt", "The t-test table is: ", TYPE.FILE);
+			item.addTag("TABLE");
+			result.addOutputItem(item);
+			
 			// done
 			//
 			jobStatus.addStatusMessage("100", "done");
@@ -307,9 +312,17 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(new File(getOutdir() + "/anova.txt"));
 
-			result.addOutputItem(new Item("anova_file", getOutdir() + "/anova.txt", "The anova file is: ", TYPE.FILE));
-			result.addOutputItem(new Item("anova_heatmap", getOutdir() + "/anova_heatmap.png", "The anova heatmap is: ", TYPE.IMAGE));
+			BufferedWriter bw = new BufferedWriter(new FileWriter(getOutdir() + "/anova_table.txt"));
+			bw.write(dataFrame.toString(true, true));
+			bw.close();
+			
+			result.addOutputItem(new Item("anova_file", "anova.txt", "The anova file is: ", TYPE.FILE));
+			result.addOutputItem(new Item("anova_heatmap", "anova_heatmap.png", "The anova heatmap is: ", TYPE.IMAGE));
 
+			Item item = new Item("anova_table", "anova_table.txt", "The anova table is: ", TYPE.FILE);
+			item.addTag("TABLE");
+			result.addOutputItem(item);
+			
 			// done
 			//
 			jobStatus.addStatusMessage("100", "done");
@@ -395,9 +408,16 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(new File(getOutdir() + "/" + test + "_correlation.txt"));
 
-			result.addOutputItem(new Item(test + "_correlation_file", getOutdir() + "/" + test + "_correlation.txt", "The " + test + " correlation file is: ", TYPE.FILE));
-			result.addOutputItem(new Item(test + "_correlation_heatmap", getOutdir() + "/" + test + "_heatmap.png", "The " + test + " correlation heatmap is: ", TYPE.IMAGE));
+			BufferedWriter bw = new BufferedWriter(new FileWriter(getOutdir() + "/" + test + "_table.txt"));
+			bw.write(dataFrame.toString(true, true));
+			bw.close();
+			
+			result.addOutputItem(new Item(test + "_correlation_file", test + "_correlation.txt", "The " + test + " correlation file is: ", TYPE.FILE));
+			result.addOutputItem(new Item(test + "_correlation_heatmap", test + "_heatmap.png", "The " + test + " correlation heatmap is: ", TYPE.IMAGE));
 
+			Item item = new Item(test + "_table", test + "_table.txt", "The " + test + " table is: ", TYPE.FILE);
+			item.addTag("TABLE");
+			result.addOutputItem(item);
 
 			// done
 			//
@@ -488,9 +508,16 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(new File(getOutdir() + "/regression.txt"));
 
-			result.addOutputItem(new Item("regression_file", getOutdir() + "/regression.txt", "The regression file is: ", TYPE.FILE));
-			result.addOutputItem(new Item("regression_heatmap", getOutdir() + "/regression_heatmap.png", "The regression heatmap is: ", TYPE.IMAGE));
+			BufferedWriter bw = new BufferedWriter(new FileWriter(getOutdir() + "/regression_table.txt"));
+			bw.write(dataFrame.toString(true, true));
+			bw.close();
 
+			result.addOutputItem(new Item("regression_file", "regression.txt", "The regression file is: ", TYPE.FILE));
+			result.addOutputItem(new Item("regression_heatmap", "regression_heatmap.png", "The regression heatmap is: ", TYPE.IMAGE));
+
+			Item item = new Item("regression_table", "regression_table.txt", "The regression table is: ", TYPE.FILE);
+			item.addTag("TABLE");
+			result.addOutputItem(item);
 
 			// done
 			//
@@ -584,8 +611,16 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(new File(getOutdir() + "/cox.txt"));
 
-			result.addOutputItem(new Item("cox_file", getOutdir() + "/cox.txt", "The cox file is: ", TYPE.FILE));
-			result.addOutputItem(new Item("cox_heatmap", getOutdir() + "/cox_heatmap.png", "The cox heatmap is: ", TYPE.IMAGE));
+			BufferedWriter bw = new BufferedWriter(new FileWriter(getOutdir() + "/cox_table.txt"));
+			bw.write(dataFrame.toString(true, true));
+			bw.close();
+			
+			result.addOutputItem(new Item("cox_file", "cox.txt", "The cox file is: ", TYPE.FILE));
+			result.addOutputItem(new Item("cox_heatmap", "cox_heatmap.png", "The cox heatmap is: ", TYPE.IMAGE));
+			
+			Item item = new Item("cox_table", "cox_table.txt", "The cox table is: ", TYPE.FILE);
+			item.addTag("TABLE");
+			result.addOutputItem(item);
 
 			// done
 			//
@@ -624,7 +659,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		int infoWidth = 140;
 		//double min = dataset.getDoubleMatrix().getMinValue();
 		//double max = dataset.getDoubleMatrix().getMaxValue();
-		//double mean, deviation, standard;
+		double offset, min, max, mean, deviation, standard;
 		//System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
 
 		Canvas canvas = new Canvas("");
@@ -645,19 +680,32 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		gridTrack.setLeftRegion(rowLabelsWidth);
 		gridTrack.setRightRegion(infoWidth);
 
+		double[] values = new double[columnOrder.length]; 
 		int row, column;
+		
 		ScoreFeature feature;
 		for(int i=0 ; i<rowOrder.length ; i++) {
 			row = rowOrder[i];
-			//mean = dataset.getDoubleMatrix().getRowMean(row);
-			//deviation = dataset.getDoubleMatrix().getRowStdDeviation(row);
+			mean = dataset.getDoubleMatrix().getRowMean(row);
+			deviation = dataset.getDoubleMatrix().getRowStdDeviation(row);
+			min = Double.MAX_VALUE;
+			max = Double.MIN_NORMAL;
+			for(int j=0 ; j<columnOrder.length ; j++) {
+				column = columnOrder[j];
+				values[column] = (deviation == 0) ? Double.NaN : (dataset.getDoubleMatrix().get(row, column)-mean)/(deviation);
+				if ( min > values[column] ) min = values[column];
+				if ( max < values[column] ) max = values[column];
+			}
+			offset = ( min <= 0 ) ? Math.abs(min) : (-1 * min);
 			for(int j=0 ; j<columnOrder.length ; j++) {
 				column = columnOrder[j];
 				//System.out.print("row, column = " + row + ", " + column + ": value = "); System.out.println(dataset.getDoubleMatrix().get(row, column));
 //				feature = new ScoreFeature("name (" + column + ", " + row + ")", "", 0, 0, (dataset.getDoubleMatrix().get(row, column)-min)/(max-min));
-				//standard = (deviation == 0) ? 0 : (dataset.getDoubleMatrix().get(row, column)-mean)/(deviation);
-				//System.out.println("(value, standard) = (" + dataset.getDoubleMatrix().get(row, column) + ", " + standard + ")");
-				feature = new ScoreFeature("name (" + row + ", " + column + ")", "", 0, 0, dataset.getDoubleMatrix().get(row, column));
+				//standard = (deviation == 0) ? Double.NaN : (dataset.getDoubleMatrix().get(row, column)-mean)/(deviation);
+				standard = (values[column] + offset) / ( max + offset);
+//				System.out.println("(value, standard) = (" + dataset.getDoubleMatrix().get(row, column) + ", " + standard + ")");
+				feature = new ScoreFeature("name, " + dataset.getDoubleMatrix().get(row, column), "", 0, 0, standard);
+				//feature = new ScoreFeature("name (" + row + ", " + column + ")", "", 0, 0, dataset.getDoubleMatrix().get(row, column));
 				//feature.setJsFunction("http://www.cipf.es");
 				//				gridTrack.setFeature(row, column, feature);
 				gridTrack.setFeature(i, j, feature);

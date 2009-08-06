@@ -16,7 +16,6 @@ public class DifferentialAnalysisTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
 	public void test() {
 		System.out.println("-----     ------");
 		String []args = {"-tool", "differential-expression","-dataset", "/mnt/commons/test/biodata/example/twoclasses.txt", "-o", "/tmp/ttest", "-test", "t-test", "-class", "class"};
@@ -28,6 +27,7 @@ public class DifferentialAnalysisTest {
 		}		
 	}
 	
+	@Test
 	public void test1() {
 					    
 		System.out.println("-----   pearson ------");
@@ -41,7 +41,7 @@ public class DifferentialAnalysisTest {
 		}		
 	}
 	
-	@Test
+
 	public void test2() {
 		System.out.println("-----  spearman ------");
 		//String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/spearman", "-test", "spearman", "-class", "O2_conc"};

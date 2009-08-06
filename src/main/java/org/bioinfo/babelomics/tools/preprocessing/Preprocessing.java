@@ -189,7 +189,7 @@ public class Preprocessing extends BabelomicsTool {
 			jobStatus.addStatusMessage("" + (progress*100/finalProgress), "saving data");
 			dataset.write(new File(this.getOutdir()+"/preprocessed.txt"));
 			
-			result.addOutputItem(new Item("prepocessed_file",this.getOutdir()+"/preprocessed.txt", "The preprocessed file is: ", TYPE.FILE));
+			result.addOutputItem(new Item("prepocessed_file","preprocessed.txt", "The preprocessed file is: ", TYPE.FILE));
 			jobStatus.addStatusMessage("100", "done");
 
 			System.out.println("job status :\n" + StringUtils.arrayToString(jobStatus.getStatusMessages(), "\n"));
