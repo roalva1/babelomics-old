@@ -28,24 +28,26 @@ public class Affimetrix extends BabelomicsTool {
 
 	@Override
 	public void execute() {
-		try {
-			CommandLine cmd = parse(args);
 
-			Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
-			String bioEntityName = cmd.getOptionValue("org-filter");
-			String bientityTissueName = cmd.getOptionValue("tissue-name");
-			String bioentityListFilter = cmd.getOptionValue("list-filter");			
-			String bioentityNormalizationFilter = cmd.getOptionValue("tissue-normalization-filter");
-			String bientityExpressionFilter = cmd.getOptionValue("tissue-expression-filter");
-			System.out.println(dataset.toString()+"\n");
-			
-			executeAffyAnalisys(dataset, bioEntityName, bientityTissueName, bioentityListFilter,bioentityNormalizationFilter, bientityExpressionFilter);
-			
-		} catch (ParseException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}		
+//		try {
+//
+//			Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
+//			String bioEntityName = cmd.getOptionValue("org-filter");
+//			String bientityTissueName = cmd.getOptionValue("tissue-name");
+//			String bioentityListFilter = cmd.getOptionValue("list-filter");			
+//			String bioentityNormalizationFilter = cmd.getOptionValue("tissue-normalization-filter");
+//			String bientityExpressionFilter = cmd.getOptionValue("tissue-expression-filter");
+//			System.out.println(dataset.toString()+"\n");
+//			
+//			executeAffyAnalisys(dataset, bioEntityName, bientityTissueName, bioentityListFilter,bioentityNormalizationFilter, bientityExpressionFilter);
+//			
+//		} catch (ParseException e) {
+//			logger.error("Error parsing command line", e.toString());
+//			System.out.println("\n");
+//			printUsage();
+//		} catch (IOException e) {
+//			logger.error("Error opening the dataset", e.toString());
+//		}		
 	}
 	
 	private void executeAffyAnalisys(Dataset dataset, String bioEntityName,	String bientityTissueName, String bioentityListFilter, String bioentityNormalizationFilter, String bientityExpressionFilter) {

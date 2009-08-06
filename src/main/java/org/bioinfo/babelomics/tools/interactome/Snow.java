@@ -6,12 +6,12 @@ import java.io.IOException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.OptionFactory;
 
 public class Snow extends BabelomicsTool {
 	public Snow(String[] args) {
-		super(args);
 		initOptions();
 	}
 
@@ -34,28 +34,25 @@ public class Snow extends BabelomicsTool {
 	@Override
 	public void execute() {
 		try {
-			CommandLine cmd = parse(args);
 
-			Dataset dataset = new Dataset(new File(cmd.getOptionValue("dataset")));
-			String bioEntityName = cmd.getOptionValue("bioentity-name");
-			String bioentityInteractionsCheck = cmd.getOptionValue("interactions-check", null);
-			String bioentityListGenesProts = cmd.getOptionValue("list-genes-prots");			
-			String bioentityInteracionsFile = cmd.getOptionValue("interactions-file", null);
-			String bioentityGenesProtsFile = cmd.getOptionValue("genes-prots-file");	
-			String bioentityLabelGenProts = cmd.getOptionValue("label-genes-prots");
-			String bioentityNatureFilter = cmd.getOptionValue("nature-filter");
-			String bioentityInteracionsNumber = cmd.getOptionValue("interactions-number");			
+			Dataset dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
+			String bioEntityName = commandLine.getOptionValue("bioentity-name");
+			String bioentityInteractionsCheck = commandLine.getOptionValue("interactions-check", null);
+			String bioentityListGenesProts = commandLine.getOptionValue("list-genes-prots");			
+			String bioentityInteracionsFile = commandLine.getOptionValue("interactions-file", null);
+			String bioentityGenesProtsFile = commandLine.getOptionValue("genes-prots-file");	
+			String bioentityLabelGenProts = commandLine.getOptionValue("label-genes-prots");
+			String bioentityNatureFilter = commandLine.getOptionValue("nature-filter");
+			String bioentityInteracionsNumber = commandLine.getOptionValue("interactions-number");			
 			
 			System.out.println(dataset.toString()+"\n");
 			
 			executeSnow(dataset, bioEntityName, bioentityInteractionsCheck, bioentityListGenesProts,bioentityInteracionsFile, bioentityGenesProtsFile, bioentityLabelGenProts,  bioentityNatureFilter,bioentityInteracionsNumber);
 			
-		} catch (ParseException e) {
-			logger.error("Error parsing command line", e.toString());
-			System.out.println("\n");
-			printUsage();
 		} catch (IOException e) {
 			logger.error("Error opening the dataset", e.toString());
+		} catch (InvalidColumnIndexException e) {
+			e.printStackTrace();
 		}
 		
 		
