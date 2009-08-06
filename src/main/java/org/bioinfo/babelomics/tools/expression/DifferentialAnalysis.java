@@ -155,6 +155,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 					logger.error("Error loading the dataset", e.toString());
 					return;
 				}
+<<<<<<< HEAD:src/main/java/org/bioinfo/babelomics/tools/expression/DifferentialAnalysis.java
 				dataset.validate();
 			}			
 			
@@ -228,6 +229,38 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		} catch (MatrixIndexException e) {
 			logger.error("MatrixIndexException: execute t-test");
 			e.printStackTrace();
+=======
+				gridPanel.add(gridTrack);
+					
+				canvas.addPanel(gridPanel);		
+				canvas.render();
+				
+				
+				//saving heatMap		
+				logger.info("saving heatMap");
+				jobStatus.addStatusMessage("70", "saving heatMap");
+				canvas.save(this.getOutdir() + "/heatmap");
+
+				
+				tTestResultList.setOrderCriteria(TTestResult.PVALUE_ORDER);
+				TestResultList<TTestResult> ordered = tTestResultList.sort();
+				System.out.println("order by p-value\n" + ordered.toString()+"\n");
+
+				MultipleTestCorrection.FDRCorrection(ordered);
+				System.out.println("order by fdr\n" + ordered.toString()+"\n");
+
+				tTestResultList.setOrderCriteria(TTestResult.STATISTIC_ORDER);
+				System.out.println("order by statistic\n" + ordered.sort().toString()+"\n");
+				
+				result.addOutputItem(new Item("t-test_file", this.getOutdir() + "/stats.txt", "the t-test analisys file is: ", TYPE.FILE));				
+				result.addOutputItem(new Item("heatMap_image", this.getOutdir() + "heatmap.png", "The heat map image is: ", TYPE.IMAGE));				
+				
+			}else {
+				logger.error("Number of labels distinct of 2");
+			}
+		} catch (InvalidParameterException e) {
+			logger.error("Error opening the dataset", e.toString());
+>>>>>>> 94f382a670978c4b877696498d2c8e9f38315427:src/main/java/org/bioinfo/babelomics/tools/expression/DifferentialAnalysis.java
 		} catch (MathException e) {
 			logger.error("math exception: execute t-test");
 			e.printStackTrace();
