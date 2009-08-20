@@ -1,10 +1,5 @@
 package org.bioinfo.babelomics.tools.functional;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.OptionFactory;

@@ -18,10 +18,10 @@ public class PreprocessingTest {
 	public void tearDown() throws Exception {
 	}
 	
-//	@Test
-//	public void Test0() {
-//	}
-//
+	@Test
+	public void Test0() {
+	}
+
 //	public void Test1() {
 //		System.out.println("-----     ------");
 //		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
@@ -38,7 +38,6 @@ public class PreprocessingTest {
 //		}
 //	}
 	
-	@Test
 	public void Test3() {
 		System.out.println("-----     ------");
 		//String []args = {"--tool", "preprocessing", "-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};

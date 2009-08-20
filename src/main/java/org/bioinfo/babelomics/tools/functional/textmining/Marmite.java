@@ -2,66 +2,55 @@ package org.bioinfo.babelomics.tools.functional.textmining;
 
 
 
-import java.awt.Color;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.math.MathException;
+
 import org.apache.commons.math.linear.MatrixIndexException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
-import org.bioinfo.collections.list.NamedArrayList;
 import org.bioinfo.collections.matrix.DataFrame;
+import org.bioinfo.commons.utils.ListUtils;
+import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.db.DBConnection;
 import org.bioinfo.db.Query;
 import org.bioinfo.db.handler.BeanArrayListHandler;
 import org.bioinfo.db.handler.ResultSetHandler;
-import org.bioinfo.graphics.canvas.Canvas;
-import org.bioinfo.graphics.canvas.feature.ScoreFeature;
-import org.bioinfo.graphics.canvas.panel.GridPanel;
-import org.bioinfo.graphics.canvas.track.GridTrack;
 import org.bioinfo.io.FileSystemUtils;
-import org.bioinfo.math.comparison.KolmogorovSmirnovTest;
+import org.bioinfo.io.output.TextFileWriter;
 import org.bioinfo.math.exception.InvalidParameterException;
-import org.bioinfo.math.result.CorrelationTestResult;
 import org.bioinfo.math.result.KolmogorovSmirnovTestResult;
 import org.bioinfo.math.result.TestResultList;
-import org.bioinfo.math.stats.correlation.CorrelationTest;
+import org.bioinfo.math.stats.inference.KolmogorovSmirnovTest;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
-import org.bioinfo.utils.ListUtils;
-import org.bioinfo.utils.StringUtils;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.plot.PlotOrientation;
 
 public class Marmite extends BabelomicsTool {
 
-	public Marmite(String[] args) {
+	public Marmite() {
 		initOptions();
 	}
 
 	@Override
 	public void initOptions() {
 
-		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("bioentity-name", "possibilities: wordRoots,diseaseAssociated,chemicalProducts"));
-		options.addOption(OptionFactory.createOption("bioentity-score-filter", "Minimum number of genes with a score (0-10000)"));
-		options.addOption(OptionFactory.createOption("bioentity-number-filter", "Number of bio-entities in results (0-10000)"));
-		options.addOption(OptionFactory.createOption("gene-name-list", "gene name in list", false,false));
-		options.addOption(OptionFactory.createOption("partition-number", "Number of partitions "));
-		options.addOption(OptionFactory.createOption("significance", "p-value for statistical significance"));
-		options.addOption(OptionFactory.createOption("sort", "Sort list"));
-
+		options.addOption(OptionFactory.createOption("list1", "gene list #1"));
+		options.addOption(OptionFactory.createOption("list2", "gene list #2"));
+		options.addOption(OptionFactory.createOption("bioentity-name", "Valid values: wordroot, disease, chemical"));
+		options.addOption(OptionFactory.createOption("bioentity-score-filter", "Minimum number of genes with a score (0-10000)", false));
+		options.addOption(OptionFactory.createOption("bioentity-number-filter", "Number of bio-entities in results (0-10000)", false));
 	}
 
 	@Override
@@ -87,19 +76,6 @@ public class Marmite extends BabelomicsTool {
 	private void executeMarmite(File f1, File f2, String bioentity, int scoreFilter, int numberFilter) {
 
 		try {
-
-
-			Dataset dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
-			String bioEntityName = commandLine.getOptionValue("bioentity-name");
-			String bioentityScoreFilter = commandLine.getOptionValue("bioentity-score-filter");
-			String bioentityNumberFilter = commandLine.getOptionValue("bioentity-mumber-filter");			
-			String geneNameList = commandLine.getOptionValue("gene-name-list", null);
-			String partitionNumber = commandLine.getOptionValue("partition-number");	
-			double significance = Double.parseDouble(commandLine.getOptionValue("significance", "0.05"));
-			String sort = commandLine.getOptionValue("sort");
-			System.out.println(dataset.toString()+"\n");
-
-
 			// reading data
 			//
 			jobStatus.addStatusMessage("20", "reading data");
@@ -184,11 +160,28 @@ public class Marmite extends BabelomicsTool {
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
 			
+			// output file
+			String filename = "marmite_output.txt";
+			FeatureData featureData = new FeatureData(dataFrame);
+			featureData.write(new File(getOutdir() + "/" + filename));
+			result.addOutputItem(new Item("marmite_file", filename, "The marmite output : ", TYPE.FILE));
+
+			// output table
+			filename = "marmite_table.txt";
+			BufferedWriter bw = new BufferedWriter(new FileWriter(getOutdir() + "/" + filename));
+			//System.out.println("marmite table:\n" + dataFrame.toString(true, true));
+			bw.write(dataFrame.toString(true, true));
+			bw.close();
+			Item item = new Item("marmite_table", filename, "The MARMITE results table : ", TYPE.FILE);
+			item.addTag("TABLE");
+			result.addOutputItem(item);
+			
+			//System.out.println("marmite output:\n" +  featureData.toString());
+			
 			// generating boxplots
 			//
 			jobStatus.addStatusMessage("60", "generating boxplots");
 			logger.debug("generating boxplots...\n");
-			String path;
 			BoxPlotChart boxplot;
 			List<Score> scoreList;
 			List<Double> list1, list2;
@@ -217,9 +210,9 @@ public class Marmite extends BabelomicsTool {
 					System.out.println("list2, entity = " + entity + ": " + ListUtils.toString(list2));
 					
 					boxplot = createBoxplot(entity, Double.parseDouble(dataFrame.getColumn("adj. p-value").get(i)), list1, list2);
-					path = getOutdir() + "/" + entity.toLowerCase().replace(" ", "_") + ".png";
-					ChartUtilities.saveChartAsPNG(new File(path), boxplot, 400, 200);
-					result.addOutputItem(new Item(entity.toLowerCase().replace(" ", "_") + "_boxplot", path, "Boxplot for " + entity + ": ", TYPE.IMAGE));
+					filename = entity.toLowerCase().replace(" ", "_") + ".png";
+					ChartUtilities.saveChartAsPNG(new File(getOutdir() + "/" + filename), boxplot, 400, 200);
+					result.addOutputItem(new Item(entity.toLowerCase().replace(" ", "_") + "_boxplot", filename, "Boxplot for " + entity + ": ", TYPE.IMAGE));
 					
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -233,13 +226,6 @@ public class Marmite extends BabelomicsTool {
 			logger.debug("saving results...");
 
 								
-			FeatureData featureData = new FeatureData(dataFrame);
-			path = getOutdir() + "/marmite_output.txt";
-			featureData.write(new File(path));
-			result.addOutputItem(new Item("marmite_file", path, "The marmite output is: ", TYPE.FILE));
-			
-			System.out.println("marmite output:\n" +  featureData.toString());
-
 			// done
 			//
 			jobStatus.addStatusMessage("100", "done");

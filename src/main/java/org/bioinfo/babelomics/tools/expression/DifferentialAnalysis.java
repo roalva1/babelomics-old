@@ -13,9 +13,10 @@ import java.util.List;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.linear.MatrixIndexException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.collections.list.NamedArrayList;
 import org.bioinfo.collections.matrix.DataFrame;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.graphics.canvas.Canvas;
@@ -30,15 +31,14 @@ import org.bioinfo.math.result.CoxTestResult;
 import org.bioinfo.math.result.SimpleRegressionTestResult;
 import org.bioinfo.math.result.TTestResult;
 import org.bioinfo.math.result.TestResultList;
+import org.bioinfo.math.stats.MultipleTestCorrection;
 import org.bioinfo.math.stats.correlation.CorrelationTest;
 import org.bioinfo.math.stats.inference.AnovaTest;
-import org.bioinfo.math.stats.inference.MultipleTestCorrection;
 import org.bioinfo.math.stats.inference.TTest;
-import org.bioinfo.math.survival.CoxTest;
+import org.bioinfo.math.stats.survival.CoxTest;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
-import org.bioinfo.utils.ListUtils;
 
 public class DifferentialAnalysis extends BabelomicsTool {
 

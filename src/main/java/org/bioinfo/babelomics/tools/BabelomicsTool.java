@@ -1,15 +1,7 @@
 package org.bioinfo.babelomics.tools;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.ParseException;
-
 import org.bioinfo.tool.GenericBioTool;
 import org.bioinfo.tool.OptionFactory;
-import org.bioinfo.tool.result.Item;
-import org.bioinfo.tool.result.Item.TYPE;
 
 public abstract class BabelomicsTool extends GenericBioTool {
 	

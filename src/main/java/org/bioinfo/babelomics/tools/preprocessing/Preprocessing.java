@@ -2,19 +2,18 @@ package org.bioinfo.babelomics.tools.preprocessing;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
-import org.bioinfo.utils.StringUtils;
 
 public class Preprocessing extends BabelomicsTool {
 
 
-	public Preprocessing(String[] args) {
+	public Preprocessing() {
 		initOptions();
 	}
 

@@ -8,16 +8,16 @@ import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
+import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.tool.OptionFactory;
-import org.bioinfo.utils.StringUtils;
 
 public class FatiScan extends FunctionalProfilingTool{
 
-	public FatiScan(String[] args) {
+	public FatiScan() {
 		initOptions();
 	}
 

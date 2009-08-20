@@ -9,17 +9,16 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.ParseException;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
-import org.bioinfo.collections.exceptions.InvalidRowIndexException;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.tool.OptionFactory;
-import org.bioinfo.utils.ListUtils;
 
 public class FatiGO extends FunctionalProfilingTool{
 
-	public FatiGO(String[] args) {
+	public FatiGO() {
 		initOptions();
 	}
 

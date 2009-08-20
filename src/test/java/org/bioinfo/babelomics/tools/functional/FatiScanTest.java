@@ -25,7 +25,7 @@ public class FatiScanTest {
 		String []args = {"-list", "/mnt/commons/test/biodata/example/fatiscan_input.txt", "-o", "/tmp", "--go-bp-db", "true", "--go-bp-min-level", "5", "--go-bp-max-level", "12", "--nb-partitions", "4"};
 
 		try {
-			FatiScan fatiscan = new FatiScan(args);
+			FatiScan fatiscan = new FatiScan();
 			fatiscan.execute();
 		} catch (Exception e) {
 			e.printStackTrace();

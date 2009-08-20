@@ -12,6 +12,9 @@ import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.babelomics.tools.functional.FunctionalProfilingTool;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.collections.matrix.DataFrame;
+import org.bioinfo.commons.utils.ArrayUtils;
+import org.bioinfo.commons.utils.ListUtils;
+import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.db.DBConnection;
 import org.bioinfo.db.Query;
@@ -20,17 +23,15 @@ import org.bioinfo.db.handler.MatrixHandler;
 import org.bioinfo.db.handler.ResultSetHandler;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.io.FileSystemUtils;
-import org.bioinfo.math.MathUtils;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.math.result.TTestResult;
 import org.bioinfo.math.result.TestResultList;
-import org.bioinfo.math.stats.inference.MultipleTestCorrection;
+import org.bioinfo.math.stats.MultipleTestCorrection;
 import org.bioinfo.math.stats.inference.TTest;
+import org.bioinfo.math.util.MathUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
-import org.bioinfo.utils.ListUtils;
-import org.bioinfo.utils.StringUtils;
 import org.jfree.chart.plot.PlotOrientation;
 
 public class TMT  extends BabelomicsTool {
@@ -411,15 +412,15 @@ public class TMT  extends BabelomicsTool {
 
 	private double getFrequency(List<Double> values, String freqMethod) {
 
-		double[] array = ListUtils.toDoubleArray(values);
+		double[] array = ArrayUtils.toDoubleArray(values);
 
 
 		if ( "mean".equalsIgnoreCase(freqMethod) ) {
 			return MathUtils.mean(array);
 		} else if ( "max".equalsIgnoreCase(freqMethod) ) {
-			return MathUtils.max(array);
+			return ArrayUtils.max(array);
 		} else if ( "min".equalsIgnoreCase(freqMethod) ) {
-			return MathUtils.min(array);
+			return ArrayUtils.min(array);
 		} else if ( "25".equalsIgnoreCase(freqMethod) ) {
 			return MathUtils.percentile(array, 25);
 		} else if ( "50".equalsIgnoreCase(freqMethod) ) {

@@ -1,10 +1,7 @@
 package org.bioinfo.babelomics.tools.expression;
 
 import java.io.File;
-import java.io.IOException;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.OptionFactory;
@@ -12,7 +9,7 @@ import org.bioinfo.tool.OptionFactory;
 public class TimeDosageSeries extends BabelomicsTool {
 	//Time/dosage series
 	
-	public TimeDosageSeries(String[] args) {
+	public TimeDosageSeries() {
 		initOptions();
 	}
 
