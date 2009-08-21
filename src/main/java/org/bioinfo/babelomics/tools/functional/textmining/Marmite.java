@@ -75,15 +75,26 @@ public class Marmite extends BabelomicsTool {
 
 	private void executeMarmite(File f1, File f2, String bioentity, int scoreFilter, int numberFilter) {
 
+		long time;
+		
 		try {
 			// reading data
 			//
 			jobStatus.addStatusMessage("20", "reading data");
 			logger.debug("reading data...\n");
+		    
+			jobStatus.addStatusMessage("#", "get Entity Map1");
+			time = System.currentTimeMillis();
+			Map<String, List<Score>> entityMap1 = getEntityMap(StringUtils.stringToList(FileSystemUtils.fileToString(f1)), bioentity);
+			jobStatus.addStatusMessage("#", "getEntityMap1, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
 
-			Map<String, List<Score>> entityMap1 = getEntityMap(StringUtils.stringToList(FileSystemUtils.fileToString(f1)), bioentity);	
+			jobStatus.addStatusMessage("#", "get Entity Map2");
+			time = System.currentTimeMillis();
 			Map<String, List<Score>> entityMap2 = getEntityMap(StringUtils.stringToList(FileSystemUtils.fileToString(f2)), bioentity);	
+			jobStatus.addStatusMessage("#", "getEntityMap2, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
 
+			jobStatus.addStatusMessage("#", "creating the entities list");
+			time = System.currentTimeMillis();
 			List<String> entities = new ArrayList<String> ();
 			for(String entity: entityMap1.keySet()) {
 				if ( entityMap1.get(entity) != null && entityMap1.get(entity).size() >= scoreFilter && 
@@ -95,6 +106,11 @@ public class Marmite extends BabelomicsTool {
 //					System.out.println("-----");
 				}				
 			}
+			jobStatus.addStatusMessage("#", "entity list, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
+
+			
+			jobStatus.addStatusMessage("#", "creating score matrixes");
+			time = System.currentTimeMillis();
 
 			String entity;
 			List<Score> scoreList1, scoreList2;
@@ -118,42 +134,30 @@ public class Marmite extends BabelomicsTool {
 				}								
 			}
 
-//			System.out.println("matrix1 :");
-//			for (int i=0 ; i<scoreMatrix1.length; i++) {
-//				for (int j=0 ; j<scoreMatrix1[i].length; j++) {
-//					System.out.print(scoreMatrix1[i][j] + "\t");
-//				}
-//				System.out.println("");
-//			}						
-//			
-//			System.out.println("matrix2 :");
-//			for (int i=0 ; i<scoreMatrix2.length; i++) {
-//				for (int j=0 ; j<scoreMatrix2[i].length; j++) {
-//					System.out.print(scoreMatrix2[i][j] + "\t");
-//				}
-//				System.out.println("");
-//			}						
+			jobStatus.addStatusMessage("#", "score matrixes, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
 
-
-
-			System.out.println("scoreMatrix1 size = " + scoreMatrix1.length + ", " + scoreMatrix1[0].length);
-			System.out.println("scoreMatrix2 size = " + scoreMatrix2.length + ", " + scoreMatrix2[0].length);
+			
+//			System.out.println("scoreMatrix1 size = " + scoreMatrix1.length + ", " + scoreMatrix1[0].length);
+//			System.out.println("scoreMatrix2 size = " + scoreMatrix2.length + ", " + scoreMatrix2[0].length);
 
 			// marmite functional enrichment
 			//
 			jobStatus.addStatusMessage("40", "computing marmite functional enrichment");
 			logger.debug("computing marmite functional enrichment...\n");
 
+			jobStatus.addStatusMessage("#", "computing ks test");
+			time = System.currentTimeMillis();
 			TestResultList<KolmogorovSmirnovTestResult> res = new KolmogorovSmirnovTest().compute(scoreMatrix1, scoreMatrix2);
-			System.out.println("kolmogorov result :\n" +  res.toString());
+//			System.out.println("kolmogorov result :\n" +  res.toString());
+			jobStatus.addStatusMessage("#", "ks test, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
 
 			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getAdjPValues()));
-			System.out.println("order = " + ListUtils.toString(ListUtils.toList(rowOrder)));
+			//System.out.println("order = " + ListUtils.toString(ListUtils.toList(rowOrder)));
 
 			DataFrame dataFrame = new DataFrame(entities.size(), 0);
 			dataFrame.setRowNames(ListUtils.ordered(entities, rowOrder));
 								
-			System.out.println("********* sides = " + res.getSides());
+//			System.out.println("********* sides = " + res.getSides());
 
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
 			dataFrame.addColumn("side", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getSides()), rowOrder)));
@@ -164,7 +168,7 @@ public class Marmite extends BabelomicsTool {
 			String filename = "marmite_output.txt";
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(new File(getOutdir() + "/" + filename));
-			result.addOutputItem(new Item("marmite_file", filename, "The marmite output : ", TYPE.FILE));
+			result.addOutputItem(new Item("marmite_file", filename, "The MARMITE output file", TYPE.FILE));
 
 			// output table
 			filename = "marmite_table.txt";
@@ -172,12 +176,13 @@ public class Marmite extends BabelomicsTool {
 			//System.out.println("marmite table:\n" + dataFrame.toString(true, true));
 			bw.write(dataFrame.toString(true, true));
 			bw.close();
-			Item item = new Item("marmite_table", filename, "The MARMITE results table : ", TYPE.FILE);
+			Item item = new Item("marmite_table", filename, "The MARMITE output table", TYPE.FILE);
 			item.addTag("TABLE");
 			result.addOutputItem(item);
 			
 			//System.out.println("marmite output:\n" +  featureData.toString());
 			
+
 			// generating boxplots
 			//
 			jobStatus.addStatusMessage("60", "generating boxplots");
@@ -185,13 +190,15 @@ public class Marmite extends BabelomicsTool {
 			BoxPlotChart boxplot;
 			List<Score> scoreList;
 			List<Double> list1, list2;
-			System.out.println("row name size = " + entities.size());
+//			System.out.println("row name size = " + entities.size());
+			jobStatus.addStatusMessage("#", "generating boxplots");
+			time = System.currentTimeMillis();
 			for (int i=0 ; i<entities.size() && i < numberFilter ; i++) {
 				try {
 					
 					entity = dataFrame.getRowNames().get(i);
 					
-					System.out.println("ploting entity = " + entity);
+//					System.out.println("ploting entity = " + entity);
 					
 					scoreList = entityMap1.get(entity);
 				
@@ -206,19 +213,20 @@ public class Marmite extends BabelomicsTool {
 						list2.add((double) scoreList.get(j).getValue());
 					}						
 					
-					System.out.println("list1, entity = " + entity + ": " + ListUtils.toString(list1));
-					System.out.println("list2, entity = " + entity + ": " + ListUtils.toString(list2));
+//					System.out.println("list1, entity = " + entity + ": " + ListUtils.toString(list1));
+//					System.out.println("list2, entity = " + entity + ": " + ListUtils.toString(list2));
 					
 					boxplot = createBoxplot(entity, Double.parseDouble(dataFrame.getColumn("adj. p-value").get(i)), list1, list2);
 					filename = entity.toLowerCase().replace(" ", "_") + ".png";
 					ChartUtilities.saveChartAsPNG(new File(getOutdir() + "/" + filename), boxplot, 400, 200);
-					result.addOutputItem(new Item(entity.toLowerCase().replace(" ", "_") + "_boxplot", filename, "Boxplot for " + entity + ": ", TYPE.IMAGE));
+					result.addOutputItem(new Item(entity.toLowerCase().replace(" ", "_") + "_boxplot", filename, "Boxplot for " + entity, TYPE.IMAGE));
 					
 				} catch (IOException e) {
 					e.printStackTrace();
 				}				
 			}
 
+			jobStatus.addStatusMessage("#", "boxplots, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
 
 			// saving data
 			//

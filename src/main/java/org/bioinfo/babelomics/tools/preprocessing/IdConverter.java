@@ -11,7 +11,7 @@ import org.bioinfo.tool.OptionFactory;
 public class IdConverter extends BabelomicsTool  {
 
 	
-		public IdConverter(String[] args) {
+		public IdConverter() {
 			initOptions();
 		}
 
