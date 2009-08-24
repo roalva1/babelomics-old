@@ -2,15 +2,13 @@ package org.bioinfo.babelomics.tools.functional;
 
 import java.io.File;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.tool.OptionFactory;
 
 public class Blast2Go extends BabelomicsTool {
 
 
-	public Blast2Go(String[] args) {
+	public Blast2Go() {
 		initOptions();
 	}
 

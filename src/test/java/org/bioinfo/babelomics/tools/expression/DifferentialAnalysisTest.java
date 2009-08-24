@@ -2,22 +2,25 @@ package org.bioinfo.babelomics.tools.expression;
 
 
 import org.bioinfo.babelomics.BabelomicsMain;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 public class DifferentialAnalysisTest {
 
-	@Before
+//	@Before
 	public void setUp() throws Exception {
 	}
 
-	@After
+//	@After
 	public void tearDown() throws Exception {
 	}
-
+	
+	@Test
+	public void notest(){
+		
+	}
+	
 	public void test() {
-		System.out.println("-----     ------");
+		System.out.println("-----   ttest  ------");
 		String []args = {"-tool", "differential-expression","-dataset", "/mnt/commons/test/biodata/example/twoclasses.txt", "-o", "/tmp/ttest", "-test", "t-test", "-class", "class"};
 		
 		try {
@@ -27,7 +30,7 @@ public class DifferentialAnalysisTest {
 		}		
 	}
 	
-	@Test
+//	@Test
 	public void test1() {
 					    
 		System.out.println("-----   pearson ------");

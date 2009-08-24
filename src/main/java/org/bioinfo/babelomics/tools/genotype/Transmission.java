@@ -1,7 +1,5 @@
 package org.bioinfo.babelomics.tools.genotype;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.tool.OptionFactory;
 

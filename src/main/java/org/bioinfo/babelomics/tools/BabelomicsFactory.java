@@ -31,51 +31,51 @@ public class BabelomicsFactory {
 		}
 
 		if(toolName.equalsIgnoreCase("clustering")) {
-			return new Clustering(args);
+			return new Clustering();
 		}
 
 		if(toolName.equalsIgnoreCase("detds")) {
-			return new TimeDosageSeries(args);
+			return new TimeDosageSeries();
 		}
 
 		if(toolName.equalsIgnoreCase("copa")) {
-			return new OutlierCopa(args);
+			return new OutlierCopa();
 		}
 
 		if(toolName.equalsIgnoreCase("lrs")) {
-			return new OutlierLrs(args);
+			return new OutlierLrs();
 		}
 
 		if(toolName.equalsIgnoreCase("predictor")) {
-			return new Predictor(args);
+			return new Predictor();
 		}
 
 		if(toolName.equalsIgnoreCase("preprocessing")) {
-			return new Preprocessing(args);
+			return new Preprocessing();
 		}
 
 		if(toolName.equalsIgnoreCase("idconverter")) {
-			return new IdConverter(args);
+			return new IdConverter();
 		}
 
 		if(toolName.equalsIgnoreCase("fatigo")) {
-			return new FatiGO(args);
+			return new FatiGO();
 		}
 
 		if(toolName.equalsIgnoreCase("fatiscan")) {
-			return new FatiScan(args);
+			return new FatiScan();
 		}
 
 		if(toolName.equalsIgnoreCase("marmite")) {
-			return new Marmite(args);
+			return new Marmite();
 		}
 
 		if(toolName.equalsIgnoreCase("marmitescan")) {
-			return new MarmiteScan(args);
+			return new MarmiteScan();
 		}
 
 		if(toolName.equalsIgnoreCase("blast2go")) {
-			return new Blast2Go(args);
+			return new Blast2Go();
 		}
 
 		if(toolName.equalsIgnoreCase("tmt")) {

@@ -2,24 +2,23 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.bioinfo</groupId>
   <artifactId>babelomics</artifactId>
-  <version>0.2.0</version>
+  <version>0.3.0-beta</version>
   <dependencies>
     <dependency>
-      <groupId>org.bioinfo</groupId>
-      <artifactId>bioinfo-io</artifactId>
-      <version>0.1.0</version>
-      <scope>compile</scope>
+    	<groupId>org.bioinfo</groupId>
+    	<artifactId>bioinfo-mlpr</artifactId>
+    	<version>0.3.0</version>
     </dependency>
     <dependency>
       <groupId>org.bioinfo</groupId>
       <artifactId>bioinfo-math</artifactId>
-      <version>0.2.0</version>
+      <version>0.3.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
     	<groupId>org.bioinfo</groupId>
     	<artifactId>bioinfo-tool</artifactId>
-    	<version>0.6.0</version>
+    	<version>0.7.0</version>
     </dependency>
     <dependency>
     	<groupId>org.bioinfo</groupId>
@@ -33,13 +32,13 @@
     </dependency>
     <dependency>
     	<groupId>org.bioinfo</groupId>
-    	<artifactId>bioinfo-utils</artifactId>
-    	<version>0.6.0</version>
+    	<artifactId>bioinfo-commons</artifactId>
+    	<version>0.8.0</version>
     </dependency>
     <dependency>
     	<groupId>org.bioinfo</groupId>
     	<artifactId>bioinfo-data</artifactId>
-    	<version>0.3.0</version>
+    	<version>0.4.0</version>
     </dependency>
     <dependency>
     	<groupId>org.bioinfo</groupId>
@@ -50,6 +49,11 @@
     	<groupId>org.bioinfo</groupId>
     	<artifactId>bioinfo-collections</artifactId>
     	<version>0.2.0</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.bioinfo</groupId>
+    	<artifactId>db</artifactId>
+    	<version>1.2.0</version>
     </dependency>
   </dependencies>
   <build>

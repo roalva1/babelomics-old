@@ -26,7 +26,7 @@ public class FatiGOTest {
 		//String []args = {"-list1", "/mnt/commons/test/biodata/example/list3.txt", "-o", "/tmp", "-list2", "/mnt/commons/test/biodata/example/list4.txt", "--go-bp-db", "true", "--go-bp-min-level", "5", "--go-bp-max-level", "12", "--remove-duplicates", "ref"};
 		//String []args = {"-list1", "/mnt/commons/test/biodata/example/list3.txt", "-o", "/tmp", "-list2", "/mnt/commons/test/biodata/example/list4.txt", "--go-bp-db", "true", "--go-bp-min-level", "5", "--go-bp-max-level", "5"};
 		try {
-			FatiGO fatigo = new FatiGO(args);
+			FatiGO fatigo = new FatiGO();
 			fatigo.execute();
 		} catch (Exception e) {
 			e.printStackTrace();
