@@ -8,18 +8,19 @@ import org.junit.Test;
 
 public class DifferentialAnalysisTest {
 
-	@Before
+//	@Before
 	public void setUp() throws Exception {
 	}
 
-	@After
+//	@After
 	public void tearDown() throws Exception {
 	}
-
+	
 	@Test
-	public void test0() {
+	public void notest(){
+		
 	}
-
+	
 	public void test() {
 		System.out.println("-----   ttest  ------");
 		String []args = {"-tool", "differential-expression","-dataset", "/mnt/commons/test/biodata/example/twoclasses.txt", "-o", "/tmp/ttest", "-test", "t-test", "-class", "class"};
@@ -31,6 +32,7 @@ public class DifferentialAnalysisTest {
 		}		
 	}
 	
+//	@Test
 	public void test1() {
 					    
 		System.out.println("-----   pearson ------");

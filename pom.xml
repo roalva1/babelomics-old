@@ -5,6 +5,11 @@
   <version>0.3.0-beta</version>
   <dependencies>
     <dependency>
+    	<groupId>org.bioinfo</groupId>
+    	<artifactId>bioinfo-mlpr</artifactId>
+    	<version>0.1.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.bioinfo</groupId>
       <artifactId>bioinfo-io</artifactId>
       <version>0.1.0</version>

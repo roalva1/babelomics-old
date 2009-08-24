@@ -41,8 +41,12 @@ public class PreprocessingTest {
 //			//System.out.println(e.toString());
 //		}
 //	}
-
 	@Test
+	public void notest(){
+		
+	}
+	
+//	@Test
 	public void Test3() {
 		String dataset = "/home/joaquin/tests/dataset1.txt";
 		String outdir = "/home/joaquin/tests/preprocessing";
