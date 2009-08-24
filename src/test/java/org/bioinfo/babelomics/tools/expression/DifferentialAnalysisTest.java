@@ -2,8 +2,6 @@ package org.bioinfo.babelomics.tools.expression;
 
 
 import org.bioinfo.babelomics.BabelomicsMain;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 public class DifferentialAnalysisTest {

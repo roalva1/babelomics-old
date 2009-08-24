@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.commons.io.TextFileReader;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
@@ -206,7 +205,7 @@ public class Preprocessing extends BabelomicsTool {
 					dataset.validate();
 				}
 
-				List<String> validGenes = IOUtils.readLines(filterFile, "#");
+				List<String> validGenes = IOUtils.grep(filterFile, "[^#]");
 								
 				if ( validGenes != null && validGenes.size() > 0 ) {
 					List<String> genes = dataset.getFeatureNames();					
@@ -255,7 +254,7 @@ public class Preprocessing extends BabelomicsTool {
 				System.out.println("cmd = " + cmdStr);				
 				if ( outputFile.exists() ) {
 					List<String> values;
-					List<String> lines = IOUtils.readLines(outputFile, "#");
+					List<String> lines = IOUtils.grep(outputFile, "[^#]");
 					DoubleMatrix matrix = new DoubleMatrix(dataset.getRowDimension(), dataset.getColumnDimension());
 					for(int row=0 ; row<lines.size() ; row++) {
 						values = StringUtils.stringToList("\t", lines.get(row));

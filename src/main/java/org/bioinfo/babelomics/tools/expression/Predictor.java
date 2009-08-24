@@ -5,13 +5,12 @@ import java.io.File;
 import org.apache.commons.cli.OptionGroup;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.mlpr.classifier.Knn;
-import org.bioinfo.mlpr.classifier.RandomForestClassifier;
+import org.bioinfo.mlpr.classifier.RForest;
 import org.bioinfo.mlpr.classifier.Svm;
-import org.bioinfo.mlpr.evaluation.EvaluationResult;
-import org.bioinfo.mlpr.utils.InstanceBuilder;
+import org.bioinfo.mlpr.evaluation.result.EvaluationResult;
+import org.bioinfo.mlpr.utils.InstancesBuilder;
 import org.bioinfo.tool.OptionFactory;
 
-import weka.classifiers.trees.RandomForest;
 import weka.core.Attribute;
 import weka.core.Instances;
 
@@ -84,7 +83,7 @@ public class Predictor extends BabelomicsTool {
 				// data set loading 
 				Instances instances;
 				if(commandLine.hasOption("dataset-arff")){
-					instances = InstanceBuilder.getInstancesFromArrfFile(arff,"sample_name");
+					instances = InstancesBuilder.getInstancesFromArrfFile(arff,"sample_name");
 				} else {
 					throw new Exception("Babelomics dataset reading not yet implemented");
 				}
@@ -137,7 +136,7 @@ public class Predictor extends BabelomicsTool {
 		int best = knn.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
 		EvaluationResult bestRMSE = knn.getEvaluationResultList().get(best);
 		logger.println("Beset RMSE classification");
-		logger.println("Knn: " + knn.getKnns()[best] + " neighbors");
+		logger.println("Knn: " + knn.getKnnValues()[best] + " neighbors");
 		logger.println(bestRMSE.toString());
 		// ??????
 	}
@@ -169,7 +168,7 @@ public class Predictor extends BabelomicsTool {
 		logger.println("Random Forest classifier.........................................................");
 		logger.println("");
 		// init classifier
-		RandomForestClassifier randomForest = new RandomForestClassifier();
+		RForest randomForest = new RForest();
 		// init params
 		if(commandLine.hasOption("random-forest-tune")) randomForest.setTuneParameters(true);
 		else {
