@@ -2,10 +2,19 @@ package org.bioinfo.babelomics.tools.preprocessing;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.commons.io.TextFileReader;
+import org.bioinfo.commons.io.utils.FileUtils;
+import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ArrayUtils;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -21,13 +30,14 @@ public class Preprocessing extends BabelomicsTool {
 	public void initOptions() {
 		//super.initOptions();
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("logarithm-base", "the logarithm base to apply transformation, possible values: e, 2 10 for log base 2, log base 2 and log base 10"));
+		options.addOption(OptionFactory.createOption("logarithm-base", "the logarithm base to apply transformation, possible values: e, 2 10 for log base 2, log base 2 and log base 10", false));
 		options.addOption(OptionFactory.createOption("merge-replicates", "method to merge replicates, valid values are: mean, median", false));
 		options.addOption(OptionFactory.createOption("filter-missing", "minimum percentage of existing values, from 0 to 100", false));
 		options.addOption(OptionFactory.createOption("impute-missing", "method to impute missing values, valid values are: zero, mean, median, knn", false));
 		options.addOption(OptionFactory.createOption("kvalue", "kvalue for knn impute method, default 15", false));
-		options.addOption(OptionFactory.createOption("sample-filter", "class variable", false));
-		options.addOption(OptionFactory.createOption("feature-filter", "class variable", false));
+		options.addOption(OptionFactory.createOption("gene-list-filter", "This option will remove all the patterns of the genes that are not present in this gene list", false));
+//		options.addOption(OptionFactory.createOption("sample-filter", "class variable", false));
+//		options.addOption(OptionFactory.createOption("feature-filter", "class variable", false));
 	}
 
 
@@ -41,9 +51,8 @@ public class Preprocessing extends BabelomicsTool {
 			String mergeMethod = commandLine.getOptionValue("merge-replicates", null);
 			String filterPercentage = commandLine.getOptionValue("filter-missing", null);
 			String imputeMethod = commandLine.getOptionValue("impute-missing", null);
-			String kvalue = commandLine.getOptionValue("impute-missing", "15");
-
-			System.out.println("impute method = " + imputeMethod);
+			String kvalue = commandLine.getOptionValue("kvalue", "15");
+			String filterFile = commandLine.getOptionValue("gene-list-filter", null);
 			
 			int progress = 1, finalProgress = 3;
 			if ( imputeMethod != null && !("none".equalsIgnoreCase(imputeMethod)) ) finalProgress++; 
@@ -152,7 +161,14 @@ public class Preprocessing extends BabelomicsTool {
 
 					//System.out.println("input :\n" + dataset.toString());
 					//System.out.println("executing impute missing values...\n");
-					dataset.setDoubleMatrix(dataset.getDoubleMatrix().imputeMissingValuesInRows(imputeMethod));
+					if ( "knn".equalsIgnoreCase(imputeMethod) ) {
+						Dataset newDataset = knnImpute(dataset, Integer.parseInt(kvalue));
+						if ( newDataset != null ) {
+							dataset = newDataset;
+						}
+					} else {
+						dataset.setDoubleMatrix(dataset.getDoubleMatrix().imputeMissingValuesInRows(imputeMethod));
+					}
 					dataset.validate();
 					//System.out.println("output :\n" + dataset.toString());
 					//System.out.println("end of impute missing values...\n");
@@ -184,14 +200,36 @@ public class Preprocessing extends BabelomicsTool {
 				 */
 			}
 			
+			if ( filterFile != null ) {
+				if ( dataset.getDoubleMatrix() == null ) { 
+					dataset.load();
+					dataset.validate();
+				}
+
+				List<String> validGenes = IOUtils.readLines(filterFile, "#");
+								
+				if ( validGenes != null && validGenes.size() > 0 ) {
+					List<String> genes = dataset.getFeatureNames();					
+					List<Integer> rows = new ArrayList<Integer>();
+					for (int row=0 ; row<genes.size() ; row++) {
+						if ( !validGenes.contains(genes.get(row))) {
+							rows.add(row);
+						}
+					}
+					
+					dataset = dataset.filterRows(rows);
+					dataset.validate();					
+				}
+			}
+			
+			
+			
 			logger.debug("saving dataset...\n");
 			jobStatus.addStatusMessage("" + (progress*100/finalProgress), "saving data");
 			dataset.write(new File(this.getOutdir()+"/preprocessed.txt"));
 			
 			result.addOutputItem(new Item("prepocessed_file","preprocessed.txt", "The preprocessed file is: ", TYPE.FILE));
 			jobStatus.addStatusMessage("100", "done");
-
-			System.out.println("job status :\n" + StringUtils.arrayToString(jobStatus.getStatusMessages(), "\n"));
 		} catch (Exception e1) {
 			try {
 				jobStatus.addStatusMessage("100", "error");
@@ -201,5 +239,36 @@ public class Preprocessing extends BabelomicsTool {
 			e1.printStackTrace();
 		}
 
+	}
+	
+	
+	private Dataset knnImpute(Dataset dataset, int kvalue) {
+		Dataset newDataset = null;
+		try {
+			String wd = outdir + "/knn";
+			File inputFile = new File(wd + "/in.txt");
+			File outputFile = new File(wd + "/out.txt");
+			if ( new File(wd).isDirectory() || FileUtils.createDirectory(wd) ) {
+				dataset.write(inputFile);
+				String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/KNNimpute -K=" + kvalue + " " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath();
+				Runtime.getRuntime().exec(cmdStr);
+				System.out.println("cmd = " + cmdStr);				
+				if ( outputFile.exists() ) {
+					List<String> values;
+					List<String> lines = IOUtils.readLines(outputFile, "#");
+					DoubleMatrix matrix = new DoubleMatrix(dataset.getRowDimension(), dataset.getColumnDimension());
+					for(int row=0 ; row<lines.size() ; row++) {
+						values = StringUtils.stringToList("\t", lines.get(row));
+						values.remove(0);
+						matrix.setRow(row, ArrayUtils.toDoubleArray(ListUtils.toStringArray(values)));
+					}
+					newDataset = dataset;
+					newDataset.setDoubleMatrix(matrix);
+				}
+			}
+		} catch (IOException e) {
+			newDataset = null;
+		}
+		return newDataset;
 	}
 }

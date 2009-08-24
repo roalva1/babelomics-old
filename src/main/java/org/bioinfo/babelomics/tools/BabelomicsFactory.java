@@ -55,7 +55,7 @@ public class BabelomicsFactory {
 		}
 
 		if(toolName.equalsIgnoreCase("idconverter")) {
-			return new IdConverter(args);
+			return new IdConverter();
 		}
 
 		if(toolName.equalsIgnoreCase("fatigo")) {

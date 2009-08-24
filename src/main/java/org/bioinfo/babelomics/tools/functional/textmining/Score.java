@@ -1,22 +1,32 @@
 package org.bioinfo.babelomics.tools.functional.textmining;
 
 public class Score {
-	private String name;
+	private String entity;
+	private String gene;
 	private float value;
 
-	public Score(String name, Float value) {
-		this.setName(name);
+	public Score(String entity, String gene, Float value) {
+		this.entity = entity;
+		this.gene = gene;
 		this.value = value;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public String getEntity() {
+		return entity;
 	}
 
-	public String getName() {
-		return name;
+	public void setEntity(String entity) {
+		this.entity = entity;
 	}
-	
+
+	public String getGene() {
+		return gene;
+	}
+
+	public void setGene(String gene) {
+		this.gene = gene;
+	}
+
 	public void setValue(float value) {
 		this.value = value;
 	}
@@ -26,7 +36,7 @@ public class Score {
 	}
 	
 	public String toString() {
-		return "[" + name + ", " + value + "]";
+		return "[" + entity + ", " + gene + ", " + value + "]";
 	}
 	
 }
