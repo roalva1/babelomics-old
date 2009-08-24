@@ -14,7 +14,7 @@ import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.db.DBConnection;
-import org.bioinfo.db.Query;
+import org.bioinfo.db.api.Query;
 import org.bioinfo.db.handler.BeanArrayListHandler;
 import org.bioinfo.db.handler.MatrixHandler;
 import org.bioinfo.db.handler.ResultSetHandler;
@@ -29,9 +29,9 @@ import org.bioinfo.math.stats.inference.TTest;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
-import org.bioinfo.utils.ArrayUtils;
-import org.bioinfo.utils.ListUtils;
-import org.bioinfo.utils.StringUtils;
+import org.bioinfo.utils.utils.ArrayUtils;
+import org.bioinfo.utils.utils.ListUtils;
+import org.bioinfo.utils.utils.StringUtils;
 import org.jfree.chart.plot.PlotOrientation;
 
 public class TMT  extends BabelomicsTool {

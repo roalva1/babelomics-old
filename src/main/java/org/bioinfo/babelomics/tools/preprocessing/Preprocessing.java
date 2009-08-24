@@ -9,7 +9,7 @@ import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
-import org.bioinfo.utils.StringUtils;
+import org.bioinfo.utils.utils.StringUtils;
 
 public class Preprocessing extends BabelomicsTool {
 

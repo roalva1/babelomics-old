@@ -19,7 +19,7 @@ import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.bioinfo.math.stats.inference.FisherExactTest;
 import org.bioinfo.tool.OptionFactory;
-import org.bioinfo.utils.ListUtils;
+import org.bioinfo.utils.utils.ListUtils;
 
 
 public abstract class FunctionalProfilingTool extends BabelomicsTool {

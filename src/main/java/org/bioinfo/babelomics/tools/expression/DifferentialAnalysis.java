@@ -38,7 +38,7 @@ import org.bioinfo.math.survival.CoxTest;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
-import org.bioinfo.utils.ListUtils;
+import org.bioinfo.utils.utils.ListUtils;
 
 public class DifferentialAnalysis extends BabelomicsTool {
 

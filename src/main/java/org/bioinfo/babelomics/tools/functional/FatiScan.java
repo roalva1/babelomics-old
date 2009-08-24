@@ -13,7 +13,7 @@ import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.tool.OptionFactory;
-import org.bioinfo.utils.StringUtils;
+import org.bioinfo.utils.utils.StringUtils;
 
 public class FatiScan extends FunctionalProfilingTool{
 

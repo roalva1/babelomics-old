@@ -18,7 +18,7 @@ import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.stats.inference.FisherExactTest;
 import org.bioinfo.math.result.FisherTestResult;
 import org.bioinfo.math.result.TestResultList;
-import org.bioinfo.utils.StringUtils;
+import org.bioinfo.utils.utils.StringUtils;
 
 public class FuncTest {
 
