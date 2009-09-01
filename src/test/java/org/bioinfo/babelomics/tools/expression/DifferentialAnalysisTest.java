@@ -30,7 +30,6 @@ public class DifferentialAnalysisTest {
 		}		
 	}
 	
-//	@Test
 	public void test1() {
 					    
 		System.out.println("-----   pearson ------");
@@ -71,7 +70,7 @@ public class DifferentialAnalysisTest {
 	
 	
 	public void test4() {
-		System.out.println("-----     ------");
+		System.out.println("----- cox ------");
 		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/survival.txt", "-o", "/tmp/cox", "-test", "cox", "-time-class", "time", "-censored-class", "censored"};
 		
 		try {
@@ -82,7 +81,7 @@ public class DifferentialAnalysisTest {
 	}
 
 	public void test5() {
-		System.out.println("-----     ------");
+		System.out.println("----- anova ------");
 		String []args = {"-tool", "differential-expression","-dataset", "/mnt/commons/test/biodata/example/multiclasses.txt", "-o", "/tmp/anova", "-test", "anova", "-class", "class"};
 		
 		try {
@@ -95,4 +94,15 @@ public class DifferentialAnalysisTest {
 		}		
 	}
 	
+	public void test6() {
+		System.out.println("----- masigpro ------");
+		String []args = {"-tool", "differential-expression", "-dataset", "/home/joaquin/tests/masigpro/masigpro.dataset", "-o", "/home/joaquin/tests/masigpro/out", "-test", "masigpro", "-contin-class", "contin", "-series-class", "series"};
+		
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+	}
+
 }
