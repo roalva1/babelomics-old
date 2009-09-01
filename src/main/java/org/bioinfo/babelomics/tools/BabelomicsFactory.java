@@ -16,10 +16,9 @@ import org.bioinfo.babelomics.tools.preprocessing.IdConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
 
 
-
 public class BabelomicsFactory {
 
-	public static BabelomicsTool createTool(String toolName, String[] args) {
+	public static BabelomicsTool createTool(String toolName) {
 		BabelomicsTool babelomicsTool = null;
 
 		if(toolName.equalsIgnoreCase("differential-expression")) {

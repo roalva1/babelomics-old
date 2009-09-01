@@ -24,6 +24,7 @@ public class PreprocessingTest {
 	
 	@Test
 	public void Test0() {
+		System.out.println("----------------> " );
 	}
 
 //	public void Test1() {
@@ -43,7 +44,7 @@ public class PreprocessingTest {
 //	}
 	@Test
 	public void notest(){
-		
+		System.out.println("----------------> ");
 	}
 	
 	public void Test3() {
