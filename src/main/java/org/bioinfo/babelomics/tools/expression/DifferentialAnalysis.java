@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math.MathException;
@@ -16,6 +17,7 @@ import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.collections.list.NamedArrayList;
 import org.bioinfo.collections.matrix.DataFrame;
+import org.bioinfo.commons.io.TextFileWriter;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
@@ -50,10 +52,12 @@ public class DifferentialAnalysis extends BabelomicsTool {
 	@Override
 	public void initOptions() {
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("test", "the test, possible values: t-test, bayes, sam, fold-change, anova, pearson, spearman, regression, cox"));
+		options.addOption(OptionFactory.createOption("test", "the test, possible values: t-test, bayes, sam, fold-change, anova, pearson, spearman, regression, cox, masigpro"));
 		options.addOption(OptionFactory.createOption("class", "class variable", false));
 		options.addOption(OptionFactory.createOption("time-class", "class variable", false));
-		options.addOption(OptionFactory.createOption("censored-class", "class variable", false));
+		options.addOption(OptionFactory.createOption("censored-class", "class class variable", false));
+		options.addOption(OptionFactory.createOption("contin-class", "contin class variable", false));
+		options.addOption(OptionFactory.createOption("series-class", "series class variable", false));
 		options.addOption(OptionFactory.createOption("sample-filter", "class variable", false));
 		options.addOption(OptionFactory.createOption("feature-filter", "class variable", false));
 	}
@@ -127,10 +131,16 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			executeCox(dataset, timeClass, censoredClass);
 			return;
 		}
+		if (test.equals("masigpro")) {
+			String continClass = commandLine.getOptionValue("contin-class", null);
+			String seriesClass = commandLine.getOptionValue("series-class", null);
+
+			executeMaSigPro(dataset, continClass, seriesClass);
+			return;
+		}
 
 		logger.warn("que raroo....");
 	}
-
 
 	private void executeTTest(Dataset dataset, String className) {
 		logger.info("executing t-test");
@@ -648,6 +658,125 @@ public class DifferentialAnalysis extends BabelomicsTool {
 	}
 
 
+	
+	
+	private void executeMaSigPro(Dataset dataset, String continClass, String seriesClass) {
+		logger.info("executing maSigPro");
+		
+		System.out.println("(continClass, seriesClass) = (" + continClass + ", " + seriesClass + ")");
+		
+		List<String> continVars = dataset.getVariables().getByName(continClass).getValues();
+		List<String> seriesVars = dataset.getVariables().getByName(seriesClass).getValues();
+
+		try {
+			// reading data
+			//
+			jobStatus.addStatusMessage("20", "reading data");
+			logger.debug("reading data...\n");
+
+			if ( dataset.getDoubleMatrix() == null ) { 
+				try {
+					dataset.load();
+				} catch (Exception e) {
+					logger.error("Error loading the dataset", e.toString());
+					return;
+				}
+				dataset.validate();
+			}
+
+			// masigpro test
+			//
+			jobStatus.addStatusMessage("40", "computing maSigPro");
+			logger.debug("computing maSigPro...\n");
+
+			String line, testPath = outdir + "/test/";
+			List<String> names = dataset.getFeatureNames();
+			TextFileWriter writer = new TextFileWriter(testPath + "input.txt");
+			writer.writeLine("#CONTIN\t" + ListUtils.toString(continVars, "\t"));
+			writer.writeLine("#SERIES\t" + ListUtils.toString(seriesVars, "\t"));
+			writer.writeLine("#NAMES\t" + ListUtils.toString(dataset.getSampleNames(), "\t"));
+			for(int i=0 ; i<names.size() ; i++) {
+				line = names.get(i) + "\t";
+				line = line + ListUtils.toString(ListUtils.toList(dataset.getDoubleMatrix().getRow(i)), "\t");
+				writer.writeLine(line);
+			}
+			writer.close();
+			
+//			cd /home/joaquin/tests/masigpro; cat masigpro.R | data="/home/joaquin/tests/masigpro/out/test/input.txt"  degree="2" Q="0.05" adjust="BH" alfa="0.05" clustermethod="hclust" k="9" main="out"  outdir="/home/joaquin/tests/masigpro/out/test/" R --no-save
+
+			
+			
+			
+//			CoxTest coxtest = new CoxTest();
+//			//System.out.println("input matrix = \n" + dataset.getDoubleMatrix().toString());
+//			TestResultList<CoxTestResult> res = coxtest.compute(dataset.getDoubleMatrix(), timeVars, censoredVars);
+//
+//			int[] columnOrder = ListUtils.order(vars);
+//			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
+//			
+//			// generating heatmap
+//			//
+//			jobStatus.addStatusMessage("60", "generating heatmap");
+//			logger.debug("generating heatmap...\n");
+//
+//			Canvas heatmap = generateHeatmap(dataset, timeClass, columnOrder, rowOrder, "coeff.", res.getCoefs(), "adj. p-value", res.getAdjPValues());
+//			heatmap.save(getOutdir() + "/cox_heatmap");
+//			
+//			// saving data
+//			//
+//			jobStatus.addStatusMessage("80", "saving results");
+//			logger.debug("saving results...");
+//
+//			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
+//			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
+//
+//			//dataFrame.addColumn("id", ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
+//			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
+//			dataFrame.addColumn("coeff.", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getCoefs()), rowOrder)));
+//			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
+//			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
+//
+//			FeatureData featureData = new FeatureData(dataFrame);
+//			featureData.write(new File(getOutdir() + "/cox.txt"));
+//
+//			BufferedWriter bw = new BufferedWriter(new FileWriter(getOutdir() + "/cox_table.txt"));
+//			bw.write(dataFrame.toString(true, true));
+//			bw.close();
+//			
+//			result.addOutputItem(new Item("cox_file", "cox.txt", "The cox file is: ", TYPE.FILE));
+//			result.addOutputItem(new Item("cox_heatmap", "cox_heatmap.png", "The cox heatmap is: ", TYPE.IMAGE));
+//			
+//			Item item = new Item("cox_table", "cox_table.txt", "The cox table is: ", TYPE.FILE);
+//			item.addTag("TABLE");
+//			result.addOutputItem(item);
+
+			// done
+			//
+			jobStatus.addStatusMessage("100", "done");
+			logger.debug("regression done\n");
+		} catch (java.security.InvalidParameterException e) {
+			logger.error("not valid parameter: execute regression");
+			e.printStackTrace();
+		} catch (MatrixIndexException e) {
+			logger.error("MatrixIndexException: execute regression");
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+//		} catch (MathException e) {
+//			// TODO Auto-generated catch block
+//			logger.error("math exception: execute regression");
+//			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.error("IOException: execute regression");
+			e.printStackTrace();
+//		} catch (InvalidColumnIndexException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+		}
+	}
+	
+	
+	
 	public Canvas generateHeatmap(Dataset dataset, String className, int[] columnOrder, int[] rowOrder, String infoName1, double[] infoList1, String infoName2, double[] infoList2) {
 		int xHeatMap = 2;				
 		int yHeatMap = 2;
