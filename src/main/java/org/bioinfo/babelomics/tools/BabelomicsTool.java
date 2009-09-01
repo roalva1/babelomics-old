@@ -7,6 +7,7 @@ public abstract class BabelomicsTool extends GenericBioTool {
 	
 	public BabelomicsTool() {
 		initCommonsOptions();
+		initOptions();
 	}
 	
 	public abstract void initOptions();
