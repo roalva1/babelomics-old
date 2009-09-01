@@ -12,7 +12,6 @@ import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.babelomics.tools.functional.FunctionalProfilingTool;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.collections.matrix.DataFrame;
-import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;

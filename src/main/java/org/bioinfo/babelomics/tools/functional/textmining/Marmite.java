@@ -14,7 +14,6 @@ import java.util.Map;
 
 import org.apache.commons.math.linear.MatrixIndexException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.babelomics.tools.functional.textmining.Score;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.collections.matrix.DataFrame;

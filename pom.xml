@@ -42,7 +42,7 @@
     </dependency>
     <dependency>
     	<groupId>org.bioinfo</groupId>
-    	<artifactId>bioinfo-io</artifactId>
+    	<artifactId>bioinfo-io-file</artifactId>
     	<version>0.1.0</version>
     </dependency>
     <dependency>
