@@ -23,6 +23,7 @@ public abstract class BabelomicsTool extends GenericBioTool {
 		getOptions().addOption(OptionFactory.createOption("species", "The specie of the ids", false));	
 	}
 
+	
 	/* (non-Javadoc)
 	 * @see org.bioinfo.tool.GenericBioTool#parse(java.lang.String[])
 	 */
@@ -30,6 +31,7 @@ public abstract class BabelomicsTool extends GenericBioTool {
 	public void parse(String[] args) throws ParseException, IOException {
 		parse(args, false);
 	}
+	
 	
 	/* (non-Javadoc)
 	 * @see org.bioinfo.tool.GenericBioTool#parse(java.lang.String[], boolean)
@@ -42,15 +44,7 @@ public abstract class BabelomicsTool extends GenericBioTool {
 		this.toolName = commandLine.getOptionValue("tool", "");
 		this.species = commandLine.getOptionValue("species", "unknown");
 	}
-
-	/* (non-Javadoc)
-	 * @see org.bioinfo.tool.GenericBioTool#abort(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public void abort(String msg, String description) {
-		super.abort(msg, description);
-	}
-
+	
 	
 	
 	/**
@@ -66,7 +60,5 @@ public abstract class BabelomicsTool extends GenericBioTool {
 	public String getSpecies() {
 		return species;
 	}
-	
-	
 	
 }

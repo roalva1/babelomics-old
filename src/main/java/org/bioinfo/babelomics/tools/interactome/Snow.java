@@ -9,13 +9,13 @@ import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.OptionFactory;
 
 public class Snow extends BabelomicsTool {
-	public Snow(String[] args) {
-		initOptions();
+	
+	public Snow() {
+		super();
 	}
 
 	@Override
 	public void initOptions() {
-		
 		options.addOption(OptionFactory.createOption("dataset", "the data"));		
 		options.addOption(OptionFactory.createOption("interactions-check", " if proteins in interactions and list are in same id",false,false));
 		options.addOption(OptionFactory.createOption("bioentity-name", "Select interactome"));
@@ -25,14 +25,12 @@ public class Snow extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("label-genes-prots", "Label for list of genes/proteins"));
 		options.addOption(OptionFactory.createOption("nature-filter", "Nature of your lists"));
 		options.addOption(OptionFactory.createOption("interactions-number", "Nature of your lists"));
-		
 	}
 
 
 	@Override
 	public void execute() {
 		try {
-
 			Dataset dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
 			String bioEntityName = commandLine.getOptionValue("bioentity-name");
 			String bioentityInteractionsCheck = commandLine.getOptionValue("interactions-check", null);
@@ -52,9 +50,6 @@ public class Snow extends BabelomicsTool {
 		} catch (InvalidColumnIndexException e) {
 			e.printStackTrace();
 		}
-		
-		
-		
 	}
 	
 	private void executeSnow(Dataset dataset, String bioEntityName,	String bioentityInteractionsCheck, String bioentityListGenesProts, String bioentityInteracionsFile, String bioentityGenesProtsFile,	String bioentityLabelGenProts, String bioentityNatureFilter, String bioentityInteracionsNumber) {

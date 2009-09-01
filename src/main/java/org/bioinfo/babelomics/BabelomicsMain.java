@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.tools.BabelomicsFactory;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.commons.utils.StringUtils;
 
 public class BabelomicsMain {
 
@@ -53,12 +54,10 @@ public class BabelomicsMain {
 			
 		} catch (ParseException e) {
 			tool.printUsage("./babelomics.sh");
-			tool.printError("parseexception_main_babelomicsmain", "An error while parsing the command line", e.toString(), e);
-			tool.abort("parseexception_main_babelomics", "ParseException from Main in command line parse");
+			tool.abort("parseexception_main_babelomics", "ParseException from Main in command line parse", e.toString(), StringUtils.getStackTrace(e));
 		} catch (IOException e) {
 			tool.printUsage("./babelomics.sh");	
-			tool.printError("ioexception_main_babelomicsmain", "An error while parsing the command line", e.toString(), e);
-			tool.abort("ioexception_main_babelomics", "IOException from Main in command line parse");
+			tool.abort("ioexception_main_babelomics", "IOException from Main in command line parse", e.toString(), StringUtils.getStackTrace(e));
 		}
 	}
 
