@@ -19,6 +19,7 @@ public class DifferentialAnalysisTest {
 		
 	}
 	
+	@Test
 	public void test() {
 		System.out.println("-----   ttest  ------");
 		String []args = {"-tool", "differential-expression","-dataset", "/mnt/commons/test/biodata/example/twoclasses.txt", "-o", "/tmp/ttest", "-test", "t-test", "-class", "class"};
@@ -30,6 +31,7 @@ public class DifferentialAnalysisTest {
 		}		
 	}
 	
+	@Test
 	public void test1() {
 					    
 		System.out.println("-----   pearson ------");
@@ -43,7 +45,7 @@ public class DifferentialAnalysisTest {
 		}		
 	}
 	
-
+	@Test
 	public void test2() {
 		System.out.println("-----  spearman ------");
 		//String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/spearman", "-test", "spearman", "-class", "O2_conc"};
@@ -56,6 +58,7 @@ public class DifferentialAnalysisTest {
 		}		
 	}
 	
+	@Test
 	public void test3() {
 		System.out.println("-----  regression  ------");
 		//String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/regression", "-test", "regression", "-class", "O2_conc"};
@@ -69,6 +72,7 @@ public class DifferentialAnalysisTest {
 	}
 	
 	
+	@Test
 	public void test4() {
 		System.out.println("----- cox ------");
 		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/survival.txt", "-o", "/tmp/cox", "-test", "cox", "-time-class", "time", "-censored-class", "censored"};
@@ -80,6 +84,7 @@ public class DifferentialAnalysisTest {
 		}		
 	}
 
+	@Test
 	public void test5() {
 		System.out.println("----- anova ------");
 		String []args = {"-tool", "differential-expression","-dataset", "/mnt/commons/test/biodata/example/multiclasses.txt", "-o", "/tmp/anova", "-test", "anova", "-class", "class"};
@@ -94,9 +99,10 @@ public class DifferentialAnalysisTest {
 		}		
 	}
 	
+	@Test
 	public void test6() {
 		System.out.println("----- masigpro ------");
-		String []args = {"-tool", "differential-expression", "-dataset", "/home/joaquin/tests/masigpro/masigpro.dataset", "-o", "/home/joaquin/tests/masigpro/out", "-test", "masigpro", "-contin-class", "contin", "-series-class", "series"};
+		String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/masigpro.dataset", "-o", "/tmp/masigpro", "-test", "masigpro", "-contin-class", "contin", "-series-class", "series"};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -104,5 +110,4 @@ public class DifferentialAnalysisTest {
 			e.printStackTrace();
 		}		
 	}
-
 }

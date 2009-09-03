@@ -33,7 +33,7 @@ public class Preprocessing extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("filter-missing", "minimum percentage of existing values, from 0 to 100", false));
 		options.addOption(OptionFactory.createOption("impute-missing", "method to impute missing values, valid values are: zero, mean, median, knn", false));
 		options.addOption(OptionFactory.createOption("kvalue", "kvalue for knn impute method, default 15", false));
-		options.addOption(OptionFactory.createOption("gene-list-filter", "This option will remove all the patterns of the genes that are not present in this gene list", false));
+		options.addOption(OptionFactory.createOption("gene-file-filter", "This option will remove all the patterns of the genes that are not present in this gene file", false));
 		//		options.addOption(OptionFactory.createOption("sample-filter", "class variable", false));
 		//		options.addOption(OptionFactory.createOption("feature-filter", "class variable", false));
 	}
@@ -50,7 +50,7 @@ public class Preprocessing extends BabelomicsTool {
 		String mergeMethod = commandLine.getOptionValue("merge-replicates", null);
 		String filterPercentage = commandLine.getOptionValue("filter-missing", null);
 		String imputeMethod = commandLine.getOptionValue("impute-missing", null);
-		String filterFilename = commandLine.getOptionValue("gene-list-filter", null);
+		String filterFilename = commandLine.getOptionValue("gene-file-filter", null);
 
 		int progress = 1, finalProgress = 3;
 		if ( logBase != null && !("none".equalsIgnoreCase(logBase)) ) finalProgress++;
@@ -64,8 +64,7 @@ public class Preprocessing extends BabelomicsTool {
 			try {
 				kvalue = Integer.parseInt(commandLine.getOptionValue("kvalue", "15"));
 			} catch (NumberFormatException e) {
-				printError("numberformatexception_execute_preprocessing", "Invalid k-value '" + commandLine.getOptionValue("kvalue", "15") + "' for knn imputation", e.toString(), e);
-				abort("Invalid k-value for knn imputation", e.toString());
+				abort("numberformatexception_execute_preprocessing", "Invalid k-value '" + commandLine.getOptionValue("kvalue", "15") + "' for knn imputation", e.toString(), StringUtils.getStackTrace(e));
 			}
 			imputeMethodMsg = imputeMethodMsg + ", k-value = " + kvalue;
 		}
@@ -73,21 +72,18 @@ public class Preprocessing extends BabelomicsTool {
 		try {
 			jobStatus.addStatusMessage("" + (progress*100/finalProgress), "reading dataset");
 		} catch (FileNotFoundException e) {
-			printError("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), e);
-			abort("Job status file not found", e.toString());
+			abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
 
 		String datasetPath = commandLine.getOptionValue("dataset");
 		if ( datasetPath == null ) {
-			printError("missingdataset_execute_preprocessing", "Missing dataset", "Missing dataset");
-			abort("Missing dataset", "Missing dataset");
+			abort("missingdataset_execute_preprocessing", "Missing dataset", "Missing dataset", "Missing dataset");
 		}
 		File datasetFile = new File(commandLine.getOptionValue("dataset"));
 		try {
 			dataset = new Dataset(datasetFile);
 		} catch (Exception e) {
-			printError("exception_execute_preprocessing", "error reading dataset '" + datasetFile.getName() + "'", e.toString(), e);
-			abort("Error reading dataset '" + datasetFile.getName() + "'", e.toString());
+			abort("exception_execute_preprocessing", "error reading dataset '" + datasetFile.getName() + "'", e.toString(), StringUtils.getStackTrace(e));
 		}		
 
 		//		if(commandLine.hasOption("sample-filter") || commandLine.hasOption("feature-filter")) {
@@ -95,8 +91,7 @@ public class Preprocessing extends BabelomicsTool {
 		//		}
 		
 		if ( dataset == null ) {
-			printError("datasetisnull_execute_preprocessing", "dataset is null", "Dataset is null after reading file '" + datasetFile.getName() + "'");
-			abort("Dataset is null", "Dataset is null after reading file '" + datasetFile.getName() + "'");			
+			abort("datasetisnull_execute_preprocessing", "dataset is null", "Dataset is null after reading file '" + datasetFile.getName() + "'", "Dataset is null after reading file " + datasetFile.getAbsolutePath());
 		}
 		
 		progress++;
@@ -110,8 +105,7 @@ public class Preprocessing extends BabelomicsTool {
 			try {
 				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "applying logarithm base " + logBase);
 			} catch (FileNotFoundException e) {
-				printError("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), e);
-				abort("Job status file not found before applying logarithm", e.toString());
+				abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 			}
 			logger.debug("executing logarithm base " + logBase + "...\n");
 
@@ -120,8 +114,7 @@ public class Preprocessing extends BabelomicsTool {
 					try {
 						dataset.load();
 					} catch (Exception e) {
-						printError("exception_logbase_execute_preprocessing", "Error loading dataset '" + datasetFile.getName() + "' before applying logarithm base " + logBase, e.toString(), e);
-						abort("Error loading dataset '" + datasetFile.getName() + "' before applying logarithm base " + logBase, e.toString());
+						abort("exception_logbase_execute_preprocessing", "Error loading dataset '" + datasetFile.getName() + "' before applying logarithm base " + logBase, e.toString(), StringUtils.getStackTrace(e));
 					}
 					dataset.validate();
 				}
@@ -130,8 +123,7 @@ public class Preprocessing extends BabelomicsTool {
 				dataset.validate();					
 			} 
 			catch (CloneNotSupportedException e) {
-				printError("cloneexecption_logbase_execute_preprocessing", "logarithm base preprocessing error", e.toString(), e);
-				abort("logarithm base preprocessing error", e.toString());
+				abort("cloneexecption_logbase_execute_preprocessing", "logarithm base preprocessing error", e.toString(), StringUtils.getStackTrace(e));
 			}
 			logger.debug("end of executing logarithm base " + logBase + "\n");
 			progress++;
@@ -143,8 +135,7 @@ public class Preprocessing extends BabelomicsTool {
 			try {
 				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "merging replicated rows (" + mergeMethod + ")");
 			} catch (FileNotFoundException e) {
-				printError("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), e);
-				abort("Job status file not found before merging replicated rows", e.toString());
+				abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 			}
 			logger.debug("merging replicated rows (" + mergeMethod + ")...\n");
 
@@ -152,8 +143,7 @@ public class Preprocessing extends BabelomicsTool {
 				try {
 					dataset.load();
 				} catch (Exception e) {
-					printError("exception_mergereplicated_execute_preprocessing", "Error loading dataset '" + datasetFile.getName() + "' before merging replicated rows with method " + mergeMethod, e.toString(), e);
-					abort("Error loading dataset '" + datasetFile.getName() + "' before merging replicated rows with method " + mergeMethod, e.toString());
+					abort("exception_mergereplicated_execute_preprocessing", "Error loading dataset '" + datasetFile.getName() + "' before merging replicated rows with method " + mergeMethod, e.toString(), StringUtils.getStackTrace(e));
 				}
 				dataset.validate();
 			}
@@ -161,8 +151,7 @@ public class Preprocessing extends BabelomicsTool {
 			try {
 				dataset = dataset.mergeReplicatedFeatures(mergeMethod);
 			} catch (Exception e) {
-				printError("exception_mergereplicated_execute_preprocessing", "Error merging replicated rows with method " + mergeMethod, e.toString(), e);
-				abort("Error merging replicated rows with method " + mergeMethod, e.toString());
+				abort("exception_mergereplicated_execute_preprocessing", "Error merging replicated rows with method " + mergeMethod, e.toString(), StringUtils.getStackTrace(e));
 			}
 
 			logger.debug("end of merging replicated rows (" + mergeMethod + ")\n");
@@ -176,8 +165,7 @@ public class Preprocessing extends BabelomicsTool {
 			try {
 				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "filtering missing values by percentage " + filterPercentage);
 			} catch (FileNotFoundException e) {
-				printError("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), e);
-				abort("Job status file not found before filtering missing values", e.toString());
+				abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 			}
 			logger.debug("filtering missing values by percentage " + filterPercentage + "...\n");
 
@@ -185,8 +173,7 @@ public class Preprocessing extends BabelomicsTool {
 				try {
 					dataset.load();
 				} catch (Exception e) {
-					printError("exception_filterpermissingvalues_execute_preprocessing", "Error loading dataset '" + datasetFile.getName() + "' before filtering by missing values, percentage " + filterPercentage + "%", e.toString(), e);
-					abort("Error loading dataset '" + datasetFile.getName() + "' before filtering by missing values, percentage " + filterPercentage + "%", e.toString());
+					abort("exception_filterpermissingvalues_execute_preprocessing", "Error loading dataset '" + datasetFile.getName() + "' before filtering by missing values, percentage " + filterPercentage + "%", e.toString(), StringUtils.getStackTrace(e));
 				}
 				dataset.validate();
 			}
@@ -198,8 +185,7 @@ public class Preprocessing extends BabelomicsTool {
 				dataset.validate();
 
 			} catch (Exception e) {
-				printError("exception_filterbymissingvalues_execute_preprocessing", "Error filtering by missing values, percentage value of " + filterPercentage + "%", e.toString(), e);
-				abort("Error filtering by missing values, percentage value of " + filterPercentage + "%", e.toString());
+				abort("exception_filterbymissingvalues_execute_preprocessing", "Error filtering by missing values, percentage value of " + filterPercentage + "%", e.toString(), StringUtils.getStackTrace(e));
 			}
 			logger.debug("end of filtering missing values by percentage " + filterPercentage + "\n");
 			progress++;
@@ -212,8 +198,7 @@ public class Preprocessing extends BabelomicsTool {
 			try {
 				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "imputing missing values (" + imputeMethodMsg + ")");
 			} catch (FileNotFoundException e) {
-				printError("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), e);
-				abort("Job status file not found before applying imputing missing values", e.toString());
+				abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 			}
 			logger.debug("imputing missing values (" + imputeMethodMsg + ")...\n");
 			try {
@@ -221,8 +206,7 @@ public class Preprocessing extends BabelomicsTool {
 					try {
 						dataset.load();
 					} catch (Exception e) {
-						printError("exception_imputingmissingvalues_execute_preprocessing", "Error loading dataset '" + datasetFile.getName() + "' before imputing missing values with method " + imputeMethodMsg, e.toString(), e);
-						abort("Error loading dataset '" + datasetFile.getName() + "' before imputing missing values with method " + imputeMethodMsg, e.toString());
+						abort("exception_imputingmissingvalues_execute_preprocessing", "Error loading dataset '" + datasetFile.getName() + "' before imputing missing values with method " + imputeMethodMsg, e.toString(), StringUtils.getStackTrace(e));
 					}
 					dataset.validate();
 				}
@@ -238,8 +222,7 @@ public class Preprocessing extends BabelomicsTool {
 				dataset.validate();
 
 			} catch (CloneNotSupportedException e) {
-				printError("cloneexecption_imputemissingvalues_execute_preprocessing", "Error imputing missing values with method " + imputeMethodMsg, e.toString(), e);
-				abort("Error imputing missing values with method " + imputeMethodMsg, e.toString());
+				abort("cloneexeption_imputemissingvalues_execute_preprocessing", "Error imputing missing values with method " + imputeMethodMsg, e.toString(), StringUtils.getStackTrace(e));
 			}	
 			logger.debug("end of imputing missing values (" + imputeMethodMsg + ")\n");
 			progress++;
@@ -251,8 +234,7 @@ public class Preprocessing extends BabelomicsTool {
 			try {
 				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "filtering by names");
 			} catch (FileNotFoundException e) {
-				printError("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), e);
-				abort("Job status file not found before filtering by names", e.toString());
+				abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 			}
 			logger.debug("filtering by names...\n");
 
@@ -260,8 +242,7 @@ public class Preprocessing extends BabelomicsTool {
 				try {
 					dataset.load();
 				} catch (Exception e) {
-					printError("exception_filterbynames_execute_preprocessing", "Error loading dataset '" + datasetFile.getName() + "' before filtering by names", e.toString(), e);
-					abort("Error loading dataset '" + datasetFile.getName() + "' before filtering by names", e.toString());
+					abort("exception_filterbynames_execute_preprocessing", "Error loading dataset '" + datasetFile.getName() + "' before filtering by names", e.toString(), StringUtils.getStackTrace(e));
 				}
 				dataset.validate();
 			}
@@ -280,8 +261,7 @@ public class Preprocessing extends BabelomicsTool {
 				
 				
 			} catch (IOException e) {
-				printError("ioexecption_filterbynames_execute_preprocessing", "Error reading names from file '" + new File(filterFilename).getName() + "' when filtering by names", e.toString(), e);
-				abort("Error reading names from file '" + new File(filterFilename).getName() + "' when filtering by names", e.toString());
+				abort("ioexecption_filterbynames_execute_preprocessing", "Error reading names from file '" + new File(filterFilename).getName() + "' when filtering by names", e.toString(), StringUtils.getStackTrace(e));
 			}
 			
 			//System.out.println("valid genes = " + ListUtils.toString(validGenes));
@@ -298,8 +278,7 @@ public class Preprocessing extends BabelomicsTool {
 				try {
 					dataset = dataset.filterRows(rows);
 				} catch (Exception e) {
-					printError("exception_filterbynames_execute_preprocessing", "Error filtering rows by names", e.toString(), e);
-					abort("Error filtering rows by names", e.toString());
+					abort("exception_filterbynames_execute_preprocessing", "Error filtering rows by names", e.toString(), StringUtils.getStackTrace(e));
 				}
 				dataset.validate();					
 			}
@@ -314,25 +293,15 @@ public class Preprocessing extends BabelomicsTool {
 		try {
 			jobStatus.addStatusMessage("" + (progress*100/finalProgress), "saving results");
 		} catch (FileNotFoundException e) {
-			printError("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), e);
-			abort("Job status file not found before saving results", e.toString());
+			abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
 		
 		try {
 			dataset.write(new File(this.getOutdir() + "/preprocessed.txt"));
 			result.addOutputItem(new Item("prepocessed_file", "preprocessed.txt", "The preprocessed file is: ", TYPE.FILE));
 		} catch (IOException e) {
-			printError("ioexception_savingresults_execute_preprocessing", "error saving output file", e.toString(), e);
-			abort("Error saving output file", e.toString());
-		}
-
-		
-		try {
-			jobStatus.addStatusMessage("100", "done");
-		} catch (FileNotFoundException e) {
-			printError("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), e);
-			abort("Job status file not found when setting done status", e.toString());
-		}
+			abort("ioexception_savingresults_execute_preprocessing", "error saving output file", e.toString(), StringUtils.getStackTrace(e));
+		}		
 	}
 
 

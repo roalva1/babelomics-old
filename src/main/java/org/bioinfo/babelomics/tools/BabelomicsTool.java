@@ -41,17 +41,7 @@ public abstract class BabelomicsTool extends GenericBioTool {
 		// must be in commandLine, just in case we initialize...
 		this.toolName = commandLine.getOptionValue("tool", "");
 		this.species = commandLine.getOptionValue("species", "unknown");
-	}
-
-	/* (non-Javadoc)
-	 * @see org.bioinfo.tool.GenericBioTool#abort(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public void abort(String msg, String description) {
-		super.abort(msg, description);
-	}
-
-	
+	}	
 	
 	/**
 	 * @param species the species to set

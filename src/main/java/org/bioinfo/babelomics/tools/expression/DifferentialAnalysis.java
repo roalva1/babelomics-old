@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math.MathException;
@@ -37,6 +38,7 @@ import org.bioinfo.math.stats.correlation.CorrelationTest;
 import org.bioinfo.math.stats.inference.AnovaTest;
 import org.bioinfo.math.stats.inference.TTest;
 import org.bioinfo.math.stats.survival.CoxTest;
+import org.bioinfo.math.util.MathUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -814,6 +816,11 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		ScoreFeature feature;
 		for(int i=0 ; i<rowOrder.length ; i++) {
 			row = rowOrder[i];
+//			System.out.println("row = " + Arrays.toString(dataset.getDoubleMatrix().getRow(row)));
+//			System.out.println("row mean = " + MathUtils.mean(dataset.getDoubleMatrix().getRow(row)));
+//			System.out.println("row deviation = " + MathUtils.standardDeviation(dataset.getDoubleMatrix().getRow(row)));
+//			System.exit(-1);
+			
 			mean = dataset.getDoubleMatrix().getRowMean(row);
 			deviation = dataset.getDoubleMatrix().getRowStdDeviation(row);
 			min = Double.MAX_VALUE;
@@ -824,14 +831,16 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				if ( min > values[column] ) min = values[column];
 				if ( max < values[column] ) max = values[column];
 			}
+			
 			offset = ( min <= 0 ) ? Math.abs(min) : (-1 * min);
+			//System.out.println("mean = " + mean + ", deviation = " + deviation + ", min = " + min + ", max = " + max + ", offset = " + offset);
 			for(int j=0 ; j<columnOrder.length ; j++) {
 				column = columnOrder[j];
 				//System.out.print("row, column = " + row + ", " + column + ": value = "); System.out.println(dataset.getDoubleMatrix().get(row, column));
 //				feature = new ScoreFeature("name (" + column + ", " + row + ")", "", 0, 0, (dataset.getDoubleMatrix().get(row, column)-min)/(max-min));
 				//standard = (deviation == 0) ? Double.NaN : (dataset.getDoubleMatrix().get(row, column)-mean)/(deviation);
 				standard = (values[column] + offset) / ( max + offset);
-//				System.out.println("(value, standard) = (" + dataset.getDoubleMatrix().get(row, column) + ", " + standard + ")");
+				//System.out.println("(value, standard) = (" + dataset.getDoubleMatrix().get(row, column) + ", " + standard + ")");
 				feature = new ScoreFeature("name, " + dataset.getDoubleMatrix().get(row, column), "", 0, 0, standard);
 				//feature = new ScoreFeature("name (" + row + ", " + column + ")", "", 0, 0, dataset.getDoubleMatrix().get(row, column));
 				//feature.setJsFunction("http://www.cipf.es");
