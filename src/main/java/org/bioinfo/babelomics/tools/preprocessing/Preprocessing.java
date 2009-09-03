@@ -1,7 +1,9 @@
 package org.bioinfo.babelomics.tools.preprocessing;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -233,7 +235,7 @@ public class Preprocessing extends BabelomicsTool {
 
 		// filter by gene names
 		//
-		if ( filterFilename != null ) {
+		if ( filterFilename != null && !("none".equalsIgnoreCase(filterFilename)) ) {
 			try {
 				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "filtering by names");
 			} catch (FileNotFoundException e) {
@@ -301,7 +303,7 @@ public class Preprocessing extends BabelomicsTool {
 		
 		try {
 			dataset.write(new File(this.getOutdir() + "/preprocessed.txt"));
-			result.addOutputItem(new Item("prepocessed_file", "preprocessed.txt", "The preprocessed file is: ", TYPE.FILE));
+			result.addOutputItem(new Item("prepocessed_file", "preprocessed.txt", "The preprocessed file", TYPE.FILE));
 		} catch (IOException e) {
 			abort("ioexception_savingresults_execute_preprocessing", "error saving output file", e.toString(), StringUtils.getStackTrace(e));
 		}		
