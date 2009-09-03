@@ -29,7 +29,7 @@ public class Preprocessing extends BabelomicsTool {
 	public void initOptions() {
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
 		options.addOption(OptionFactory.createOption("logarithm-base", "the logarithm base to apply transformation, possible values: e, 2 10 for log base 2, log base 2 and log base 10", false));
-		options.addOption(OptionFactory.createOption("merge-replicates", "method to merge replicates, valid values are: mean, median", false));
+		options.addOption(OptionFactory.createOption("merge-replicates", "method to merge replicates, valid values are: mean or median", false));
 		options.addOption(OptionFactory.createOption("filter-missing", "minimum percentage of existing values, from 0 to 100", false));
 		options.addOption(OptionFactory.createOption("impute-missing", "method to impute missing values, valid values are: zero, mean, median, knn", false));
 		options.addOption(OptionFactory.createOption("kvalue", "kvalue for knn impute method, default 15", false));
@@ -38,10 +38,12 @@ public class Preprocessing extends BabelomicsTool {
 		//		options.addOption(OptionFactory.createOption("feature-filter", "class variable", false));
 	}
 
-
+	public void execute2() {
+		
+	}
+	
 	@Override
 	public void execute() {
-
 		Dataset dataset = null;
 
 		int kvalue = 15;
@@ -52,7 +54,8 @@ public class Preprocessing extends BabelomicsTool {
 		String imputeMethod = commandLine.getOptionValue("impute-missing", null);
 		String filterFilename = commandLine.getOptionValue("gene-file-filter", null);
 
-		int progress = 1, finalProgress = 3;
+		int progress = 1;
+		int finalProgress = 3;
 		if ( logBase != null && !("none".equalsIgnoreCase(logBase)) ) finalProgress++;
 		if ( mergeMethod != null && !("none".equalsIgnoreCase(mergeMethod)) ) finalProgress++;
 		if ( filterPercentage != null && !("none".equalsIgnoreCase(filterPercentage)) ) finalProgress++;
@@ -62,7 +65,7 @@ public class Preprocessing extends BabelomicsTool {
 		imputeMethodMsg = imputeMethod;
 		if ( "knn".equalsIgnoreCase(imputeMethod) ) {
 			try {
-				kvalue = Integer.parseInt(commandLine.getOptionValue("kvalue", "15"));
+				kvalue = Integer.parseInt(commandLine.getOptionValue("k-value", "15"));
 			} catch (NumberFormatException e) {
 				abort("numberformatexception_execute_preprocessing", "Invalid k-value '" + commandLine.getOptionValue("kvalue", "15") + "' for knn imputation", e.toString(), StringUtils.getStackTrace(e));
 			}
@@ -103,7 +106,7 @@ public class Preprocessing extends BabelomicsTool {
 		if ( logBase != null && !("none".equalsIgnoreCase(logBase)) ) {
 
 			try {
-				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "applying logarithm base " + logBase);
+				jobStatus.addStatusMessage(StringUtils.decimalFormat((double)progress*100/finalProgress, "##.00"), "applying logarithm base " + logBase);
 			} catch (FileNotFoundException e) {
 				abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 			}
