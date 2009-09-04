@@ -1,6 +1,11 @@
 package org.bioinfo.babelomics.tools.functional;
 
 
+import java.io.IOException;
+
+import org.apache.commons.cli.ParseException;
+import org.bioinfo.babelomics.tools.BabelomicsFactory;
+import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +22,18 @@ public class FatiGOTest {
 	
 	@Test
 	public void Test0() {
+		String list1 = "/mnt/commons/test/example.motor";
+		String list2 = "/mnt/commons/test/example.apoptosis";
+		String []args = {"--tool", "fatigo" ,"--list1", list1, "--list2", list2, "--go-bp-db", "-o", "/tmp/fatigo"};
+		try {
+			FatiGO fatigo = (FatiGO)BabelomicsFactory.createTool("fatigo",args);
+			fatigo.parse(args);
+			fatigo.run();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (IOException e) {			
+			e.printStackTrace();
+		}
 		
 	}
 
@@ -27,7 +44,7 @@ public class FatiGOTest {
 		//String []args = {"-list1", "/mnt/commons/test/biodata/example/list3.txt", "-o", "/tmp", "-list2", "/mnt/commons/test/biodata/example/list4.txt", "--go-bp-db", "true", "--go-bp-min-level", "5", "--go-bp-max-level", "5"};
 		try {
 			FatiGO fatigo = new FatiGO();
-			fatigo.execute();
+			fatigo.execute();			
 		} catch (Exception e) {
 			e.printStackTrace();
 			//System.out.println(e.toString());

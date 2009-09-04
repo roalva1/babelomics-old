@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
@@ -16,58 +17,51 @@ import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.core.Gene;
 import org.bioinfo.infrared.core.dbsql.GeneDBManager;
 import org.bioinfo.infrared.core.dbsql.XRefDBManager;
+import org.bioinfo.infrared.funcannot.dbsql.AnnotationDBManager;
+import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
 import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
+import org.bioinfo.infrared.funcannot.filter.KeggFilter;
+import org.bioinfo.infrared.funcannot.filter.Keywords;
 import org.bioinfo.math.stats.inference.FisherExactTest;
 import org.bioinfo.tool.OptionFactory;
 
 
 public abstract class FunctionalProfilingTool extends BabelomicsTool {
 
-	// commons
-	//
-	private FeatureData featureData;
-	private FeatureData featureData2;
-
-	private String species;
-
+	// input data		
 	private boolean restOfGenome;
-	private String chromosome;
-	private int chromosomeStart;
-	private int chromosomeEnd;
-
-	private int testMode;
-	private String removeDuplicates;
 	
-	private int NumberOfPartitions;
+	// test
+	private int testMode;
+	
+	// other capabilities
+	private String removeDuplicates;	
 	
 	// GO biological process
-	//
-	private boolean goBpDB;
-	private int goBpMinLevel, goBpMaxLevel, goBpMinNumberGenes, goBpMaxNumberGenes;
-	private String goBpDBKeywords, goBpDBKeywordsLogic;
-	private boolean goBpAllGenome, goBpInclusive;
+	protected List<GOFilter> goBpFilterList;
+	protected List<GOFilter> goMfFilterList;
+	protected List<GOFilter> goCcFilterList;
+	protected KeggFilter keggFilter;
+	protected BiocartaFilter biocartaFilter;
+	
+	
+//	private int goBpMinLevel, goBpMaxLevel, goBpMinNumberGenes, goBpMaxNumberGenes;
+//	private String goBpDBKeywords, goBpDBKeywordsLogic;
+//	private boolean goBpAllGenome, goBpInclusive;
 
 	public static String REMOVE_NEVER = "never";
 	public static String REMOVE_EACH = "each";
 	public static String REMOVE_REF = "ref";
 
-	public static String FISHER_LESS = "less";
-	public static String GREATER = "greater";
-	public static String TWO_SIDED = "two_sided";
-
-//	public FunctionalProfilingTool(String[] args) {
-//	}
 
 	@Override
 	public void initOptions() {
 
 		// commons options
-		//
 		getOptions().addOption(OptionFactory.createOption("test-mode", "the Fisher test mode, valid values: less, greater, two_sided. By default, two_sided", false));
 		
 		// GO biological process options
-		//
 		getOptions().addOption(OptionFactory.createOption("go-bp-db", "GO biological process database",false,false));
 		getOptions().addOption(OptionFactory.createOption("go-bp-inclusive", "GO biological process, inclusive analysis (one per GO level), otherwise joins GO levels",false,false));
 		getOptions().addOption(OptionFactory.createOption("go-bp-min-level", "GO biological process, min go level to take into account, default 3",false));
@@ -78,44 +72,52 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		getOptions().addOption(OptionFactory.createOption("go-bp-keywords", "GO biological process, keywords filter",false));
 		getOptions().addOption(OptionFactory.createOption("go-bp-keywords-logic", "GO biological process, keywords filter logic: all or any",false));
 
-		// GO molecular function options
-		//
+		// kegg
+		getOptions().addOption(OptionFactory.createOption("kegg-db", "Kegg database",false,false));
+		getOptions().addOption(OptionFactory.createOption("kegg-min-num-genes", "Kegg min number of genes",false));
+		getOptions().addOption(OptionFactory.createOption("kegg-max-num-genes", "Kegg max number of genes",false));
+		getOptions().addOption(OptionFactory.createOption("kegg-count-genes-from-genome", "computes the number of annotated genes from all genome, otherwise from you input list",false,false));
+		
+		// biocarta
+		getOptions().addOption(OptionFactory.createOption("biocarta-db", "Biocarta database",false,false));
+		getOptions().addOption(OptionFactory.createOption("biocarta-min-num-genes", "Biocarta min number of genes",false));
+		getOptions().addOption(OptionFactory.createOption("biocarta-max-num-genes", "Biocarta max number of genes",false));
+		getOptions().addOption(OptionFactory.createOption("biocarta-count-genes-from-genome", "computes the number of annotated genes from all genome, otherwise from you input list",false,false));
 
-
-		// GO cellular component options
-		//
 
 
 	}
 
-	public void prepare(CommandLine cmdLine) throws IOException, ParseException {
+	public void prepare(CommandLine cmdLine) throws IOException, ParseException, InvalidColumnIndexException{
 
-		// commons
-		//
-		setSpecies(cmdLine.getOptionValue("species","hsa"));			
-
-		if  ( FISHER_LESS.equals(cmdLine.getOptionValue("test-mode")) ) {
-			setTestMode(FisherExactTest.LESS);
-		} else if ( FISHER_LESS.equals(cmdLine.getOptionValue("test-mode")) ) {
-			setTestMode(FisherExactTest.GREATER);			
-		} else {
-			setTestMode(FisherExactTest.TWO_SIDED);			
+		// species
+		setSpecies(cmdLine.getOptionValue("species","hsa"));
+		
+		// fisher test
+		String testMode = cmdLine.getOptionValue("test-mode", "two-sided");
+		if(testMode.equals("less")) setTestMode(FisherExactTest.LESS);
+		if(testMode.equals("greater")) setTestMode(FisherExactTest.GREATER);
+		if(testMode.equals("two-sided")) setTestMode(FisherExactTest.TWO_SIDED);
+		
+		// go bp
+		if(cmdLine.hasOption("go-bp-db")) {
+			goBpFilterList = new ArrayList<GOFilter>();
+			if(cmdLine.hasOption("go-bp-inclusive")) {
+				throw new ParseException("inclusive analysis not yet implemented");
+			} else {
+				GOFilter goBpFilter = new GOFilter("biological_process");
+				goBpFilter.setMinLevel(Integer.parseInt(cmdLine.getOptionValue("go-bp-min-level","5")));
+				goBpFilter.setMaxLevel(Integer.parseInt(cmdLine.getOptionValue("go-bp-max-level","12")));
+				goBpFilter.setMinNumberGenes(Integer.parseInt(cmdLine.getOptionValue("go-bp-min-num-genes","5")));	
+				goBpFilter.setMaxNumberGenes(Integer.parseInt(cmdLine.getOptionValue("go-bp-max-num-genes","500")));				
+				goBpFilter.setLogicalOperator(cmdLine.getOptionValue("go-bp-keywords-logic","AND"));				
+			}			
 		}
-
-		// GO biological process database
-		//
-		if( cmdLine.hasOption("go-bp-db") ) {
-			setGoBpDB(cmdLine.hasOption("go-bp-db"));
-			setGoBpInclusive(cmdLine.hasOption("go-bp-inclusive"));
-			setGoBpMinLevel(Integer.parseInt(cmdLine.getOptionValue("go-bp-min-level","5")));
-			setGoBpMaxLevel(Integer.parseInt(cmdLine.getOptionValue("go-bp-max-level","12")));
-			setGoBpMinNumberGenes(Integer.parseInt(cmdLine.getOptionValue("go-bp-min-num-genes","5")));	
-			setGoBpMaxNumberGenes(Integer.parseInt(cmdLine.getOptionValue("go-bp-max-num-genes","500")));
-			setGoBpAllGenome(cmdLine.hasOption("go-bp-all-genome"));
-			setGoBpDBKeywords(cmdLine.getOptionValue("go-bp-keywords",""));
-			setGoBpDBKeywordsLogic(cmdLine.getOptionValue("go-bp-keywords-logic","AND"));
-			setGoBpDBKeywords(cmdLine.getOptionValue("go-bp-keywords",""));
-			setGoBpDBKeywordsLogic(cmdLine.getOptionValue("go-bp-keywords-logic","AND"));
+		if(cmdLine.hasOption("kegg-db")) {
+			keggFilter = new KeggFilter(Integer.parseInt(cmdLine.getOptionValue("kegg-min-num-genes","5")),Integer.parseInt(cmdLine.getOptionValue("kegg-max-num-genes","500")));			
+		}
+		if(cmdLine.hasOption("biocarta-db")) {
+			biocartaFilter = new BiocartaFilter(Integer.parseInt(cmdLine.getOptionValue("biocarta-min-num-genes","5")),Integer.parseInt(cmdLine.getOptionValue("biocarta-max-num-genes","500")));			
 		}
 	}
 
@@ -156,9 +158,12 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 				System.out.println(">>>>> getAllByExternalIds returns null");
 				ensemblIds = null;
 			} else {
-				for(List<String> stringList: list) {
-					for(String ensemblId: stringList) {
-						ensemblIds.add(ensemblId);
+				
+				for(List<String> stringList: list) {					
+					if(stringList!=null){
+						for(String ensemblId: stringList) {						
+							ensemblIds.add(ensemblId);
+						}
 					}
 //				for(FeatureList<Gene> featureList: list) {
 //					ensemblIds.addAll(featureList.getFeaturesIds());
@@ -208,125 +213,29 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		}
 	}
 
-	public Filter getFilter() {
-		if ( isGoBpDB() ) {
-			logger.info("go biological process");
-
-			// creating GO biological process filter
-			//
-			GOFilter gof = new GOFilter("biological_process", getGoBpMinLevel(), getGoBpMaxLevel(), getGoBpMinNumberGenes(), getGoBpMaxNumberGenes());
-			gof.setLogicalOperator(getGoBpDBKeywordsLogic());
-			if ( getGoBpDBKeywords() != null && !getGoBpDBKeywords().equalsIgnoreCase("")) {
-				logger.info("adding the keywords: " + getGoBpDBKeywords());
-				gof.addKeyword(getGoBpDBKeywords());
-			}
-			return gof;
-		}
-		return null;
-	}
+//	public Filter getFilter() {
+//		if ( isGoBpDB() ) {
+//			logger.info("go biological process");
+//
+//			// creating GO biological process filter
+//			//
+//			GOFilter gof = new GOFilter("biological_process", getGoBpMinLevel(), getGoBpMaxLevel(), getGoBpMinNumberGenes(), getGoBpMaxNumberGenes());
+//			gof.setLogicalOperator(getGoBpDBKeywordsLogic());
+//			if ( getGoBpDBKeywords() != null && !getGoBpDBKeywords().equalsIgnoreCase("")) {
+//				logger.info("adding the keywords: " + getGoBpDBKeywords());
+//				gof.addKeyword(getGoBpDBKeywords());
+//			}
+//			return gof;
+//		}
+//		return null;
+//	}
 	
-	public String getDbTarget() {
-		if ( isGoBpDB() ) {
-			return FuncTest.GO;
-		}
-		return null;
-	}
-
-	public FeatureData getFeatureData() {
-		return featureData;
-	}
-
-	public void setFeatureData(FeatureData featureData) {
-		this.featureData = featureData;
-	}
-
-	public String getSpecies() {
-		return species;
-	}
-
-	public void setSpecies(String species) {
-		this.species = species;
-	}
-
-	public boolean isGoBpDB() {
-		return goBpDB;
-	}
-
-	public void setGoBpDB(boolean goBpDB) {
-		this.goBpDB = goBpDB;
-	}
-
-	public boolean isGoBpAllGenome() {
-		return goBpAllGenome;
-	}
-
-	public void setGoBpAllGenome(boolean goBpAllGenome) {
-		this.goBpAllGenome = goBpAllGenome;
-	}
-
-	public int getGoBpMinLevel() {
-		return goBpMinLevel;
-	}
-
-	public void setGoBpMinLevel(int goBpMinLevel) {
-		this.goBpMinLevel = goBpMinLevel;
-	}
-
-	public int getGoBpMaxLevel() {
-		return goBpMaxLevel;
-	}
-
-	public void setGoBpMaxLevel(int goBpMaxLevel) {
-		this.goBpMaxLevel = goBpMaxLevel;
-	}
-
-	public int getGoBpMinNumberGenes() {
-		return goBpMinNumberGenes;
-	}
-
-	public void setGoBpMinNumberGenes(int goBpMinNumberGenes) {
-		this.goBpMinNumberGenes = goBpMinNumberGenes;
-	}
-
-	public int getGoBpMaxNumberGenes() {
-		return goBpMaxNumberGenes;
-	}
-
-	public void setGoBpMaxNumberGenes(int goBpMaxNumberGenes) {
-		this.goBpMaxNumberGenes = goBpMaxNumberGenes;
-	}
-
-	public String getGoBpDBKeywords() {
-		return goBpDBKeywords;
-	}
-
-	public void setGoBpDBKeywords(String goBpDBKeywords) {
-		this.goBpDBKeywords = goBpDBKeywords;
-	}
-
-	public String getGoBpDBKeywordsLogic() {
-		return goBpDBKeywordsLogic;
-	}
-
-	public void setGoBpDBKeywordsLogic(String goBpDBKeywordsLogic) {
-		this.goBpDBKeywordsLogic = goBpDBKeywordsLogic;
-	}
-
-	public boolean isGoBpInclusive() {
-		return goBpInclusive;
-	}
-
-	public void setGoBpInclusive(boolean goBpInclusive) {
-		this.goBpInclusive = goBpInclusive;
-	}
-
-	public void setFeatureData2(FeatureData featureData2) {
-		this.featureData2 = featureData2;
-	}
-
-	public FeatureData getFeatureData2() {
-		return featureData2;
-	}
+//	public String getDbTarget() {
+//		if ( isGoBpDB() ) {
+//			return FuncTest.GO;
+//		}
+//		return null;
+//	}
 
 	public void setRestOfGenome(boolean restOfGenome) {
 		this.restOfGenome = restOfGenome;
@@ -336,29 +245,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		return restOfGenome;
 	}
 
-	public void setChromosome(String chromosome) {
-		this.chromosome = chromosome;
-	}
-
-	public String getChromosome() {
-		return chromosome;
-	}
-
-	public void setChromosomeStart(int chromosomeStart) {
-		this.chromosomeStart = chromosomeStart;
-	}
-
-	public int getChromosomeStart() {
-		return chromosomeStart;
-	}
-
-	public void setChromosomeEnd(int chromosomeEnd) {
-		this.chromosomeEnd = chromosomeEnd;
-	}
-
-	public int getChromosomeEnd() {
-		return chromosomeEnd;
-	}
+	
 
 	public void setTestMode(int testMode) {
 		this.testMode = testMode;
@@ -374,14 +261,6 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 
 	public String getRemoveDuplicates() {
 		return removeDuplicates;
-	}
-
-	public void setNumberOfPartitions(int numberOfPartitions) {
-		NumberOfPartitions = numberOfPartitions;
-	}
-
-	public int getNumberOfPartitions() {
-		return NumberOfPartitions;
 	}
 
 

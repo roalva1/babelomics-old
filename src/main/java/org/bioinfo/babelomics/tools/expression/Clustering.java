@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
@@ -12,6 +13,7 @@ import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
+import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.format.core.newick.NewickTree;
 import org.bioinfo.data.format.io.NewickParser;
@@ -46,49 +48,51 @@ public class Clustering extends BabelomicsTool {
 
 	@Override
 	public void execute() {
+		int kvalue = 15;
 		Dataset dataset = null;
 		String method = commandLine.getOptionValue("method");
 
 		String distance = commandLine.getOptionValue("distance", "euclidean");
-		String kvalue = commandLine.getOptionValue("time-class", "15");
+		
+		try {
+			kvalue = Integer.parseInt(commandLine.getOptionValue("kvalue", "15"));
+		} catch (NumberFormatException e ) {
+			if ( "kmeans".equalsIgnoreCase(method) ) {
+				abort("invalidkvalue_execute_clustering", "Invalid k-value", e.toString(), StringUtils.getStackTrace(e));
+			}
+		}
 
 		String datasetPath = commandLine.getOptionValue("dataset");
 		if ( datasetPath == null ) {
-			printError("missingdataset_execute_clustering", "Missing dataset", "Missing dataset");
-			abort("Missing dataset", "Missing dataset");
+			abort("missingdataset_execute_clustering", "Missing dataset", "Missing dataset", "Missing dataset");
 		}
 
 		if ( method == null ) {
-			printError("missingclusteringmethod_execute_clustering", "Missing clustering method", "Missing clustering method");
-			abort("Missing clustering method", "Missing clustering method");
+			abort("missingclusteringmethod_execute_clustering", "Missing clustering method", "Missing clustering method", "Missing clustering method");
 		}
 
 		if ( !"upgma".equalsIgnoreCase(method) && !"sota".equalsIgnoreCase(method) && !"som".equalsIgnoreCase(method) && !"kmeans".equalsIgnoreCase(method) ) {
-			printError("unknowncluteringmethod_execute_clustering", "Unknown clustering method", "Unknown clustering method");
-			abort("Unknown clustering method", "Unknown clustering method");			
+			abort("unknownclusteringmethod_execute_clustering", "Unknown clustering method", "Unknown clustering method '" + method + "'", "Unknown clustering method '" + method + "'");			
 		}
 		
 		try {
 			jobStatus.addStatusMessage("20", "reading dataset");
 		} catch (FileNotFoundException e) {
-			printError("filenotfoundexception_execute_clustering", "job status file not found", e.toString(), e);
-			abort("Job status file not found", e.toString());
+			abort("filenotfoundexception_execute_clustering", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
 
 		File datasetFile = new File(commandLine.getOptionValue("dataset"));
 		try {
 			dataset = new Dataset(datasetFile);
 		} catch (Exception e) {
-			printError("exception_execute_clustering", "error reading dataset '" + datasetFile.getName() + "'", e.toString(), e);
-			abort("Error reading dataset '" + datasetFile.getName() + "'", e.toString());
+			abort("exception_execute_clustering", "error reading dataset '" + datasetFile.getName() + "'", e.toString(), StringUtils.getStackTrace(e));
 		}		
 
 		if ( dataset.getDoubleMatrix() == null ) { 
 			try {
 				dataset.load();
 			} catch (Exception e) {
-				printError("exception_execute_clustering", "Error loading dataset '" + datasetFile.getName() + "'", e.toString(), e);
-				abort("Error loading dataset '" + datasetFile.getName() + "'", e.toString());
+				abort("exception_execute_clustering", "Error loading dataset '" + datasetFile.getName() + "'", e.toString(), StringUtils.getStackTrace(e));
 			}
 			dataset.validate();
 		}
@@ -97,66 +101,24 @@ public class Clustering extends BabelomicsTool {
 //			dataset = dataset.getSubDataset(commandLine.getOptionValue("sample-filter"), "4", commandLine.getOptionValue("feature-filter"), ""); 
 //		}
 
-		if ( "upgma".equalsIgnoreCase(method) ) {
-			
-			executeUpgma(dataset, distance);
-			
-		} else if ( "sota".equalsIgnoreCase(method) ) {
-			
-			executeSota(dataset, distance);
-			
-		} else if ( "som".equalsIgnoreCase(method) ) {
-			
-			executeSom(dataset, distance);
-			
-		} else if ( "kmeans".equalsIgnoreCase(method) ) {
-			
-			int k;
-			try {
-				k = Integer.parseInt(kvalue);
-				executeKmeans(dataset, distance, k);
-			} catch (NumberFormatException e ) {
-				logger.error("Invalid k-value: " + kvalue);
-			}
+		
+		if ( !"kmeans".equalsIgnoreCase(method) && !"upgma".equalsIgnoreCase(method)  &&
+			 !"sota".equalsIgnoreCase(method)   && !"som".equalsIgnoreCase(method) ) {
+			abort("unknownclusteringmethod_execute_clustering", "Unknown clustering method '" + method + "'", "Unknown clustering method '" + method + "'", "Unknown clustering method '" + method + "'");
 		}
 		
-		try {
-			jobStatus.addStatusMessage("100", "done");
-		} catch (FileNotFoundException e) {
-			printError("filenotfoundexception_execute_clustering", "job status file not found", e.toString(), e);
-			abort("Job status file not found", e.toString());
-		}
-
-	}
-
-
-	private void executeUpgma(Dataset dataset, String distance) {
-		logger.info("executing upgma, not implemented yet");
-	}
-
-	private void executeSom(Dataset dataset, String distance) {
-		logger.info("executing som, not implemented yet");
-	}
-
-	private void executeKmeans(Dataset dataset, String distance, int kvalue) {
-		logger.info("executing kmeans, not implemented yet");
-	}
-
-	private void executeSota(Dataset dataset, String distance) {
-
 		NewickTree nwGenes = null, nwSamples = null;
 		
 		try {
 			jobStatus.addStatusMessage("40", "generating genes clusters");
 		} catch (FileNotFoundException e) {
-			printError("filenotfoundexception_execute_clustering", "job status file not found", e.toString(), e);
-			abort("Job status file not found", e.toString());
+			printError("filenotfoundexception_execute_clustering", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
 
 		try {
-			nwGenes = runSota(dataset.getDoubleMatrix(), dataset.getFeatureNames(), dataset.getSampleNames(), distance);
+			nwGenes = runClustering(dataset.getDoubleMatrix(), dataset.getFeatureNames(), dataset.getSampleNames(), method, distance, kvalue);
 		} catch (Exception e) {
-			printError("exception_executesota_clustering", "error running sota algorithm for genes", e.toString(), e);
+			printError("exception_executesota_clustering", "error running " + method + " algorithm for genes", e.toString(), e);
 		}
 		
 		if ( nwGenes != null ) {
@@ -172,14 +134,13 @@ public class Clustering extends BabelomicsTool {
 		try {
 			jobStatus.addStatusMessage("60", "generating samples clusters");
 		} catch (FileNotFoundException e) {
-			printError("filenotfoundexception_execute_clustering", "job status file not found", e.toString(), e);
-			abort("Job status file not found", e.toString());
+			abort("filenotfoundexception_execute_clustering", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
 
 		try {
-			nwSamples = runSota(new DoubleMatrix(dataset.getDoubleMatrix().transpose().getData()), dataset.getSampleNames(), dataset.getFeatureNames(), distance);
+			nwSamples = runClustering(new DoubleMatrix(dataset.getDoubleMatrix().transpose().getData()), dataset.getSampleNames(), dataset.getFeatureNames(), method, distance, kvalue);
 		} catch (Exception e) {
-			printError("exception_executesota_clustering", "error running sota algorithm for samples", e.toString(), e);
+			printError("exception_execute" + method + "_clustering", "error running " + method + " algorithm for samples", e.toString(), e);
 		}
 		
 		if ( nwSamples != null ) {
@@ -187,7 +148,7 @@ public class Clustering extends BabelomicsTool {
 				IOUtils.write(new File(this.getOutdir() + "/samples.nw"), nwGenes.toString());
 				result.addOutputItem(new Item("sample_newick_file", "samples.nw", "Clusters of samples (newick format file)", TYPE.FILE));
 			} catch (IOException e) {
-				printError("ioexception_executesota_clustering", "error saving samples newick", e.toString(), e);
+				printError("ioexception_execute" + method + "_clustering", "error saving samples newick", e.toString(), e);
 				nwSamples = null;
 			}			
 		}
@@ -195,42 +156,44 @@ public class Clustering extends BabelomicsTool {
 		try {
 			jobStatus.addStatusMessage("80", "generating clustering image");
 		} catch (FileNotFoundException e) {
-			printError("filenotfoundexception_execute_clustering", "job status file not found", e.toString(), e);
-			abort("Job status file not found", e.toString());
+			abort("filenotfoundexception_execute_clustering", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
 
 		if ( nwGenes != null && nwSamples != null ) {
 			try {
-				String imgFilename = this.getOutdir() + "/sota";
-				saveImageTree(dataset.getDoubleMatrix(), nwGenes, nwSamples, imgFilename);
+				String imgFilename = this.getOutdir() + "/" + method;
+				
+				int rowOrder[] = getOrder(nwGenes.getLabels(), dataset.getFeatureNames());
+				int columnOrder[] = getOrder(nwSamples.getLabels(), dataset.getSampleNames());
+				DoubleMatrix matrix = orderMatrix(dataset.getDoubleMatrix(), rowOrder, columnOrder);
+				
+				saveImageTree(matrix, nwGenes, nwSamples, imgFilename);
 				File imgFile = new File(imgFilename + ".png");
 				if ( imgFile.exists() ) {
-					result.addOutputItem(new Item("sota_clustering_image", "sota.png", "SOTA clustering image (png format)", TYPE.IMAGE));					
+					result.addOutputItem(new Item(method + "_clustering_image", method + ".png", method.toUpperCase() + " clustering image (png format)", TYPE.IMAGE));					
 				} else {
-					printError("executesota_clustering", "error saving clustering image", "error saving clustering image");					
+					printError("execute" + method + "_clustering", "error saving clustering image", "error saving clustering image");					
 				}
 			} catch (IOException e) {
-				printError("ioexception_executesota_clustering", "error saving clustering image", e.toString(), e);
+				printError("ioexception_execute" + method + "_clustering", "error saving clustering image", e.toString(), e);
 			}
 		}
 	}
 
 
-	
-	
-	
-	
 	//--------------------------------------------------------------------------------------
 	// The following functions must be located in another library for re-usability purposes
 	//--------------------------------------------------------------------------------------
 	
 
-	private NewickTree runSota(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String distance) throws IOException, InvalidFormatException {
+	private NewickTree runClustering(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String method, String distance, int kvalue) throws IOException, InvalidFormatException {
 		NewickTree tree = null;
 
 		File inputFile = File.createTempFile("input", null);
 		File outputFile = File.createTempFile("output", null);
 
+		System.out.println("(infile, outfile) = (" + inputFile.getAbsolutePath() + ", " + outputFile.getAbsolutePath() + ")");
+		
 		List<String> lines = new ArrayList<String>(rowNames.size() + 1);
 		lines.add("#NAMES\t" + ListUtils.toString(colNames, "\t"));
 		for(int i=0 ; i<rowNames.size() ; i++) {
@@ -238,7 +201,17 @@ public class Clustering extends BabelomicsTool {
 		}
 		IOUtils.write(inputFile, lines);
 		
-		String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/sota " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath() + " " + distance + " -newick";
+		String cmdStr = null;
+		if ( "sota".equalsIgnoreCase(method) ) {
+			cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/sota " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath() + " " + distance + " -newick";
+		} else if ( "som".equalsIgnoreCase(method) ) {
+			
+		} else if ( "upgma".equalsIgnoreCase(method) ) {
+			cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/cluster " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath() + " UPGMA " + distance;			
+		} else if ( "kmeans".equalsIgnoreCase(method) ) {
+			
+		}
+		
 		Command cmd = new Command(cmdStr); 
 		SingleProcess sp = new SingleProcess(cmd);
 		sp.runSync();
@@ -247,8 +220,8 @@ public class Clustering extends BabelomicsTool {
 			tree = new NewickParser().parse(IOUtils.toString(outputFile));
 		}
 		
-		inputFile.delete();
-		outputFile.delete();
+		//inputFile.delete();
+		//outputFile.delete();
 		
 		return tree;
 	}
@@ -256,37 +229,35 @@ public class Clustering extends BabelomicsTool {
 	
 	private void saveImageTree(DoubleMatrix matrix, NewickTree vTree, NewickTree hTree, String imgFilename) throws IOException {
 		
-		int x = 2;				
-		int y = 2;
 		int cellSide = 20;
-		int rowLabelsWidth = 50;
-		int colLabelsWidth = 50;
+		int rowLabelsWidth = getMaxStringLengh(vTree.getLabels())*9;
+		int colLabelsWidth = getMaxStringLengh(hTree.getLabels())*9;
 		int infoWidth = 0;
+		
 		
 		int rowDimension = vTree.getNumberOfLeaves();
 		int columnDimension = hTree.getNumberOfLeaves();
-		
-		Canvas canvas = new Canvas("");
-		canvas.setBorderWidth(0);
-		canvas.setBorderPadding(0);
-		canvas.setBorderColor(Color.BLACK);
-		canvas.setBackGroundColor(Color.WHITE);
-		canvas.setHeight((rowDimension + hTree.getNumberOfLevels()) * cellSide + colLabelsWidth + 100);
-		canvas.setWidth((columnDimension + vTree.getNumberOfLevels()) * cellSide + rowLabelsWidth + 100);
-		
+				
 		System.out.println("sizes from trees: rows = " + rowDimension + ", cols = " + columnDimension);
 		System.out.println("sizes from matrix: rows = " + matrix.getRowDimension() + ", cols = " + matrix.getColumnDimension());
 		
-		NewickPanel newickHPanel = new NewickPanel("", rowDimension*cellSide+2, (hTree.getNumberOfLevels() * cellSide)+2, 2 + x + (vTree.getNumberOfLevels()*cellSide) + rowLabelsWidth, y);
-		NewickTrack nwTrack = new NewickTrack("", "", 0, Color.WHITE);
+		NewickPanel newickHPanel = new NewickPanel("", hTree.getNumberOfLeaves() * cellSide, 
+													   hTree.getNumberOfLevels() * cellSide, 
+													   rowLabelsWidth + (vTree.getNumberOfLevels() * cellSide), 
+													   0);
+		NewickTrack nwTrack = new NewickTrack("", "", 0, Color.RED);
 		nwTrack.setNewick(hTree);
 		nwTrack.setLevelSeparation(cellSide);
 		nwTrack.setLeafSeparation(cellSide);
 		nwTrack.setShowLabels(false);
 		nwTrack.setVertical(false);
+		newickHPanel.setBorder(2);
 		newickHPanel.add(nwTrack);
 					
-		NewickPanel newickVPanel = new NewickPanel("", (vTree.getNumberOfLevels() * cellSide)+2, (rowDimension * cellSide)+2, x, y + (hTree.getNumberOfLevels() * cellSide) + colLabelsWidth);
+		NewickPanel newickVPanel = new NewickPanel("", vTree.getNumberOfLevels() * cellSide, 
+													   vTree.getNumberOfLeaves() * cellSide, 
+													   0, 
+													   colLabelsWidth + (hTree.getNumberOfLevels() * cellSide));
 		nwTrack = new NewickTrack("", "", 0, Color.WHITE);
 		nwTrack.setNewick(vTree);
 		nwTrack.setLevelSeparation(cellSide);
@@ -295,10 +266,14 @@ public class Clustering extends BabelomicsTool {
 		nwTrack.setVertical(true);
 		newickVPanel.add(nwTrack);
 
-		GridPanel gridPanel = new GridPanel("", (rowDimension * cellSide) + rowLabelsWidth + 2 + infoWidth, 
-												(columnDimension * cellSide) + colLabelsWidth + 2, 
-												4 + x + (vTree.getNumberOfLevels()*cellSide), 
-												y + (hTree.getNumberOfLevels() * cellSide));
+		GridPanel gridPanel = new GridPanel("", (rowDimension * cellSide) + rowLabelsWidth + infoWidth, 
+												(columnDimension * cellSide) + colLabelsWidth, 
+												vTree.getNumberOfLevels() * cellSide, 
+												newickHPanel.getHeight());
+//		GridPanel gridPanel = new GridPanel("", (rowDimension * cellSide) + rowLabelsWidth + 2 + infoWidth, 
+//												(columnDimension * cellSide) + colLabelsWidth + 2, 
+//												4 + x + (vTree.getNumberOfLevels()*cellSide), 
+//												y + (hTree.getNumberOfLevels() * cellSide));
 		GridTrack gridTrack = new GridTrack(rowDimension, columnDimension, cellSide, cellSide);
 		gridTrack.setName("g r i d     t r a c k     n a m e");
 		gridTrack.setColumnLabels(hTree.getLabels());
@@ -308,24 +283,82 @@ public class Clustering extends BabelomicsTool {
 		gridTrack.setRightRegion(infoWidth);
 		ScoreFeature feature;
 		
-		
-		
+		double mean, deviation, min, max, offset, standard;
+		double[] values = new double[gridTrack.getColumnDimension()];
 		for(int row=0 ; row<gridTrack.getRowDimension() ; row++) {
+			mean = matrix.getRowMean(row);
+			deviation = matrix.getRowStdDeviation(row);
+			min = Double.MAX_VALUE;
+			max = Double.MIN_NORMAL;
 			for(int column=0 ; column<gridTrack.getColumnDimension() ; column++) {
+				values[column] = (deviation == 0) ? Double.NaN : (matrix.get(row, column)-mean)/(deviation);
+				if ( min > values[column] ) min = values[column];
+				if ( max < values[column] ) max = values[column];
+			}
+			offset = ( min <= 0 ) ? Math.abs(min) : (-1 * min);
+			for(int column=0 ; column<gridTrack.getColumnDimension() ; column++) {
+				standard = (values[column] + offset) / ( max + offset);
 				
-				System.out.println("(" + row + ", " + column + ") = " + matrix.get(row, column));
+				System.out.print(matrix.get(row, column) + "\t");
 //				feature = new ScoreFeature("name (" + column + ", " + row + ")", "description bla, bla, bla", 0, 0, matrix.get(row, column));
-				feature = new ScoreFeature("name (" + column + ", " + row + ")", "description bla, bla, bla", 0, 0, Math.random());
+				feature = new ScoreFeature("name (" + column + ", " + row + ")", "description bla, bla, bla", 0, 0, standard);
 				gridTrack.setFeature(row, column, feature);
 			}
+			System.out.println("");
 		}
 		gridPanel.add(gridTrack);
-					
+
+		Canvas canvas = new Canvas("");
+		canvas.setBorderWidth(0);
+		canvas.setBorderPadding(4);
+		canvas.setSpaceSeparator(0);
+		canvas.setBorderColor(Color.BLACK);
+		canvas.setBackGroundColor(Color.WHITE);
+
+		int canvasHeight = gridPanel.getWidth() + newickHPanel.getHeight() + cellSide;
+		int canvasWidth = gridPanel.getHeight() + newickVPanel.getWidth() + cellSide;
+		System.out.println("canvas height = " + canvasHeight);
+		System.out.println("canvas width  = " + canvasWidth);
+
+		canvas.setHeight(canvasHeight);
+		canvas.setWidth(canvasWidth);
+		
+		
 		canvas.addPanel(gridPanel);
 		canvas.addPanel(newickHPanel);
 		canvas.addPanel(newickVPanel);
 		
 		canvas.render();
 		canvas.save(imgFilename);		
-	}	
+	}
+
+	private int getMaxStringLengh(List<String> names) {
+		int max = 0;
+		for(String name: names) {
+			if ( name.length() > max ) {
+				max = name.length();
+			}
+		}
+		return max;
+	}
+	
+	private int[] getOrder(List<String> src, List<String> dest) {
+		int order[] = new int[src.size()];
+		int i=0;
+		for(String name: src) {
+			order[i++] = dest.indexOf(name);
+		}
+		return order;
+	}
+
+	private DoubleMatrix orderMatrix(DoubleMatrix inputMatrix, int rowOrder[], int columnOrder[]) {
+		DoubleMatrix matrix = new DoubleMatrix(inputMatrix.getRowDimension(), inputMatrix.getColumnDimension());
+		for(int row=0 ; row<matrix.getRowDimension() ; row++) {
+			for(int col=0 ; col<matrix.getColumnDimension() ; col++) {
+				matrix.set(row, col, inputMatrix.get(rowOrder[row], columnOrder[col]));
+			}
+		}				
+		return matrix;
+	}
+
 }
