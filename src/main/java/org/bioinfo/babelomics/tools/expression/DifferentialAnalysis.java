@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math.MathException;
@@ -16,7 +17,10 @@ import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.collections.list.NamedArrayList;
 import org.bioinfo.collections.matrix.DataFrame;
+import org.bioinfo.commons.io.TextFileWriter;
+import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
+import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.graphics.canvas.Canvas;
@@ -36,6 +40,7 @@ import org.bioinfo.math.stats.correlation.CorrelationTest;
 import org.bioinfo.math.stats.inference.AnovaTest;
 import org.bioinfo.math.stats.inference.TTest;
 import org.bioinfo.math.stats.survival.CoxTest;
+import org.bioinfo.math.util.MathUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -50,10 +55,12 @@ public class DifferentialAnalysis extends BabelomicsTool {
 	@Override
 	public void initOptions() {
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("test", "the test, possible values: t-test, bayes, sam, fold-change, anova, pearson, spearman, regression, cox"));
+		options.addOption(OptionFactory.createOption("test", "the test, possible values: t-test, bayes, sam, fold-change, anova, pearson, spearman, regression, cox, masigpro"));
 		options.addOption(OptionFactory.createOption("class", "class variable", false));
 		options.addOption(OptionFactory.createOption("time-class", "class variable", false));
-		options.addOption(OptionFactory.createOption("censored-class", "class variable", false));
+		options.addOption(OptionFactory.createOption("censored-class", "class class variable", false));
+		options.addOption(OptionFactory.createOption("contin-class", "contin class variable", false));
+		options.addOption(OptionFactory.createOption("series-class", "series class variable", false));
 		options.addOption(OptionFactory.createOption("sample-filter", "class variable", false));
 		options.addOption(OptionFactory.createOption("feature-filter", "class variable", false));
 	}
@@ -127,10 +134,16 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			executeCox(dataset, timeClass, censoredClass);
 			return;
 		}
+		if (test.equals("masigpro")) {
+			String continClass = commandLine.getOptionValue("contin-class", null);
+			String seriesClass = commandLine.getOptionValue("series-class", null);
+
+			executeMaSigPro(dataset, continClass, seriesClass);
+			return;
+		}
 
 		logger.warn("que raroo....");
 	}
-
 
 	private void executeTTest(Dataset dataset, String className) {
 		logger.info("executing t-test");
@@ -211,12 +224,15 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			bw.write(dataFrame.toString(true, true));
 			bw.close();
 
-			result.addOutputItem(new Item("ttest_file", "ttest.txt", "The t-test file is: ", TYPE.FILE));
-			result.addOutputItem(new Item("ttest_heatmap", "ttest_heatmap.png", "The t-test heatmap is: ", TYPE.IMAGE));
 
-			Item item = new Item("ttest_table", "ttest_table.txt", "The t-test table is: ", TYPE.FILE);
+			result.addOutputItem(new Item("ttest_file", "ttest.txt", "T-test file", TYPE.FILE));
+			
+			Item item = new Item("ttest_table", "ttest_table.txt", "T-test table", TYPE.FILE);
 			item.addTag("TABLE");
 			result.addOutputItem(item);
+
+			result.addOutputItem(new Item("ttest_heatmap", "ttest_heatmap.png", "T-test heatmap", TYPE.IMAGE));
+
 			
 			// done
 			//
@@ -349,6 +365,11 @@ public class DifferentialAnalysis extends BabelomicsTool {
 	}
 
 	private void executeCorrelation(Dataset dataset, String className, String test) {
+		
+		if ( "none".equalsIgnoreCase(className) ) {
+			abort("executecorrelation_differentialexpression", "Missing independent variable to test", "Missing independent variable to test", "Missing independent variable to test");
+		}
+		
 		logger.info("executing " + test);
 		List<String> vars = dataset.getVariables().getByName(className).getValues();
 		List<Double> doubleVars = new ArrayList<Double>(vars.size());
@@ -372,7 +393,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				dataset.validate();
 			}
 
-			// spearman test
+			// correlation test
 			//
 			jobStatus.addStatusMessage("40", "computing " + test + " correlation");
 			logger.debug("computing " + test + " correlation...\n");
@@ -408,21 +429,22 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(new File(getOutdir() + "/" + test + "_correlation.txt"));
 
-			BufferedWriter bw = new BufferedWriter(new FileWriter(getOutdir() + "/" + test + "_table.txt"));
-			bw.write(dataFrame.toString(true, true));
-			bw.close();
-			
-			result.addOutputItem(new Item(test + "_correlation_file", test + "_correlation.txt", "The " + test + " correlation file is: ", TYPE.FILE));
-			result.addOutputItem(new Item(test + "_correlation_heatmap", test + "_heatmap.png", "The " + test + " correlation heatmap is: ", TYPE.IMAGE));
+			IOUtils.write(new File(getOutdir() + "/" + test + "_correlation_table.txt"), dataFrame.toString(true, true));
 
-			Item item = new Item(test + "_table", test + "_table.txt", "The " + test + " table is: ", TYPE.FILE);
+			Item item;
+			
+			item = new Item(test + "_correlation_file", test + "_correlation.txt", "Correlation file", TYPE.FILE);
+			item.setGroup(test.toUpperCase() + " results");
+			result.addOutputItem(item);
+			
+			item = new Item(test + "_correlation_table", test + "_correlation_table.txt", "Correlation table", TYPE.FILE);
 			item.addTag("TABLE");
+			item.setGroup(test.toUpperCase() +" results");
 			result.addOutputItem(item);
 
-			// done
-			//
-			jobStatus.addStatusMessage("100", "done");
-			logger.debug(test + " correlation done\n");
+			item = new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " Heatmap", TYPE.IMAGE);
+			item.setGroup(test.toUpperCase() + " results");
+			result.addOutputItem(item);			
 		} catch (java.security.InvalidParameterException e) {
 			logger.error("not valid parameter: execute " + test + " correlation");
 			e.printStackTrace();
@@ -478,9 +500,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			TestResultList<SimpleRegressionTestResult> res = regression.compute(dataset.getDoubleMatrix(), doubleVars);
 
 			int[] columnOrder = ListUtils.order(vars);
-			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
-
-			
+			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);			
 			
 			// generating heatmap
 			//
@@ -508,21 +528,22 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(new File(getOutdir() + "/regression.txt"));
 
-			BufferedWriter bw = new BufferedWriter(new FileWriter(getOutdir() + "/regression_table.txt"));
-			bw.write(dataFrame.toString(true, true));
-			bw.close();
+			IOUtils.write(new File(getOutdir() + "/regression_table.txt"), dataFrame.toString(true, true));
 
-			result.addOutputItem(new Item("regression_file", "regression.txt", "The regression file is: ", TYPE.FILE));
-			result.addOutputItem(new Item("regression_heatmap", "regression_heatmap.png", "The regression heatmap is: ", TYPE.IMAGE));
-
-			Item item = new Item("regression_table", "regression_table.txt", "The regression table is: ", TYPE.FILE);
+			Item item;
+			
+			item = new Item("regression_file", "regression.txt", "Regression file", TYPE.FILE);
+			item.setGroup("Regression results");
+			result.addOutputItem(item);
+			
+			item = new Item("regression_table", "regression_table.txt", "Regression table", TYPE.FILE);
 			item.addTag("TABLE");
+			item.setGroup("Regression results");
 			result.addOutputItem(item);
 
-			// done
-			//
-			jobStatus.addStatusMessage("100", "done");
-			logger.debug("regression done\n");
+			item = new Item("regression_heatmap", "regression_heatmap.png", "The regression heatmap is: ", TYPE.IMAGE);
+			item.setGroup("Regression results");
+			result.addOutputItem(item);
 		} catch (java.security.InvalidParameterException e) {
 			logger.error("not valid parameter: execute regression");
 			e.printStackTrace();
@@ -648,6 +669,72 @@ public class DifferentialAnalysis extends BabelomicsTool {
 	}
 
 
+	
+	
+	private void executeMaSigPro(Dataset dataset, String continClass, String seriesClass) {
+		logger.info("executing maSigPro");
+		
+		System.out.println("(continClass, seriesClass) = (" + continClass + ", " + seriesClass + ")");
+		
+		List<String> continVars = dataset.getVariables().getByName(continClass).getValues();
+		List<String> seriesVars = dataset.getVariables().getByName(seriesClass).getValues();
+
+		try {
+			// reading data
+			//
+			jobStatus.addStatusMessage("20", "reading data");
+			logger.debug("reading data...\n");
+
+			if ( dataset.getDoubleMatrix() == null ) { 
+				try {
+					dataset.load();
+				} catch (Exception e) {
+					logger.error("Error loading the dataset", e.toString());
+					return;
+				}
+				dataset.validate();
+			}
+
+			// masigpro test
+			//
+			jobStatus.addStatusMessage("40", "computing maSigPro");
+			logger.debug("computing maSigPro...\n");
+
+			String line, testPath = outdir + "/test/";
+			List<String> names = dataset.getFeatureNames();
+			TextFileWriter writer = new TextFileWriter(testPath + "input.txt");
+			writer.writeLine("#CONTIN\t" + ListUtils.toString(continVars, "\t"));
+			writer.writeLine("#SERIES\t" + ListUtils.toString(seriesVars, "\t"));
+			writer.writeLine("#NAMES\t" + ListUtils.toString(dataset.getSampleNames(), "\t"));
+			for(int i=0 ; i<names.size() ; i++) {
+				line = names.get(i) + "\t";
+				line = line + ListUtils.toString(ListUtils.toList(dataset.getDoubleMatrix().getRow(i)), "\t");
+				writer.writeLine(line);
+			}
+			writer.close();			
+		} catch (java.security.InvalidParameterException e) {
+			logger.error("not valid parameter: execute regression");
+			e.printStackTrace();
+		} catch (MatrixIndexException e) {
+			logger.error("MatrixIndexException: execute regression");
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+//		} catch (MathException e) {
+//			// TODO Auto-generated catch block
+//			logger.error("math exception: execute regression");
+//			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.error("IOException: execute regression");
+			e.printStackTrace();
+//		} catch (InvalidColumnIndexException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+		}
+	}
+	
+	
+	
 	public Canvas generateHeatmap(Dataset dataset, String className, int[] columnOrder, int[] rowOrder, String infoName1, double[] infoList1, String infoName2, double[] infoList2) {
 		int xHeatMap = 2;				
 		int yHeatMap = 2;
@@ -686,6 +773,11 @@ public class DifferentialAnalysis extends BabelomicsTool {
 		ScoreFeature feature;
 		for(int i=0 ; i<rowOrder.length ; i++) {
 			row = rowOrder[i];
+//			System.out.println("row = " + Arrays.toString(dataset.getDoubleMatrix().getRow(row)));
+//			System.out.println("row mean = " + MathUtils.mean(dataset.getDoubleMatrix().getRow(row)));
+//			System.out.println("row deviation = " + MathUtils.standardDeviation(dataset.getDoubleMatrix().getRow(row)));
+//			System.exit(-1);
+			
 			mean = dataset.getDoubleMatrix().getRowMean(row);
 			deviation = dataset.getDoubleMatrix().getRowStdDeviation(row);
 			min = Double.MAX_VALUE;
@@ -696,14 +788,16 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				if ( min > values[column] ) min = values[column];
 				if ( max < values[column] ) max = values[column];
 			}
+			
 			offset = ( min <= 0 ) ? Math.abs(min) : (-1 * min);
+			//System.out.println("mean = " + mean + ", deviation = " + deviation + ", min = " + min + ", max = " + max + ", offset = " + offset);
 			for(int j=0 ; j<columnOrder.length ; j++) {
 				column = columnOrder[j];
 				//System.out.print("row, column = " + row + ", " + column + ": value = "); System.out.println(dataset.getDoubleMatrix().get(row, column));
 //				feature = new ScoreFeature("name (" + column + ", " + row + ")", "", 0, 0, (dataset.getDoubleMatrix().get(row, column)-min)/(max-min));
 				//standard = (deviation == 0) ? Double.NaN : (dataset.getDoubleMatrix().get(row, column)-mean)/(deviation);
 				standard = (values[column] + offset) / ( max + offset);
-//				System.out.println("(value, standard) = (" + dataset.getDoubleMatrix().get(row, column) + ", " + standard + ")");
+				//System.out.println("(value, standard) = (" + dataset.getDoubleMatrix().get(row, column) + ", " + standard + ")");
 				feature = new ScoreFeature("name, " + dataset.getDoubleMatrix().get(row, column), "", 0, 0, standard);
 				//feature = new ScoreFeature("name (" + row + ", " + column + ")", "", 0, 0, dataset.getDoubleMatrix().get(row, column));
 				//feature.setJsFunction("http://www.cipf.es");

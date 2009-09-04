@@ -1,25 +1,56 @@
 package org.bioinfo.babelomics.tools;
 
+import java.io.IOException;
+
+import org.apache.commons.cli.ParseException;
 import org.bioinfo.tool.GenericBioTool;
 import org.bioinfo.tool.OptionFactory;
 
 public abstract class BabelomicsTool extends GenericBioTool {
 	
-	private String species;
+	protected String species;
+	
 	
 	public BabelomicsTool() {
 		initCommonsOptions();
+		initOptions();
 	}
 	
 	public abstract void initOptions();
 	
-	
 	private void initCommonsOptions() {
-//		options.addOption(OptionFactory.createOption("outdir", "o",  "outdir to save the results"));
 		getOptions().addOption(OptionFactory.createOption("tool", "to", "tool name", true));
-//		options.addOption(OptionFactory.createOption("log-file", "name of the log file, default: result.log", false));
-//		options.addOption(OptionFactory.createOption("log-level", "DEBUG -1, INFO -2, WARNING - 3, ERROR - 4, FATAL - 5", false));
-		getOptions().addOption(OptionFactory.createOption("species", "The species of the ids", false));	
+		getOptions().addOption(OptionFactory.createOption("species", "The specie of the ids", false));	
+
+	}
+
+	
+	/* (non-Javadoc)
+	 * @see org.bioinfo.tool.GenericBioTool#parse(java.lang.String[])
+	 */
+	@Override
+	public void parse(String[] args) throws ParseException, IOException {
+		parse(args, false);
+	}
+	
+	
+	/* (non-Javadoc)
+	 * @see org.bioinfo.tool.GenericBioTool#parse(java.lang.String[], boolean)
+	 */
+	@Override
+	public void parse(String[] args, boolean stopAtNoOption) throws ParseException, IOException {
+		super.parse(args, stopAtNoOption);
+		
+		// must be in commandLine, just in case we initialize...
+		this.toolName = commandLine.getOptionValue("tool", "");
+		this.species = commandLine.getOptionValue("species", "unknown");
+	}	
+	
+	/**
+	 * @param species the species to set
+	 */
+	public void setSpecies(String species) {
+		this.species = species;
 	}
 
 	/**
@@ -28,38 +59,5 @@ public abstract class BabelomicsTool extends GenericBioTool {
 	public String getSpecies() {
 		return species;
 	}
-
-	/**
-	 * @param species the species to set
-	 */
-	public void setSpecies(String species) {
-		this.species = species;
-	}
-	
-//	public void parse() throws ParseException, IOException {
-//		commandLine = parser.parse( options, args, true);		
-//		if(commandLine.hasOption("outdir")) {
-//			System.out.println("takin outdir");
-//			this.outdir = commandLine.getOptionValue("outdir");
-//		}
-//		if(commandLine.hasOption("log-file")) {
-//			logger.addLogFile(new File(commandLine.getOptionValue("log-file")));
-//		}
-//		if(commandLine.hasOption("log-level")) {
-//			logger.setLevel(Integer.parseInt(commandLine.getOptionValue("log-level")));
-//		}
-//		
-//		writeInputData();
-//	}
-	
-//	protected void writeInputData() {
-//		for(Option option: commandLine.getOptions()) {
-//			result.addInputItem(new Item(option.getLongOpt(), option.getValue(), option.getDescription(), TYPE.MESSAGE));
-//		}
-//	}
-	
-//	protected void printUsage() {
-//		printUsage("./babelomics.sh");
-//	}
 	
 }
