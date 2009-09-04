@@ -5,6 +5,8 @@ import org.bioinfo.tool.OptionFactory;
 
 public abstract class BabelomicsTool extends GenericBioTool {
 	
+	private String species;
+	
 	public BabelomicsTool() {
 		initCommonsOptions();
 	}
@@ -17,7 +19,21 @@ public abstract class BabelomicsTool extends GenericBioTool {
 		getOptions().addOption(OptionFactory.createOption("tool", "to", "tool name", true));
 //		options.addOption(OptionFactory.createOption("log-file", "name of the log file, default: result.log", false));
 //		options.addOption(OptionFactory.createOption("log-level", "DEBUG -1, INFO -2, WARNING - 3, ERROR - 4, FATAL - 5", false));
-		getOptions().addOption(OptionFactory.createOption("species", "The specie of the ids", false));	
+		getOptions().addOption(OptionFactory.createOption("species", "The species of the ids", false));	
+	}
+
+	/**
+	 * @return the species
+	 */
+	public String getSpecies() {
+		return species;
+	}
+
+	/**
+	 * @param species the species to set
+	 */
+	public void setSpecies(String species) {
+		this.species = species;
 	}
 	
 //	public void parse() throws ParseException, IOException {
