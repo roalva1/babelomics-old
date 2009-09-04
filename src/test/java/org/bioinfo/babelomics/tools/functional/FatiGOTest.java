@@ -26,7 +26,7 @@ public class FatiGOTest {
 		String list2 = "/mnt/commons/test/example.apoptosis";
 		String []args = {"--tool", "fatigo" ,"--list1", list1, "--list2", list2, "--go-bp-db", "-o", "/tmp/fatigo"};
 		try {
-			FatiGO fatigo = (FatiGO)BabelomicsFactory.createTool("fatigo",args);
+			FatiGO fatigo = (FatiGO)BabelomicsFactory.createTool("fatigo");
 			fatigo.parse(args);
 			fatigo.run();
 		} catch (ParseException e) {
