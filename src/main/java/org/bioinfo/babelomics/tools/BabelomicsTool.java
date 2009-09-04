@@ -45,7 +45,13 @@ public abstract class BabelomicsTool extends GenericBioTool {
 		this.species = commandLine.getOptionValue("species", "unknown");
 	}
 	
-	
+	/* (non-Javadoc)
+	 * @see org.bioinfo.tool.GenericBioTool#abort(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public void abort(String name, String title, String msg, String text) {
+		super.abort(name, title, msg, text);
+	}
 	
 	/**
 	 * @param species the species to set
@@ -60,5 +66,7 @@ public abstract class BabelomicsTool extends GenericBioTool {
 	public String getSpecies() {
 		return species;
 	}
+
+	
 	
 }
