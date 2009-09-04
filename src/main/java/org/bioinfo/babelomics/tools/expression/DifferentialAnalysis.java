@@ -18,7 +18,9 @@ import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.collections.list.NamedArrayList;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.TextFileWriter;
+import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
+import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.graphics.canvas.Canvas;
@@ -222,12 +224,15 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			bw.write(dataFrame.toString(true, true));
 			bw.close();
 
-			result.addOutputItem(new Item("ttest_file", "ttest.txt", "The t-test file is: ", TYPE.FILE));
-			result.addOutputItem(new Item("ttest_heatmap", "ttest_heatmap.png", "The t-test heatmap is: ", TYPE.IMAGE));
 
-			Item item = new Item("ttest_table", "ttest_table.txt", "The t-test table is: ", TYPE.FILE);
+			result.addOutputItem(new Item("ttest_file", "ttest.txt", "T-test file", TYPE.FILE));
+			
+			Item item = new Item("ttest_table", "ttest_table.txt", "T-test table", TYPE.FILE);
 			item.addTag("TABLE");
 			result.addOutputItem(item);
+
+			result.addOutputItem(new Item("ttest_heatmap", "ttest_heatmap.png", "T-test heatmap", TYPE.IMAGE));
+
 			
 			// done
 			//
@@ -360,6 +365,11 @@ public class DifferentialAnalysis extends BabelomicsTool {
 	}
 
 	private void executeCorrelation(Dataset dataset, String className, String test) {
+		
+		if ( "none".equalsIgnoreCase(className) ) {
+			abort("executecorrelation_differentialexpression", "Missing independent variable to test", "Missing independent variable to test", "Missing independent variable to test");
+		}
+		
 		logger.info("executing " + test);
 		List<String> vars = dataset.getVariables().getByName(className).getValues();
 		List<Double> doubleVars = new ArrayList<Double>(vars.size());
@@ -383,7 +393,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				dataset.validate();
 			}
 
-			// spearman test
+			// correlation test
 			//
 			jobStatus.addStatusMessage("40", "computing " + test + " correlation");
 			logger.debug("computing " + test + " correlation...\n");
@@ -419,21 +429,22 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(new File(getOutdir() + "/" + test + "_correlation.txt"));
 
-			BufferedWriter bw = new BufferedWriter(new FileWriter(getOutdir() + "/" + test + "_table.txt"));
-			bw.write(dataFrame.toString(true, true));
-			bw.close();
-			
-			result.addOutputItem(new Item(test + "_correlation_file", test + "_correlation.txt", "The " + test + " correlation file is: ", TYPE.FILE));
-			result.addOutputItem(new Item(test + "_correlation_heatmap", test + "_heatmap.png", "The " + test + " correlation heatmap is: ", TYPE.IMAGE));
+			IOUtils.write(new File(getOutdir() + "/" + test + "_correlation_table.txt"), dataFrame.toString(true, true));
 
-			Item item = new Item(test + "_table", test + "_table.txt", "The " + test + " table is: ", TYPE.FILE);
+			Item item;
+			
+			item = new Item(test + "_correlation_file", test + "_correlation.txt", "Correlation file", TYPE.FILE);
+			item.setGroup(test.toUpperCase() + " results");
+			result.addOutputItem(item);
+			
+			item = new Item(test + "_correlation_table", test + "_correlation_table.txt", "Correlation table", TYPE.FILE);
 			item.addTag("TABLE");
+			item.setGroup(test.toUpperCase() +" results");
 			result.addOutputItem(item);
 
-			// done
-			//
-			jobStatus.addStatusMessage("100", "done");
-			logger.debug(test + " correlation done\n");
+			item = new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " Heatmap", TYPE.IMAGE);
+			item.setGroup(test.toUpperCase() + " results");
+			result.addOutputItem(item);			
 		} catch (java.security.InvalidParameterException e) {
 			logger.error("not valid parameter: execute " + test + " correlation");
 			e.printStackTrace();
@@ -489,9 +500,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			TestResultList<SimpleRegressionTestResult> res = regression.compute(dataset.getDoubleMatrix(), doubleVars);
 
 			int[] columnOrder = ListUtils.order(vars);
-			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
-
-			
+			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);			
 			
 			// generating heatmap
 			//
@@ -519,21 +528,22 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(new File(getOutdir() + "/regression.txt"));
 
-			BufferedWriter bw = new BufferedWriter(new FileWriter(getOutdir() + "/regression_table.txt"));
-			bw.write(dataFrame.toString(true, true));
-			bw.close();
+			IOUtils.write(new File(getOutdir() + "/regression_table.txt"), dataFrame.toString(true, true));
 
-			result.addOutputItem(new Item("regression_file", "regression.txt", "The regression file is: ", TYPE.FILE));
-			result.addOutputItem(new Item("regression_heatmap", "regression_heatmap.png", "The regression heatmap is: ", TYPE.IMAGE));
-
-			Item item = new Item("regression_table", "regression_table.txt", "The regression table is: ", TYPE.FILE);
+			Item item;
+			
+			item = new Item("regression_file", "regression.txt", "Regression file", TYPE.FILE);
+			item.setGroup("Regression results");
+			result.addOutputItem(item);
+			
+			item = new Item("regression_table", "regression_table.txt", "Regression table", TYPE.FILE);
 			item.addTag("TABLE");
+			item.setGroup("Regression results");
 			result.addOutputItem(item);
 
-			// done
-			//
-			jobStatus.addStatusMessage("100", "done");
-			logger.debug("regression done\n");
+			item = new Item("regression_heatmap", "regression_heatmap.png", "The regression heatmap is: ", TYPE.IMAGE);
+			item.setGroup("Regression results");
+			result.addOutputItem(item);
 		} catch (java.security.InvalidParameterException e) {
 			logger.error("not valid parameter: execute regression");
 			e.printStackTrace();
@@ -701,60 +711,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 				line = line + ListUtils.toString(ListUtils.toList(dataset.getDoubleMatrix().getRow(i)), "\t");
 				writer.writeLine(line);
 			}
-			writer.close();
-			
-//			cd /home/joaquin/tests/masigpro; cat masigpro.R | data="/home/joaquin/tests/masigpro/out/test/input.txt"  degree="2" Q="0.05" adjust="BH" alfa="0.05" clustermethod="hclust" k="9" main="out"  outdir="/home/joaquin/tests/masigpro/out/test/" R --no-save
-
-			
-			
-			
-//			CoxTest coxtest = new CoxTest();
-//			//System.out.println("input matrix = \n" + dataset.getDoubleMatrix().toString());
-//			TestResultList<CoxTestResult> res = coxtest.compute(dataset.getDoubleMatrix(), timeVars, censoredVars);
-//
-//			int[] columnOrder = ListUtils.order(vars);
-//			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
-//			
-//			// generating heatmap
-//			//
-//			jobStatus.addStatusMessage("60", "generating heatmap");
-//			logger.debug("generating heatmap...\n");
-//
-//			Canvas heatmap = generateHeatmap(dataset, timeClass, columnOrder, rowOrder, "coeff.", res.getCoefs(), "adj. p-value", res.getAdjPValues());
-//			heatmap.save(getOutdir() + "/cox_heatmap");
-//			
-//			// saving data
-//			//
-//			jobStatus.addStatusMessage("80", "saving results");
-//			logger.debug("saving results...");
-//
-//			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
-//			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
-//
-//			//dataFrame.addColumn("id", ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
-//			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
-//			dataFrame.addColumn("coeff.", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getCoefs()), rowOrder)));
-//			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
-//			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
-//
-//			FeatureData featureData = new FeatureData(dataFrame);
-//			featureData.write(new File(getOutdir() + "/cox.txt"));
-//
-//			BufferedWriter bw = new BufferedWriter(new FileWriter(getOutdir() + "/cox_table.txt"));
-//			bw.write(dataFrame.toString(true, true));
-//			bw.close();
-//			
-//			result.addOutputItem(new Item("cox_file", "cox.txt", "The cox file is: ", TYPE.FILE));
-//			result.addOutputItem(new Item("cox_heatmap", "cox_heatmap.png", "The cox heatmap is: ", TYPE.IMAGE));
-//			
-//			Item item = new Item("cox_table", "cox_table.txt", "The cox table is: ", TYPE.FILE);
-//			item.addTag("TABLE");
-//			result.addOutputItem(item);
-
-			// done
-			//
-			jobStatus.addStatusMessage("100", "done");
-			logger.debug("regression done\n");
+			writer.close();			
 		} catch (java.security.InvalidParameterException e) {
 			logger.error("not valid parameter: execute regression");
 			e.printStackTrace();
