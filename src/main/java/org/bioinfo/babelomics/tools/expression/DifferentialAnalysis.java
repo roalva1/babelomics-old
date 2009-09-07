@@ -429,7 +429,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(new File(getOutdir() + "/" + test + "_correlation.txt"));
 
-			IOUtils.write(new File(getOutdir() + "/" + test + "_correlation_table.txt"), dataFrame.toString(true, true));
+			IOUtils.write(new File(getOutdir() + "/" + test + "_table.txt"), dataFrame.toString(true, true));
 
 			Item item;
 			
@@ -437,7 +437,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			item.setGroup(test.toUpperCase() + " results");
 			result.addOutputItem(item);
 			
-			item = new Item(test + "_correlation_table", test + "_correlation_table.txt", "Correlation table", TYPE.FILE);
+			item = new Item(test + "_table", test + "_table.txt", "Correlation table", TYPE.FILE);
 			item.addTag("TABLE");
 			item.setGroup(test.toUpperCase() +" results");
 			result.addOutputItem(item);
