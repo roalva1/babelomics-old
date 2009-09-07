@@ -87,7 +87,7 @@ public class Predictor extends BabelomicsTool {
 					throw new Exception("Babelomics dataset reading not yet implemented");
 				}
 				
-				// class definition
+				// class definition 
 				if(commandLine.hasOption("class")){
 					Attribute classAttr = instances.attribute(commandLine.getOptionValue("class"));
 					if(classAttr==null) throw new Exception("class attribute not found in dataset");
