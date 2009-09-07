@@ -41,7 +41,7 @@ public class Predictor extends BabelomicsTool {
 
 		// classifiers
 		OptionGroup classifiers = new OptionGroup();
-		classifiers.setRequired(true);		
+		classifiers.setRequired(false);		
 			  // KNN
 			classifiers.addOption(OptionFactory.createOption("knn", "Classify dataset with a KNN classifier",false,false));
 			options.addOption(OptionFactory.createOption("knn-tune", "Perform automated number of neighbors tunning",false,false));

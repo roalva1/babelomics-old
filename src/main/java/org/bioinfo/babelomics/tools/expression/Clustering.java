@@ -2,10 +2,9 @@ package org.bioinfo.babelomics.tools.expression;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileNotFoundException; 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
@@ -28,6 +27,7 @@ import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
+
 
 public class Clustering extends BabelomicsTool {
 

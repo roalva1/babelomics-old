@@ -30,29 +30,24 @@ import org.bioinfo.tool.OptionFactory;
 public abstract class FunctionalProfilingTool extends BabelomicsTool {
 
 	// input data		
-	private boolean restOfGenome;
+	protected boolean restOfGenome;
 	
 	// test
-	private int testMode;
+	protected int testMode;
 	
-	// other capabilities
-	private String removeDuplicates;	
 	
-	// GO biological process
-	protected List<GOFilter> goBpFilterList;
-	protected List<GOFilter> goMfFilterList;
-	protected List<GOFilter> goCcFilterList;
-	protected KeggFilter keggFilter;
-	protected BiocartaFilter biocartaFilter;
+// GO biological process
+//	protected List<GOFilter> goBpFilterList;
+//	protected List<GOFilter> goMfFilterList;
+//	protected List<GOFilter> goCcFilterList;
+//	protected KeggFilter keggFilter;
+//	protected BiocartaFilter biocartaFilter;
 	
+	protected List<Filter> filterList;
 	
 //	private int goBpMinLevel, goBpMaxLevel, goBpMinNumberGenes, goBpMaxNumberGenes;
 //	private String goBpDBKeywords, goBpDBKeywordsLogic;
 //	private boolean goBpAllGenome, goBpInclusive;
-
-	public static String REMOVE_NEVER = "never";
-	public static String REMOVE_EACH = "each";
-	public static String REMOVE_REF = "ref";
 
 
 	@Override
@@ -99,9 +94,11 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		if(testMode.equals("greater")) setTestMode(FisherExactTest.GREATER);
 		if(testMode.equals("two-sided")) setTestMode(FisherExactTest.TWO_SIDED);
 		
+		filterList = new ArrayList<Filter>();
+		
 		// go bp
 		if(cmdLine.hasOption("go-bp-db")) {
-			goBpFilterList = new ArrayList<GOFilter>();
+			//goBpFilterList = new ArrayList<GOFilter>();
 			if(cmdLine.hasOption("go-bp-inclusive")) {
 				throw new ParseException("inclusive analysis not yet implemented");
 			} else {
@@ -110,14 +107,17 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 				goBpFilter.setMaxLevel(Integer.parseInt(cmdLine.getOptionValue("go-bp-max-level","12")));
 				goBpFilter.setMinNumberGenes(Integer.parseInt(cmdLine.getOptionValue("go-bp-min-num-genes","5")));	
 				goBpFilter.setMaxNumberGenes(Integer.parseInt(cmdLine.getOptionValue("go-bp-max-num-genes","500")));				
-				goBpFilter.setLogicalOperator(cmdLine.getOptionValue("go-bp-keywords-logic","AND"));				
+				goBpFilter.setLogicalOperator(cmdLine.getOptionValue("go-bp-keywords-logic","AND"));
+				filterList.add(goBpFilter);
 			}			
 		}
 		if(cmdLine.hasOption("kegg-db")) {
-			keggFilter = new KeggFilter(Integer.parseInt(cmdLine.getOptionValue("kegg-min-num-genes","5")),Integer.parseInt(cmdLine.getOptionValue("kegg-max-num-genes","500")));			
+			KeggFilter keggFilter = new KeggFilter(Integer.parseInt(cmdLine.getOptionValue("kegg-min-num-genes","5")),Integer.parseInt(cmdLine.getOptionValue("kegg-max-num-genes","500")));
+			filterList.add(keggFilter);
 		}
 		if(cmdLine.hasOption("biocarta-db")) {
-			biocartaFilter = new BiocartaFilter(Integer.parseInt(cmdLine.getOptionValue("biocarta-min-num-genes","5")),Integer.parseInt(cmdLine.getOptionValue("biocarta-max-num-genes","500")));			
+			BiocartaFilter biocartaFilter = new BiocartaFilter(Integer.parseInt(cmdLine.getOptionValue("biocarta-min-num-genes","5")),Integer.parseInt(cmdLine.getOptionValue("biocarta-max-num-genes","500")));
+			filterList.add(biocartaFilter);
 		}
 	}
 
@@ -150,7 +150,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		try {
 			
 			//List<FeatureList<Gene>> list = new GeneDBManager(dbConnector).getAllByExternalIds(ids);
-			
+			System.err.println("dbconnector" + dbConnector);
 			List<List<String>> list = new XRefDBManager(dbConnector).getIdsByDBName(ids, "ensembl_gene");
 			
 			List<String> ensemblIds = new ArrayList<String>();
