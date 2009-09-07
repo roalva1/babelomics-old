@@ -5,7 +5,7 @@ import org.bioinfo.babelomics.tools.expression.DifferentialAnalysis;
 import org.bioinfo.babelomics.tools.expression.OutlierLrs;
 import org.bioinfo.babelomics.tools.expression.Predictor;
 import org.bioinfo.babelomics.tools.functional.Blast2Go;
-import org.bioinfo.babelomics.tools.functional.FatiGO;
+import org.bioinfo.babelomics.tools.functional.FatiGOTool;
 import org.bioinfo.babelomics.tools.functional.FatiScan;
 import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
@@ -45,7 +45,7 @@ public class BabelomicsFactory {
 		}
 
 		if(toolName.equalsIgnoreCase("fatigo")) {
-			return new FatiGO();
+			return new FatiGOTool();
 		}
 
 		if(toolName.equalsIgnoreCase("fatiscan")) {
