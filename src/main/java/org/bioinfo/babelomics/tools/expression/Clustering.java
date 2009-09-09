@@ -251,7 +251,7 @@ public class Clustering extends BabelomicsTool {
 		nwTrack.setLeafSeparation(cellSide);
 		nwTrack.setShowLabels(false);
 		nwTrack.setVertical(false);
-		newickHPanel.setBorder(2);
+		//newickHPanel.setBorder(2);
 		newickHPanel.add(nwTrack);
 					
 		NewickPanel newickVPanel = new NewickPanel("", vTree.getNumberOfLevels() * cellSide, 

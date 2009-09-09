@@ -2,23 +2,28 @@ package org.bioinfo.babelomics.tools.functional;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.genetics.Chromosome;
+import org.bioinfo.babelomics.methods.functional.FatiGO;
+import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
-import org.bioinfo.commons.Config;
-import org.bioinfo.commons.utils.ListUtils;
+import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
+import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
 import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
-import org.bioinfo.math.result.FisherTestResult;
-import org.bioinfo.math.result.TestResultList;
-import org.bioinfo.math.stats.MultipleTestCorrection;
+import org.bioinfo.infrared.funcannot.filter.KeggFilter;
 import org.bioinfo.tool.OptionFactory;
+import org.bioinfo.tool.result.Item;
 
 public class FatiGOTool extends FunctionalProfilingTool{
 
@@ -75,15 +80,18 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		}
 		
 		// extras
-		setRemoveDuplicates(cmdLine.getOptionValue("remove-duplicates", "never"));
+		String duplicates = cmdLine.getOptionValue("remove-duplicates", "never");
+		if(duplicates.equalsIgnoreCase("each")) duplicatesMode = FatiGO.REMOVE_EACH;
+		if(duplicates.equalsIgnoreCase("ref")) duplicatesMode = FatiGO.REMOVE_REF;
+		if(duplicates.equalsIgnoreCase("all")) duplicatesMode = FatiGO.REMOVE_ALL;		
+		
 	}
 
 	@Override
 	public void execute() {
 		try {
-			// infrared connector
-			Config infraredConfig = new Config(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf");
-			DBConnector dbConnector = new DBConnector(getSpecies(), new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));
+			// infrared connector			
+			DBConnector dbConnector = new DBConnector(getSpecies(), new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));			
 			
 			// prepare params
 			prepare(commandLine);			
@@ -91,14 +99,14 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			// list 1
 			List<String> idList1;
 			
-			idList1 = FunctionalProfilingTool.toEnsembId(dbConnector, list1.getDataFrame().getColumn(0));
+			idList1 = list1.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list1.getDataFrame().getColumn(0));
 			
 			// list 2
-			List<String> idList2;
+			List<String> idList2 = null;
 			if(list2!=null) {
-				idList2 = FunctionalProfilingTool.toEnsembId(dbConnector, list2.getDataFrame().getColumn(0));
-			} else if(isRestOfGenome()) {
-				idList2 = FunctionalProfilingTool.getGenes(dbConnector);
+				idList2 = list2.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list2.getDataFrame().getColumn(0));
+			} else if(isRestOfGenome()) {				
+				duplicatesMode = FatiGO.REMOVE_GENOME;
 			} else if(chromosomes!=null) {
 				throw new ParseException("chromosome comparison not yet implemented");
 			} else {
@@ -109,20 +117,40 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			if(filterList.size()==0){
 				throw new ParseException("No biological database selected (eg. --go-db-bp)");
 			} else {
+				String name,fileName,annotFileName,title,levels;				
 				for(Filter filter: filterList) {
-					// GO
-					if(filter instanceof GOFilter) {						
-						GOFilter goFilter = (GOFilter) filter.clone();
-						logger.info(goFilter.getNamespace() + " (" + goFilter.getMinLevel() + "," + goFilter.getMaxLevel() + ")...\n");
-						
-						FatigoTest fatigo = new FatigoTest(idList1, idList2, goFilter, dbConnector, testMode, duplicatesMode);						
-						fatigo.run();
-						
-						TestResultList<FisherTestResult> testResult = fatigo.getResult();
-						
-						logger.info(goFilter.getNamespace() + " (" + goFilter.getMinLevel() + "," + goFilter.getMaxLevel() + ")\n" + testResult.toString());
-						logger.info("...end of GO " + goFilter.getNamespace());				
-					}
+
+					// db attributes
+					name = getDBName(filter);
+					title = getDBTitle(filter);					
+					fileName = name + ".txt";
+					annotFileName = name + ".annot";
+					
+					logger.info(title + "...\n");
+
+					// init test
+					FatiGO fatigo = null;
+					if(list2!=null) fatigo = new FatiGO(idList1, idList2, filter, dbConnector, testMode, duplicatesMode);
+					else if(isRestOfGenome()) fatigo = new FatiGO(idList1, filter, dbConnector);
+					
+					// run test
+					fatigo.run();
+					
+					// save statistic results
+					List<TwoListFisherTestResult> testResult = fatigo.getResults();
+					List<String> testResultOutput = new ArrayList<String>(testResult.size());
+					testResultOutput.add(TwoListFisherTestResult.header());
+					for(int i=0; i<testResult.size(); i++){
+						testResultOutput.add(testResult.get(i).toString());	
+					}					
+					IOUtils.write(outdir + "/" + fileName, StringUtils.join(testResultOutput,"\n"));
+					result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE"),new HashMap<String,String>(),"Database tests"));
+					// save annotation
+					IOUtils.write(outdir + "/" + annotFileName, fatigo.getAnnotations().toString());
+					result.addOutputItem(new Item("annot_" + name,annotFileName,"Annotations for " + title,Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
+					
+					logger.info("...end of " + title);				
+					
 				}
 			}
 			
@@ -131,4 +159,38 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		}
 		
 	}
+	
+	private String getDBName(Filter filter){
+		String name = StringUtils.randomString();
+		if(filter instanceof GOFilter) {						
+			GOFilter goFilter = (GOFilter) filter.clone();
+			name = "go_" + goFilter.getNamespace() + "_" + goFilter.getMinLevel() + "_" + goFilter.getMaxLevel();
+		} else if(filter instanceof KeggFilter) {
+			name = "kegg";
+		}
+		else if(filter instanceof BiocartaFilter) {
+			name = "biocarta";
+		}
+		return name;
+	}
+	
+	
+	private String getDBTitle(Filter filter){
+		String title = "Untitled",levels;
+		if(filter instanceof GOFilter) {						
+			GOFilter goFilter = (GOFilter) filter.clone();
+			if(goFilter.getMinLevel()==goFilter.getMaxLevel()) {
+				levels = "(level " + goFilter.getMinLevel() + ")";
+			} else{
+				levels = "(levels from " + goFilter.getMinLevel() + " to " + goFilter.getMaxLevel() + ")"; 
+			}						
+			title = "GO " + goFilter.getNamespace().replace("_", " ") + " " + levels;
+		} else if(filter instanceof KeggFilter) {
+			title = "Kegg";
+		} else if(filter instanceof BiocartaFilter) {
+			title = "Biocarta";
+		}
+		return title;
+	}
+
 }

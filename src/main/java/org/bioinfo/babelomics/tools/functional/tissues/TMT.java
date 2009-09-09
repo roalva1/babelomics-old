@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bioinfo.babelomics.methods.functional.InfraredUtils;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.babelomics.tools.functional.FunctionalProfilingTool;
 import org.bioinfo.chart.BoxPlotChart;
@@ -115,7 +116,7 @@ public class TMT  extends BabelomicsTool {
 
 			Map<String, List<String>> geneMap1, geneMap2;
 			
-			geneMap1 = FunctionalProfilingTool.getEnsemblMap(dbConnector, StringUtils.stringToList(IOUtils.toString(f1)));
+			geneMap1 = InfraredUtils.getEnsemblMap(dbConnector, StringUtils.stringToList(IOUtils.toString(f1)));
 			geneMap1 = cleanGeneMap(geneMap1, true);
 			geneList1 = createListFromMap(geneMap1);
 
@@ -137,7 +138,7 @@ public class TMT  extends BabelomicsTool {
 					geneMap2.get(gene).add(gene);
 				}
 			} else {
-				geneMap2 = FunctionalProfilingTool.getEnsemblMap(dbConnector, StringUtils.stringToList(IOUtils.toString(f2)));
+				geneMap2 = InfraredUtils.getEnsemblMap(dbConnector, StringUtils.stringToList(IOUtils.toString(f2)));
 				geneMap2 = cleanGeneMap(geneMap2, false);
 				geneList2 = createListFromMap(geneMap2);
 			}
