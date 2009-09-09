@@ -30,7 +30,7 @@ public class ClusteringTest {
 
 	@Test
 	public void Test1() {
-		String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
+		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
 		String outdir = "/tmp/upgma";
 		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "upgma", "--distance", "euclidean"};
 
@@ -48,7 +48,6 @@ public class ClusteringTest {
 		}
 	}	
 
-	@Test
 	public void Test2() {
 		String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
 		String outdir = "/tmp/sota";
@@ -90,16 +89,16 @@ public class ClusteringTest {
 	}	
 
 	public void Test4() {
-		String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
+		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
 		String outdir = "/tmp/kmeans";
-		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "kmeans", "--distance", "euclidean"};
+		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "kmeans", "--distance", "euclidean", "--kvalue", "4"};
 
 		System.out.println("----------------> " + Arrays.toString(args));
 		
 		try {
 			FileUtils.createDirectory(outdir);
 			BabelomicsMain.main(args); 
-			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
+//			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
 			System.out.println("cluster of genes:\n" + IOUtils.toString(new File(outdir + "/genes.nw")));
 			System.out.println("cluster of samples:\n" + IOUtils.toString(new File(outdir + "/samples.nw")));
 		} catch (Exception e) {

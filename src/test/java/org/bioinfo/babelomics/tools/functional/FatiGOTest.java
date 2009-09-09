@@ -25,15 +25,15 @@ public class FatiGOTest {
 		String list1 = "/mnt/commons/test/example.motor";
 		String list2 = "/mnt/commons/test/example.apoptosis";
 		String []args = {"--tool", "fatigo" ,"--list1", list1, "--list2", list2, "--go-bp-db", "-o", "/tmp/fatigo"};
-		try {
-			FatiGOTool fatigo = (FatiGOTool)BabelomicsFactory.createTool("fatigo");
-			fatigo.parse(args);
-			fatigo.run();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		} catch (IOException e) {			
-			e.printStackTrace();
-		}
+//		try {
+//			FatiGOTool fatigo = (FatiGOTool)BabelomicsFactory.createTool("fatigo");
+//			fatigo.parse(args);
+//			fatigo.run();
+//		} catch (ParseException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {			
+//			e.printStackTrace();
+//		}
 		
 	}
 
@@ -42,13 +42,13 @@ public class FatiGOTest {
 		String []args = {"-list1", "/mnt/commons/test/biodata/example/list3.txt", "-o", "/tmp", "-rest-of-genome", "1", "--go-bp-db", "true", "--go-bp-min-level", "5", "--go-bp-max-level", "12", "--remove-duplicates", "ref"};
 		//String []args = {"-list1", "/mnt/commons/test/biodata/example/list3.txt", "-o", "/tmp", "-list2", "/mnt/commons/test/biodata/example/list4.txt", "--go-bp-db", "true", "--go-bp-min-level", "5", "--go-bp-max-level", "12", "--remove-duplicates", "ref"};
 		//String []args = {"-list1", "/mnt/commons/test/biodata/example/list3.txt", "-o", "/tmp", "-list2", "/mnt/commons/test/biodata/example/list4.txt", "--go-bp-db", "true", "--go-bp-min-level", "5", "--go-bp-max-level", "5"};
-		try {
-			FatiGOTool fatigo = new FatiGOTool();
-			fatigo.execute();			
-		} catch (Exception e) {
-			e.printStackTrace();
-			//System.out.println(e.toString());
-		}
+//		try {
+//			FatiGOTool fatigo = new FatiGOTool();
+//			fatigo.execute();			
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			//System.out.println(e.toString());
+//		}
 	}
 
 }

@@ -29,6 +29,9 @@ import org.bioinfo.tool.OptionFactory;
 
 public abstract class FunctionalProfilingTool extends BabelomicsTool {
 
+	// JT.2009.09.07
+	private String removeDuplicates;
+	
 	// input data		
 	protected boolean restOfGenome;
 	
