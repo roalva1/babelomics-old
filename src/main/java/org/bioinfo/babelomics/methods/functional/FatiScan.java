@@ -115,10 +115,11 @@ public class FatiScan {
 			}
 			// update results
 			results.clear();
-			for(TwoListFisherTestResult testResult:resultsMap.values()){
-				results.add(testResult);
-			}
-			results = (ArrayList<TwoListFisherTestResult>)resultsMap.values();			
+			results.addAll(resultsMap.values());
+//			for(TwoListFisherTestResult testResult:resultsMap.values()){
+//				results.add(testResult);
+//			}
+//			results = (ArrayList<TwoListFisherTestResult>)resultsMap.values();			
 		}
 				
 		System.err.println("final results.size: " + results.size());	
