@@ -15,13 +15,13 @@ import org.bioinfo.math.stats.inference.FisherExactTest;
 
 public class TwoListFisherTest extends FunctionalTest {
 	
+	public final static double DEFAULT_PVALUE_THRESHOLD = 0.05;
+	
 	private List<TwoListFisherTestResult> results;
 
 	@Override
 	public void test(List<String> list1, List<String> list2, FeatureList<AnnotationItem> annotations, int testMode) {
-			
-		System.err.println(list1);
-		System.err.println(list2);
+		
 		// init counters
 		Map<String, Integer> map1 = new HashMap<String, Integer>();
 		Map<String, Integer> map2 = new HashMap<String, Integer>();
@@ -83,12 +83,25 @@ public class TwoListFisherTest extends FunctionalTest {
 			}
 			
 		} else {
+			//FIXME thrown an exception
 			System.out.println("\nannotation is nullllll\n");
 			results = null;
 		}
 			
 	}
 
+	public List<TwoListFisherTestResult> getSignificantResults(){
+		return getSignificantResults(DEFAULT_PVALUE_THRESHOLD);
+	}
+	
+	public List<TwoListFisherTestResult> getSignificantResults(double threshold){
+		List<TwoListFisherTestResult> significant = new ArrayList<TwoListFisherTestResult>();
+		for(TwoListFisherTestResult result: this.results){
+			if(result.getAdjPValue()<threshold) significant.add(result);
+		}
+		return significant;
+	}
+	
 	
 	/**
 	 * @return the results

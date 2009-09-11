@@ -7,9 +7,9 @@ import org.apache.commons.cli.ParseException;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.tool.OptionFactory;
 
-public class FatiScan extends FunctionalProfilingTool{
+public class FatiScanOld extends FunctionalProfilingTool{
 
-	public FatiScan() {
+	public FatiScanOld() {
 		initOptions();
 	}
 
