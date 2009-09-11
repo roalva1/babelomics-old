@@ -76,7 +76,14 @@ public class FatiScan {
 		results = new ArrayList<TwoListFisherTestResult>();
 		
 		double inc = (double)(statistic.get(0)-statistic.get(statistic.size()-1))/(numberOfPartitions+1);
-		double acum = statistic.get(0) - inc;
+		double acum;
+		if(order==DESCENDING_SORT) {
+			inc*=-1;
+			acum = statistic.get(0) + inc;
+		} else {
+			acum = statistic.get(statistic.size()-1) + inc;
+		}
+		
 		int thresholdPosition;
 				
 		for(int i=0; i<numberOfPartitions; i++){
@@ -97,7 +104,7 @@ public class FatiScan {
 			// get result
 			results.addAll(fisher.getResults());
 						
-			acum-=inc;
+			acum+=inc;
 		}
 
 		if(outputFormat == SHORT_FORMAT) {
@@ -116,10 +123,7 @@ public class FatiScan {
 			// update results
 			results.clear();
 			results.addAll(resultsMap.values());
-//			for(TwoListFisherTestResult testResult:resultsMap.values()){
-//				results.add(testResult);
-//			}
-//			results = (ArrayList<TwoListFisherTestResult>)resultsMap.values();			
+			
 		}
 				
 		System.err.println("final results.size: " + results.size());	
