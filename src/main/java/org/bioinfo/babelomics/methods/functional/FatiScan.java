@@ -115,6 +115,9 @@ public class FatiScan {
 			}
 			// update results
 			results.clear();
+			for(TwoListFisherTestResult testResult:resultsMap.values()){
+				results.add(testResult);
+			}
 			results = (ArrayList<TwoListFisherTestResult>)resultsMap.values();			
 		}
 				
