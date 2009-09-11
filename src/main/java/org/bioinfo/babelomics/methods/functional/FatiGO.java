@@ -18,7 +18,7 @@ import org.bioinfo.math.result.TestResultList;
 import org.bioinfo.math.stats.inference.FisherExactTest;
 
 public class FatiGO {
-
+	
 	public static final int REMOVE_NEVER = 0;
 	public static final int REMOVE_EACH = 1;	
 	public static final int REMOVE_REF = 2;
@@ -29,13 +29,15 @@ public class FatiGO {
 	private List<String> list1;
 	private List<String> list2;
 	private Filter filter;
-	DBConnector dbConnector;
+	private DBConnector dbConnector;
 	private int testMode;
 	private int duplicatesMode;
 	
-
+	// test
+	TwoListFisherTest fisher;
+	
 	// results	
-	List<TwoListFisherTestResult> results;
+	List<TwoListFisherTestResult> results;	
 	FeatureList<AnnotationItem> annotations;
 
 	// Two list constructor
@@ -57,28 +59,28 @@ public class FatiGO {
 		this.testMode = FisherExactTest.GREATER;
 		this.duplicatesMode = REMOVE_GENOME;
 	}
-		
+
 	public void run() throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException {
-				
 		List<String> all = new ArrayList<String>(list1);
 		all.addAll(list2);	
 		
 		// duplicates managing
-		removeDuplicates(list1, list2, duplicatesMode);
+		removeDuplicates();
 		
 		// annotation
 		annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
 
 		// run test
-		TwoListFisherTest fisher = new TwoListFisherTest();
+		fisher = new TwoListFisherTest();
 		fisher.test(list1, list2, annotations, testMode);
+		
+		// get result
 		results = fisher.getResults();
-
-				
+						
 	}
-
 	
-	private void removeDuplicates(List<String> list1, List<String> list2, int duplicatesMode){
+	
+	public void removeDuplicates(){
 		// each list
 		if(duplicatesMode!=REMOVE_NEVER){
 			list1 = ListUtils.unique(list1);
@@ -114,8 +116,11 @@ public class FatiGO {
 			}
 		}
 	}
-
-
+	
+	public List<TwoListFisherTestResult> getSignificant(double threshold){
+		if(fisher!=null) return fisher.getSignificantResults(threshold);
+		return null;
+	}
 
 	/**
 	 * @return the annotations
@@ -147,5 +152,34 @@ public class FatiGO {
 	public void setResults(List<TwoListFisherTestResult> results) {
 		this.results = results;
 	}
+
+	/**
+	 * @return the list1
+	 */
+	public List<String> getList1() {
+		return list1;
+	}
+
+	/**
+	 * @param list1 the list1 to set
+	 */
+	public void setList1(List<String> list1) {
+		this.list1 = list1;
+	}
+
+	/**
+	 * @return the list2
+	 */
+	public List<String> getList2() {
+		return list2;
+	}
+
+	/**
+	 * @param list2 the list2 to set
+	 */
+	public void setList2(List<String> list2) {
+		this.list2 = list2;
+	}
+
 	
 }

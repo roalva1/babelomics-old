@@ -1,12 +1,13 @@
 package org.bioinfo.babelomics.tools;
 
+import org.bioinfo.babelomics.methods.functional.FatiScan;
 import org.bioinfo.babelomics.tools.expression.Clustering;
 import org.bioinfo.babelomics.tools.expression.DifferentialAnalysis;
 import org.bioinfo.babelomics.tools.expression.OutlierLrs;
 import org.bioinfo.babelomics.tools.expression.Predictor;
 import org.bioinfo.babelomics.tools.functional.Blast2Go;
 import org.bioinfo.babelomics.tools.functional.FatiGOTool;
-import org.bioinfo.babelomics.tools.functional.FatiScan;
+import org.bioinfo.babelomics.tools.functional.FatiScanTool;
 import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
 import org.bioinfo.babelomics.tools.functional.tissues.AffyTmt;
@@ -50,7 +51,7 @@ public class BabelomicsFactory {
 		}
 
 		if(toolName.equalsIgnoreCase("fatiscan")) {
-			return new FatiScan();
+			return new FatiScanTool();
 		}
 
 		if(toolName.equalsIgnoreCase("marmite")) {

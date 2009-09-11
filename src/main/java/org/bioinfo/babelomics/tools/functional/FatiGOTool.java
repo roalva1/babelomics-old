@@ -27,6 +27,8 @@ import org.bioinfo.tool.result.Item;
 
 public class FatiGOTool extends FunctionalProfilingTool{
 
+	public final static double DEFAULT_PVALUE_THRESHOLD = 0.05;
+	
 	// list1
 	private FeatureData list1;
 	
@@ -52,7 +54,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		OptionGroup input2 = new OptionGroup();
 		input2.setRequired(false);		
 			input2.addOption(OptionFactory.createOption("list2", "the file containig the list #2 of genes, or the feature data file",false));
-			input2.addOption(OptionFactory.createOption("rest-of-genome", "compares list #1 with the rest of genome",false,false));
+			input2.addOption(OptionFactory.createOption("genome", "compares list #1 with the rest of genome",false,false));
 			input2.addOption(OptionFactory.createOption("chromosomes", "the chromosome to compare with list #1. Use chromosome-start and chromosome-end options tp delimite the region within the chromosome",false));
 		options.addOptionGroup(input2);
 		// filters
@@ -61,6 +63,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		options.addOption(OptionFactory.createOption("remove-duplicates", "to remove duplicated IDs, valid values: never, each, ref. By default, never", false));
 	}
 
+	
 	@Override
 	public void prepare(CommandLine cmdLine) throws IOException, ParseException, InvalidColumnIndexException {
 		super.prepare(cmdLine);
@@ -71,7 +74,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		// list 2
 		if(cmdLine.hasOption("list2")){
 			list2 = new FeatureData(new File(cmdLine.getOptionValue("list2")), true);
-		} else if ( cmdLine.hasOption("rest-of-genome")) {
+		} else if(cmdLine.hasOption("genome")) {
 			this.setRestOfGenome(true);
 		} else if(cmdLine.hasOption("chromosomes")) {
 			throw new ParseException("chromosome reading not yet implemented");
@@ -113,14 +116,28 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			} else if(chromosomes!=null) {
 				throw new ParseException("chromosome comparison not yet implemented");
 			} else {
-				throw new ParseException("No comparison provided, use list2, rest-of-genome or chromosome options to set your comparison");				
+				throw new ParseException("No comparison provided, use list2, genome or chromosomes options to set your comparison");				
 			}
 			
-			
+			// run fatigo's
 			if(filterList.size()==0){
-				throw new ParseException("No biological database selected (eg. --go-db-bp)");
+				throw new ParseException("No biological database selected (eg. --go-bp)");
 			} else {
-				String name,fileName,annotFileName,title,levels;				
+				List<String> significant = new ArrayList<String>();
+				String name,fileName,annotFileName,title;
+
+				// save id lists
+				FatiGO fatigo = new FatiGO(idList1, idList2, filterList.get(0), dbConnector, testMode, duplicatesMode);
+				IOUtils.write(outdir + "/clean_list1.txt", StringUtils.join(fatigo.getList1(),"\n"));
+				result.addOutputItem(new Item("clean_list1","clean_list1.txt","List 1 (after duplicates managing)",Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
+				IOUtils.write(outdir + "/clean_list2.txt", StringUtils.join(fatigo.getList2(),"\n"));
+				result.addOutputItem(new Item("clean_list2","clean_list2.txt","List 2 (after duplicates managing)",Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
+
+				
+				// Significant results must appear after than complete tables!!
+				result.addOutputItem(new Item("significant","significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE"),new HashMap<String,String>(),"Significant Results"));
+				significant.add(TwoListFisherTestResult.header());
+				
 				for(Filter filter: filterList) {
 
 					// db attributes
@@ -132,29 +149,32 @@ public class FatiGOTool extends FunctionalProfilingTool{
 					logger.info(title + "...\n");
 
 					// init test
-					FatiGO fatigo = null;
+					fatigo = null;
 					if(list2!=null) fatigo = new FatiGO(idList1, idList2, filter, dbConnector, testMode, duplicatesMode);
 					else if(isRestOfGenome()) fatigo = new FatiGO(idList1, filter, dbConnector);
 					
 					// run test
 					fatigo.run();
 					
-					// save statistic results
-					List<TwoListFisherTestResult> testResult = fatigo.getResults();
-					List<String> testResultOutput = new ArrayList<String>(testResult.size());
-					testResultOutput.add(TwoListFisherTestResult.header());
-					for(int i=0; i<testResult.size(); i++){
-						testResultOutput.add(testResult.get(i).toString());	
-					}					
+					// save statistic results					
+					List<String> testResultOutput = testResultToStringList(fatigo.getResults());
 					IOUtils.write(outdir + "/" + fileName, StringUtils.join(testResultOutput,"\n"));
 					result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE"),new HashMap<String,String>(),"Database tests"));
+									
 					// save annotation
 					IOUtils.write(outdir + "/" + annotFileName, fatigo.getAnnotations().toString());
 					result.addOutputItem(new Item("annot_" + name,annotFileName,"Annotations for " + title,Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
 					
-					logger.info("...end of " + title);				
+					// acum significant values
+					significant.addAll(testResultToStringList(fatigo.getSignificant(DEFAULT_PVALUE_THRESHOLD),false));
+					
+					logger.info("...end of " + title);
 					
 				}
+				
+				// significant terms
+				IOUtils.write(outdir + "/significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt", StringUtils.join(significant,"\n"));
+				
 			}
 			
 		}catch(Exception e){
@@ -162,38 +182,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		}
 		
 	}
-	
-	private String getDBName(Filter filter){
-		String name = StringUtils.randomString();
-		if(filter instanceof GOFilter) {						
-			GOFilter goFilter = (GOFilter) filter.clone();
-			name = "go_" + goFilter.getNamespace() + "_" + goFilter.getMinLevel() + "_" + goFilter.getMaxLevel();
-		} else if(filter instanceof KeggFilter) {
-			name = "kegg";
-		}
-		else if(filter instanceof BiocartaFilter) {
-			name = "biocarta";
-		}
-		return name;
-	}
-	
-	
-	private String getDBTitle(Filter filter){
-		String title = "Untitled",levels;
-		if(filter instanceof GOFilter) {						
-			GOFilter goFilter = (GOFilter) filter.clone();
-			if(goFilter.getMinLevel()==goFilter.getMaxLevel()) {
-				levels = "(level " + goFilter.getMinLevel() + ")";
-			} else{
-				levels = "(levels from " + goFilter.getMinLevel() + " to " + goFilter.getMaxLevel() + ")"; 
-			}						
-			title = "GO " + goFilter.getNamespace().replace("_", " ") + " " + levels;
-		} else if(filter instanceof KeggFilter) {
-			title = "Kegg";
-		} else if(filter instanceof BiocartaFilter) {
-			title = "Biocarta";
-		}
-		return title;
-	}
 
+	
+	
 }

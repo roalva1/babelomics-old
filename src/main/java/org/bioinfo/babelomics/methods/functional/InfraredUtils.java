@@ -26,7 +26,7 @@ public class InfraredUtils {
 		if(filter instanceof GOFilter){
 			return annotationMng.getGOAnnotation(ids, (GOFilter) filter);
 		} else if(filter instanceof KeggFilter){
-			return annotationMng.getKeggAnnotation(ids, (KeggFilter) filter);
+			return annotationMng.getKeggAnnotation(ids, (KeggFilter) filter);		
 		}
 		return null;
 	}	
