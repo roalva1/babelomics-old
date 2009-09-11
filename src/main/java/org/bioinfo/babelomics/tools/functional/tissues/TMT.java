@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bioinfo.babelomics.methods.functional.InfraredUtils;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.babelomics.tools.functional.FunctionalProfilingTool;
 import org.bioinfo.chart.BoxPlotChart;
@@ -18,7 +19,7 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.db.DBConnection;
-import org.bioinfo.db.api.Query;
+import org.bioinfo.db.Query;
 import org.bioinfo.db.handler.BeanArrayListHandler;
 import org.bioinfo.db.handler.MatrixHandler;
 import org.bioinfo.db.handler.ResultSetHandler;
@@ -34,7 +35,7 @@ import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 import org.jfree.chart.plot.PlotOrientation;
 
-public class TMT  extends BabelomicsTool {
+public class TMT extends BabelomicsTool {
 
 	private String dbDriver = "mysql";
 	private String dbHost = "mem20";
@@ -115,7 +116,7 @@ public class TMT  extends BabelomicsTool {
 
 			Map<String, List<String>> geneMap1, geneMap2;
 			
-			geneMap1 = FunctionalProfilingTool.getEnsemblMap(dbConnector, StringUtils.stringToList(IOUtils.toString(f1)));
+			geneMap1 = InfraredUtils.getEnsemblMap(dbConnector, StringUtils.stringToList(IOUtils.toString(f1)));
 			geneMap1 = cleanGeneMap(geneMap1, true);
 			geneList1 = createListFromMap(geneMap1);
 
@@ -137,7 +138,7 @@ public class TMT  extends BabelomicsTool {
 					geneMap2.get(gene).add(gene);
 				}
 			} else {
-				geneMap2 = FunctionalProfilingTool.getEnsemblMap(dbConnector, StringUtils.stringToList(IOUtils.toString(f2)));
+				geneMap2 = InfraredUtils.getEnsemblMap(dbConnector, StringUtils.stringToList(IOUtils.toString(f2)));
 				geneMap2 = cleanGeneMap(geneMap2, false);
 				geneList2 = createListFromMap(geneMap2);
 			}

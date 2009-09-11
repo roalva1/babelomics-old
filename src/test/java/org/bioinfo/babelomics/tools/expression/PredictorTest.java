@@ -28,7 +28,6 @@ public class PredictorTest {
 	public void notest() {		
 	}
 
-	@Test
 	public void Test1() {
 		String dataset = "/mnt/commons/test/biodata/example/predictor_input.txt";
 		String outdir = "/tmp/predictors";

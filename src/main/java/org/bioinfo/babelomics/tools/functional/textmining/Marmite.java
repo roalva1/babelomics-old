@@ -1,32 +1,27 @@
 package org.bioinfo.babelomics.tools.functional.textmining;
 
-
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.math.linear.MatrixIndexException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.chart.BoxPlotChart;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
-import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.db.DBConnection;
-import org.bioinfo.db.api.Query;
+import org.bioinfo.db.PreparedQuery;
 import org.bioinfo.db.handler.BeanArrayListHandler;
 import org.bioinfo.db.handler.ResultSetHandler;
-import org.bioinfo.math.exception.InvalidParameterException;
+import org.bioinfo.infrared.common.dbsql.DBConnector;
+import org.bioinfo.infrared.core.dbsql.XRefDBManager;
 import org.bioinfo.math.result.KolmogorovSmirnovTestResult;
 import org.bioinfo.math.result.TestResultList;
 import org.bioinfo.math.stats.inference.KolmogorovSmirnovTest;
@@ -39,7 +34,6 @@ import org.jfree.chart.plot.PlotOrientation;
 public class Marmite extends BabelomicsTool {
 
 	public Marmite() {
-		initOptions();
 	}
 
 	@Override
@@ -81,23 +75,35 @@ public class Marmite extends BabelomicsTool {
 		try {
 			// reading data
 			//
-			jobStatus.addStatusMessage("20", "reading data");
+			jobStatus.addStatusMessage("15", "reading data");
 			logger.debug("reading data...\n");
 
-			List<String> geneList1 = ListUtils.unique(StringUtils.stringToList(IOUtils.toString(f1)));
-			List<String> geneList2 = ListUtils.unique(StringUtils.stringToList(IOUtils.toString(f2)));
+			
+			List<String> geneList1 = ListUtils.unique(IOUtils.readLines(f1));
+			List<String> geneList2 = ListUtils.unique(IOUtils.readLines(f2));
 
-			jobStatus.addStatusMessage("#", "get Entity Map1");
-			time = System.currentTimeMillis();
+//			System.out.println("input gene list 1:\n" + ListUtils.toString(geneList1, ","));
+//			XRefDBManager xRefMng = new XRefDBManager(new DBConnector("hsa", new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"))); 
+//			System.out.println("calling hgnc conversion\n");
+//			List<List<String>> hugoList1a = xRefMng.getIdsByDBName(geneList1, "hgnc_(curated)");
+//			List<List<String>> hugoList1b = xRefMng.getIdsByDBName(geneList1, "hgnc_(automatic)");
+//			System.out.println("hgnc ids:\n");
+//			for (int i=0 ; i<geneList1.size() ; i++) {
+//				System.out.println(geneList1.get(i) + " ---> " + (hugoList1a.get(i) != null ? ListUtils.toString(hugoList1a.get(i), ",") : "") + " ||| " + (hugoList1b.get(i) != null ? ListUtils.toString(hugoList1b.get(i), ",") : ""));
+//			}
+			 
+
+			jobStatus.addStatusMessage("30", "fetching entities corresponding to gene lists");
+			//time = System.currentTimeMillis();
 			Map<String, List<Score>> entityMap1 = getEntityMap(geneList1, bioentity);
-			jobStatus.addStatusMessage("#", "getEntityMap1, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
+			//jobStatus.addStatusMessage("#", "getEntityMap1, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
 
-			jobStatus.addStatusMessage("#", "get Entity Map2");
-			time = System.currentTimeMillis();
+			//jobStatus.addStatusMessage("#", "get Entity Map2");
+			//time = System.currentTimeMillis();
 			Map<String, List<Score>> entityMap2 = getEntityMap(geneList2, bioentity);	
-			jobStatus.addStatusMessage("#", "getEntityMap2, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
+			//jobStatus.addStatusMessage("#", "getEntityMap2, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
 
-			jobStatus.addStatusMessage("#", "creating the entities list");
+			//jobStatus.addStatusMessage("#", "creating the entities list");
 			time = System.currentTimeMillis();
 			List<String> entities = MapUtils.getKeys(entityMap1);
 			entities.addAll(MapUtils.getKeys(entityMap2));
@@ -115,10 +121,10 @@ public class Marmite extends BabelomicsTool {
 				}
 			}
 			entities.clear();
-			jobStatus.addStatusMessage("#", "entity list, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
+			//jobStatus.addStatusMessage("#", "entity list, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
 
-			jobStatus.addStatusMessage("#", "creating score matrixes");
-			time = System.currentTimeMillis();
+			jobStatus.addStatusMessage("45", "creating score matrixes");
+			//time = System.currentTimeMillis();
 			double[][] scoreMatrix1 = new double[validEntities.size()][];
 			double[][] scoreMatrix2 = new double[validEntities.size()][];
 			for(int i=0 ; i<validEntities.size() ; i++) {
@@ -135,7 +141,7 @@ public class Marmite extends BabelomicsTool {
 					scoreMatrix2[i][j] = scoreList2.get(j).getValue();
 				}	
 			}								
-			jobStatus.addStatusMessage("#", "score matrixes, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
+			//jobStatus.addStatusMessage("#", "score matrixes, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
 
 
 			//			System.out.println("scoreMatrix1 size = " + scoreMatrix1.length + ", " + scoreMatrix1[0].length);
@@ -143,14 +149,11 @@ public class Marmite extends BabelomicsTool {
 
 			// marmite functional enrichment
 			//
-			jobStatus.addStatusMessage("40", "computing marmite functional enrichment");
-			logger.debug("computing marmite functional enrichment...\n");
-
-			jobStatus.addStatusMessage("#", "computing ks test");
-			time = System.currentTimeMillis();
+			jobStatus.addStatusMessage("60", "computing marmite functional enrichment (kolgomorov-smirnov test)");
+			//time = System.currentTimeMillis();
 			TestResultList<KolmogorovSmirnovTestResult> res = new KolmogorovSmirnovTest().compute(scoreMatrix1, scoreMatrix2);
-			//			System.out.println("kolmogorov result :\n" +  res.toString());
-			jobStatus.addStatusMessage("#", "ks test, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
+			//System.out.println("kolmogorov result :\n" +  res.toString());
+			//jobStatus.addStatusMessage("#", "ks test, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
 
 			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getAdjPValues()));
 			//System.out.println("order = " + ListUtils.toString(ListUtils.toList(rowOrder)));
@@ -169,7 +172,7 @@ public class Marmite extends BabelomicsTool {
 			String filename = "marmite_output.txt";
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(new File(getOutdir() + "/" + filename));
-			result.addOutputItem(new Item("marmite_file", filename, "The MARMITE output file", TYPE.FILE));
+			result.addOutputItem(new Item("marmite_file", filename, "MARMITE output file", TYPE.FILE));
 
 			// output table
 			filename = "marmite_table.txt";
@@ -177,87 +180,58 @@ public class Marmite extends BabelomicsTool {
 			//System.out.println("marmite table:\n" + dataFrame.toString(true, true));
 			bw.write(dataFrame.toString(true, true));
 			bw.close();
-			Item item = new Item("marmite_table", filename, "The MARMITE output table", TYPE.FILE);
+			Item item = new Item("marmite_table", filename, "MARMITE output table", TYPE.FILE);
 			item.addTag("TABLE");
 			result.addOutputItem(item);
 
-			System.out.println("marmite output:\n" +  featureData.toString());
-
+			//System.out.println("marmite output:\n" +  featureData.toString());
 
 			// generating boxplots
 			//
-			jobStatus.addStatusMessage("60", "generating boxplots");
+			jobStatus.addStatusMessage("75", "generating boxplots");
 			logger.debug("generating boxplots...\n");
 			BoxPlotChart boxplot;
 			List<Score> scoreList;
 			List<Double> list1, list2;
 			//			System.out.println("row name size = " + entities.size());
-			jobStatus.addStatusMessage("#", "generating boxplots");
-			time = System.currentTimeMillis();
+			//jobStatus.addStatusMessage("#", "generating boxplots");
+			//time = System.currentTimeMillis();
 			for (int i=0 ; i<validEntities.size() && i < numberFilter ; i++) {
-				try {
+				entity = dataFrame.getRowNames().get(i);
 
-					entity = dataFrame.getRowNames().get(i);
+				//System.out.println("ploting entity = " + entity);
 
-					//					System.out.println("ploting entity = " + entity);
+				scoreList = entityMap1.get(entity);
 
-					scoreList = entityMap1.get(entity);
+				list1 = new ArrayList<Double> (scoreList.size());
+				for (int j=0 ; j<scoreList.size(); j++) {
+					list1.add((double) scoreList.get(j).getValue());
+				}						
 
-					list1 = new ArrayList<Double> (scoreList.size());
-					for (int j=0 ; j<scoreList.size(); j++) {
-						list1.add((double) scoreList.get(j).getValue());
-					}						
+				scoreList = entityMap2.get(entity); 
+				list2 = new ArrayList<Double> (scoreList.size());
+				for (int j=0 ; j<scoreList.size(); j++) {
+					list2.add((double) scoreList.get(j).getValue());
+				}						
 
-					scoreList = entityMap2.get(entity); 
-					list2 = new ArrayList<Double> (scoreList.size());
-					for (int j=0 ; j<scoreList.size(); j++) {
-						list2.add((double) scoreList.get(j).getValue());
-					}						
+				//System.out.println("list1, entity = " + entity + ": " + ListUtils.toString(list1));
+				//System.out.println("list2, entity = " + entity + ": " + ListUtils.toString(list2));
 
-					//					System.out.println("list1, entity = " + entity + ": " + ListUtils.toString(list1));
-					//					System.out.println("list2, entity = " + entity + ": " + ListUtils.toString(list2));
+				boxplot = createBoxplot(entity, Double.parseDouble(dataFrame.getColumn("adj. p-value").get(i)), list1, list2);
+				filename = entity.toLowerCase().replace(" ", "_") + ".png";
+				ChartUtilities.saveChartAsPNG(new File(getOutdir() + "/" + filename), boxplot, 400, 200);
+				result.addOutputItem(new Item(entity.toLowerCase().replace(" ", "_") + "_boxplot", filename, "Boxplot for " + entity, TYPE.IMAGE));
 
-					boxplot = createBoxplot(entity, Double.parseDouble(dataFrame.getColumn("adj. p-value").get(i)), list1, list2);
-					filename = entity.toLowerCase().replace(" ", "_") + ".png";
-					ChartUtilities.saveChartAsPNG(new File(getOutdir() + "/" + filename), boxplot, 400, 200);
-					result.addOutputItem(new Item(entity.toLowerCase().replace(" ", "_") + "_boxplot", filename, "Boxplot for " + entity, TYPE.IMAGE));
-
-				} catch (IOException e) {
-					e.printStackTrace();
-				}				
 			}
-
-			jobStatus.addStatusMessage("#", "boxplots, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
+			//jobStatus.addStatusMessage("#", "boxplots, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
 
 			// saving data
 			//
-			jobStatus.addStatusMessage("80", "saving results");
-			logger.debug("saving results...");
+			jobStatus.addStatusMessage("90", "saving results");
 
-
-			// done
-			//
-			jobStatus.addStatusMessage("100", "done");
-			logger.debug("marmite funcitonal enrichment done\n");
-
-		} catch (java.security.InvalidParameterException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (MatrixIndexException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			logger.error("Error opening the dataset", e.toString());
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidParameterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidColumnIndexException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			printError("exception_executemarmite_marmite", e.toString(), e.getMessage(), e);
 		}
 	}
 
@@ -266,7 +240,8 @@ public class Marmite extends BabelomicsTool {
 		ArrayList<Score> list;
 		Map<String, List<Score>> map = new HashMap<String, List<Score>>();
 
-		Query query;
+		PreparedQuery query;
+		//Query query;
 		ResultSetHandler rsh = new BeanArrayListHandler(Score.class);
 		DBConnection dbConn = new DBConnection("mysql", "mem20", "3306", "Babelomics", "ensembl_user", "ensembl_user");
 
@@ -274,11 +249,14 @@ public class Marmite extends BabelomicsTool {
 		if ( entity.equalsIgnoreCase("diseases") ) prefix = prefix + " hsa_bioalmaDis";
 		if ( entity.equalsIgnoreCase("products") ) prefix = prefix + " hsa_bioalmaChem";
 		if ( entity.equalsIgnoreCase("roots") )    prefix = prefix + " hsa_bioalmaWordRoot";
-		prefix = prefix + " where hgnc_name ="; 
+		prefix = prefix + " where hgnc_name = ?"; 
+		//prefix = prefix + " where hgnc_name ="; 
 		for(String gene: genes) {
 			try {
 				//System.out.println("query = " + prefix + " '" + gene.toUpperCase() + "'");
-				query = dbConn.createSQLQuery(prefix + " \"" + gene.toUpperCase() + "\"");
+				//query = dbConn.createSQLPrepQuery(prefix + " \"" + gene.toUpperCase() + "\"");
+				query = dbConn.createSQLPrepQuery(prefix);
+				query.setParams(gene.toUpperCase());
 				list = (ArrayList<Score>) query.execute(rsh);
 				if ( list != null ) {
 					for(Score score: list) {
@@ -289,7 +267,7 @@ public class Marmite extends BabelomicsTool {
 					}
 				}
 			} catch (Exception e) {
-				System.out.println("marmite, getEntityMap(), error accessing db: " + prefix + " \"" + gene.toUpperCase() + "\", error = " + e.toString());
+				System.out.println("marmite, getEntityMap(), error accessing db: " + prefix + ", " + gene.toUpperCase() + ", error = " + e.toString());
 			}				
 		}
 

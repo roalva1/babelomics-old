@@ -9,6 +9,7 @@ import org.bioinfo.babelomics.tools.functional.FatiGOTool;
 import org.bioinfo.babelomics.tools.functional.FatiScan;
 import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
+import org.bioinfo.babelomics.tools.functional.tissues.AffyTmt;
 import org.bioinfo.babelomics.tools.functional.tissues.TMT;
 import org.bioinfo.babelomics.tools.interactome.Snow;
 import org.bioinfo.babelomics.tools.preprocessing.IdConverter;
@@ -60,8 +61,8 @@ public class BabelomicsFactory {
 			return new MarmiteScan();
 		}
 		
-		if(toolName.equalsIgnoreCase("tmt")) {
-			return new TMT();
+		if(toolName.equalsIgnoreCase("tmt-affy")) {
+			return new AffyTmt();
 		}
 		
 		if(toolName.equalsIgnoreCase("association")) {

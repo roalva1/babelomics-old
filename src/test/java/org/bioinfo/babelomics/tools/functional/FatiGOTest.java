@@ -24,17 +24,17 @@ public class FatiGOTest {
 	public void Test0() {
 		String list1 = "/mnt/commons/test/example.motor";
 		String list2 = "/mnt/commons/test/example.apoptosis";
-		String []args = {"--tool", "fatigo" ,"--list1", list1, "--list2", list2, "--go-bp-db", "-o", "/tmp/fatigo"};
-//		try {
-//			FatiGOTool fatigo = (FatiGOTool)BabelomicsFactory.createTool("fatigo");
-//			fatigo.parse(args);
-//			fatigo.run();
-//		} catch (ParseException e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {			
-//			e.printStackTrace();
-//		}
-		
+//		String []args = {"--tool", "fatigo" ,"--list1", list1, "--list2", list2, "-o", "/tmp/fatigo"};
+		String []args = {"--tool", "fatigo" ,"--list1", list1, "--list2", list2, "--go-bp", "--kegg", "-o", "/tmp/fatigo", "--species", "hsa"};
+		try {
+			FatiGOTool fatigo = (FatiGOTool)BabelomicsFactory.createTool("fatigo");
+			fatigo.parse(args);
+			fatigo.run();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (IOException e) {			
+			e.printStackTrace();
+		}		
 	}
 
 	public void Test1() {

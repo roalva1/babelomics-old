@@ -1,10 +1,8 @@
 package org.bioinfo.babelomics.tools.expression;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.FileNotFoundException; 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
@@ -12,21 +10,10 @@ import org.bioinfo.babelomics.tools.expression.clustering.ClusteringUtils;
 import org.bioinfo.babelomics.tools.expression.clustering.Kmeans;
 import org.bioinfo.babelomics.tools.expression.clustering.Sota;
 import org.bioinfo.babelomics.tools.expression.clustering.Upgma;
-import org.bioinfo.commons.exec.Command;
-import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.format.core.newick.NewickTree;
-import org.bioinfo.data.format.io.NewickParser;
-import org.bioinfo.data.format.io.exception.InvalidFormatException;
-import org.bioinfo.graphics.canvas.Canvas;
-import org.bioinfo.graphics.canvas.feature.ScoreFeature;
-import org.bioinfo.graphics.canvas.panel.GridPanel;
-import org.bioinfo.graphics.canvas.panel.NewickPanel;
-import org.bioinfo.graphics.canvas.track.GridTrack;
-import org.bioinfo.graphics.canvas.track.NewickTrack;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;

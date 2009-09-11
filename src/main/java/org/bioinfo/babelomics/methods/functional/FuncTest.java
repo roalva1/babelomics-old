@@ -1,4 +1,4 @@
-package org.bioinfo.babelomics.tools.functional;
+package org.bioinfo.babelomics.methods.functional;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
