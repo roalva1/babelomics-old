@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bioinfo.babelomics.methods.functional.InfraredUtils;
+import org.bioinfo.babelomics.tools.functional.FunctionalUtils;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
@@ -58,14 +59,12 @@ public class AffyTmt extends Tmt {
 		super.initOptions();
 		options.addOption(OptionFactory.createOption("normalization-method", "Normalization method, valid values are 'mas5' and 'gcrma'. Defalut value: 'mas5'", false));
 		options.addOption(OptionFactory.createOption("multiple-probes", "Multiple probes expression value, valid values are 'mean', 'greatest', 'lowest', 'perc25', 'perc50' and 'perc75'. Default value: 'mean'", false));
-		options.addOption(OptionFactory.createOption("ensembl-ids", "This flag indicates if the input gene files are Ensembl IDs", false,false));
 	}
 
 	public void execute() {
 		File f1 = new File(commandLine.getOptionValue("list1"));
 		File f2 = commandLine.hasOption("list2") ? new File(commandLine.getOptionValue("list2")) :  null;
 
-		boolean areEnsemblIds = commandLine.hasOption("ensembl-ids");
 		String organism = commandLine.getOptionValue("organism");
 		String normMethod = commandLine.getOptionValue("normalization-method", "mas5");
 		String multipleProbes = commandLine.getOptionValue("multiple-probes", "mean");
@@ -92,21 +91,34 @@ public class AffyTmt extends Tmt {
 			// handling list #1
 			//
 			List<String> geneList1, uniqueGeneList1, dupGeneList1 = null;
-			List<String> ensemblList1, noConverted1 = null;
+			List<String> genesToConvert1, ensemblList1, noConverted1 = null;
 			Map<String, List<String>> ensemblMap1 = null;
 			geneList1 = IOUtils.readLines(f1);
+			if ( geneList1 == null || geneList1.size() == 0 ) {
+				throw new Exception("No genes found in your list #1");
+			}
 			uniqueGeneList1 = ListUtils.unique(geneList1);
 			if ( geneList1.size() != uniqueGeneList1.size() ) {
 				dupGeneList1 = ListUtils.duplicated(geneList1);
 				logger.debug("removing " + dupGeneList1.size() + " duplicated genes from List #1: " + ListUtils.toString(dupGeneList1, ","));
 			}
-			if ( ! areEnsemblIds ) {
-				ensemblMap1 = InfraredUtils.getEnsemblMap(dbConnector, uniqueGeneList1);
+			
+			ensemblList1 = new ArrayList<String> ();
+			genesToConvert1 = new ArrayList<String> ();
+			for(String id: uniqueGeneList1) {
+				if ( FunctionalUtils.isEnsemblID(id) ) {
+					genesToConvert1.add(id);
+				} else {
+					ensemblList1.add(id);
+				}
+			}
+			if ( genesToConvert1.size() > 0 ) {
+				logger.debug("found " + genesToConvert1.size() + " IDs non-Ensembl ID in List #1: " + ListUtils.toString(dupGeneList1, ","));
+				ensemblMap1 = InfraredUtils.getEnsemblMap(dbConnector, genesToConvert1);
 				if ( ensemblMap1 == null || ensemblMap1.size() == 0 ) {
-					throw new Exception("No Ensembl IDs found when converting your gene list #1 to Ensembl IDs");
+					logger.debug("No Ensembl IDs found for your input genes in List #1 when converting your input genes to Ensembl ID");
 				}
 				noConverted1 = new ArrayList<String> ();
-				ensemblList1 = new ArrayList<String> ();
 				for(String key: ensemblMap1.keySet()) {
 					if ( ensemblMap1.get(key) != null && ensemblMap1.get(key).size() > 0 ) {
 						ensemblList1.addAll(ensemblMap1.get(key));
@@ -114,58 +126,60 @@ public class AffyTmt extends Tmt {
 						noConverted1.add(key);
 					}
 				}
-				uniqueGeneList1 = ListUtils.unique(ensemblList1);
 			}
-
+			uniqueGeneList1 = ListUtils.unique(ensemblList1);
+			if ( uniqueGeneList1.size() == 0 ) {
+				throw new Exception("No Ensembl IDs found for your input genes in List #1 when converting your input genes to Ensembl ID");				
+			}
+			
 			Map<String, List<String>> probesMap1 = getProbes(organism, uniqueGeneList1);
 			if ( probesMap1 == null || probesMap1.size() == 0 ) {
-				throw new Exception("No Affymetrix probes found for gene list #1");
+				throw new Exception("No Affymetrix probes found for your genes in List #1");
 			}
-
-			//			Map<String, List<String>> geneMap1, geneMap2;
-			//			
-			//			geneMap1 = InfraredUtils.getEnsemblMap(dbConnector, StringUtils.stringToList(IOUtils.toString(f1)));
-			//			geneMap1 = cleanGeneMap(geneMap1, true);
-			//			geneList1 = createListFromMap(geneMap1);
-			//
-			//			for(String key: geneMap1.keySet()) {
-			//				ensemblIdtoGene1.put(geneMap1.get(key).get(0), key);
-			//			}
-			//			
-			//			replicated1 = geneList1.size();
-			//			geneList1 = ListUtils.unique(geneList1);
-			//			replicated1 -= geneList1.size();
 
 
 			// handling list #2
 			//
 			List<String> geneList2, uniqueGeneList2, dupGeneList2 = null;
-			List<String> ensemblList2, noConverted2 = null;
+			List<String> genesToConvert2, ensemblList2, noConverted2 = null;
 			Map<String, List<String>> ensemblMap2 = null;
 
 			if ( f2 == null ) {
 				List<String> genes = getAllGenes(organism);
 				
-				uniqueGeneList2 = new ArrayList<String>();
+				ensemblList2 = new ArrayList<String>();
 				for (String gene: genes) {
 					if ( !uniqueGeneList1.contains(gene) ) {
-						uniqueGeneList2.add(gene);
+						ensemblList2.add(gene);
 					}
 				}
 			} else {
 				geneList2 = IOUtils.readLines(f2);
+				if ( geneList2 == null || geneList2.size() == 0 ) {
+					throw new Exception("No genes found in your list #2");
+				}
 				uniqueGeneList2 = ListUtils.unique(geneList2);
 				if ( geneList2.size() != uniqueGeneList2.size() ) {
 					dupGeneList2 = ListUtils.duplicated(geneList2);
-					logger.debug("removing " + dupGeneList1.size() + " duplicated genes from List #2: " + ListUtils.toString(dupGeneList2, ","));
+					logger.debug("removing " + dupGeneList2.size() + " duplicated genes from List #2: " + ListUtils.toString(dupGeneList2, ","));
 				}
-				if ( ! areEnsemblIds ) {
-					ensemblMap2 = InfraredUtils.getEnsemblMap(dbConnector, uniqueGeneList2);
+				
+				ensemblList2 = new ArrayList<String> ();
+				genesToConvert2 = new ArrayList<String> ();
+				for(String id: uniqueGeneList2) {
+					if ( FunctionalUtils.isEnsemblID(id) ) {
+						genesToConvert2.add(id);
+					} else {
+						ensemblList2.add(id);
+					}
+				}
+				if ( genesToConvert2.size() > 0 ) {
+					logger.debug("found " + genesToConvert1.size() + " IDs non-Ensembl ID in List #2: " + ListUtils.toString(dupGeneList2, ","));
+					ensemblMap2 = InfraredUtils.getEnsemblMap(dbConnector, genesToConvert2);
 					if ( ensemblMap2 == null || ensemblMap2.size() == 0 ) {
-						throw new Exception("No Ensembl IDs found when converting your gene list #2 to Ensembl IDs");
+						logger.debug("No Ensembl IDs found for your input genes in List #2 when converting your input genes to Ensembl ID");
 					}
 					noConverted2 = new ArrayList<String> ();
-					ensemblList2 = new ArrayList<String> ();
 					for(String key: ensemblMap2.keySet()) {
 						if ( ensemblMap2.get(key) != null && ensemblMap2.get(key).size() > 0 ) {
 							ensemblList2.addAll(ensemblMap2.get(key));
@@ -173,13 +187,17 @@ public class AffyTmt extends Tmt {
 							noConverted2.add(key);
 						}
 					}
-					uniqueGeneList2 = ListUtils.unique(ensemblList2);
-				}
+				}			
 			}
+			
+			uniqueGeneList2 = ListUtils.unique(ensemblList2);
+			if ( ensemblList2.size() == 0 ) {
+				throw new Exception("No Ensembl IDs found for your input genes in List #2 when converting your input genes to Ensembl ID");				
+			}				
 			
 			Map<String, List<String>> probesMap2 = getProbes(organism, uniqueGeneList2);
 			if ( probesMap2 == null || probesMap2.size() == 0 ) {
-				throw new Exception("No Affymetrix probes found for gene list #2");
+				throw new Exception("No Affymetrix probes found for your genes in List #2");
 			}
 
 			// getting libraries
