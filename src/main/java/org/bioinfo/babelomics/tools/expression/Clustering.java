@@ -220,5 +220,4 @@ public class Clustering extends BabelomicsTool {
 		}				
 		return matrix;
 	}
-
 }
