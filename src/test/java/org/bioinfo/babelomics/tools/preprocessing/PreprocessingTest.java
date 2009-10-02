@@ -46,11 +46,10 @@ public class PreprocessingTest {
 	public void notest(){
 		System.out.println("----------------> ");
 	}
-
-
+	
 	public void Test3() {
-		String dataset = "/home/joaquin/tests/dataset1.txt";
-		String outdir = "/home/joaquin/tests/preprocessing";
+		String dataset = "/mnt/commons/test/biodata/example/dataset1.txt";
+		String outdir = "/tmp/preprocessing";
 		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir,"--merge-replicates", "mean", "--logarithm-base", "2", "--impute-missing", "zero", "--filter-missing", "90"};
 
 		System.out.println("----------------> " + Arrays.toString(args));
@@ -67,8 +66,8 @@ public class PreprocessingTest {
 	}	
 
 	public void Test4() {
-		String dataset = "/home/joaquin/tests/dataset1.txt";
-		String outdir = "/home/joaquin/tests/preprocessing";
+		String dataset = "/mnt/commons/test/biodata/example/dataset1.txt";
+		String outdir = "/tmp/preprocessing";
 		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--impute-missing", "zero"};
 
 		System.out.println("----------------> " + Arrays.toString(args));
@@ -86,9 +85,9 @@ public class PreprocessingTest {
 
 
 	public void Test5() {
-		String dataset = "/home/joaquin/tests/dataset1.txt";
-		String outdir = "/home/joaquin/tests/preprocessing";
-		String filename = "/home/joaquin/tests/known.txt";
+		String dataset = "/mnt/commons/test/biodata/example/dataset1.txt";
+		String outdir = "/tmp/preprocessing";
+		String filename = "/mnt/commons/test/biodata/example/known.txt";
 		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--gene-list-filter", filename};
 
 		System.out.println("----------------> " + Arrays.toString(args));
@@ -105,8 +104,8 @@ public class PreprocessingTest {
 	}	
 
 	public void Test6() {
-		String dataset = "/home/joaquin/tests/dataset1.txt";
-		String outdir = "/home/joaquin/tests/preprocessing";
+		String dataset = "/mnt/commons/test/biodata/example/dataset1.txt";
+		String outdir = "/tmp/preprocessing";
 		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--impute-missing", "knn", "--kvalue", "3"};
 
 		System.out.println("----------------> " + Arrays.toString(args));
@@ -121,6 +120,4 @@ public class PreprocessingTest {
 			//System.out.println(e.toString());
 		}
 	}	
-
-
 }

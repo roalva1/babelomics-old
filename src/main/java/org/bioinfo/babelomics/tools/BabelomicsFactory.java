@@ -1,16 +1,16 @@
 package org.bioinfo.babelomics.tools;
 
-import org.bioinfo.babelomics.methods.functional.FatiScan;
 import org.bioinfo.babelomics.tools.expression.Clustering;
 import org.bioinfo.babelomics.tools.expression.DifferentialAnalysis;
 import org.bioinfo.babelomics.tools.expression.OutlierLrs;
 import org.bioinfo.babelomics.tools.expression.Predictor;
+import org.bioinfo.babelomics.tools.expression.normalization.AffyNormalization;
 import org.bioinfo.babelomics.tools.functional.Blast2Go;
 import org.bioinfo.babelomics.tools.functional.FatiGOTool;
 import org.bioinfo.babelomics.tools.functional.FatiScanTool;
 import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
-import org.bioinfo.babelomics.tools.functional.tissues.TMT;
+import org.bioinfo.babelomics.tools.functional.tissues.AffyTmt;
 import org.bioinfo.babelomics.tools.interactome.Snow;
 import org.bioinfo.babelomics.tools.preprocessing.IdConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
@@ -20,6 +20,10 @@ public class BabelomicsFactory {
 
 	public static BabelomicsTool createTool(String toolName) {
 		BabelomicsTool babelomicsTool = null;
+
+		if(toolName.equalsIgnoreCase("affymetrix-normalization")) {
+			return new AffyNormalization();
+		}
 
 		if(toolName.equalsIgnoreCase("preprocessing")) {
 			return new Preprocessing();
@@ -61,8 +65,8 @@ public class BabelomicsFactory {
 			return new MarmiteScan();
 		}
 		
-		if(toolName.equalsIgnoreCase("tmt")) {
-			return new TMT();
+		if(toolName.equalsIgnoreCase("tmt-affy")) {
+			return new AffyTmt();
 		}
 		
 		if(toolName.equalsIgnoreCase("association")) {

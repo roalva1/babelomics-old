@@ -106,6 +106,9 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			// infrared connector
 			DBConnector dbConnector = new DBConnector(getSpecies(), new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));			
 			
+//			System.out.println("FatiGOTool.java, execute: getSpecies() = " + getSpecies());
+//			System.out.println("FatiGOTool.java, execute: from file " + new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf").getAbsolutePath() + ", dbConnector = " + dbConnector);
+
 			// prepare params
 			prepare(commandLine);			
 	

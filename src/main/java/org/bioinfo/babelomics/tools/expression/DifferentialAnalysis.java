@@ -55,7 +55,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 	@Override
 	public void initOptions() {
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("test", "the test, possible values: t-test, bayes, sam, fold-change, anova, pearson, spearman, regression, cox, masigpro"));
+		options.addOption(OptionFactory.createOption("test", "the test, possible values: t, bayes, sam, fold-change, anova, pearson, spearman, regression, cox, masigpro"));
 		options.addOption(OptionFactory.createOption("class", "class variable", false));
 		options.addOption(OptionFactory.createOption("time-class", "class variable", false));
 		options.addOption(OptionFactory.createOption("censored-class", "class class variable", false));
@@ -98,7 +98,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 
 
 		System.out.println(dataset.toString()+"\n");
-		if(test.equals("t-test")) {
+		if(test.equals("t")) {
 			executeTTest(dataset, className);
 			return;
 		}
@@ -202,7 +202,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			logger.debug("generating heatmap...\n");
 
 			Canvas heatmap = generateHeatmap(dataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());
-			heatmap.save(getOutdir() + "/ttest_heatmap");
+			heatmap.save(getOutdir() + "/t_heatmap");
 			
 			// saving data
 			//
@@ -218,20 +218,20 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
 
 			FeatureData featureData = new FeatureData(dataFrame);
-			featureData.write(new File(getOutdir() + "/ttest.txt"));
+			featureData.write(new File(getOutdir() + "/t.txt"));
 
-			BufferedWriter bw = new BufferedWriter(new FileWriter(getOutdir() + "/ttest_table.txt"));
+			BufferedWriter bw = new BufferedWriter(new FileWriter(getOutdir() + "/t_table.txt"));
 			bw.write(dataFrame.toString(true, true));
 			bw.close();
 
 
-			result.addOutputItem(new Item("ttest_file", "ttest.txt", "T-test file", TYPE.FILE));
+			result.addOutputItem(new Item("t_file", "t.txt", "T-test file", TYPE.FILE));
 			
-			Item item = new Item("ttest_table", "ttest_table.txt", "T-test table", TYPE.FILE);
+			Item item = new Item("t_table", "t_table.txt", "T-test table", TYPE.FILE);
 			item.addTag("TABLE");
 			result.addOutputItem(item);
 
-			result.addOutputItem(new Item("ttest_heatmap", "ttest_heatmap.png", "T-test heatmap", TYPE.IMAGE));
+			result.addOutputItem(new Item("t_heatmap", "t_heatmap.png", "T-test heatmap", TYPE.IMAGE));
 
 			
 			// done
@@ -429,7 +429,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(new File(getOutdir() + "/" + test + "_correlation.txt"));
 
-			IOUtils.write(new File(getOutdir() + "/" + test + "_correlation_table.txt"), dataFrame.toString(true, true));
+			IOUtils.write(new File(getOutdir() + "/" + test + "_table.txt"), dataFrame.toString(true, true));
 
 			Item item;
 			
@@ -437,7 +437,7 @@ public class DifferentialAnalysis extends BabelomicsTool {
 			item.setGroup(test.toUpperCase() + " results");
 			result.addOutputItem(item);
 			
-			item = new Item(test + "_correlation_table", test + "_correlation_table.txt", "Correlation table", TYPE.FILE);
+			item = new Item(test + "_table", test + "_table.txt", "Correlation table", TYPE.FILE);
 			item.addTag("TABLE");
 			item.setGroup(test.toUpperCase() +" results");
 			result.addOutputItem(item);

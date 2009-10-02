@@ -19,7 +19,7 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.db.DBConnection;
-import org.bioinfo.db.api.Query;
+import org.bioinfo.db.Query;
 import org.bioinfo.db.handler.BeanArrayListHandler;
 import org.bioinfo.db.handler.MatrixHandler;
 import org.bioinfo.db.handler.ResultSetHandler;
@@ -35,7 +35,7 @@ import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 import org.jfree.chart.plot.PlotOrientation;
 
-public class TMT  extends BabelomicsTool {
+public class TMT extends BabelomicsTool {
 
 	private String dbDriver = "mysql";
 	private String dbHost = "mem20";
