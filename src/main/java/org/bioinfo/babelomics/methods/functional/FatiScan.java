@@ -2,6 +2,7 @@ package org.bioinfo.babelomics.methods.functional;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class FatiScan {
 	private int numberOfPartitions;
 	private int outputFormat;
 	private int order;
+	private boolean isYourAnnotations;
 	
 	
 	// test
@@ -49,7 +51,19 @@ public class FatiScan {
 		this.testMode = testMode;
 		this.outputFormat = outputFormat;
 		this.order = order;
+		this.isYourAnnotations = false;
 	}
+	
+	public FatiScan(FeatureData rankedList, FeatureList<AnnotationItem> annotations, int numberOfPartitions, int testMode, int outputFormat, int order) {
+		this.rankedList = rankedList;
+		this.annotations = annotations;
+		this.numberOfPartitions = numberOfPartitions;
+		this.testMode = testMode;
+		this.outputFormat = outputFormat;
+		this.order = order;
+		this.isYourAnnotations = true;
+	}
+	
 	
 	public void prepare() throws InvalidColumnIndexException{
 		
@@ -57,11 +71,15 @@ public class FatiScan {
 		idList = rankedList.getDataFrame().getColumn(0);
 		// statistic
 		statistic = ListUtils.toList(rankedList.getDataFrame().getColumnAsDoubleArray(1));
-		
+					
 		// order ranked list
-		int[] sortIndex = ListUtils.order(statistic,order==DESCENDING_SORT);
+		int[] sortIndex = ListUtils.order(statistic);
 		ListUtils.ordered(idList,sortIndex);
 		ListUtils.ordered(statistic,sortIndex);
+		if(order==ASCENDING_SORT){
+			Collections.reverse(idList);
+			Collections.reverse(statistic);			
+		}		
 		
 	}
 	
@@ -71,29 +89,24 @@ public class FatiScan {
 		prepare();
 		
 		// annotation		
-		annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);		
+		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);		
 
 		results = new ArrayList<TwoListFisherTestResult>();
 		
-		double inc = (double)(statistic.get(0)-statistic.get(statistic.size()-1))/(numberOfPartitions+1);
-		double acum;
-		if(order==DESCENDING_SORT) {
-			inc*=-1;
-			acum = statistic.get(0) + inc;
-		} else {
-			acum = statistic.get(statistic.size()-1) + inc;
-		}
+		double inc = -(double)(statistic.get(0)-statistic.get(statistic.size()-1))/(numberOfPartitions+1);
+		double acum = statistic.get(0) + inc;
 		
 		int thresholdPosition;
-				
+		List<String> list1,list2;
+		
 		for(int i=0; i<numberOfPartitions; i++){
 			
 			thresholdPosition = getThresholdPosition(acum);
 			
-			System.err.print(i + ": threshold = " + acum + " (" + thresholdPosition + ")");
+			System.err.print(i + ": threshold = " + acum + " (" + thresholdPosition + ") ");
 			
-			List<String> list1 = idList.subList(0, thresholdPosition);
-			List<String> list2 = idList.subList(thresholdPosition + 1, idList.size()-1);
+			list1 = idList.subList(0, thresholdPosition);
+			list2 = idList.subList(thresholdPosition + 1, idList.size()-1);
 			
 			System.err.println("l1.size: " + list1.size() + "l2.size: " + list2.size());
 			
@@ -105,6 +118,7 @@ public class FatiScan {
 			results.addAll(fisher.getResults());
 						
 			acum+=inc;
+			
 		}
 
 		if(outputFormat == SHORT_FORMAT) {
@@ -148,8 +162,11 @@ public class FatiScan {
 	}
 	
 	public List<TwoListFisherTestResult> getSignificant(double threshold){
-		if(fisher!=null) return fisher.getSignificantResults(threshold);
-		return null;
+		List<TwoListFisherTestResult> significant = new ArrayList<TwoListFisherTestResult>();
+		for(TwoListFisherTestResult result: this.results){			
+			if(result.getAdjPValue()<threshold) significant.add(result);
+		}
+		return significant;
 	}
 	
 	/**
