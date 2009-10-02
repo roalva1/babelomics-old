@@ -3,6 +3,9 @@ package org.bioinfo.babelomics.tools.expression;
 import java.io.File;
 import java.io.FileNotFoundException; 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
@@ -11,6 +14,7 @@ import org.bioinfo.babelomics.tools.expression.clustering.Kmeans;
 import org.bioinfo.babelomics.tools.expression.clustering.Sota;
 import org.bioinfo.babelomics.tools.expression.clustering.Upgma;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.format.core.newick.NewickTree;
@@ -75,19 +79,12 @@ public class Clustering extends BabelomicsTool {
 		File datasetFile = new File(commandLine.getOptionValue("dataset"));
 		try {
 			dataset = new Dataset(datasetFile);
+			dataset.load();
+			dataset.validate();
 		} catch (Exception e) {
 			abort("exception_execute_clustering", "error reading dataset '" + datasetFile.getName() + "'", e.toString(), StringUtils.getStackTrace(e));
 		}		
-
-		if ( dataset.getDoubleMatrix() == null ) { 
-			try {
-				dataset.load();
-			} catch (Exception e) {
-				abort("exception_execute_clustering", "Error loading dataset '" + datasetFile.getName() + "'", e.toString(), StringUtils.getStackTrace(e));
-			}
-			dataset.validate();
-		}
-
+		
 //		if(commandLine.hasOption("sample-filter") || commandLine.hasOption("feature-filter")) {
 //			dataset = dataset.getSubDataset(commandLine.getOptionValue("sample-filter"), "4", commandLine.getOptionValue("feature-filter"), ""); 
 //		}
@@ -112,10 +109,11 @@ public class Clustering extends BabelomicsTool {
 			printError("exception_executesota_clustering", "error running " + method + " algorithm for genes", e.toString(), e);
 		}
 		
+		List<String> tags = StringUtils.toList("data,newick", ",");
 		if ( nwGenes != null ) {
 			try {
 				IOUtils.write(new File(this.getOutdir() + "/genes.nw"), nwGenes.toString());
-				result.addOutputItem(new Item("gene_newick_file", "genes.nw", "Clusters of genes (newick format file)", TYPE.FILE));
+				result.addOutputItem(new Item("gene_newick_file", "genes.nw", "Clusters of genes", TYPE.FILE, tags, new HashMap<String, String>(2), "Clusters in newick format"));
 			} catch (IOException e) {
 				printError("ioexception_executesota_clustering", "error saving genes newick", e.toString(), e);
 				nwGenes = null;
@@ -137,7 +135,7 @@ public class Clustering extends BabelomicsTool {
 		if ( nwSamples != null ) {
 			try {
 				IOUtils.write(new File(this.getOutdir() + "/samples.nw"), nwSamples.toString());
-				result.addOutputItem(new Item("sample_newick_file", "samples.nw", "Clusters of samples (newick format file)", TYPE.FILE));
+				result.addOutputItem(new Item("sample_newick_file", "samples.nw", "Clusters of samples", TYPE.FILE, tags, new HashMap<String, String>(2), "Clusters in newick format"));
 			} catch (IOException e) {
 				printError("ioexception_execute" + method + "_clustering", "error saving samples newick", e.toString(), e);
 				nwSamples = null;
@@ -151,22 +149,46 @@ public class Clustering extends BabelomicsTool {
 		}
 
 		if ( nwGenes != null && nwSamples != null ) {
+			File imgFile;
+			String imgFilename;
 			try {
-				String imgFilename = this.getOutdir() + "/" + method;
-				
-				int rowOrder[] = getOrder(nwGenes.getLabels(), dataset.getFeatureNames());
-				int columnOrder[] = getOrder(nwSamples.getLabels(), dataset.getSampleNames());
-				DoubleMatrix matrix = orderMatrix(dataset.getDoubleMatrix(), rowOrder, columnOrder);
-				
-				ClusteringUtils.saveImageTree(matrix, nwGenes, nwSamples, imgFilename);
-				File imgFile = new File(imgFilename + ".png");
+				imgFilename = this.getOutdir() + "/samples." + method;
+				ClusteringUtils.saveImageTree(nwSamples, "Clusters of samples",  imgFilename, false);
+				imgFile = new File(imgFilename + ".png");
 				if ( imgFile.exists() ) {
-					result.addOutputItem(new Item(method + "_clustering_image", method + ".png", method.toUpperCase() + " clustering image (png format)", TYPE.IMAGE));					
+					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " sample clustering image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Cluster images"));					
 				} else {
-					printError("execute" + method + "_clustering", "error saving clustering image", "error saving clustering image");					
+					printError("execute" + method + "_clustering", "error saving sample clustering image", "error saving sample clustering image");										
 				}
+				
+				imgFilename = this.getOutdir() + "/genes." + method;
+				ClusteringUtils.saveImageTree(nwGenes, "Clusters of genes",  imgFilename, true);
+				imgFile = new File(imgFilename + ".png");
+				if ( imgFile.exists() ) {
+					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " gene clustering image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Cluster images"));					
+				} else {
+					printError("execute" + method + "_clustering", "error saving gene clustering image", "error saving gene clustering image");										
+				}
+
+//				String imgFilename = this.getOutdir() + "/" + method + ".png";
+//				
+//				int rowOrder[] = getOrder(nwGenes.getLabels(), dataset.getFeatureNames());
+//				int columnOrder[] = getOrder(nwSamples.getLabels(), dataset.getSampleNames());
+//				
+////				System.out.println("row order = \n" + Arrays.toString(rowOrder));
+////				System.out.println("column order = \n" + Arrays.toString(columnOrder));
+////				System.out.println("nw samples labels = " + ListUtils.toString(nwSamples.getLabels(), ",") + "\ndataset sample names = " + ListUtils.toString(dataset.getSampleNames(), ","));
+//				DoubleMatrix matrix = orderMatrix(dataset.getDoubleMatrix(), rowOrder, columnOrder);
+//				
+//				ClusteringUtils.saveImageTree(matrix, nwGenes, nwSamples, imgFilename);
+//				File imgFile = new File(imgFilename);
+//				if ( imgFile.exists() ) {
+//					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " clustering image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Clusters image"));					
+//				} else {
+//					printError("execute" + method + "_clustering", "error saving clustering image", "error saving clustering image");					
+//				}
 			} catch (IOException e) {
-				printError("ioexception_execute" + method + "_clustering", "error saving clustering image", e.toString(), e);
+				printError("ioexception_execute" + method + "_clustering", "error saving clustering image", e.toString(), StringUtils.getStackTrace(e));
 			}
 		}
 	}

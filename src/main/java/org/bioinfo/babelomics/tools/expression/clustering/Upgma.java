@@ -35,7 +35,8 @@ public class Upgma extends Cluster {
 		}
 		IOUtils.write(inputFile, lines);
 	
-		String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/cluster " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath() + " UPGMA " + distance;					
+		String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/cluster " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath() + " UPGMA " + distance;
+		System.out.println("clustering command UPGMS: " + cmdStr);
 		Command cmd = new Command(cmdStr); 
 		SingleProcess sp = new SingleProcess(cmd);
 		sp.runSync();

@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
@@ -302,10 +303,10 @@ public class Preprocessing extends BabelomicsTool {
 		}
 		
 		try {
-			dataset.write(new File(this.getOutdir() + "/preprocessed.txt"));
-			Item item = new Item("prepocessed_file", "preprocessed.txt", "Preprocessed file", TYPE.FILE);
-			item.setGroup("Preprocessed data");
-			result.addOutputItem(item);
+			File file = new File(this.getOutdir() + "/preprocessed.txt");
+			dataset.write(file);
+			List<String> tags = StringUtils.toList("data,datamatrix,expression", ",");
+			result.addOutputItem(new Item("prepocessed_file", file.getName(), "Preprocessed file", TYPE.FILE, tags, new HashMap<String, String>(2), "Preprocessed data"));								
 		} catch (IOException e) {
 			abort("ioexception_savingresults_execute_preprocessing", "error saving output file", e.toString(), StringUtils.getStackTrace(e));
 		}		
