@@ -130,19 +130,19 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		}
 		// kegg
 		if(commandLine.hasOption("kegg")) {			
-			KeggFilter keggFilter = new KeggFilter(Integer.parseInt(commandLine.getOptionValue("kegg-min-num-genes","5")),Integer.parseInt(cmdLine.getOptionValue("kegg-max-num-genes","500")));
+			KeggFilter keggFilter = new KeggFilter(Integer.parseInt(commandLine.getOptionValue("kegg-min-num-genes","5")),Integer.parseInt(commandLine.getOptionValue("kegg-max-num-genes","500")));
 			filterList.add(keggFilter);
 		}
 		// biocarta
 		if(commandLine.hasOption("biocarta")) {
-			BiocartaFilter biocartaFilter = new BiocartaFilter(Integer.parseInt(commandLine.getOptionValue("biocarta-min-num-genes","5")),Integer.parseInt(cmdLine.getOptionValue("biocarta-max-num-genes","500")));
+			BiocartaFilter biocartaFilter = new BiocartaFilter(Integer.parseInt(commandLine.getOptionValue("biocarta-min-num-genes","5")),Integer.parseInt(commandLine.getOptionValue("biocarta-max-num-genes","500")));
 			filterList.add(biocartaFilter);
 		}
 		// your annotations
-		if(cmdLine.hasOption("annotations") && !cmdLine.getOptionValue("annotations").equalsIgnoreCase("") && !cmdLine.getOptionValue("annotations").equalsIgnoreCase("none")) {
+		if(commandLine.hasOption("annotations") && !commandLine.getOptionValue("annotations").equalsIgnoreCase("") && !commandLine.getOptionValue("annotations").equalsIgnoreCase("none")) {
 			isYourAnnotations = true;
-			System.err.println("annotation file: " + cmdLine.getOptionValue("annotations"));
-			FeatureData annotations = new FeatureData(new File(cmdLine.getOptionValue("annotations")), true);
+			System.err.println("annotation file: " + commandLine.getOptionValue("annotations"));
+			FeatureData annotations = new FeatureData(new File(commandLine.getOptionValue("annotations")), true);
 			List<String> ids = annotations.getDataFrame().getColumn(0);
 			List<String> terms = annotations.getDataFrame().getColumn(1);			
 			yourAnnotations = new FeatureList<AnnotationItem>(ids.size());// FeatureData(new File(cmdLine.getOptionValue("annotations")), true);

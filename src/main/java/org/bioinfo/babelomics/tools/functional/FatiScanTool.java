@@ -57,20 +57,20 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		
 	@Override
 	public void prepare() throws IOException, ParseException, InvalidColumnIndexException {
-		super.prepare(cmdLine);
+		super.prepare();
 
 		// ranked list
-		rankedList = new FeatureData(new File(cmdLine.getOptionValue("ranked-list")), true);
+		rankedList = new FeatureData(new File(commandLine.getOptionValue("ranked-list")), true);
 		// test
-		numberOfPartitions = Integer.parseInt(cmdLine.getOptionValue("partitions","" + FatiScan.DEFAULT_NUMBER_OF_PARTITIONS));
+		numberOfPartitions = Integer.parseInt(commandLine.getOptionValue("partitions","" + FatiScan.DEFAULT_NUMBER_OF_PARTITIONS));
 		// output format
-		if(cmdLine.hasOption("output-format") && cmdLine.getOptionValue("output-format").equalsIgnoreCase("long")) {
+		if(commandLine.hasOption("output-format") && commandLine.getOptionValue("output-format").equalsIgnoreCase("long")) {
 			outputFormat = FatiScan.LONG_FORMAT;
 		} else {
 			outputFormat = FatiScan.SHORT_FORMAT;
 		}
 		// sort order
-		if(cmdLine.hasOption("order") && cmdLine.getOptionValue("order").equalsIgnoreCase("ascend")) {
+		if(commandLine.hasOption("order") && commandLine.getOptionValue("order").equalsIgnoreCase("ascend")) {
 			order = FatiScan.ASCENDING_SORT;
 		} else {
 			order = FatiScan.DESCENDING_SORT;
@@ -85,7 +85,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 			DBConnector dbConnector = new DBConnector(getSpecies(), new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));			
 			
 			// prepare params
-			prepare(commandLine);			
+			prepare();			
 	
 			// run fatigo's
 			if(filterList.size()==0  && !isYourAnnotations){

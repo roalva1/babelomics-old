@@ -70,25 +70,25 @@ public class FatiGOTool extends FunctionalProfilingTool{
 
 	
 	@Override
-	public void prepare(CommandLine cmdLine) throws IOException, ParseException, InvalidColumnIndexException {
-		super.prepare(cmdLine);
+	public void prepare() throws IOException, ParseException, InvalidColumnIndexException {
+		super.prepare();
 
 		// list 1		
-		list1 = new FeatureData(new File(cmdLine.getOptionValue("list1")), true);
+		list1 = new FeatureData(new File(commandLine.getOptionValue("list1")), true);
 		
 		// list 2
-		if(cmdLine.hasOption("list2")){
-			list2 = new FeatureData(new File(cmdLine.getOptionValue("list2")), true);
-		} else if(cmdLine.hasOption("genome")) {
+		if(commandLine.hasOption("list2")){
+			list2 = new FeatureData(new File(commandLine.getOptionValue("list2")), true);
+		} else if(commandLine.hasOption("genome")) {
 			this.setRestOfGenome(true);
-		} else if(cmdLine.hasOption("chromosomes")) {
+		} else if(commandLine.hasOption("chromosomes")) {
 			throw new ParseException("chromosome reading not yet implemented");
 		} else {
 			throw new ParseException("No comparison provided, use list2, rest-of-genome or chromosome options to set your comparison");
 		}
 		
 		// extras
-		String duplicates = cmdLine.getOptionValue("remove-duplicates", "never");
+		String duplicates = commandLine.getOptionValue("remove-duplicates", "never");
 		if(duplicates.equalsIgnoreCase("each")) duplicatesMode = FatiGO.REMOVE_EACH;
 		if(duplicates.equalsIgnoreCase("ref")) duplicatesMode = FatiGO.REMOVE_REF;
 		if(duplicates.equalsIgnoreCase("all")) duplicatesMode = FatiGO.REMOVE_ALL;		
@@ -110,7 +110,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 //			System.out.println("FatiGOTool.java, execute: from file " + new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf").getAbsolutePath() + ", dbConnector = " + dbConnector);
 
 			// prepare params
-			prepare(commandLine);			
+			prepare();			
 	
 			// list 1
 			List<String> idList1 = list1.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list1.getDataFrame().getColumn(0));
