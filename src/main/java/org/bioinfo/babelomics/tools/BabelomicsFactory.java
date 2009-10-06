@@ -4,6 +4,9 @@ import org.bioinfo.babelomics.tools.expression.Clustering;
 import org.bioinfo.babelomics.tools.expression.DifferentialAnalysis;
 import org.bioinfo.babelomics.tools.expression.OutlierLrs;
 import org.bioinfo.babelomics.tools.expression.Predictor;
+import org.bioinfo.babelomics.tools.expression.differential.Correlation;
+import org.bioinfo.babelomics.tools.expression.differential.MaSigPro;
+import org.bioinfo.babelomics.tools.expression.differential.Survival;
 import org.bioinfo.babelomics.tools.expression.normalization.AffyNormalization;
 import org.bioinfo.babelomics.tools.functional.Blast2Go;
 import org.bioinfo.babelomics.tools.functional.FatiGOTool;
@@ -37,6 +40,18 @@ public class BabelomicsFactory {
 			return new DifferentialAnalysis();
 		}
 
+		if(toolName.equalsIgnoreCase("correlation")) {
+			return new Correlation();
+		}
+
+		if(toolName.equalsIgnoreCase("survival")) {
+			return new Survival();
+		}
+
+		if(toolName.equalsIgnoreCase("masigpro")) {
+			return new MaSigPro();
+		}
+		
 		if(toolName.equalsIgnoreCase("predictor")) {
 			return new Predictor();
 		}
