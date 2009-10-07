@@ -34,9 +34,9 @@ public class ClusteringUtils {
 		
 		NewickPanel newickPanel = new NewickPanel(title, width, height, 0, 0);
 		
-		newickPanel.setNewick(tree);
-		newickPanel.setShowLabels(true);
-		newickPanel.setVertical(vertical);
+//		newickPanel.setNewick(tree);
+//		newickPanel.setShowLabels(true);
+//		newickPanel.setVertical(vertical);
 				
 		Canvas canvas = new Canvas("");
 		canvas.setBorderWidth(0);
