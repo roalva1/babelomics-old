@@ -1,48 +1,7 @@
 package org.bioinfo.babelomics.tools.expression;
 
-import java.awt.Color;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.math.MathException;
-import org.apache.commons.math.linear.MatrixIndexException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
-import org.bioinfo.collections.list.NamedArrayList;
-import org.bioinfo.collections.matrix.DataFrame;
-import org.bioinfo.commons.io.TextFileWriter;
-import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.utils.ListUtils;
-import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
-import org.bioinfo.data.dataset.FeatureData;
-import org.bioinfo.graphics.canvas.Canvas;
-import org.bioinfo.graphics.canvas.feature.ScoreFeature;
-import org.bioinfo.graphics.canvas.panel.GridPanel;
-import org.bioinfo.graphics.canvas.track.GridTrack;
-import org.bioinfo.math.data.DoubleMatrix;
-import org.bioinfo.math.regression.SimpleRegressionTest;
-import org.bioinfo.math.result.AnovaTestResult;
-import org.bioinfo.math.result.CorrelationTestResult;
-import org.bioinfo.math.result.CoxTestResult;
-import org.bioinfo.math.result.SimpleRegressionTestResult;
-import org.bioinfo.math.result.TTestResult;
-import org.bioinfo.math.result.TestResultList;
-import org.bioinfo.math.stats.MultipleTestCorrection;
-import org.bioinfo.math.stats.correlation.CorrelationTest;
-import org.bioinfo.math.stats.inference.AnovaTest;
-import org.bioinfo.math.stats.inference.TTest;
-import org.bioinfo.math.stats.survival.CoxTest;
-import org.bioinfo.tool.OptionFactory;
-import org.bioinfo.tool.result.Item;
-import org.bioinfo.tool.result.Item.TYPE;
 
 public class DifferentialAnalysis extends BabelomicsTool {
 

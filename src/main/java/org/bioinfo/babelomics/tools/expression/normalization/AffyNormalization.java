@@ -1,12 +1,9 @@
 package org.bioinfo.babelomics.tools.expression.normalization;
 
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +16,6 @@ import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;
@@ -30,7 +26,6 @@ import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 import org.jfree.chart.ChartUtilities;
-import org.junit.Test;
 
 
 public class AffyNormalization extends BabelomicsTool {

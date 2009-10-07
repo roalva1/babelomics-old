@@ -1,18 +1,12 @@
 package org.bioinfo.babelomics.tools.expression.differential;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.math.MathException;
-import org.apache.commons.math.linear.MatrixIndexException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.babelomics.tools.expression.DifferentialAnalysis;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;

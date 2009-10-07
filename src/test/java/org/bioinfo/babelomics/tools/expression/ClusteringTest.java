@@ -4,7 +4,6 @@ package org.bioinfo.babelomics.tools.expression;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 
 import org.bioinfo.babelomics.BabelomicsMain;

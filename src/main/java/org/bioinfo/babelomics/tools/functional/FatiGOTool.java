@@ -18,10 +18,7 @@ import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
-import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
 import org.bioinfo.infrared.funcannot.filter.Filter;
-import org.bioinfo.infrared.funcannot.filter.GOFilter;
-import org.bioinfo.infrared.funcannot.filter.KeggFilter;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 

@@ -1,7 +1,6 @@
 package org.bioinfo.babelomics.tools.expression.differential;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,24 +8,17 @@ import java.util.List;
 
 import org.bioinfo.babelomics.tools.expression.DifferentialAnalysis;
 import org.bioinfo.collections.matrix.DataFrame;
-import org.bioinfo.commons.exec.Command;
-import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
-import org.bioinfo.data.format.core.newick.NewickTree;
-import org.bioinfo.data.format.io.NewickParser;
 import org.bioinfo.graphics.canvas.Canvas;
-import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.math.regression.SimpleRegressionTest;
 import org.bioinfo.math.result.CorrelationTestResult;
-import org.bioinfo.math.result.CoxTestResult;
 import org.bioinfo.math.result.SimpleRegressionTestResult;
 import org.bioinfo.math.result.TestResultList;
 import org.bioinfo.math.stats.correlation.CorrelationTest;
-import org.bioinfo.math.stats.survival.CoxTest;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;

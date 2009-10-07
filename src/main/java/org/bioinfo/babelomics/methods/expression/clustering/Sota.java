@@ -1,7 +1,6 @@
 package org.bioinfo.babelomics.methods.expression.clustering;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +34,7 @@ public class Sota extends Cluster {
 		}
 		IOUtils.write(inputFile, lines);
 		
-		String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/sota " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath() + " " + distance + " -newick";
+		String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/clustering/sota " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath() + " " + distance + " -newick";
 		System.out.println("clustering command SOTA: " + cmdStr);
 		Command cmd = new Command(cmdStr); 
 		SingleProcess sp = new SingleProcess(cmd);
