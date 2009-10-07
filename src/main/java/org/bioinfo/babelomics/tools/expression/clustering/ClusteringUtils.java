@@ -1,18 +1,11 @@
 package org.bioinfo.babelomics.tools.expression.clustering;
 
 import java.awt.Color;
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import org.bioinfo.data.format.core.newick.NewickTree;
-import org.bioinfo.data.format.io.NewickParser;
 import org.bioinfo.graphics.canvas.Canvas;
-import org.bioinfo.graphics.canvas.feature.ScoreFeature;
-import org.bioinfo.graphics.canvas.panel.GridPanel;
 import org.bioinfo.graphics.canvas.panel.NewickPanel;
-import org.bioinfo.graphics.canvas.track.GridTrack;
-import org.bioinfo.math.data.DoubleMatrix;
 
 public class ClusteringUtils {
 	
