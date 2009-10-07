@@ -1,5 +1,7 @@
 package org.bioinfo.babelomics.tools.expression.normalization;
 
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.Config;
 import org.bioinfo.commons.exec.Command;
@@ -26,6 +29,8 @@ import org.bioinfo.io.file.compress.GenericCompressManager;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
+import org.jfree.chart.ChartUtilities;
+import org.junit.Test;
 
 
 public class AffyNormalization extends BabelomicsTool {
@@ -223,9 +228,10 @@ public class AffyNormalization extends BabelomicsTool {
 				IOUtils.write(file, cleanLines(IOUtils.readLines(file)));
 				saveAsDataset(file);
 				
-				result.addOutputItem(new Item("rma.summary", file.getName(), "Summary ", TYPE.FILE, tags, new HashMap<String, String>(2), "RMA analysis"));								
+				result.addOutputItem(new Item("rma.summary", file.getName(), "Summary ", TYPE.FILE, tags, new HashMap<String, String>(2), "RMA analysis"));
+				saveBoxPlot(file, "RMA box-plot", "rmaimg", "RMA analysis");				
 			} catch (Exception e) {
-				e.printStackTrace();
+				printError("error saving rma results", "error saving rma results", "error saving rma results");
 			}
 		}
 
@@ -236,6 +242,7 @@ public class AffyNormalization extends BabelomicsTool {
 				saveAsDataset(file);
 				
 				result.addOutputItem(new Item("plier-mm.summary", file.getName(), "MM summary ", TYPE.FILE, tags, new HashMap<String, String>(2), "Plier analysis"));								
+				saveBoxPlot(file, "Plier MM box-plot", "plierimg", "Plier analysis");				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -248,6 +255,7 @@ public class AffyNormalization extends BabelomicsTool {
 				saveAsDataset(file);
 				
 				result.addOutputItem(new Item("plier-gcbg.summary", file.getName(), "GCBG summary ", TYPE.FILE, tags, new HashMap<String, String>(2), "Plier analysis"));								
+				saveBoxPlot(file, "Plier GCBG box-plot", "plierimg", "Plier analysis");				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -260,6 +268,7 @@ public class AffyNormalization extends BabelomicsTool {
 				saveAsDataset(file);
 				
 				result.addOutputItem(new Item("pm-mm.summary", file.getName(), "PM-MM summary ", TYPE.FILE, tags, new HashMap<String, String>(2), "Present-absent calls"));								
+				saveBoxPlot(file, "PM-MM box-plot", "pmmmimg", "Present-absent calls");				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -282,6 +291,7 @@ public class AffyNormalization extends BabelomicsTool {
 				saveAsDataset(file);
 				
 				result.addOutputItem(new Item("dabg.summary", file.getName(), "DABG summary ", TYPE.FILE, tags, new HashMap<String, String>(2), "Present-absent calls"));								
+				saveBoxPlot(file, "DABG box-plot", "dabgimg", "Present-absent calls");				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -358,5 +368,26 @@ public class AffyNormalization extends BabelomicsTool {
 		Dataset dataset = new Dataset(file);
 		dataset.load();
 		dataset.write();
-	}	
+	}
+	
+	public void saveBoxPlot(File file, String title, String resultId, String group) throws IOException, InvalidColumnIndexException {
+		File imgFile = new File(file.getAbsolutePath().replace(".txt", ".png"));
+		Dataset dataset = new Dataset(file, true);
+		BoxPlotChart bpc = new BoxPlotChart(title, "", "");
+		bpc.getLegend().setVisible(false);
+		for(int i=0; i<dataset.getColumnDimension(); i++) {
+			bpc.addSeries(dataset.getDoubleMatrix().getColumn(i), "samples", dataset.getSampleNames().get(i));
+		}
+		try {
+			ChartUtilities.saveChartAsPNG(imgFile, bpc, 400, 256);
+			if ( imgFile.exists() ) {
+				result.addOutputItem(new Item(resultId, imgFile.getName(), title, TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), group));							
+			} else {
+				printError("error saving " + title, "error saving " + title, "error saving " + title);
+			}
+		} catch (IOException e) {
+			printError("error generating " + title, "error generating " + title, "error generating " + title);
+		}
+	}
+
 }
