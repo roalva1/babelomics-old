@@ -3,9 +3,10 @@ package org.bioinfo.babelomics.tools.genomic.genotype;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.tool.OptionFactory;
 
-public class Linkage extends BabelomicsTool {
-	public Linkage(String[] args) {
-		initOptions();
+public class StratificationTest extends BabelomicsTool {
+	
+	public StratificationTest() {
+		
 	}
 
 	@Override

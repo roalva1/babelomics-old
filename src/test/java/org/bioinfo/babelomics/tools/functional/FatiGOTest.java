@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.tools.BabelomicsFactory;
-import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

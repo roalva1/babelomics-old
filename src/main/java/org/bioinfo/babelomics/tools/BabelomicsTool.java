@@ -13,9 +13,11 @@ import org.bioinfo.tool.OptionFactory;
 public abstract class BabelomicsTool extends GenericBioTool {
 	
 	protected String species;
+	protected String babelomicsHomePath;
 	
 	
 	public BabelomicsTool() {
+		babelomicsHomePath = System.getenv("BABELOMICS_HOME");
 		initCommonsOptions();
 		initOptions();
 	}

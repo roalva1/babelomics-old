@@ -6,8 +6,8 @@ import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.OptionFactory;
 
-public class Association extends BabelomicsTool {
-	public Association(String[] args) {
+public class AssociationTest extends BabelomicsTool {
+	public AssociationTest(String[] args) {
 		initOptions();
 	}
 

@@ -1,4 +1,4 @@
-package org.bioinfo.babelomics.tools.genomic;
+package org.bioinfo.babelomics.tools.genomic.genotype;
 
 import java.io.File;
 

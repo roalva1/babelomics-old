@@ -1,7 +1,9 @@
-package org.bioinfo.babelomics.methods.genomic;
+package org.bioinfo.babelomics.tools.genomic.genotype;
 
 import java.io.File;
 
+import org.bioinfo.babelomics.methods.genomic.genotype.GenotypeUtils;
+import org.bioinfo.babelomics.methods.genomic.genotype.PlinkTestsExecutor;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.tool.OptionFactory;
 
@@ -22,25 +24,29 @@ public class GenotypeAnalysis extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("map-file", "Just a flag", false));
 
 		
-		options.addOption(OptionFactory.createOption("create-ped-map", "Just a flag", false));
+		options.addOption(OptionFactory.createOption("create-ped-map", "Just a flag", false, false));
 		options.addOption(OptionFactory.createOption("stratification", "Just a flag", false, false));
-		options.addOption(OptionFactory.createOption("association", "Either is a assoc or fisher", false));
-		options.addOption(OptionFactory.createOption("association-log", "Just a flag", false));
+		options.addOption(OptionFactory.createOption("tdt", "Just a flag", false, false));
+		options.addOption(OptionFactory.createOption("assoc", "Either is a assoc or fisher", false));
+		options.addOption(OptionFactory.createOption("assoc-odd-ratio-log", "Just a flag", false, false));
 	}
 
 	@Override
 	protected void execute() {
 		File pedFile = null;
 		File mapFile = null;
+		PlinkTestsExecutor plinkTestsExecutor;
+		
 		if(commandLine.hasOption("pedigree-file") && commandLine.hasOption("chp-dir") && commandLine.hasOption("ped-file") && commandLine.hasOption("map-file")) {
 			abort("", "", "", "");
 		}
 		
 		if(commandLine.hasOption("create-ped-map")) {
 			
-			PlinkUtils.createPedAndMapFile("");
 			pedFile = new File(outdir+"/plink.ped");
 			mapFile = new File(outdir+"/plink.map");
+			GenotypeUtils.affyToPedAndMap("");
+			
 		}else {
 			if(commandLine.hasOption("ped-file") && commandLine.hasOption("map-file")) {
 				pedFile = new File(commandLine.getOptionValue("ped-file"));
@@ -55,7 +61,17 @@ public class GenotypeAnalysis extends BabelomicsTool {
 			abort("", "", "", "");
 		}
 		
+		plinkTestsExecutor = new PlinkTestsExecutor(pedFile, mapFile);
+		plinkTestsExecutor.setPlinkPath(babelomicsHomePath+"/bin/genotype/plink64");
+		plinkTestsExecutor.setOutdir(outdir);
 		
+		if(commandLine.hasOption("stratification")) {
+			plinkTestsExecutor.stratification();
+		}
+		
+		if(commandLine.hasOption("assoc")) {
+			plinkTestsExecutor.association(commandLine.getOptionValue("assoc"));
+		}
 		
 		
 	}
