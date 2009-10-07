@@ -8,11 +8,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bioinfo.babelomics.methods.expression.clustering.ClusteringUtils;
+import org.bioinfo.babelomics.methods.expression.clustering.Kmeans;
+import org.bioinfo.babelomics.methods.expression.clustering.Sota;
+import org.bioinfo.babelomics.methods.expression.clustering.Upgma;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.babelomics.tools.expression.clustering.ClusteringUtils;
-import org.bioinfo.babelomics.tools.expression.clustering.Kmeans;
-import org.bioinfo.babelomics.tools.expression.clustering.Sota;
-import org.bioinfo.babelomics.tools.expression.clustering.Upgma;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;

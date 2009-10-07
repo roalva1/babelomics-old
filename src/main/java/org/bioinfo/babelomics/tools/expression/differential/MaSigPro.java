@@ -84,7 +84,8 @@ public class MaSigPro extends BabelomicsTool {
 		env.add("main=");
 		env.add("outdir=" + outdir);
 	
-		Command cmd = new Command("/usr/local/R-2.9.2/bin/R CMD BATCH --no-save --no-restore " + System.getenv("BABELOMICS_HOME") + "/bin/masigpro/masigpro.R " + outdir + "/r.log", env);
+		//Command cmd = new Command("/usr/local/R-2.9.2/bin/R CMD BATCH --no-save --no-restore " + System.getenv("BABELOMICS_HOME") + "/bin/masigpro/masigpro.R " + outdir + "/r.log", env);
+		Command cmd = new Command("R CMD BATCH --no-save --no-restore " + System.getenv("BABELOMICS_HOME") + "/bin/masigpro/masigpro.R " + outdir + "/r.log", env);
 		SingleProcess sp = new SingleProcess(cmd);
 		sp.runSync();
 		
@@ -105,7 +106,7 @@ public class MaSigPro extends BabelomicsTool {
 		// general info
 		outFiles = FileUtils.listFiles(outDirFile, ".*summary.*");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("summaryfile", f.getName(), "Significant genes", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "List of significant genes"));			
+			result.addOutputItem(new Item("summaryfile", f.getName(), "Significant genes for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "List of significant genes"));			
 		}
 		if ( (outFile = new File(outdir + "/pvalues.txt")).exists() ) {
 			result.addOutputItem(new Item("pvaluesfile", outFile.getName(), "p-values file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "p-values and adjusted p-values of global model for all genes"));						
@@ -120,66 +121,39 @@ public class MaSigPro extends BabelomicsTool {
 		// model data
 		outFiles = FileUtils.listFiles(outDirFile, ".*coefficients\\.txt");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("sigcoeffile", f.getName(), "Significant coefficients", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Significant coefficients"));			
+			result.addOutputItem(new Item("sigcoeffile", f.getName(), "Significant coefficients for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Significant coefficients"));			
 		}	
 		outFiles = FileUtils.listFiles(outDirFile, ".*sig\\.pvalues\\.txt");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("sigpvaluefile", f.getName(), "Significant p-values", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Significant p-values"));			
+			result.addOutputItem(new Item("sigpvaluefile", f.getName(), "Significant p-values for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Significant p-values"));			
 		}
 		outFiles = FileUtils.listFiles(outDirFile, ".*profiles\\.txt");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("sigprofilefile", f.getName(), "Significant profiles", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Significant profiles"));			
+			result.addOutputItem(new Item("sigprofilefile", f.getName(), "Significant profiles for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Significant profiles"));			
 		}
 		
 		
 		// visualization
 		outFiles = FileUtils.listFiles(outDirFile, ".*heatmap.*");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("heatmapimg", f.getName(), "Heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap plot"));			
+			result.addOutputItem(new Item("heatmapimg", f.getName(),  "'" + getCleanName(f) + "' heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap plot"));			
 		}
 		outFiles = FileUtils.listFiles(outDirFile, ".*Groups\\.png");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("groupimg", f.getName(), "Group", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Group plot"));			
+			result.addOutputItem(new Item("groupimg", f.getName(), "'" + getCleanName(f) + "' group", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Group plot"));			
 		}
 		outFiles = FileUtils.listFiles(outDirFile, ".*heatmap.*");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("profileimg", f.getName(), "Profile", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Profiles plot"));			
-		}
-				
-		// Summary: list of significant genes (*summary*)
-		// P-values and adjusted p-values of global model for all genes (*pvalues.txt) 
-		// Influence data (genes with influential values, possible outliers) (*influ_info.txt, *influ_data.png)
-		// Significant coefficients 
-		
-		
-		
-//
-//		// saving data
-//		//
-//		updateJobStatus("80", "saving results");
-//		DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
-//		dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
-//
-//		try {
-//			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
-//			dataFrame.addColumn("coeff.", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getCoefs()), rowOrder)));
-//			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
-//			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
-//
-//			FeatureData featureData = new FeatureData(dataFrame);
-//			featureData.write(new File(getOutdir() + "/cox.txt"));
-//			result.addOutputItem(new Item("cox_file", "cox.txt", "Cox output file", TYPE.FILE));
-//			
-//			IOUtils.write(new File(getOutdir() + "/cox_table.txt"), dataFrame.toString(true, true));			
-//			List<String> tags = new ArrayList<String>();
-//			tags.add("TABLE");
-//			result.addOutputItem(new Item("cox_table", "cox_table.txt", "Cox table", TYPE.FILE, tags, new HashMap<String, String>(2)));
-//		} catch (Exception e) {
-//			printError("ioexception_cox_cox", "error saving results", e.toString(), e);
-//		}
-//
-//		if ( new File(heatmapFilename + ".png").exists() ) {
-//			result.addOutputItem(new Item("cox_heatmap", "cox_heatmap.png", "Cox heatmap", TYPE.IMAGE));
-//		}
+			result.addOutputItem(new Item("profileimg", f.getName(), "'" + getCleanName(f) + "' profile", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Profiles plot"));			
+		}				
 	}
+	
+	private String getCleanName(File file) {
+		String res = file.getName().replace(".txt", "").replace(".png", "");
+		res = res.replace("groups_", "").replace("summary", "").replace("_sig.profiles", "").replace("_sig.pvalues", "").replace("_coefficients", "");
+		res = res.replace("_Groups", "").replace("_heatmap", "").replace("_Profiles", "").replace("_sig.pvalues", "_heatmap");
+		res = res.replace("_", " ");
+		return res;
+	}
+	
 }
