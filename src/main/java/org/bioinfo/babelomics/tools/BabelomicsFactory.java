@@ -14,6 +14,7 @@ import org.bioinfo.babelomics.tools.functional.FatiScanTool;
 import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
 import org.bioinfo.babelomics.tools.functional.tissues.AffyTmt;
+import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.genomic.genotype.SnpAffymetrixNormalization;
 import org.bioinfo.babelomics.tools.interactome.Snow;
 import org.bioinfo.babelomics.tools.preprocessing.IdConverter;
@@ -89,6 +90,10 @@ public class BabelomicsFactory {
 			return new AffyTmt();
 		}
 		
+		if(toolName.equalsIgnoreCase("copy-number")) {
+			return new CopyNumberAnalysis();
+		}
+
 		if(toolName.equalsIgnoreCase("association")) {
 			return new OutlierLrs();
 		}
