@@ -1,17 +1,23 @@
 package org.bioinfo.babelomics.tools;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.commons.cli.ParseException;
+import org.bioinfo.commons.utils.StringUtils;
+import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.GenericBioTool;
 import org.bioinfo.tool.OptionFactory;
 
 public abstract class BabelomicsTool extends GenericBioTool {
 	
 	protected String species;
+	protected String babelomicsHomePath;
 	
 	
 	public BabelomicsTool() {
+		babelomicsHomePath = System.getenv("BABELOMICS_HOME");
 		initCommonsOptions();
 		initOptions();
 	}
@@ -53,6 +59,30 @@ public abstract class BabelomicsTool extends GenericBioTool {
 	public void abort(String name, String title, String msg, String text) {
 		super.abort(name, title, msg, text);
 	}
+		
+	public Dataset initDataset(File file) {
+		updateJobStatus("20", "reading dataset");
+			
+		try {
+			// reading data
+			//
+			return new Dataset(file, true);
+		} catch (Exception e) {
+			abort("filenotfoundexception_initdataset_babelomicstool", "error reading dataset", e.toString(), StringUtils.getStackTrace(e));
+		}
+		return null;
+	}
+
+	public void updateJobStatus(String progress, String message) {
+		logger.debug(message + "...\n");
+		try {
+			jobStatus.addStatusMessage(progress, message);
+		} catch (FileNotFoundException e) {
+			abort("filenotfoundexception_updatejobstatus_babelomicstools", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
+		}
+	}
+	
+	
 	
 	/**
 	 * @param species the species to set

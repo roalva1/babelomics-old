@@ -1,7 +1,6 @@
-package org.bioinfo.babelomics.tools.expression.clustering;
+package org.bioinfo.babelomics.methods.expression.clustering;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,9 +12,9 @@ import org.bioinfo.data.format.core.newick.NewickTree;
 import org.bioinfo.data.format.io.NewickParser;
 import org.bioinfo.math.data.DoubleMatrix;
 
-public class Sota extends Cluster {
+public class Upgma extends Cluster {
 
-	public Sota(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String distance) {
+	public Upgma(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String distance) {
 		super(matrix, rowNames, colNames, distance);
 	}
 	
@@ -34,9 +33,9 @@ public class Sota extends Cluster {
 			lines.add(rowNames.get(i) + "\t" + ListUtils.toString(ListUtils.toList(matrix.getRow(i)), "\t"));
 		}
 		IOUtils.write(inputFile, lines);
-		
-		String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/sota " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath() + " " + distance + " -newick";
-		System.out.println("clustering command SOTA: " + cmdStr);
+	
+		String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/cluster " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath() + " UPGMA " + distance;
+		System.out.println("clustering command UPGMS: " + cmdStr);
 		Command cmd = new Command(cmdStr); 
 		SingleProcess sp = new SingleProcess(cmd);
 		sp.runSync();
@@ -48,5 +47,5 @@ public class Sota extends Cluster {
 		}
 		
 		return nw;
-	}
+	}	
 }

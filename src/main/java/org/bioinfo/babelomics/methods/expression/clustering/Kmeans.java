@@ -1,4 +1,4 @@
-package org.bioinfo.babelomics.tools.expression.clustering;
+package org.bioinfo.babelomics.methods.expression.clustering;
 
 import java.io.File;
 import java.util.ArrayList;

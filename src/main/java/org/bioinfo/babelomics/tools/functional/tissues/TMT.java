@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.bioinfo.babelomics.methods.functional.InfraredUtils;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.babelomics.tools.functional.FunctionalProfilingTool;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.utils.IOUtils;
@@ -19,7 +18,7 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.db.DBConnection;
-import org.bioinfo.db.Query;
+import org.bioinfo.db.api.Query;
 import org.bioinfo.db.handler.BeanArrayListHandler;
 import org.bioinfo.db.handler.MatrixHandler;
 import org.bioinfo.db.handler.ResultSetHandler;

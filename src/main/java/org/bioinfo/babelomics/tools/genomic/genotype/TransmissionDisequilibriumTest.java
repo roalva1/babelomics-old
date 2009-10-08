@@ -1,11 +1,12 @@
-package org.bioinfo.babelomics.tools.genotype;
+package org.bioinfo.babelomics.tools.genomic.genotype;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.tool.OptionFactory;
 
-public class Transmission extends BabelomicsTool {
-	public Transmission(String[] args) {
-		initOptions();
+public class TransmissionDisequilibriumTest extends BabelomicsTool {
+	
+	public TransmissionDisequilibriumTest() {
+
 	}
 
 	@Override

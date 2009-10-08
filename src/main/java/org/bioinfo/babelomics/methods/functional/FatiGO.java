@@ -8,13 +8,8 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
-import org.bioinfo.infrared.funcannot.dbsql.AnnotationDBManager;
 import org.bioinfo.infrared.funcannot.filter.Filter;
-import org.bioinfo.infrared.funcannot.filter.GOFilter;
-import org.bioinfo.infrared.funcannot.filter.KeggFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
-import org.bioinfo.math.result.FisherTestResult;
-import org.bioinfo.math.result.TestResultList;
 import org.bioinfo.math.stats.inference.FisherExactTest;
 
 public class FatiGO {
