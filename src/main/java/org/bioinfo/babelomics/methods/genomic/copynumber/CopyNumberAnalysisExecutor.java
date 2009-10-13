@@ -10,7 +10,7 @@ import org.bioinfo.commons.exec.SingleProcess;
 
 public class CopyNumberAnalysisExecutor {
 
-	private String segmentedFilename = "segemented.txt";
+	private String segmentedFilename = "segmented.txt";
 	private String cghFilename = "cgh.txt";
 	
 	
