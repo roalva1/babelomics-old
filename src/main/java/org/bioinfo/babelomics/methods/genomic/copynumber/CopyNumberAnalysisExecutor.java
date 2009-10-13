@@ -10,6 +10,10 @@ import org.bioinfo.commons.exec.SingleProcess;
 
 public class CopyNumberAnalysisExecutor {
 
+	private String segmentedFilename = "segemented.txt";
+	private String cghFilename = "cgh.txt";
+	
+	
 	private File normalizedFile;
 	private String segmentationBinPath;
 	private String cghMcrBinPath;
@@ -43,7 +47,7 @@ public class CopyNumberAnalysisExecutor {
 		env.add("infile=" + normalizedFile.getAbsolutePath());		
 		env.add("outdir=" + outdir);
 	
-		Command cmd = new Command("R CMD BATCH --no-save --no-restore " + segmentationBinPath + " " + outdir + "/r.segmentation.log", env);
+		Command cmd = new Command("R CMD BATCH --no-save --no-restore " + segmentationBinPath + " " + outdir + "/" + segmentedFilename + ".log", env);
 		
 		System.out.println("cmd = " + cmd.getCommandLine());
 		
@@ -51,7 +55,7 @@ public class CopyNumberAnalysisExecutor {
 		sp.runSync();		
 
 		if ( cghMcrBinPath != null ) {		
-			File segmentedFile = new File(outdir + "/segmented.txt");
+			File segmentedFile = new File(outdir + "/" + segmentedFilename);
 			if ( segmentedFile.exists() ) {
 				env = new ArrayList<String>();
 				env.add("normalized.file=" + normalizedFile.getAbsolutePath());		
@@ -63,14 +67,19 @@ public class CopyNumberAnalysisExecutor {
 				env.add("alteredHigh=" + alteredHigh);
 				env.add("recurrence=" + recurrence);
 
-				cmd = new Command("R CMD BATCH --no-save --no-restore " + cghMcrBinPath + " " + outdir + "/r.cgh.log", env);
+				cmd = new Command("R CMD BATCH --no-save --no-restore " + cghMcrBinPath + " " + outdir + "/" + cghFilename + ".log", env);
 				
 				System.out.println("cmd = " + cmd.getCommandLine());
 				
 				sp = new SingleProcess(cmd);
 				sp.runSync();
+				
+				File cghFile = new File(outdir + "/" + cghFilename);
+				if ( ! cghFile.exists() ) {
+					System.err.println("error creating cgh file");
+				}
 			} else {
-				System.err.println("erro creating segmented file");
+				System.err.println("error creating segmented file");
 			}
 		}
 	}
@@ -136,5 +145,13 @@ public class CopyNumberAnalysisExecutor {
 
 	public void setSegmentationBinPath(String segmentationBinPath) {
 		this.segmentationBinPath = segmentationBinPath;
+	}
+
+	public String getSegmentatedFilename() {
+		return segmentedFilename;
+	}
+	
+	public String getCghFilename() {
+		return cghFilename;
 	}
 }

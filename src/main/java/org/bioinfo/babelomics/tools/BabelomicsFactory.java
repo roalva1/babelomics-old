@@ -24,6 +24,9 @@ import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
 public class BabelomicsFactory {
 
 	public static BabelomicsTool createTool(String toolName) {
+		
+		System.err.println(">>>>>>>>>>>>>>> hello : " + toolName);
+		
 		BabelomicsTool babelomicsTool = null;
 
 		if(toolName.equalsIgnoreCase("affymetrix-normalization")) {
