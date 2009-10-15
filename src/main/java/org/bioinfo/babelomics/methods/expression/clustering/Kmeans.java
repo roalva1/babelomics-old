@@ -44,7 +44,7 @@ public class Kmeans extends Cluster {
 		}
 		IOUtils.write(inputFile, lines);
 		
-		String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/kmeans -f " + inputFile.getAbsolutePath() + " -g " + getDistance(distance) + " -k " + kvalue;
+		String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/clustering/kmeans -f " + inputFile.getAbsolutePath() + " -g " + getDistance(distance) + " -k " + kvalue;
 		System.out.println("clustering command KMEANS: " + cmdStr);		
 		
 		Command cmd = new Command(cmdStr); 
