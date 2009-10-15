@@ -1,6 +1,7 @@
 package org.bioinfo.babelomics.tools.genomic.copynumber;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -51,27 +52,31 @@ public class CopyNumberAnalysis extends BabelomicsTool {
 			abort("normalizedfilenotexist_execute_copynumberanalysis", "input normalized file does not exist", "input normalized file  does not exist", "input normalized file  does not exist");
 		}
 
-		CopyNumberAnalysisExecutor cpExecutor = new CopyNumberAnalysisExecutor(new File(normalizedFilename));
+		CopyNumberAnalysisExecutor cpExecutor = null;
 
 		if ( "dnacopy".equalsIgnoreCase(segmentation) ) {
-			cpExecutor.setSegmentationBinPath(babelomicsHomePath + "/bin/copynumber/DNAcopy.r");
+			cpExecutor = new CopyNumberAnalysisExecutor(babelomicsHomePath + "/bin/copynumber/DNAcopy.r");
 		} else if ( "glad".equalsIgnoreCase(segmentation) ) {
-			cpExecutor.setSegmentationBinPath(babelomicsHomePath + "/bin/copynumber/GLAD.r");
+			cpExecutor = new CopyNumberAnalysisExecutor(babelomicsHomePath + "/bin/copynumber/GLAD.r");
 		} else {
 			abort("unknownanalysis_execute_copynumberanalysis", "copy number analysis unknown", "copy number analysis unknown, valid values are dnacopy and glad", "copy number analysis unknown, valid values are dnacopy and glad");
 		}
 
+		File cghFile = new File(outdir + "/cgh.txt");;
+		File segmentedFile = new File(outdir + "/segmented.txt");
+		
+		cpExecutor.setNormalizedFile(normalizedFilename);
+		cpExecutor.setSegmentatedFilename(segmentedFile.getAbsolutePath());
+		cpExecutor.setCghFilename(cghFile.getAbsolutePath());
+		cpExecutor.setCghMcrBinPath(null);
+		
 		if ( cghMcr ) {
 			cpExecutor.setCghMcrBinPath(babelomicsHomePath + "/bin/copynumber/cghMCR.r");
 			cpExecutor.setAlteredLow(alteredLow);
 			cpExecutor.setAlteredHigh(alteredHigh);
 			cpExecutor.setGapAllowed(gapAllowed);
 			cpExecutor.setRecurrence(recurrence);
-		} else {
-			cpExecutor.setCghMcrBinPath(null);			
 		}
-
-		cpExecutor.setOutdir(outdir);
 
 		// executing segmentation
 		//
@@ -80,29 +85,26 @@ public class CopyNumberAnalysis extends BabelomicsTool {
 		try {
 			cpExecutor.run();			
 		} catch (InvalidParameterException e) {
-			printError("invalidparameteexception_execute_copynumberanalysis","error executing segmentation", e.getMessage(), e);
+			printError("invalidparameteexception_execute_copynumberanalysis", "error executing segmentation", e.getMessage(), e);
+		} catch (IOException e) {
+			printError("ioexception_execute_copynumberanalysis", "error executing segmentation", e.getMessage(), e);
 		}
 
 		// saving results
 		//
 		updateJobStatus("90", "saving results");
 
-		File outFile = new File(outdir + "/" + cpExecutor.getSegmentatedFilename());
-		if ( outFile.exists() ) {
-			result.addOutputItem(new Item("segmentedfile", outFile.getName(), "Segmented " + segmentation.toUpperCase() + " file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), segmentation.toUpperCase() + " segmentation"));						
+		if ( segmentedFile.exists() ) {
+			result.addOutputItem(new Item("segmentedfile", segmentedFile.getName(), "Segmented " + segmentation.toUpperCase() + " file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), segmentation.toUpperCase() + " segmentation"));						
 		} else {
 			printError("segmentedfileerror_execute_copynumberanalyis", "error creating segmented file", "error creating segmented file");
 		}
 		if ( cghMcr ) {
-			outFile = new File(outdir + "/" + cpExecutor.getCghFilename());
-			if ( outFile.exists() ) {
-				result.addOutputItem(new Item("cghfile", outFile.getName(), "CGH file for " + segmentation.toUpperCase() + " segmentation", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), segmentation.toUpperCase() + " CGH"));						
+			if ( cghFile.exists() ) {
+				result.addOutputItem(new Item("cghfile", cghFile.getName(), "CGH file for " + segmentation.toUpperCase() + " segmentation", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), segmentation.toUpperCase() + " CGH"));						
 			} else {
 				printError("cghfileerror_execute_copynumberanalyis", "error creating cgh file", "error creating cgh file");			
 			}
 		}
-
-
 	}
-
 }
