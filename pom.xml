@@ -27,8 +27,8 @@
     </dependency>
     <dependency>
     	<groupId>org.bioinfo</groupId>
-    	<artifactId>infrared</artifactId>
-    	<version>0.8.0</version>
+    	<artifactId>infrared-lib</artifactId>
+    	<version>0.9.0-beta</version>
     </dependency>
     <dependency>
     	<groupId>org.bioinfo</groupId>

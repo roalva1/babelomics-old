@@ -68,22 +68,22 @@ public class SageTmt extends Tmt {
 		File f2 = commandLine.hasOption("list2") ? new File(commandLine.getOptionValue("list2")) :  null;
  
 		boolean areEnsemblIds = commandLine.hasOption("ensembl-ids");
-		String organism = commandLine.getOptionValue("organism");
+//		String organism = commandLine.getOptionValue("organism");
 		String normMethod = commandLine.getOptionValue("normalization-method", "mas5");
 		String multipleProbes = commandLine.getOptionValue("multiple-probes", "mean");
 
 		List<String> tissues = StringUtils.toList(commandLine.getOptionValue("tissues"), ",");
 		
-		dbName = "mouse".equalsIgnoreCase(organism) ? "gnf_mouse" : "gnf_human";
+		dbName = "mouse".equalsIgnoreCase(species) ? "gnf_mouse" : "gnf_human";
 
 		try {			
 			if ( tissues.contains("all tissues") ) {
-				tissues = getAllTissues(organism);
+				tissues = getAllTissues(species);
 			}
 
 			System.out.println("tissues:\n" + ListUtils.toString(tissues));
 
-			DBConnector dbConnector = new DBConnector("mouse".equalsIgnoreCase(organism) ? "mus" : "hsa");
+			DBConnector dbConnector = new DBConnector("mouse".equalsIgnoreCase(species) ? "mmu" : "hsa");
 			System.out.println("db connector = " + dbConnector.toString());
 
 			// reading data
@@ -119,7 +119,7 @@ public class SageTmt extends Tmt {
 				uniqueGeneList1 = ListUtils.unique(ensemblList1);
 			}
 
-			Map<String, List<String>> probesMap1 = getProbes(organism, uniqueGeneList1);
+			Map<String, List<String>> probesMap1 = getProbes(species, uniqueGeneList1);
 			if ( probesMap1 == null || probesMap1.size() == 0 ) {
 				throw new Exception("No Affymetrix probes found for gene list #1");
 			}
@@ -146,7 +146,7 @@ public class SageTmt extends Tmt {
 			Map<String, List<String>> ensemblMap2 = null;
 
 			if ( f2 == null ) {
-				List<String> genes = getAllGenes(organism);
+				List<String> genes = getAllGenes(species);
 				
 				uniqueGeneList2 = new ArrayList<String>();
 				for (String gene: genes) {
@@ -179,14 +179,14 @@ public class SageTmt extends Tmt {
 				}
 			}
 			
-			Map<String, List<String>> probesMap2 = getProbes(organism, uniqueGeneList2);
+			Map<String, List<String>> probesMap2 = getProbes(species, uniqueGeneList2);
 			if ( probesMap2 == null || probesMap2.size() == 0 ) {
 				throw new Exception("No Affymetrix probes found for gene list #2");
 			}
 
 			// getting libraries
 			//
-			Map<String, String> libraryMap = getTissueLibraries(organism, tissues);
+			Map<String, String> libraryMap = getTissueLibraries(species, tissues);
 			List<String> libraryNames = MapUtils.getKeys(libraryMap);
 
 			// getting frequency matrixes
@@ -206,7 +206,8 @@ public class SageTmt extends Tmt {
 			TestResultList<TTestResult> res = tTest.tTest(matrix1, matrix2);				
 			MultipleTestCorrection.BHCorrection(res);
 
-			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
+//			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
+			int[] rowOrder = ArrayUtils.order(res.getStatistics(), true);
 
 			// saving data
 			//
