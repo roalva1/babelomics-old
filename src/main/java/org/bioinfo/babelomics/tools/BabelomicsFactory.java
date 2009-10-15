@@ -14,7 +14,7 @@ import org.bioinfo.babelomics.tools.functional.FatiScanTool;
 import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
 import org.bioinfo.babelomics.tools.functional.tissues.AffyTmt;
-import org.bioinfo.babelomics.tools.genomic.genotype.SnpAffymetrixNormalization;
+import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
 import org.bioinfo.babelomics.tools.interactome.Snow;
 import org.bioinfo.babelomics.tools.preprocessing.IdConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
@@ -25,12 +25,12 @@ public class BabelomicsFactory {
 	public static BabelomicsTool createTool(String toolName) {
 		BabelomicsTool babelomicsTool = null;
 
-		if(toolName.equalsIgnoreCase("affymetrix-normalization")) {
+		if(toolName.equalsIgnoreCase("affy-genotype-preprocess")) {
 			return new AffyNormalization();
 		}
 		
-		if(toolName.equalsIgnoreCase("affy-snp-calls")) {
-			return new SnpAffymetrixNormalization();
+		if(toolName.equalsIgnoreCase("affy-snp-preprocess")) {
+			return new AffyGenotypePreprocessing();
 		}
 
 		if(toolName.equalsIgnoreCase("preprocessing")) {

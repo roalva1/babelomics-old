@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.commons.cli.ParseException;
+import org.bioinfo.babelomics.exception.InvalidParameterException;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.GenericBioTool;
@@ -52,14 +53,26 @@ public abstract class BabelomicsTool extends GenericBioTool {
 		this.species = commandLine.getOptionValue("species", "unknown");
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.bioinfo.tool.GenericBioTool#abort(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-	 */
-	@Override
-	public void abort(String name, String title, String msg, String text) {
-		super.abort(name, title, msg, text);
+	public void checkFile(String filePath) throws InvalidParameterException, IOException {
+		checkFile(new File(filePath));
 	}
-		
+	
+	public void checkFile(File file) throws InvalidParameterException, IOException {
+		if(file == null) {
+			throw new InvalidParameterException("File is null");
+		}
+		if(!file.exists()) {
+			throw new IOException("File '" + file.getAbsolutePath() + "' does not exist");
+		}
+		if(file.isDirectory()) {
+			throw new IOException("File '" + file.getAbsolutePath() + "' is a directory");
+		}
+		if(!file.canRead()) {
+			throw new IOException("File '" + file.getAbsolutePath() + "' cannot be read");	
+		}
+	}
+	
+	
 	public Dataset initDataset(File file) {
 		updateJobStatus("20", "reading dataset");
 			
