@@ -1,9 +1,10 @@
 package org.bioinfo.babelomics.tools.expression;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileNotFoundException; 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import org.bioinfo.babelomics.methods.expression.clustering.Sota;
 import org.bioinfo.babelomics.methods.expression.clustering.Upgma;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.format.core.newick.NewickTree;
@@ -36,7 +38,6 @@ public class Clustering extends BabelomicsTool {
 		getOptions().addOption(OptionFactory.createOption("kvalue", "k-value for kmeans clustering. Default value: 15", false));
 		getOptions().addOption(OptionFactory.createOption("sample-filter", "class variable", false));
 		getOptions().addOption(OptionFactory.createOption("feature-filter", "class variable", false));
-
 	}
 
 	@Override
@@ -88,7 +89,8 @@ public class Clustering extends BabelomicsTool {
 //		}
 
 		
-		if ( !"kmeans".equalsIgnoreCase(method) && !"upgma".equalsIgnoreCase(method)  && !"sota".equalsIgnoreCase(method) && !"som".equalsIgnoreCase(method) ) {
+		if ( !"kmeans".equalsIgnoreCase(method) && !"upgma".equalsIgnoreCase(method)  &&
+			 !"sota".equalsIgnoreCase(method)   && !"som".equalsIgnoreCase(method) ) {
 			abort("unknownclusteringmethod_execute_clustering", "Unknown clustering method '" + method + "'", "Unknown clustering method '" + method + "'", "Unknown clustering method '" + method + "'");
 		}
 		

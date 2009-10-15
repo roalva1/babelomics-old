@@ -1,13 +1,12 @@
 package org.bioinfo.babelomics.tools;
 
+import org.bioinfo.babelomics.methods.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.expression.Clustering;
 import org.bioinfo.babelomics.tools.expression.DifferentialAnalysis;
 import org.bioinfo.babelomics.tools.expression.OutlierLrs;
 import org.bioinfo.babelomics.tools.expression.Predictor;
 import org.bioinfo.babelomics.tools.expression.differential.Correlation;
-import org.bioinfo.babelomics.tools.expression.differential.MaSigPro;
 import org.bioinfo.babelomics.tools.expression.differential.Survival;
-import org.bioinfo.babelomics.tools.expression.normalization.AffyNormalization;
 import org.bioinfo.babelomics.tools.functional.Blast2Go;
 import org.bioinfo.babelomics.tools.functional.FatiGOTool;
 import org.bioinfo.babelomics.tools.functional.FatiScanTool;
@@ -18,15 +17,22 @@ import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
 import org.bioinfo.babelomics.tools.interactome.Snow;
 import org.bioinfo.babelomics.tools.preprocessing.IdConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
+import org.jfree.data.time.TimeSeries;
 
 
 public class BabelomicsFactory {
 
 	public static BabelomicsTool createTool(String toolName) {
+		
+		System.err.println(">>>>>>>>>>>>>>> hello : " + toolName);
+		
 		BabelomicsTool babelomicsTool = null;
 
 		if(toolName.equalsIgnoreCase("affy-genotype-preprocess")) {
-			return new AffyNormalization();
+			return new AffyGenotypePreprocessing();
+		}
+		if(toolName.equalsIgnoreCase("affy-expression-normalization")) {
+			return new AffyExpressionNormalization();
 		}
 		
 		if(toolName.equalsIgnoreCase("affy-snp-preprocess")) {
@@ -41,6 +47,10 @@ public class BabelomicsFactory {
 			return new IdConverter();
 		}
 		
+		if(toolName.equalsIgnoreCase("class-comparison")) {
+			return new ClassComparison();
+		}
+		
 		if(toolName.equalsIgnoreCase("differential-expression")) {
 			return new DifferentialAnalysis();
 		}
@@ -53,8 +63,8 @@ public class BabelomicsFactory {
 			return new Survival();
 		}
 
-		if(toolName.equalsIgnoreCase("masigpro")) {
-			return new MaSigPro();
+		if(toolName.equalsIgnoreCase("time-series")) {
+			return new TimeSeries();
 		}
 		
 		if(toolName.equalsIgnoreCase("predictor")) {
@@ -89,6 +99,10 @@ public class BabelomicsFactory {
 			return new AffyTmt();
 		}
 		
+		if(toolName.equalsIgnoreCase("copy-number")) {
+			return new CopyNumberAnalysis();
+		}
+
 		if(toolName.equalsIgnoreCase("association")) {
 			return new OutlierLrs();
 		}
