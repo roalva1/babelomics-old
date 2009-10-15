@@ -19,6 +19,7 @@ public class CorrelationTest {
 		}		
 	}
 	
+	@Test
 	public void test2() {
 		System.out.println("-----  spearman ------");
 		//String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/spearman", "-test", "spearman", "-class", "O2_conc"};
