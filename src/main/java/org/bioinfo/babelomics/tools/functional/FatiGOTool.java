@@ -103,7 +103,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 	@Override
 	public void execute() {
 		try {
-			System.err.println("EXECUTING FATIGOOOOO!!!!");
+			logger.debug("EXECUTING FATIGOOOOO!!!!");
 			
 			// infrared connector
 			DBConnector dbConnector = new DBConnector(getSpecies(), new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));			

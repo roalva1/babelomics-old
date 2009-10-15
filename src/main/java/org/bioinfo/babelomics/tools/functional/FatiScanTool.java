@@ -196,7 +196,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		// save statistic results					
 		List<String> testResultOutput = testResultToStringList(fatiscan.getResults());
 		
-		IOUtils.write(outdir + "/" + fileName, StringUtils.join(testResultOutput,"\n"));
+		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
 		result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE"),new HashMap<String,String>(),"Database tests"));
 						
 		// save annotation
