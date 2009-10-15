@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.bioinfo.babelomics.tools.expression.DifferentialAnalysis;
+import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
@@ -23,7 +23,7 @@ import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 
-public class Correlation extends DifferentialAnalysis {
+public class Correlation extends BabelomicsTool {
 
 	Dataset dataset;
 	String test;

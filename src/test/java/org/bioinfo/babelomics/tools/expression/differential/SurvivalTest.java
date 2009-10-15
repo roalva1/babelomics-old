@@ -9,7 +9,7 @@ public class SurvivalTest {
 	@Test
 	public void test() {
 		System.out.println("----- cox ------");
-		String []args = {"-tool", "survival", "-dataset", "/mnt/commons/test/biodata/example/survival.txt", "-o", "/tmp/cox", "-test", "cox", "-time-class", "time", "-censored-class", "censored"};
+		String []args = {"--tool", "survival", "--dataset", "/mnt/commons/test/biodata/example/survival.txt", "-o", "/tmp/cox", "--test", "cox", "--time-class", "time", "--censored-class", "censored"};
 		
 		try {
 			BabelomicsMain.main(args); 
