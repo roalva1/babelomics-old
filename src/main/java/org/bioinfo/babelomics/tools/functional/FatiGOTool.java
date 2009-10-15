@@ -102,6 +102,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 	@Override
 	public void execute() {
 		try {
+			System.err.println("EXECUTING FATIGOOOOO!!!!");
 			
 			// infrared connector
 			DBConnector dbConnector = new DBConnector(getSpecies(), new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));			
@@ -113,6 +114,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			prepare();			
 	
 			// list 1
+			System.err.println("list1: " + list1);
 			List<String> idList1 = list1.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list1.getDataFrame().getColumn(0));
 			
 			// list 2
@@ -143,7 +145,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				result.addOutputItem(new Item("clean_list2","clean_list2.txt","List 2 (after duplicates managing)",Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
 				
 				// Significant results must appear after than complete tables!!
-				result.addOutputItem(new Item("significant","significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE"),new HashMap<String,String>(),"Significant Results"));
+				result.addOutputItem(new Item("significant","significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE"),new HashMap<String,String>(),"Significant Results"));
 				significant.add(TwoListFisherTestResult.header());
 				
 				// run fatigo's
@@ -224,7 +226,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		// save statistic results					
 		List<String> testResultOutput = testResultToStringList(fatigo.getResults());
 		IOUtils.write(outdir + "/" + fileName, StringUtils.join(testResultOutput,"\n"));
-		result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE"),new HashMap<String,String>(),"Database tests"));
+		result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE"),new HashMap<String,String>(),"Database tests"));
 						
 		// save annotation
 		IOUtils.write(outdir + "/" + annotFileName, fatigo.getAnnotations().toString());

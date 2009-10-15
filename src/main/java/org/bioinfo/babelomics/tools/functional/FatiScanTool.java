@@ -109,7 +109,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				result.addOutputItem(new Item("statistic","statistic.txt","Statistic (sorted)",Item.TYPE.FILE,Arrays.asList("STATISTIC","SORTED"),new HashMap<String,String>(),"Input data"));
 								
 				// Significant results must appear after than complete tables!!
-				result.addOutputItem(new Item("significant","significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE"),new HashMap<String,String>(),"Significant Results"));
+				result.addOutputItem(new Item("significant","significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE"),new HashMap<String,String>(),"Significant Results"));
 								
 				// do fatiscans
 				for(Filter filter: filterList) {
@@ -198,7 +198,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		List<String> testResultOutput = testResultToStringList(fatiscan.getResults());
 		
 		IOUtils.write(outdir + "/" + fileName, StringUtils.join(testResultOutput,"\n"));
-		result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE"),new HashMap<String,String>(),"Database tests"));
+		result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE"),new HashMap<String,String>(),"Database tests"));
 						
 		// save annotation
 		IOUtils.write(outdir + "/" + annotFileName, fatiscan.getAnnotations().toString());
