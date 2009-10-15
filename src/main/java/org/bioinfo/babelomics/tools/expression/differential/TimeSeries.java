@@ -6,9 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bioinfo.babelomics.methods.expression.differential.maSigPro;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.commons.exec.Command;
-import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
@@ -18,9 +17,9 @@ import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 
-public class MaSigPro extends BabelomicsTool {
+public class TimeSeries extends BabelomicsTool {
 
-	public MaSigPro() {
+	public TimeSeries() {
 		initOptions();
 	}
 
@@ -28,6 +27,7 @@ public class MaSigPro extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
 		options.addOption(OptionFactory.createOption("contin-class", "class variable"));
 		options.addOption(OptionFactory.createOption("series-class", "class class variable"));
+		options.addOption(OptionFactory.createOption("test", "the test", false));
 	}
 
 	@Override
@@ -37,6 +37,7 @@ public class MaSigPro extends BabelomicsTool {
 		//
 		Dataset dataset = initDataset(new File(commandLine.getOptionValue("dataset")));
 				
+		String test = commandLine.getOptionValue("contin-class", "masigpro");
 		String continClass = commandLine.getOptionValue("contin-class", null);
 		String seriesClass = commandLine.getOptionValue("series-class", null);
 		
@@ -60,27 +61,11 @@ public class MaSigPro extends BabelomicsTool {
 			abort("ioexception_execute_masigpro", "error writting intermediate file", e.toString(), StringUtils.getStackTrace(e));
 		}
 		
-		List<String> env = new ArrayList<String>();
-		env.add("data=" + inputFile.getAbsolutePath());
-		env.add("degree=2");
-		env.add("Q=0.05");
-		env.add("adjust=BH");
-		env.add("alfa=0.05");
-		env.add("clustermethod=hclust");
-		env.add("k=9");
-		env.add("main=");
-		env.add("outdir=" + outdir);
-	
-		//Command cmd = new Command("/usr/local/R-2.9.2/bin/R CMD BATCH --no-save --no-restore " + System.getenv("BABELOMICS_HOME") + "/bin/masigpro/masigpro.R " + outdir + "/r.log", env);
-		Command cmd = new Command("R CMD BATCH --no-save --no-restore " + System.getenv("BABELOMICS_HOME") + "/bin/masigpro/masigpro.R " + outdir + "/r.log", env);
-		SingleProcess sp = new SingleProcess(cmd);
-		sp.runSync();
+		maSigPro masigpro = new maSigPro(System.getenv("BABELOMICS_HOME") + "/bin/masigpro/masigpro.R");
+		masigpro.setInputFilename(inputFile.getAbsolutePath());
+		masigpro.setOutdir(outdir);
 		
-		System.out.println("cmd line = " + cmd.getCommandLine());
-//		System.out.println("cmd env = " + ListUtils.toString(cmd.getEnvironment(), "\t"));
-//		System.out.println("cmd exit value = " + cmd.getExitValue());
-		System.out.println("cmd output = " + cmd.getOutput());
-		System.out.println("cmd error = " + cmd.getError());
+		masigpro.compute();
 		
 		// saving data
 		//
@@ -134,6 +119,7 @@ public class MaSigPro extends BabelomicsTool {
 			result.addOutputItem(new Item("profileimg", f.getName(), "'" + getCleanName(f) + "' profile", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Profiles plot"));			
 		}				
 	}
+	
 	
 	private String getCleanName(File file) {
 		String res = file.getName().replace(".txt", "").replace(".png", "");

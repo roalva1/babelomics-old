@@ -17,6 +17,7 @@ import org.bioinfo.babelomics.methods.functional.FatiGO;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
@@ -137,11 +138,10 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				// significant terms
 				List<String> significant = new ArrayList<String>();
 
-				// save id lists
 				FatiGO fatigo = new FatiGO(idList1, idList2, null, dbConnector, testMode, duplicatesMode);
-				IOUtils.write(outdir + "/clean_list1.txt", StringUtils.join(fatigo.getList1(),"\n"));
+				IOUtils.write(outdir + "/clean_list1.txt", ListUtils.toString(fatigo.getList1(),"\n"));
 				result.addOutputItem(new Item("clean_list1","clean_list1.txt","List 1 (after duplicates managing)",Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
-				IOUtils.write(outdir + "/clean_list2.txt", StringUtils.join(fatigo.getList2(),"\n"));
+				IOUtils.write(outdir + "/clean_list2.txt", ListUtils.toString(fatigo.getList2(),"\n"));
 				result.addOutputItem(new Item("clean_list2","clean_list2.txt","List 2 (after duplicates managing)",Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
 				
 				// Significant results must appear after than complete tables!!

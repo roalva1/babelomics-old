@@ -1,29 +1,31 @@
 package org.bioinfo.babelomics.methods.genomic.genotype;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.InvalidParameterException;
 
 import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
+import org.bioinfo.commons.io.utils.FileUtils;
 
-public class PlinkTestsExecutor {
+public class GenotypeAnalysis {
 
 	private File pedFile;
 	private File mapFile;
 	private String plinkPath;
 	private String outdir;
 	
-	public PlinkTestsExecutor() {
+	public GenotypeAnalysis() {
 		this.pedFile = null;
 		this.mapFile = null;
 	}
 	
-	public PlinkTestsExecutor(String pedFilePath, String mapFilePath) {
+	public GenotypeAnalysis(String pedFilePath, String mapFilePath) {
 		this.pedFile = new File(pedFilePath);
 		this.mapFile = new File(mapFilePath);
 	}
 	
-	public PlinkTestsExecutor(File pedFile, File mapFile) {
+	public GenotypeAnalysis(File pedFile, File mapFile) {
 		this.pedFile = pedFile;
 		this.mapFile = mapFile;
 	}
@@ -34,7 +36,7 @@ public class PlinkTestsExecutor {
 	 * 
 	 */
 	
-	public void association(String assocTest) throws InvalidParameterException {
+	public void association(String assocTest) throws IOException {
 		checkParameters();
 		if(assocTest == null) {
 			throw new InvalidParameterException("association test is null");
@@ -43,12 +45,12 @@ public class PlinkTestsExecutor {
 			throw new InvalidParameterException("association test is not valid, valid options are: 'assoc' or 'fisher', parameter: " + assocTest);
 		}
 		StringBuilder plinkCommandLine = createBasicPlinkCommand();
-		plinkCommandLine.append(" --" +  assocTest.toLowerCase());
+		plinkCommandLine.append(" --" + assocTest.toLowerCase() + " ");
 		executePlinkCommand(plinkCommandLine.toString());
 	}
 
 	
-	public void stratification() throws InvalidParameterException {
+	public void stratification() throws IOException {
 		 checkParameters();
 		 StringBuilder plinkCommandLine = createBasicPlinkCommand();
 		 plinkCommandLine.append(" --cluster ");
@@ -76,7 +78,16 @@ public class PlinkTestsExecutor {
 		sp.runSync();
 	}
 	
-	private void checkParameters() throws InvalidParameterException {
+	private void checkParameters() throws IOException {
+		FileUtils.checkFile(pedFile);
+		FileUtils.checkFile(mapFile);
+		FileUtils.checkFile(plinkPath);
+		FileUtils.checkFile(outdir);
+	}
+	
+	
+	@Deprecated
+	private void checkParameters2() throws InvalidParameterException {
 		if(pedFile == null) {
 			throw new InvalidParameterException("pedFile is null");
 		}

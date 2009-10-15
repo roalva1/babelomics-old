@@ -13,6 +13,7 @@ import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.data.dataset.FeatureData;
@@ -153,7 +154,7 @@ public class Marmite extends BabelomicsTool {
 			//System.out.println("kolmogorov result :\n" +  res.toString());
 			//jobStatus.addStatusMessage("#", "ks test, elapsed time = " + ((System.currentTimeMillis()-time)/1000F) + " s");
 
-			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getAdjPValues()));
+			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getAdjPValues()));
 			//System.out.println("order = " + ListUtils.toString(ListUtils.toList(rowOrder)));
 
 			DataFrame dataFrame = new DataFrame(validEntities.size(), 0);

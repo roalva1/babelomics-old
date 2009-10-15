@@ -17,7 +17,6 @@ import org.bioinfo.babelomics.methods.functional.graph.FatiScanGraph;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
-import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
@@ -124,7 +123,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				// significant terms
 				System.err.println("sig size: " + significants.size());
 				if(significants!=null && significants.size()>0){						
-					IOUtils.write(outdir + "/significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt", StringUtils.join(significantOutput,"\n"));
+					IOUtils.write(outdir + "/significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significantOutput,"\n"));
 					FatiScanGraph.fatiScanGraph(significants,"Significant terms graph for all databases",outdir + "/significant_graph.png");			
 					result.addOutputItem(new Item("graph_alldbs","significant_graph.png","Significant terms graph for all databases",Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Significant Results"));
 				} else {

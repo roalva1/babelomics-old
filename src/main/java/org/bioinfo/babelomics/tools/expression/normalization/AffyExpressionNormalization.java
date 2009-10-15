@@ -8,12 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bioinfo.babelomics.methods.expression.AffyUtils;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.Config;
-import org.bioinfo.commons.exec.Command;
-import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
@@ -28,13 +27,12 @@ import org.bioinfo.tool.result.Item.TYPE;
 import org.jfree.chart.ChartUtilities;
 
 
-public class AffyNormalization extends BabelomicsTool {
+public class AffyExpressionNormalization extends BabelomicsTool {
 
-
-	private String chipLibPath = System.getenv("BABELOMICS_HOME") + "/data/apt";
 	private String aptBinPath = System.getenv("BABELOMICS_HOME") + "/bin/apt";
 
-	public AffyNormalization() {
+	public AffyExpressionNormalization() {
+		initOptions();
 	}
 
 	@Override
@@ -52,8 +50,7 @@ public class AffyNormalization extends BabelomicsTool {
 
 	@Override
 	public void execute() {
-		String cmdStr = null;
-		String tmpDirname = outdir + "/tmp";
+		File tmpDir = new File(outdir + "/tmp");
 		String compressedFilename = commandLine.getOptionValue("compressed-file", null);
 		String rawDirname = commandLine.getOptionValue("raw-dir", null);
 		boolean celConvert = !commandLine.hasOption("no-cel-convert");
@@ -87,10 +84,10 @@ public class AffyNormalization extends BabelomicsTool {
 			}
 
 			System.out.println("input dataset = " + compressedFilename);
-			System.out.println("tmp dir = " + tmpDirname);
+			System.out.println("tmp dir = " + tmpDir.getAbsolutePath());
 			try {
 				GenericCompressManager compresor = CompressFactory.getCompressManager(new File(compressedFilename));
-				rawFilenames = compresor.decompress(compressedFilename, tmpDirname);
+				rawFilenames = compresor.decompress(compressedFilename, tmpDir.getAbsolutePath());
 			} catch (Exception e) {
 				abort("exception_execute_affynormalization", "error decompressing dataset", e.toString(), StringUtils.getStackTrace(e));
 			}
@@ -131,13 +128,9 @@ public class AffyNormalization extends BabelomicsTool {
 				abort("filenotfoundexception_execute_affynormalization", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 			}
 
-			cmdStr = aptBinPath + "/apt-cel-convert -f text -o " + tmpDirname + " --cel-files " + celFiles.getAbsolutePath();
-			System.out.println("cmd = " + cmdStr);
-			Command cmd = new Command(cmdStr);
-			SingleProcess sp = new SingleProcess(cmd);
-			sp.runSync();
+			AffyUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", tmpDir.getAbsolutePath(), celFiles);			
 
-			File[] rawFiles = FileUtils.listFiles(new File(tmpDirname), ".+.CEL", true);
+			File[] rawFiles = FileUtils.listFiles(tmpDir, ".+.CEL", true);
 			rawFilenames = ListUtils.toStringList(rawFiles);
 			System.out.println("-----------> raw file names = " + ListUtils.toString(rawFilenames, ","));
 
@@ -177,30 +170,22 @@ public class AffyNormalization extends BabelomicsTool {
 			abort("filenotfoundexception_execute_affynormalization", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
 
+		List<String> analysis = new ArrayList<String>();
 		if ( "3-prime".equalsIgnoreCase(chipInfo.get("type")) ) {
-			cmdStr = aptBinPath + "/apt-probeset-summarize";
-			cmdStr = cmdStr + " -o " + outdir + " -d " + System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf");
-			if ( rma ) cmdStr = cmdStr + " -a rma";
-			if ( calls ) cmdStr = cmdStr + " -a pm-mm,mas5-detect.calls=1.pairs=1";
-			if ( plier ) cmdStr = cmdStr + " -a plier-mm";
-			cmdStr = cmdStr + " --cel-files " + celFiles.getAbsolutePath();
-			//cmdStr = cmdStr + " " + tmpDirname + "/*.CEL";
-			System.out.println("cmd = " + cmdStr);
-			Command cmd = new Command(cmdStr);
-			SingleProcess sp = new SingleProcess(cmd);
-			sp.runSync();
+
+			if ( rma ) analysis.add("rma");
+			if ( calls ) analysis.add("pm-mm,mas5-detect.calls=1.pairs=1");
+			if ( plier ) analysis.add("plier-mm");
+			
+			AffyUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", outdir, analysis, new File(System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf")), celFiles);
+			
 		} else {
-			cmdStr = aptBinPath + "/apt-probeset-summarize";
-			cmdStr = cmdStr + " -o " + outdir + " -d " + System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf");
-			if ( rma ) cmdStr = cmdStr + " -a rma";
-			if ( calls ) cmdStr = cmdStr + " -a dabg";
-			if ( plier ) cmdStr = cmdStr + " -a plier-gcbg";
-			cmdStr = cmdStr + " --cel-files " + celFiles.getAbsolutePath();
-			//cmdStr = cmdStr + " " + tmpDirname + "/*.CEL";
-			System.out.println("cmd = " + cmdStr);
-			Command cmd = new Command(cmdStr);
-			SingleProcess sp = new SingleProcess(cmd);
-			sp.runSync();
+			
+			if ( rma ) analysis.add("rma");
+			if ( calls ) analysis.add("dabg");
+			if ( plier ) analysis.add("plier-gcbg");
+			
+			AffyUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", outdir, analysis, new File(System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf")), celFiles);
 		}
 
 		//		System.err.println("cmd output: " + sp.getRunnableProcess().getOutput());
@@ -226,6 +211,7 @@ public class AffyNormalization extends BabelomicsTool {
 				result.addOutputItem(new Item("rma.summary", file.getName(), "Summary ", TYPE.FILE, tags, new HashMap<String, String>(2), "RMA analysis"));
 				saveBoxPlot(file, "RMA box-plot", "rmaimg", "RMA analysis");				
 			} catch (Exception e) {
+				e.printStackTrace();
 				printError("error saving rma results", "error saving rma results", "error saving rma results");
 			}
 		}
@@ -344,8 +330,9 @@ public class AffyNormalization extends BabelomicsTool {
 		for(String line: lines) {
 			if ( line.startsWith("#") ) {
 			} else if ( line.startsWith("probeset_id") ) {
-				line = line.replace("\t", ",");
-				result.add(line.replace("probeset_id,", "#NAMES\t"));
+				//line = line.replace("\t", ",");
+				//result.add(line.replace("probeset_id,", "#NAMES\t"));
+				result.add(line.replace("probeset_id", "#NAMES"));
 			} else {
 				result.add(line);
 			}
@@ -381,6 +368,7 @@ public class AffyNormalization extends BabelomicsTool {
 				printError("error saving " + title, "error saving " + title, "error saving " + title);
 			}
 		} catch (IOException e) {
+			e.printStackTrace();
 			printError("error generating " + title, "error generating " + title, "error generating " + title);
 		}
 	}

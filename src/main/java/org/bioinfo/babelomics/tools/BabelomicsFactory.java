@@ -4,17 +4,19 @@ import org.bioinfo.babelomics.tools.expression.Clustering;
 import org.bioinfo.babelomics.tools.expression.DifferentialAnalysis;
 import org.bioinfo.babelomics.tools.expression.OutlierLrs;
 import org.bioinfo.babelomics.tools.expression.Predictor;
+import org.bioinfo.babelomics.tools.expression.differential.ClassComparison;
 import org.bioinfo.babelomics.tools.expression.differential.Correlation;
-import org.bioinfo.babelomics.tools.expression.differential.MaSigPro;
 import org.bioinfo.babelomics.tools.expression.differential.Survival;
-import org.bioinfo.babelomics.tools.expression.normalization.AffyNormalization;
+import org.bioinfo.babelomics.tools.expression.differential.TimeSeries;
+import org.bioinfo.babelomics.tools.expression.normalization.AffyExpressionNormalization;
 import org.bioinfo.babelomics.tools.functional.Blast2Go;
 import org.bioinfo.babelomics.tools.functional.FatiGOTool;
 import org.bioinfo.babelomics.tools.functional.FatiScanTool;
 import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
 import org.bioinfo.babelomics.tools.functional.tissues.AffyTmt;
-import org.bioinfo.babelomics.tools.genomic.genotype.SnpAffymetrixNormalization;
+import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
+import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
 import org.bioinfo.babelomics.tools.interactome.Snow;
 import org.bioinfo.babelomics.tools.preprocessing.IdConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
@@ -23,14 +25,20 @@ import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
 public class BabelomicsFactory {
 
 	public static BabelomicsTool createTool(String toolName) {
+		
+		System.err.println(">>>>>>>>>>>>>>> hello : " + toolName);
+		
 		BabelomicsTool babelomicsTool = null;
 
-		if(toolName.equalsIgnoreCase("affymetrix-normalization")) {
-			return new AffyNormalization();
+		if(toolName.equalsIgnoreCase("affy-genotype-preprocess")) {
+			return new AffyGenotypePreprocessing();
+		}
+		if(toolName.equalsIgnoreCase("affy-expression-normalization")) {
+			return new AffyExpressionNormalization();
 		}
 		
-		if(toolName.equalsIgnoreCase("affy-snp-calls")) {
-			return new SnpAffymetrixNormalization();
+		if(toolName.equalsIgnoreCase("affy-snp-preprocess")) {
+			return new AffyGenotypePreprocessing();
 		}
 
 		if(toolName.equalsIgnoreCase("preprocessing")) {
@@ -39,6 +47,10 @@ public class BabelomicsFactory {
 		
 		if(toolName.equalsIgnoreCase("id-converter")) {
 			return new IdConverter();
+		}
+		
+		if(toolName.equalsIgnoreCase("class-comparison")) {
+			return new ClassComparison();
 		}
 		
 		if(toolName.equalsIgnoreCase("differential-expression")) {
@@ -53,8 +65,8 @@ public class BabelomicsFactory {
 			return new Survival();
 		}
 
-		if(toolName.equalsIgnoreCase("masigpro")) {
-			return new MaSigPro();
+		if(toolName.equalsIgnoreCase("time-series")) {
+			return new TimeSeries();
 		}
 		
 		if(toolName.equalsIgnoreCase("predictor")) {
@@ -89,6 +101,10 @@ public class BabelomicsFactory {
 			return new AffyTmt();
 		}
 		
+		if(toolName.equalsIgnoreCase("copy-number")) {
+			return new CopyNumberAnalysis();
+		}
+
 		if(toolName.equalsIgnoreCase("association")) {
 			return new OutlierLrs();
 		}
