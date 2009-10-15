@@ -7,10 +7,11 @@ import java.util.List;
 import org.bioinfo.babelomics.exception.InvalidParameterException;
 import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
+import org.bioinfo.commons.utils.ListUtils;
 
 public class CopyNumberAnalysisExecutor {
 
-	private String segmentedFilename = "segemented.txt";
+	private String segmentedFilename = "segmented.txt";
 	private String cghFilename = "cgh.txt";
 	
 	
@@ -58,8 +59,8 @@ public class CopyNumberAnalysisExecutor {
 			File segmentedFile = new File(outdir + "/" + segmentedFilename);
 			if ( segmentedFile.exists() ) {
 				env = new ArrayList<String>();
-				env.add("normalized.file=" + normalizedFile.getAbsolutePath());		
-				env.add("segmented.file=" + segmentedFile.getAbsolutePath());		
+				env.add("normalizedfile=" + normalizedFile.getAbsolutePath());		
+				env.add("segmentedfile=" + segmentedFile.getAbsolutePath());		
 				env.add("outdir=" + outdir);
 
 				env.add("gapAllowed=" + gapAllowed);
@@ -70,6 +71,7 @@ public class CopyNumberAnalysisExecutor {
 				cmd = new Command("R CMD BATCH --no-save --no-restore " + cghMcrBinPath + " " + outdir + "/" + cghFilename + ".log", env);
 				
 				System.out.println("cmd = " + cmd.getCommandLine());
+				System.out.println("env = " + ListUtils.toString(env, " "));
 				
 				sp = new SingleProcess(cmd);
 				sp.runSync();
