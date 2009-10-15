@@ -1,23 +1,25 @@
 package org.bioinfo.babelomics.tools;
 
-import org.bioinfo.babelomics.methods.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.expression.Clustering;
 import org.bioinfo.babelomics.tools.expression.DifferentialAnalysis;
 import org.bioinfo.babelomics.tools.expression.OutlierLrs;
 import org.bioinfo.babelomics.tools.expression.Predictor;
+import org.bioinfo.babelomics.tools.expression.differential.ClassComparison;
 import org.bioinfo.babelomics.tools.expression.differential.Correlation;
 import org.bioinfo.babelomics.tools.expression.differential.Survival;
+import org.bioinfo.babelomics.tools.expression.differential.TimeSeries;
+import org.bioinfo.babelomics.tools.expression.normalization.AffyExpressionNormalization;
 import org.bioinfo.babelomics.tools.functional.Blast2Go;
 import org.bioinfo.babelomics.tools.functional.FatiGOTool;
 import org.bioinfo.babelomics.tools.functional.FatiScanTool;
 import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
 import org.bioinfo.babelomics.tools.functional.tissues.AffyTmt;
+import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
 import org.bioinfo.babelomics.tools.interactome.Snow;
 import org.bioinfo.babelomics.tools.preprocessing.IdConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
-import org.jfree.data.time.TimeSeries;
 
 
 public class BabelomicsFactory {

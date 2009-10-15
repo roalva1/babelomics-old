@@ -15,7 +15,6 @@ import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
-import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.funcannot.filter.Filter;
@@ -123,7 +122,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 					// save statistic results					
 					List<String> testResultOutput = testResultToStringList(fatiscan.getResults());
 					
-					IOUtils.write(outdir + "/" + fileName, StringUtils.join(testResultOutput,"\n"));
+					IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput, "\n"));
 					result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE"),new HashMap<String,String>(),"Database tests"));
 									
 					// save annotation
@@ -138,7 +137,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				}
 				
 				// significant terms
-				IOUtils.write(outdir + "/significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt", StringUtils.join(significant,"\n"));
+				IOUtils.write(outdir + "/significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significant,"\n"));
 				
 			}
 					

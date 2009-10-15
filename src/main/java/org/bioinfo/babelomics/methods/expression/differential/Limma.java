@@ -1,16 +1,12 @@
 package org.bioinfo.babelomics.methods.expression.differential;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.bioinfo.babelomics.exception.InvalidParameterException;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
-import org.bioinfo.commons.io.utils.FileSystemUtils;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.Dataset;

@@ -7,6 +7,7 @@ import java.util.List;
 import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.format.core.newick.NewickTree;
 import org.bioinfo.data.format.io.NewickParser;
@@ -30,7 +31,7 @@ public class Upgma extends Cluster {
 		List<String> lines = new ArrayList<String>(rowNames.size() + 1);
 		lines.add("#NAMES\t" + ListUtils.toString(colNames, "\t"));
 		for(int i=0 ; i<rowNames.size() ; i++) {
-			lines.add(rowNames.get(i) + "\t" + ListUtils.toString(ListUtils.toList(matrix.getRow(i)), "\t"));
+			lines.add(rowNames.get(i) + "\t" + ArrayUtils.toString(matrix.getRow(i), "\t"));
 		}
 		IOUtils.write(inputFile, lines);
 	

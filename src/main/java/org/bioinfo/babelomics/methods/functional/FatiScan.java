@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
+import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
@@ -56,7 +57,7 @@ public class FatiScan {
 		// id list
 		idList = rankedList.getDataFrame().getColumn(0);
 		// statistic
-		statistic = ListUtils.toList(rankedList.getDataFrame().getColumnAsDoubleArray(1));
+		statistic = ArrayUtils.toList(rankedList.getDataFrame().getColumnAsDoubleArray(1));
 		
 		// order ranked list
 		int[] sortIndex = ListUtils.order(statistic,order==DESCENDING_SORT);
