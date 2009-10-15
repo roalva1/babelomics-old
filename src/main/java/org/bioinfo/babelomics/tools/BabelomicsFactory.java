@@ -1,7 +1,6 @@
 package org.bioinfo.babelomics.tools;
 
 import org.bioinfo.babelomics.tools.expression.Clustering;
-import org.bioinfo.babelomics.tools.expression.DifferentialAnalysis;
 import org.bioinfo.babelomics.tools.expression.OutlierLrs;
 import org.bioinfo.babelomics.tools.expression.Predictor;
 import org.bioinfo.babelomics.tools.expression.differential.ClassComparison;
@@ -50,9 +49,9 @@ public class BabelomicsFactory {
 			return new ClassComparison();
 		}
 		
-		if(toolName.equalsIgnoreCase("differential-expression")) {
-			return new DifferentialAnalysis();
-		}
+//		if(toolName.equalsIgnoreCase("differential-expression")) {
+//			return new DifferentialAnalysis();
+//		}
 
 		if(toolName.equalsIgnoreCase("correlation")) {
 			return new Correlation();
@@ -70,9 +69,9 @@ public class BabelomicsFactory {
 			return new Predictor();
 		}
 
-		if(toolName.equalsIgnoreCase("regression")) {
-			return new DifferentialAnalysis();
-		}
+//		if(toolName.equalsIgnoreCase("regression")) {
+//			return new DifferentialAnalysis();
+//		}
 		
 		if(toolName.equalsIgnoreCase("clustering")) {
 			return new Clustering();
