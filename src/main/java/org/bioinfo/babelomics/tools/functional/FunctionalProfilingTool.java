@@ -1,5 +1,6 @@
 package org.bioinfo.babelomics.tools.functional;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,14 @@ import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.utils.StringUtils;
+import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.infrared.common.dbsql.DBConnector;
+import org.bioinfo.infrared.common.feature.FeatureList;
+import org.bioinfo.infrared.core.Gene;
+import org.bioinfo.infrared.core.dbsql.GeneDBManager;
+import org.bioinfo.infrared.core.dbsql.XRefDBManager;
+import org.bioinfo.infrared.funcannot.AnnotationItem;
+import org.bioinfo.infrared.funcannot.dbsql.AnnotationDBManager;
 import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
 import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
@@ -25,7 +34,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	
 	// input data		
 	protected boolean restOfGenome;
-	
+
 	// test
 	protected int testMode;
 		
@@ -42,12 +51,14 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 //	private String goBpDBKeywords, goBpDBKeywordsLogic;
 //	private boolean goBpAllGenome, goBpInclusive;
 
+	protected boolean isYourAnnotations;
+	protected FeatureList<AnnotationItem> yourAnnotations;
 
 	@Override
 	public void initOptions() {
 
 		// commons options
-		getOptions().addOption(OptionFactory.createOption("test-mode", "the Fisher test mode, valid values: less, greater, two_sided. By default, two_sided", false));
+		getOptions().addOption(OptionFactory.createOption("fisher", "the Fisher test mode, valid values: less, greater, two_sided. By default, two_sided", false));
 		
 		// GO biological process options
 		addGOOptions("bp");
@@ -67,7 +78,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		getOptions().addOption(OptionFactory.createOption("biocarta-count-genes-from-genome", "computes the number of annotated genes from all genome, otherwise from you input list",false,false));
 
 		// your annotations
-		getOptions().addOption(OptionFactory.createOption("annotations", "Your own annotations",false,false));
+		getOptions().addOption(OptionFactory.createOption("annotations", "Your own annotations",false,true));
 		getOptions().addOption(OptionFactory.createOption("annotation-enrichment", "rest of databases will used to enrich your annotations",false,false));
 		
 	}
@@ -88,13 +99,13 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-keywords-logic", "GO " + namespaceTitle + ", keywords filter logic: all or any",false));
 	}
 	
-	public void prepare(CommandLine cmdLine) throws IOException, ParseException, InvalidColumnIndexException{
+	public void prepare() throws IOException, ParseException, InvalidColumnIndexException{
 
 		// species
-		setSpecies(cmdLine.getOptionValue("species","hsa"));
+		setSpecies(commandLine.getOptionValue("species","hsa"));
 		
 		// fisher test
-		String testMode = cmdLine.getOptionValue("test-mode", "two-tailed");
+		String testMode = commandLine.getOptionValue("test-mode", "two-tailed");
 		if(testMode.equals("less")) setTestMode(FisherExactTest.LESS);
 		if(testMode.equals("greater")) setTestMode(FisherExactTest.GREATER);
 		if(testMode.equals("two-tailed")) setTestMode(FisherExactTest.TWO_SIDED);
@@ -102,27 +113,40 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		filterList = new ArrayList<Filter>();
 		
 		// go bp
-		if(cmdLine.hasOption("go-bp")) {
-			parseGODb(cmdLine,"bp");
+		if(commandLine.hasOption("go-bp")) {
+			parseGODb(commandLine,"bp");
 		}
 		// go cc
-		if(cmdLine.hasOption("go-cc")) {
-			parseGODb(cmdLine,"cc");
+		if(commandLine.hasOption("go-cc")) {
+			parseGODb(commandLine,"cc");
 		}
 		// go mf
-		if(cmdLine.hasOption("go-mf")) {
-			parseGODb(cmdLine,"mf");
+		if(commandLine.hasOption("go-mf")) {
+			parseGODb(commandLine,"mf");
 		}
 		// kegg
-		if(cmdLine.hasOption("kegg")) {			
-			KeggFilter keggFilter = new KeggFilter(Integer.parseInt(cmdLine.getOptionValue("kegg-min-num-genes","5")),Integer.parseInt(cmdLine.getOptionValue("kegg-max-num-genes","500")));
+		if(commandLine.hasOption("kegg")) {			
+			KeggFilter keggFilter = new KeggFilter(Integer.parseInt(commandLine.getOptionValue("kegg-min-num-genes","5")),Integer.parseInt(commandLine.getOptionValue("kegg-max-num-genes","500")));
 			filterList.add(keggFilter);
 		}
 		// biocarta
-		if(cmdLine.hasOption("biocarta")) {
-			BiocartaFilter biocartaFilter = new BiocartaFilter(Integer.parseInt(cmdLine.getOptionValue("biocarta-min-num-genes","5")),Integer.parseInt(cmdLine.getOptionValue("biocarta-max-num-genes","500")));
+		if(commandLine.hasOption("biocarta")) {
+			BiocartaFilter biocartaFilter = new BiocartaFilter(Integer.parseInt(commandLine.getOptionValue("biocarta-min-num-genes","5")),Integer.parseInt(commandLine.getOptionValue("biocarta-max-num-genes","500")));
 			filterList.add(biocartaFilter);
 		}
+		// your annotations
+		if(commandLine.hasOption("annotations") && !commandLine.getOptionValue("annotations").equalsIgnoreCase("") && !commandLine.getOptionValue("annotations").equalsIgnoreCase("none")) {
+			isYourAnnotations = true;
+			System.err.println("annotation file: " + commandLine.getOptionValue("annotations"));
+			FeatureData annotations = new FeatureData(new File(commandLine.getOptionValue("annotations")), true);
+			List<String> ids = annotations.getDataFrame().getColumn(0);
+			List<String> terms = annotations.getDataFrame().getColumn(1);			
+			yourAnnotations = new FeatureList<AnnotationItem>(ids.size());// FeatureData(new File(cmdLine.getOptionValue("annotations")), true);
+			for(int i=0; i<ids.size(); i++){
+				yourAnnotations.add(new AnnotationItem(ids.get(i),terms.get(i)));
+			}
+		}
+		
 	}
 
 	public void parseGODb(CommandLine cmdLine, String namespace){
@@ -151,7 +175,8 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		goFilter.setMinLevel(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-min-level","5")));
 		goFilter.setMaxLevel(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-max-level","12")));
 		goFilter.setMinNumberGenes(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-min-num-genes","5")));	
-		goFilter.setMaxNumberGenes(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-max-num-genes","500")));				
+		goFilter.setMaxNumberGenes(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-max-num-genes","500")));
+		//goFilter.addKeywords(arg0);
 		goFilter.setLogicalOperator(cmdLine.getOptionValue("go-" + namespace + "-keywords-logic","AND"));
 		return goFilter;
 	}
@@ -198,7 +223,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	protected List<String> testResultToStringList(List<TwoListFisherTestResult> testResult, boolean header){
 		List<String> result = new ArrayList<String>();
 		if(header) result.add(TwoListFisherTestResult.header());
-		for(int i=0; i<testResult.size(); i++){
+		for(int i=0; i<testResult.size(); i++){			
 			result.add(testResult.get(i).toString());
 		}
 		return result;

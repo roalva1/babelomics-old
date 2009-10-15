@@ -97,6 +97,7 @@ public class TwoListFisherTest extends FunctionalTest {
 	public List<TwoListFisherTestResult> getSignificantResults(double threshold){
 		List<TwoListFisherTestResult> significant = new ArrayList<TwoListFisherTestResult>();
 		for(TwoListFisherTestResult result: this.results){
+			System.err.println("rr: " + result.getAdjPValue() + ": " + threshold);
 			if(result.getAdjPValue()<threshold) significant.add(result);
 		}
 		return significant;
