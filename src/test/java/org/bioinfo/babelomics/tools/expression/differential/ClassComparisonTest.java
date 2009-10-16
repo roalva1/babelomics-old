@@ -11,7 +11,7 @@ public class ClassComparisonTest {
 	    
 		System.out.println("----- two classes - limma ------");
 		//String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/pearson", "-test", "pearson", "-class", "O2_conc"};
-		String []args = {"-tool", "class-comparison", "-dataset", "/mnt/commons/test/biodata/example/twoclasses100.txt", "-o", "/tmp/limmatwo", "-test", "limma", "-class-name", "class", "-class-values", "basal,luminal"};
+		String []args = {"-tool", "class-comparison", "-dataset", "/mnt/commons/test/biodata/example/twoclasses.txt", "-o", "/tmp/limmatwo", "-test", "limma", "-class-name", "class", "-class-values", "basal,luminal"};
 		
 		try {
 			BabelomicsMain.main(args); 
