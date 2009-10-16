@@ -112,19 +112,19 @@ public class Correlation extends BabelomicsTool {
 			File outFile = new File(getOutdir() + "/" + test + ".txt");
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(outFile);
-			result.addOutputItem(new Item(test + "_file", outFile.getName(), test.toUpperCase() + " output file", TYPE.FILE));
+			result.addOutputItem(new Item(test + "_file", outFile.getName(), test.toUpperCase() + " output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Output files"));
 
 			outFile = new File(getOutdir() + "/" + test + "_table.txt");
 			IOUtils.write(outFile, dataFrame.toString(true, true));			
 			List<String> tags = new ArrayList<String>();
 			tags.add("TABLE");
-			result.addOutputItem(new Item(test + "_table", outFile.getName(), test.toUpperCase() + " output table", TYPE.FILE, tags, new HashMap<String, String>(2)));
+			result.addOutputItem(new Item(test + "_table", outFile.getName(), test.toUpperCase() + " output table", TYPE.FILE, tags, new HashMap<String, String>(2), "Output files"));
 		} catch (Exception e) {
 			printError("ioexception_executecorrelation_correlation", "error saving " + test + " results", e.toString(), e);
 		}
 
 		if ( new File(heatmapFilename + ".png").exists() ) {
-			result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE));
+			result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
 		}
 	}
 
@@ -174,19 +174,19 @@ public class Correlation extends BabelomicsTool {
 			File outFile = new File(getOutdir() + "/" + test + ".txt");
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(outFile);
-			result.addOutputItem(new Item(test + "_file", outFile.getName(), test.toUpperCase() + " output file", TYPE.FILE));
+			result.addOutputItem(new Item(test + "_file", outFile.getName(), test.toUpperCase() + " output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Output files"));
 
 			outFile = new File(getOutdir() + "/" + test + "_table.txt");
 			IOUtils.write(outFile, dataFrame.toString(true, true));			
 			List<String> tags = new ArrayList<String>();
 			tags.add("TABLE");
-			result.addOutputItem(new Item(test + "_table", outFile.getName(), test.toUpperCase() + " output table", TYPE.FILE, tags, new HashMap<String, String>(2)));
+			result.addOutputItem(new Item(test + "_table", outFile.getName(), test.toUpperCase() + " output table", TYPE.FILE, tags, new HashMap<String, String>(2), "Output files"));
 		} catch (Exception e) {
 			printError("ioexception_executecorrelation_correlation", "error saving " + test + " results", e.toString(), e);
 		}
 
 		if ( new File(heatmapFilename + ".png").exists() ) {
-			result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE));
+			result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
 		}		
 	}
 }

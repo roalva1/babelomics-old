@@ -98,18 +98,18 @@ public class Survival extends BabelomicsTool {
 
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.write(new File(getOutdir() + "/cox.txt"));
-			result.addOutputItem(new Item("cox_file", "cox.txt", "Cox output file", TYPE.FILE));
+			result.addOutputItem(new Item("cox_file", "cox.txt", "Cox output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Output files"));
 			
 			IOUtils.write(new File(getOutdir() + "/cox_table.txt"), dataFrame.toString(true, true));			
 			List<String> tags = new ArrayList<String>();
 			tags.add("TABLE");
-			result.addOutputItem(new Item("cox_table", "cox_table.txt", "Cox table", TYPE.FILE, tags, new HashMap<String, String>(2)));
+			result.addOutputItem(new Item("cox_table", "cox_table.txt", "Cox table", TYPE.FILE, tags, new HashMap<String, String>(2), "Output files"));
 		} catch (Exception e) {
 			printError("ioexception_cox_cox", "error saving results", e.toString(), e);
 		}
 
 		if ( new File(heatmapFilename + ".png").exists() ) {
-			result.addOutputItem(new Item("cox_heatmap", "cox_heatmap.png", "Cox heatmap", TYPE.IMAGE));
+			result.addOutputItem(new Item("cox_heatmap", "cox_heatmap.png", "Cox heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
 		}
 	}
 }

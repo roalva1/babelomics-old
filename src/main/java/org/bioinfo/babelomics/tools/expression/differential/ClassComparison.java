@@ -259,7 +259,7 @@ public class ClassComparison extends BabelomicsTool {
 
 		Limma limma = null;
 		if ( classValues.size() > 2 ) {
-			limma = new Limma(babelomicsHomePath + "/bin/diffexp/limma_multiclasses.r");
+			limma = new Limma(babelomicsHomePath + "/bin/diffexp/limma_multiclass.r");
 		} else if ( classValues.size() == 2 ) {
 			limma = new Limma(babelomicsHomePath + "/bin/diffexp/limma_twoclasses.r");			
 		} else if ( classValues.size() == 1 ) {

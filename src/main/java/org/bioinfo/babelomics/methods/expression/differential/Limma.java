@@ -50,7 +50,8 @@ public class Limma {
 			throw new InvalidParameterException("limma contrast parameter missing");			
 		}
 
-		outputFilename = inputFilename + ".out";
+		//outputFilename = File.createTempFile("tmp", ".out", new File(System.getenv("BABELOMICS_HOME") + "/tmp")).getAbsolutePath();
+		outputFilename = File.createTempFile("tmp", ".out").getAbsolutePath();
 		
 		List<String> env = new ArrayList<String>();
 		env.add("datafile=" + inputFilename);		
@@ -68,10 +69,10 @@ public class Limma {
 		SingleProcess sp = new SingleProcess(cmd);
 		sp.runSync();
 		
-		file = new File(outputFilename);
-		if ( ! file.exists() ) {
-			throw new Exception("error executing limma test (output file does not created)");
-		}
+//		file = new File(outputFilename);
+//		if ( ! file.exists() ) {
+//			throw new Exception("error executing limma test (output file does not created)");
+//		}
 
 		Dataset ds = new Dataset(file, true);
 		

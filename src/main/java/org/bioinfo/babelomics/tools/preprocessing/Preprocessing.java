@@ -304,7 +304,9 @@ public class Preprocessing extends BabelomicsTool {
 			File file = new File(this.getOutdir() + "/preprocessed.txt");
 			dataset.write(file);
 			List<String> tags = StringUtils.toList("data,datamatrix,expression", ",");
-			result.addOutputItem(new Item("prepocessed_file", file.getName(), "Preprocessed file", TYPE.FILE, tags, new HashMap<String, String>(2), "Preprocessed data"));								
+			result.addOutputItem(new Item("prepocessed_file", file.getName(), "Preprocessed file", TYPE.FILE, tags, new HashMap<String, String>(2), "Preprocessed data"));
+			
+			
 		} catch (IOException e) {
 			abort("ioexception_savingresults_execute_preprocessing", "error saving output file", e.toString(), StringUtils.getStackTrace(e));
 		}		
