@@ -6,6 +6,7 @@ import org.junit.Test;
 
 public class ClassComparisonTest {
 	
+	@Test
 	public void test1() {
 	    
 		System.out.println("----- two classes - limma ------");
@@ -44,7 +45,6 @@ public class ClassComparisonTest {
 		}		
 	}
 	
-	@Test
 	public void test4() {
 	    
 		System.out.println("----- multi class - limma ------");
