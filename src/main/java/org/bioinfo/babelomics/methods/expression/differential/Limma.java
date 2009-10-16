@@ -69,15 +69,15 @@ public class Limma {
 		SingleProcess sp = new SingleProcess(cmd);
 		sp.runSync();
 		
-//		file = new File(outputFilename);
-//		if ( ! file.exists() ) {
-//			throw new Exception("error executing limma test (output file does not created)");
-//		}
+		file = new File(outputFilename);
+		if ( ! file.exists() ) {
+			throw new Exception("error executing limma test (output file does not created)");
+		}
 
 		Dataset ds = new Dataset(file, true);
 		
-		new File(file.getAbsoluteFile() + ".log").delete();
-		file.delete();
+//		new File(file.getAbsoluteFile() + ".log").delete();
+//		file.delete();
 				
 		result = new TestResultList<LimmaTestResult>(ds.getRowDimension());
 		for(int i=0 ; i < ds.getRowDimension() ; i++) {
