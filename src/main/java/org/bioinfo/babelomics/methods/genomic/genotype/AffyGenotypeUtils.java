@@ -12,9 +12,30 @@ import org.bioinfo.commons.io.utils.FileUtils;
 
 public class AffyGenotypeUtils {
 
-	public static void affyGenotypeNormalization(String aptProbesetPath, String chipType, String cdfPath, String chrXPath) {
+	public static void affyGenotypeNormalization(String aptProbesetPath, String chipType, String cdfPath, String chrXPath, String outdir, String dataDir) throws IOException {
 		StringBuilder aptCommandLine = new StringBuilder();
 		aptCommandLine.append(aptProbesetPath);
+		
+		FileUtils.checkFile(cdfPath);
+		FileUtils.checkFile(chrXPath);
+		FileUtils.checkDirectory(outdir, true);
+		FileUtils.checkDirectory(dataDir, false);
+		
+		aptCommandLine.append(" -c " + cdfPath);
+		aptCommandLine.append(" --chrX-snps " + chrXPath);
+
+		if(chipType.equalsIgnoreCase("6.0")) {
+			aptCommandLine.append(" -a birdseed ");
+		}		
+		aptCommandLine.append(" --cc-chp-output ");
+		aptCommandLine.append(" -o " + outdir);
+		
+		File celFiles = new File(dataDir);
+		File[] files = FileUtils.listFiles(celFiles, ".+.cel", true);
+		for(int i=0; i<files.length; i++) {
+			aptCommandLine.append(" " + files[i].getAbsolutePath());
+		}
+		
 		Command aptCommand = new Command(aptCommandLine.toString());
 		SingleProcess sp = new SingleProcess(aptCommand);
 		sp.runSync();

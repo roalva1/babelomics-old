@@ -50,7 +50,8 @@ public class Limma {
 			throw new InvalidParameterException("limma contrast parameter missing");			
 		}
 
-		outputFilename = inputFilename + ".out";
+		//outputFilename = File.createTempFile("tmp", ".out", new File(System.getenv("BABELOMICS_HOME") + "/tmp")).getAbsolutePath();
+		outputFilename = File.createTempFile("tmp", ".out").getAbsolutePath();
 		
 		List<String> env = new ArrayList<String>();
 		env.add("datafile=" + inputFilename);		
@@ -75,8 +76,8 @@ public class Limma {
 
 		Dataset ds = new Dataset(file, true);
 		
-		new File(file.getAbsoluteFile() + ".log").delete();
-		file.delete();
+//		new File(file.getAbsoluteFile() + ".log").delete();
+//		file.delete();
 				
 		result = new TestResultList<LimmaTestResult>(ds.getRowDimension());
 		for(int i=0 ; i < ds.getRowDimension() ; i++) {

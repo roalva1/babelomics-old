@@ -64,7 +64,7 @@ public class BabelomicsFactory {
 			return new Survival();
 		}
 
-		if(toolName.equalsIgnoreCase("time-series")) {
+		if(toolName.equalsIgnoreCase("time-dosage-series")) {
 			return new TimeSeries();
 		}
 		

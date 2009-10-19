@@ -47,7 +47,6 @@ public class ClusteringUtils {
 		try {
 			canvas.save(imgFilename);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}

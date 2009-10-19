@@ -51,6 +51,10 @@ public abstract class BabelomicsTool extends GenericBioTool {
 		// must be in commandLine, just in case we initialize...
 		this.toolName = commandLine.getOptionValue("tool", "");
 		this.species = commandLine.getOptionValue("species", "unknown");
+		// default report in PDF is requiered in Babelomics
+		if(!commandLine.hasOption("report")) {
+			this.report = "pdf";
+		}
 	}
 	
 	public void checkFile(String filePath) throws InvalidParameterException, IOException {
