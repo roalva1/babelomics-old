@@ -32,7 +32,6 @@ public class Correlation extends BabelomicsTool {
 	List<Double> doubleVars;
 	
 	public Correlation() {
-		initOptions();
 	}
 
 	public void initOptions() {

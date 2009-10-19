@@ -50,7 +50,6 @@ public class BabelomicsMain {
 		try {
 			// parse the command line
 			tool.parse(args, false);
-			
 			// everything is OK with the commandLine
 			tool.run();
 			
