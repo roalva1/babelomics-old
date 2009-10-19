@@ -1,80 +1,93 @@
 package org.bioinfo.babelomics.methods.genomic.copynumber;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bioinfo.babelomics.exception.InvalidParameterException;
 import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
+import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ListUtils;
+import org.bioinfo.data.dataset.Dataset;
 
 public class CopyNumberAnalysisExecutor {
-
-	private String segmentedFilename = "segmented.txt";
-	private String cghFilename = "cgh.txt";
 	
-	
-	private File normalizedFile;
+	private String normalizedFilename;
+	private String segmentedFilename;
+	private String cghFilename;
 	private String segmentationBinPath;
 	private String cghMcrBinPath;
-	private String outdir;
 	private int gapAllowed = 500;
 	private double alteredLow = 0.20;
 	private double alteredHigh = 0.80;
 	private int recurrence = 50;
 	
 
-	public CopyNumberAnalysisExecutor (String normalizedFile) {
-		this.normalizedFile = new File(normalizedFile);
-	}
+	public CopyNumberAnalysisExecutor (String segmentationBinPath) {
+		this.segmentationBinPath = segmentationBinPath;
+	}	
 	
-	public CopyNumberAnalysisExecutor (File normalizedFile) {
-		this.normalizedFile = normalizedFile;
-	}
-	
-	
-	public void run() throws InvalidParameterException {
+	public void run() throws InvalidParameterException, IOException {
+		String normNames = null;
+		String segNames = null;
 		
 		if ( segmentationBinPath == null ) {
 			throw new InvalidParameterException("copy number binary path missing");
 		}
 		
-		if ( outdir == null ) {
-			throw new InvalidParameterException("copy number out directory path missing");
+		if ( normalizedFilename == null ) {
+			throw new InvalidParameterException("copy number input normalized file name missing");
+		}
+
+		if ( segmentedFilename == null ) {
+			throw new InvalidParameterException("copy number output segmented file name missing");
+		}
+		
+		if ( cghMcrBinPath != null && cghFilename == null ) {
+			throw new InvalidParameterException("copy number output cgh file name missing");			
 		}
 		
 		List<String> env = new ArrayList<String>();
-		env.add("infile=" + normalizedFile.getAbsolutePath());		
-		env.add("outdir=" + outdir);
+		env.add("infile=" + normalizedFilename);		
+		env.add("outfile=" + segmentedFilename);
 	
-		Command cmd = new Command("R CMD BATCH --no-save --no-restore " + segmentationBinPath + " " + outdir + "/" + segmentedFilename + ".log", env);
+		normNames = getColumnNames(normalizedFilename);
+		env.add("colnames=" + normNames);
+						
+		Command cmd = new Command("R CMD BATCH --no-save --no-restore " + segmentationBinPath + " " + segmentedFilename + ".log", env);
 		
 		System.out.println("cmd = " + cmd.getCommandLine());
+		System.out.println("env = " + ListUtils.toString(env, " "));
 		
 		SingleProcess sp = new SingleProcess(cmd);
 		sp.runSync();		
 
 		if ( cghMcrBinPath != null ) {		
-			File segmentedFile = new File(outdir + "/" + segmentedFilename);
+			File segmentedFile = new File(segmentedFilename);
 			if ( segmentedFile.exists() ) {
 				env = new ArrayList<String>();
-				env.add("normalized.file=" + normalizedFile.getAbsolutePath());		
-				env.add("segmented.file=" + segmentedFile.getAbsolutePath());		
-				env.add("outdir=" + outdir);
+				env.add("normalizedfile=" + normalizedFilename);		
+				env.add("normnames=" + normNames);
+				env.add("segmentedfile=" + segmentedFilename);		
+				env.add("segnames=" + getColumnNames(segmentedFilename));
+				env.add("outfile=" + cghFilename);
 
 				env.add("gapAllowed=" + gapAllowed);
 				env.add("alteredLow=" + alteredLow);
 				env.add("alteredHigh=" + alteredHigh);
 				env.add("recurrence=" + recurrence);
 
-				cmd = new Command("R CMD BATCH --no-save --no-restore " + cghMcrBinPath + " " + outdir + "/" + cghFilename + ".log", env);
+				cmd = new Command("R CMD BATCH --no-save --no-restore " + cghMcrBinPath + " " + cghFilename + ".log", env);
 				
 				System.out.println("cmd = " + cmd.getCommandLine());
+				System.out.println("env = " + ListUtils.toString(env, " "));
 				
 				sp = new SingleProcess(cmd);
 				sp.runSync();
 				
-				File cghFile = new File(outdir + "/" + cghFilename);
+				File cghFile = new File(cghFilename);
 				if ( ! cghFile.exists() ) {
 					System.err.println("error creating cgh file");
 				}
@@ -84,12 +97,17 @@ public class CopyNumberAnalysisExecutor {
 		}
 	}
 
-	public String getOutdir() {
-		return outdir;
-	}
-
-	public void setOutdir(String outdir) {
-		this.outdir = outdir;
+	
+	private String getColumnNames(String filename) throws IOException {
+		String names = null;
+		List<String> lines = IOUtils.grep(filename, "#NAMES.*");
+		if ( lines != null ) {
+			names = lines.get(0).replace("#", "");
+			names = names.replace("\t", ",");
+		} else {
+			throw new IOException("File " + filename + " does not contain #NAMES label");
+		}
+		return names;
 	}
 
 	public int getGapAllowed() {
@@ -124,12 +142,12 @@ public class CopyNumberAnalysisExecutor {
 		this.recurrence = recurrence;
 	}
 
-	public void setNormalizedFile(File normalizedFile) {
-		this.normalizedFile = normalizedFile;
+	public void setNormalizedFile(String normalizedFilename) {
+		this.normalizedFilename = normalizedFilename;
 	}
 
-	public File getNormalizedFile() {
-		return normalizedFile;
+	public String getNormalizedFilename() {
+		return normalizedFilename;
 	}
 
 	public void setCghMcrBinPath(String cghMcrBinPath) {
@@ -151,7 +169,15 @@ public class CopyNumberAnalysisExecutor {
 		return segmentedFilename;
 	}
 	
+	public void setSegmentatedFilename(String segmentedFilename) {
+		this.segmentedFilename = segmentedFilename;
+	}
+
 	public String getCghFilename() {
 		return cghFilename;
+	}
+	
+	public void setCghFilename(String cghFilename) {
+		this.cghFilename = cghFilename;
 	}
 }

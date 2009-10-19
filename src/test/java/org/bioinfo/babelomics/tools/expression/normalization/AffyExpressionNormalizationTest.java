@@ -9,13 +9,12 @@ import org.bioinfo.commons.io.utils.FileUtils;
 import org.junit.Test;
 
 
-public class AffyNormalizationTest {
-
+public class AffyExpressionNormalizationTest {
 	@Test
 	public void Test() {
 		String dataset = "/mnt/commons/test/biodata/example/CEL.tar.gz";
 		String outdir = "/tmp/affy-normalization";
-		String []args = { "--tool", "affy-normalization","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--rma"};
+		String []args = { "--tool", "affy-expression-normalization","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--rma", "--plier", "--calls"};
 
 		System.out.println("----------------> " + Arrays.toString(args));
 		try {
@@ -26,5 +25,4 @@ public class AffyNormalizationTest {
 			fail(e.toString());
 		}
 	}	
-
 }

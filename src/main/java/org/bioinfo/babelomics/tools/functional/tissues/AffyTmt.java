@@ -65,22 +65,22 @@ public class AffyTmt extends Tmt {
 		File f1 = new File(commandLine.getOptionValue("list1"));
 		File f2 = commandLine.hasOption("list2") ? new File(commandLine.getOptionValue("list2")) :  null;
 
-		String organism = commandLine.getOptionValue("organism");
+//		String organism = commandLine.getOptionValue("organism");
 		String normMethod = commandLine.getOptionValue("normalization-method", "mas5");
 		String multipleProbes = commandLine.getOptionValue("multiple-probes", "mean");
 
 		List<String> tissues = StringUtils.toList(commandLine.getOptionValue("tissues"), ",");
 		
-		dbName = "mouse".equalsIgnoreCase(organism) ? "gnf_mouse" : "gnf_human";
+		dbName = "mouse".equalsIgnoreCase(species) ? "gnf_mouse" : "gnf_human";
 
 		try {		
 			if ( tissues.contains("all tissues") ) {
-				tissues = getAllTissues(organism);
+				tissues = getAllTissues(species);
 			}
 
 			System.out.println("tissues:\n" + ListUtils.toString(tissues));
 
-			DBConnector dbConnector = new DBConnector("mouse".equalsIgnoreCase(organism) ? "mus" : "hsa");
+			DBConnector dbConnector = new DBConnector("mouse".equalsIgnoreCase(species) ? "mmu" : "hsa");
 			System.out.println("db connector = " + dbConnector.toString());
 
 			// reading data
@@ -132,7 +132,7 @@ public class AffyTmt extends Tmt {
 				throw new Exception("No Ensembl IDs found for your input genes in List #1 when converting your input genes to Ensembl ID");				
 			}
 			
-			Map<String, List<String>> probesMap1 = getProbes(organism, uniqueGeneList1);
+			Map<String, List<String>> probesMap1 = getProbes(species, uniqueGeneList1);
 			if ( probesMap1 == null || probesMap1.size() == 0 ) {
 				throw new Exception("No Affymetrix probes found for your genes in List #1");
 			}
@@ -145,7 +145,7 @@ public class AffyTmt extends Tmt {
 			Map<String, List<String>> ensemblMap2 = null;
 
 			if ( f2 == null ) {
-				List<String> genes = getAllGenes(organism);
+				List<String> genes = getAllGenes(species);
 				
 				ensemblList2 = new ArrayList<String>();
 				for (String gene: genes) {
@@ -195,14 +195,14 @@ public class AffyTmt extends Tmt {
 				throw new Exception("No Ensembl IDs found for your input genes in List #2 when converting your input genes to Ensembl ID");				
 			}				
 			
-			Map<String, List<String>> probesMap2 = getProbes(organism, uniqueGeneList2);
+			Map<String, List<String>> probesMap2 = getProbes(species, uniqueGeneList2);
 			if ( probesMap2 == null || probesMap2.size() == 0 ) {
 				throw new Exception("No Affymetrix probes found for your genes in List #2");
 			}
 
 			// getting libraries
 			//
-			Map<String, String> libraryMap = getTissueLibraries(organism, tissues);
+			Map<String, String> libraryMap = getTissueLibraries(species, tissues);
 			List<String> libraryNames = MapUtils.getKeys(libraryMap);
 
 			// getting frequency matrixes

@@ -2,7 +2,7 @@ package org.bioinfo.babelomics.methods.functional;
 
 import java.util.List;
 
-import org.bioinfo.commons.utils.StringUtils;
+import org.bioinfo.commons.utils.ListUtils;
 
 public class TwoListFisherTestResult {
 
@@ -48,8 +48,8 @@ public class TwoListFisherTestResult {
 		out.append(this.list1Negatives).append("\t");
 		out.append(this.list2Positives).append("\t");
 		out.append(this.list2Negatives).append("\t");
-		out.append(StringUtils.join(this.list1Ids,",")).append("\t");
-		out.append(StringUtils.join(this.list2Ids,",")).append("\t");
+		out.append(ListUtils.toString(this.list1Ids,",")).append("\t");
+		out.append(ListUtils.toString(this.list2Ids,",")).append("\t");
 		out.append(this.pValue).append("\t");
 		out.append(this.adjPValue);
 		return out.toString();

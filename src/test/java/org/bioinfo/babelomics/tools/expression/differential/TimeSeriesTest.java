@@ -4,12 +4,12 @@ import org.bioinfo.babelomics.BabelomicsMain;
 import org.junit.Test;
 
 
-public class MaSigProTest {
-
+public class TimeSeriesTest {
+	
 	@Test
 	public void test() {
 		System.out.println("----- masigpro ------");
-		String []args = {"-tool", "masigpro", "-dataset", "/mnt/commons/test/biodata/example/masigpro.dataset", "-o", "/tmp/masigpro", "-contin-class", "contin", "-series-class", "series"};
+		String []args = {"--tool", "time-series", "--dataset", "/mnt/commons/test/biodata/example/masigpro.dataset", "-o", "/tmp/masigpro", "--test", "masigpro", "--contin-class", "contin", "--series-class", "series"};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -17,5 +17,4 @@ public class MaSigProTest {
 			e.printStackTrace();
 		}		
 	}
-
 }

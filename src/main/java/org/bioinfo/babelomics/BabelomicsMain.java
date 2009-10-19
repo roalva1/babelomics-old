@@ -62,6 +62,9 @@ public class BabelomicsMain {
 		} catch (IOException e) {
 			tool.printUsage("./babelomics.sh");	
 			tool.abort("ioexception_main_babelomics", "IOException from Main in command line parse", e.toString(), StringUtils.getStackTrace(e));
+		} catch (Exception e) {
+			tool.printUsage("./babelomics.sh");	
+			tool.abort("exception_main_babelomics", "Exception from Main", e.toString(), StringUtils.getStackTrace(e));
 		}
 	}
 

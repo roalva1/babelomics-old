@@ -20,7 +20,7 @@ public class CopyNumberAnalysisTest {
 
 	public void test1() {
 		System.out.println("----- copynumberanalysis glad ------");
-		String []args = {"-tool", "copy-number", "-normalized-file", "/mnt/commons/test/biodata/example/cgh/agilent/segmentation/data1.txt", "-o", "/tmp/copynumber-glad", "-segmentation-method", "glad"};
+		String []args = {"-tool", "copy-number", "-normalized-file", "/mnt/commons/test/biodata/example/cgh/agilent/segmentation/data1.txt", "-o", "/tmp/copynumber-glad", "-segmentation-method", "glad", "-cgh-mcr", "-gap-allowed", "400"};
 		
 		try {
 			BabelomicsMain.main(args); 

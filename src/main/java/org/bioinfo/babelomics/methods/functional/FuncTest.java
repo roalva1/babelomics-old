@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bioinfo.commons.utils.StringUtils;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
@@ -106,7 +106,7 @@ public class FuncTest {
 
 		if ( names != null && names.size() > 0 ) {
 			
-			System.out.println("GO terms (" + StringUtils.arrayToString(names, "\t") + ")");
+			System.out.println("GO terms (" + ListUtils.toString(names, "\t") + ")");
 			System.out.println("fisher matrix (" + names.size() + ", 4):");
 			
 			matrix = new IntegerMatrix(names.size(), 4);

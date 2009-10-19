@@ -17,8 +17,8 @@ public class FatiGO {
 	public static final int REMOVE_NEVER = 0;
 	public static final int REMOVE_EACH = 1;	
 	public static final int REMOVE_REF = 2;
-	public static final int REMOVE_GENOME = 2;
-	public static final int REMOVE_ALL = 3;
+	public static final int REMOVE_GENOME = 3;
+	public static final int REMOVE_ALL = 4;
 	
 	// input params
 	private List<String> list1;
@@ -27,6 +27,7 @@ public class FatiGO {
 	private DBConnector dbConnector;
 	private int testMode;
 	private int duplicatesMode;
+	private boolean isYourAnnotations;
 	
 	// test
 	TwoListFisherTest fisher;
@@ -43,8 +44,9 @@ public class FatiGO {
 		this.dbConnector = dbConnector;
 		this.testMode = testMode;
 		this.duplicatesMode = duplicatesMode;
+		this.isYourAnnotations = false;
 	}
-	
+
 	// One list against Genome constructor
 	public FatiGO(List<String> list1, Filter filter, DBConnector dbConnector) {
 		this.list1 = list1;
@@ -53,17 +55,41 @@ public class FatiGO {
 		this.dbConnector = dbConnector;
 		this.testMode = FisherExactTest.GREATER;
 		this.duplicatesMode = REMOVE_GENOME;
+		this.isYourAnnotations = false;
 	}
 
+	// Your anntoations two list constructor
+	public FatiGO(List<String> list1, List<String> list2, FeatureList<AnnotationItem> annotations, int testMode, int duplicatesMode ) {
+		this.list1 = list1;
+		this.list2 = list2;
+		this.annotations = annotations;
+		this.testMode = testMode;
+		this.duplicatesMode = duplicatesMode;
+		this.isYourAnnotations = true;
+	}
+	
+	// Your anntoations two list constructor
+	public FatiGO(List<String> list1, FeatureList<AnnotationItem> annotations) {
+		this.list1 = list1;
+		this.list2 = InfraredUtils.getGenome(dbConnector);
+		this.annotations = annotations;
+		this.testMode = FisherExactTest.GREATER;
+		this.duplicatesMode = REMOVE_GENOME;
+		this.isYourAnnotations = true;
+	}
+	
+	
 	public void run() throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException {
-		List<String> all = new ArrayList<String>(list1);
+		
+		List<String> all = new ArrayList<String>(list1.size()+list2.size());
+		all.addAll(list1);
 		all.addAll(list2);	
 		
 		// duplicates managing
 		removeDuplicates();
 		
 		// annotation
-		annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
+		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
 
 		// run test
 		fisher = new TwoListFisherTest();
