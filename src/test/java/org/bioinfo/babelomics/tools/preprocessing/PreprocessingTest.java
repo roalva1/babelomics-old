@@ -50,7 +50,7 @@ public class PreprocessingTest {
 	public void Test3() {
 		String dataset = "/mnt/commons/test/biodata/example/dataset1.txt";
 		String outdir = "/tmp/preprocessing";
-		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir,"--merge-replicates", "mean", "--logarithm-base", "2", "--impute-missing", "zero", "--filter-missing", "90"};
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir,"--merge-replicates", "mean", "--logarithm-base", "2", "--impute-missing", "zero", "--filter-missing", "90", "--report", "pdf"};
 
 		System.out.println("----------------> " + Arrays.toString(args));
 		
