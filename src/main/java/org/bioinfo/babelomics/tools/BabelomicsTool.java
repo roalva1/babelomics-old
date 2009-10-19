@@ -47,12 +47,12 @@ public abstract class BabelomicsTool extends GenericBioTool {
 	@Override
 	public void parse(String[] args, boolean stopAtNoOption) throws ParseException, IOException {
 		super.parse(args, stopAtNoOption);
-		
 		// must be in commandLine, just in case we initialize...
 		this.toolName = commandLine.getOptionValue("tool", "");
 		this.species = commandLine.getOptionValue("species", "unknown");
 		// default report in PDF is requiered in Babelomics
 		if(!commandLine.hasOption("report")) {
+			logger.debug("Adding PDF report option");
 			this.report = "pdf";
 		}
 	}

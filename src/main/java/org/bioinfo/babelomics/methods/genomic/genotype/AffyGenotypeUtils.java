@@ -2,7 +2,6 @@ package org.bioinfo.babelomics.methods.genomic.genotype;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.InvalidParameterException;
 
 import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
@@ -41,17 +40,14 @@ public class AffyGenotypeUtils {
 		sp.runSync();
 	}
 	
-	public static void affyToPedAndMap(String chpDirPath, String pedigreFilePath, String outdir) throws InvalidParameterException, IOException {
-		File pedigreeFile = new File(chpDirPath);
-		File chpDir = new  File(pedigreFilePath);
-		if(!pedigreeFile.exists() || !chpDir.exists()) {
-			throw new InvalidParameterException("Some parameters are not valid, chp-dir: " +chpDirPath+",  pedigree: "+pedigreFilePath);
-		}
+	public static void affyToPedAndMap(String pedigreFilePath, String outdir, String chpDirPath) throws IOException {
+		FileUtils.checkFile(pedigreFilePath);
+		FileUtils.checkFile(chpDirPath);
 		String affyArrayType = "affymetrix-array-type";
 		
 		TextFileWriter pedFile = new TextFileWriter(outdir+".ped");
 		TextFileWriter mapFile = new TextFileWriter(outdir+".map");
-		File[] files = FileUtils.listFiles(chpDir, ".+.chp.*", true);
+		File[] files = FileUtils.listFiles(new File(chpDirPath), ".+.chp.*", true);
 		
 		StringBuilder pedLine;
 		for(File file: files) {
