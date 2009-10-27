@@ -86,35 +86,6 @@ public class GenotypeAnalysis {
 	}
 	
 	
-	@Deprecated
-	private void checkParameters2() throws InvalidParameterException {
-		if(pedFile == null) {
-			throw new InvalidParameterException("pedFile is null");
-		}
-		if(mapFile == null) {
-			throw new InvalidParameterException("mapFile is null");
-		}
-		if(!pedFile.exists()) {
-			throw new InvalidParameterException("pedFile file does not exist: " + getPedFile().getAbsolutePath());
-		}
-		if(!mapFile.exists()) {
-			throw new InvalidParameterException("mapFile file does not exist: " + getMapFile().getAbsolutePath());
-		}
-		if(plinkPath == null) {
-			throw new InvalidParameterException("plinkPath is null");
-		}
-		if(!new File(plinkPath).exists()) {
-			throw new InvalidParameterException("plinkPath does not exist: " + getPedFile().getAbsolutePath());
-		}
-		if(outdir == null) {
-			throw new InvalidParameterException("outdir is null");
-		}
-		if(!new File(outdir).exists()) {
-			throw new InvalidParameterException("outdir does not exist: " + getPedFile().getAbsolutePath());
-		}
-	}
-
-
 	/**
 	 * @param pedFile the pedFile to set
 	 */

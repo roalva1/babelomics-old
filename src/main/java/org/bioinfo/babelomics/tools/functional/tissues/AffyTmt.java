@@ -133,6 +133,7 @@ public class AffyTmt extends Tmt {
 			}
 			
 			Map<String, List<String>> probesMap1 = getProbes(species, uniqueGeneList1);
+			System.out.println(probesMap1);
 			if ( probesMap1 == null || probesMap1.size() == 0 ) {
 				throw new Exception("No Affymetrix probes found for your genes in List #1");
 			}
@@ -448,20 +449,22 @@ public class AffyTmt extends Tmt {
 		DBConnection dbConn = new DBConnection(dbDriver, dbHost, dbPort, dbName, dbUser, dbPass);
 
 		String q;
-		PreparedQuery query;
+		PreparedQuery prepQuery;
 		List<String> probes;
 		ResultSetHandler rsh = new BeanArrayListHandler(String.class);
+		q = "select probeset_id from ensemblGene where ensemblGene_id = ?"; 
+		//			System.out.println("dbName = " + dbName + ", query = " + q);
+		prepQuery = dbConn.createSQLPrepQuery(q);
 		for(String gene: geneList) {
-			q = "select probeset_id from ensemblGene where ensemblGene_id = ?"; 
-			//			System.out.println("dbName = " + dbName + ", query = " + q);
-			query = dbConn.createSQLPrepQuery(q);
-			query.setParams(gene);
-			probes = (ArrayList<String>) query.execute(rsh);
+			prepQuery.setParams(gene);
+			probes = (ArrayList<String>) prepQuery.execute(rsh);
+			System.out.println("getProbes in AffyTmt: gene: "+gene+"  probes: "+probes);
 			if ( probes != null && probes.size() > 0 ) {
+				System.out.println("getProbes in AffyTmt: gene: "+gene);
 				probeMap.put(gene, probes);
 			}
 		}
-
+		prepQuery.close();
 		return probeMap;
 	}
 

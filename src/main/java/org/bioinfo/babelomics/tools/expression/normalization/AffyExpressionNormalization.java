@@ -349,7 +349,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 	private void saveAsDataset(File file) throws IOException, InvalidColumnIndexException {
 		Dataset dataset = new Dataset(file);
 		dataset.load();
-		dataset.write();
+		dataset.save();
 	}
 	
 	public void saveBoxPlot(File file, String title, String resultId, String group) throws IOException, InvalidColumnIndexException {

@@ -302,7 +302,7 @@ public class Preprocessing extends BabelomicsTool {
 		
 		try {
 			File file = new File(this.getOutdir() + "/preprocessed.txt");
-			dataset.write(file);
+			dataset.save(file);
 			List<String> tags = StringUtils.toList("data,datamatrix,expression", ",");
 			result.addOutputItem(new Item("prepocessed_file", file.getName(), "Preprocessed file", TYPE.FILE, tags, new HashMap<String, String>(2), "Preprocessed data"));
 			
@@ -326,7 +326,7 @@ public class Preprocessing extends BabelomicsTool {
 			File inputFile = new File(wd + "/in.txt");
 			File outputFile = new File(wd + "/out.txt");
 			if ( new File(wd).isDirectory() || FileUtils.createDirectory(wd) ) {
-				dataset.write(inputFile);
+				dataset.save(inputFile);
 				
 				String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/KNNimpute -K=" + kvalue + " " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath();
 				Command cmd = new Command(cmdStr); 

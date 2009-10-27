@@ -47,14 +47,15 @@ public class GenotypeAnalysisTool extends BabelomicsTool {
 		if(commandLine.hasOption("create-ped-map")) {
 			if(commandLine.hasOption("pedigree-file") && commandLine.hasOption("chp-dir")) {
 				try {
-					AffyGenotypeUtils.affyToPedAndMap(commandLine.getOptionValue("chp-dir"), commandLine.getOptionValue("pedigree-file"), outdir);
+//					AffyGenotypeUtils.affyCallResultsToPedAndMap(commandLine.getOptionValue("chp-dir"), commandLine.getOptionValue("pedigree-file"), outdir);
 					pedFile = new File(outdir+"/plink.ped");
 					mapFile = new File(outdir+"/plink.map");
 				}catch (InvalidParameterException e) {
 					printError("", "", "");
-				} catch (IOException e) {
-					printError("", "", "");
 				}
+//				catch (IOException e) {
+//					printError("", "", "");
+//				}
 			}else {
 				abort("", "", "", "");
 			}
