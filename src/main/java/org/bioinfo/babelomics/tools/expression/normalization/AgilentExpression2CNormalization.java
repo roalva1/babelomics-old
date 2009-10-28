@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.bioinfo.babelomics.methods.expression.AgilentUtils;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
+import org.bioinfo.data.preprocess.microarray.AgilentExpressionUtils;
 import org.bioinfo.io.file.compress.CompressFactory;
 import org.bioinfo.io.file.compress.GenericCompressManager;
 import org.bioinfo.tool.OptionFactory;
@@ -111,7 +111,7 @@ public class AgilentExpression2CNormalization extends BabelomicsTool {
 			abort("filenotfoundexception_execute_agilentexpression2cnormalization", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
 
-		AgilentUtils.TwoColorsNormalization(System.getenv("BABELOMICS_HOME") + "/bin/normalizexp/twocolor_agilent_reading.r", System.getenv("BABELOMICS_HOME") + "/bin/normalizexp/twocolor_agilent_normalizing.r", rawFileNames, (sampleNames != null ? StringUtils.toList(sampleNames, ","): getSamples(rawFileNames)), bgCorrection, waNormalization, baNormalization, flagsNotFitted, flagsAsMissing, outdir);
+		AgilentExpressionUtils.TwoColorsNormalization(System.getenv("BABELOMICS_HOME") + "/bin/normalizexp/twocolor_agilent_reading.r", System.getenv("BABELOMICS_HOME") + "/bin/normalizexp/twocolor_agilent_normalizing.r", rawFileNames, (sampleNames != null ? StringUtils.toList(sampleNames, ","): getSamples(rawFileNames)), bgCorrection, waNormalization, baNormalization, flagsNotFitted, flagsAsMissing, outdir);
 
 		// saving normalization results
 		//
@@ -124,19 +124,19 @@ public class AgilentExpression2CNormalization extends BabelomicsTool {
 		File file;
 		List<String> tags = StringUtils.toList("data,datamatrix,expression", ",");
 
-		file = new File(outdir + "/" + AgilentUtils.getNormalizedFileName()); 
+		file = new File(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName()); 
 		if ( file.exists() ) {
 			result.addOutputItem(new Item("normalized", file.getName(), "Two-colors agilent normalization ", TYPE.FILE, tags, new HashMap<String, String>(2), "Two-colors agilent normalization files"));
 		} else {
 			printError("error two-colors agilent normalization", "error two-colors agilent normalization", "error two-colors agilent normalization");
 		}
 
-		file = new File(outdir + "/" + AgilentUtils.getaValuesFileName()); 
+		file = new File(outdir + "/" + AgilentExpressionUtils.getaValuesFileName()); 
 		if ( file.exists() ) {
 			result.addOutputItem(new Item("avalues", file.getName(), "A-values", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Two-colors agilent normalization files"));
 		}
 
-		file = new File(outdir + "/" + AgilentUtils.getGeneIDsFileName()); 
+		file = new File(outdir + "/" + AgilentExpressionUtils.getGeneIDsFileName()); 
 		if ( file.exists() ) {
 			result.addOutputItem(new Item("geneids", file.getName(), "Gene IDs", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional output files"));
 		}

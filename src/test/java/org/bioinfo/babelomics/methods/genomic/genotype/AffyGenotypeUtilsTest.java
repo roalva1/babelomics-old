@@ -1,9 +1,10 @@
 package org.bioinfo.babelomics.methods.genomic.genotype;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
+import org.bioinfo.data.preprocess.microarray.AffyGenotypeUtils;
 import org.junit.Test;
 
 public class AffyGenotypeUtilsTest {

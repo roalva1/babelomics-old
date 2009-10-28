@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bioinfo.babelomics.methods.expression.AffyUtils;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
@@ -19,6 +18,7 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.data.preprocess.microarray.AffyExpresionUtils;
 import org.bioinfo.io.file.compress.CompressFactory;
 import org.bioinfo.io.file.compress.GenericCompressManager;
 import org.bioinfo.tool.OptionFactory;
@@ -127,7 +127,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 				abort("filenotfoundexception_execute_affynormalization", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 			}
 
-			AffyUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", tmpDir.getAbsolutePath(), celFiles);			
+			AffyExpresionUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", tmpDir.getAbsolutePath(), celFiles);			
 
 			File[] rawFiles = FileUtils.listFiles(tmpDir, ".+.CEL", true);
 			rawFilenames = ListUtils.toStringList(rawFiles);
@@ -176,7 +176,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 			if ( calls ) analysis.add("pm-mm,mas5-detect.calls=1.pairs=1");
 			if ( plier ) analysis.add("plier-mm");
 			
-			AffyUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", outdir, analysis, new File(System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf")), celFiles);
+			AffyExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", outdir, analysis, new File(System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf")), celFiles);
 			
 		} else {
 			
@@ -184,7 +184,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 			if ( calls ) analysis.add("dabg");
 			if ( plier ) analysis.add("plier-gcbg");
 			
-			AffyUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", outdir, analysis, new File(System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf")), celFiles);
+			AffyExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", outdir, analysis, new File(System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf")), celFiles);
 		}
 
 		//		System.err.println("cmd output: " + sp.getRunnableProcess().getOutput());

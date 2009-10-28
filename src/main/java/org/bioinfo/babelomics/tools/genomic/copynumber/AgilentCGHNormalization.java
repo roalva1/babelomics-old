@@ -2,17 +2,15 @@ package org.bioinfo.babelomics.tools.genomic.copynumber;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.bioinfo.babelomics.methods.genomic.copynumber.CopyNumberUtils;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.FileUtils;
-import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
+import org.bioinfo.data.preprocess.microarray.AgilentCghUtils;
 import org.bioinfo.io.file.compress.CompressFactory;
 import org.bioinfo.io.file.compress.GenericCompressManager;
 import org.bioinfo.tool.OptionFactory;
@@ -116,7 +114,7 @@ public class AgilentCGHNormalization extends BabelomicsTool {
 			abort("filenotfoundexception_execute_agilentcghnormalization", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
 
-		CopyNumberUtils.normalization(System.getenv("BABELOMICS_HOME") + "/bin/copynumber/normalization.agilent.r", bgCorrection, waNormalization, baNormalization, design, tmpDir.getAbsolutePath(), outdir);
+		AgilentCghUtils.normalization(System.getenv("BABELOMICS_HOME") + "/bin/copynumber/normalization.agilent.r", bgCorrection, waNormalization, baNormalization, design, tmpDir.getAbsolutePath(), outdir);
 		
 		// saving normalization results
 		//
