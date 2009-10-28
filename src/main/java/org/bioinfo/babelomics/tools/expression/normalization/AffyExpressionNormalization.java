@@ -45,7 +45,6 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 		getOptions().addOption(OptionFactory.createOption("calls", "Present-absent calls analysis", false, false));
 		getOptions().addOption(OptionFactory.createOption("sample-filter", "class variable", false));
 		getOptions().addOption(OptionFactory.createOption("feature-filter", "class variable", false));
-
 	}
 
 	@Override

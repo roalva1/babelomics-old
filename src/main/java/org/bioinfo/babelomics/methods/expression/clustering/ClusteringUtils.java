@@ -25,7 +25,7 @@ public class ClusteringUtils {
 		if (width > 8000) width = 8000;
 		if (height > 8000) height = 8000;
 		
-		NewickPanel newickPanel = new NewickPanel(title, width, height, 0, 0);
+		NewickPanel newickPanel = new NewickPanel(title, 0, 0, width, height);
 		
 		newickPanel.setNewick(tree);
 		newickPanel.setShowLabels(true);
