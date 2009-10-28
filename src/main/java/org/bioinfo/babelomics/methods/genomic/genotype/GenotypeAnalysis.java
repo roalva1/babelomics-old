@@ -35,8 +35,11 @@ public class GenotypeAnalysis {
 	 * PLINK TESTS
 	 * 
 	 */
-	
 	public void association(String assocTest) throws IOException {
+		association(assocTest, 0.01);
+	}
+	
+	public void association(String assocTest, double maf) throws IOException {
 		checkParameters();
 		if(assocTest == null) {
 			throw new InvalidParameterException("association test is null");
@@ -45,7 +48,7 @@ public class GenotypeAnalysis {
 			throw new InvalidParameterException("association test is not valid, valid options are: 'assoc' or 'fisher', parameter: " + assocTest);
 		}
 		StringBuilder plinkCommandLine = createBasicPlinkCommand();
-		plinkCommandLine.append(" --" + assocTest.toLowerCase() + " ");
+		plinkCommandLine.append(" --" + assocTest.toLowerCase() + " --maf " + maf + " ");
 		executePlinkCommand(plinkCommandLine.toString());
 	}
 

@@ -2,20 +2,24 @@ package org.bioinfo.babelomics.tools.genomic.genotype;
 
 import java.io.File;
 
-import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.OptionFactory;
 
-public class AssociationTest extends BabelomicsTool {
-	public AssociationTest(String[] args) {
+public class AssociationTool extends GenotypeAnalysisTool {
+	
+	public AssociationTool() {
 		initOptions();
 	}
 
 	@Override
 	public void initOptions() {
-		getOptions().addOption(OptionFactory.createOption("dataset", "the data"));
-		getOptions().addOption(OptionFactory.createOption("fisher", "Fisher exact test"));
-		getOptions().addOption(OptionFactory.createOption("duplicates", "Remove duplicates"));
+		super.initOptions();
+		
+		options.addOption(OptionFactory.createOption("test", "Valid values: assoc, fisher, linear, logistic"));
+		options.addOption(OptionFactory.createOption("log", "Odd ratio logarithm", false, false));
+		options.addOption(OptionFactory.createOption("maf", "Default value: 0.01", false));
+		
+		options.addOption(OptionFactory.createOption("stratification", "Just a flag", false, false));
 	}
 
 	@Override

@@ -4,36 +4,37 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 
-import org.bioinfo.babelomics.methods.genomic.genotype.AffyGenotypeUtils;
 import org.bioinfo.babelomics.methods.genomic.genotype.GenotypeAnalysis;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.tool.OptionFactory;
 
-@Deprecated
 public class GenotypeAnalysisTool extends BabelomicsTool {
 
+	protected GenotypeAnalysis genotypeAnalysis;
+	
+	protected String pedFilePath;
+	protected String mapFilePath;
+	
 	public GenotypeAnalysisTool() {
-
+		genotypeAnalysis = new GenotypeAnalysis();
 	}
 
 	@Override
 	public void initOptions() {
-		// first input: result coming from apt-probeset-genotype and a pedigree like format, this option creates .ped and .map files 
-		options.addOption(OptionFactory.createOption("pedigree-file", "Just a flag", false));
-		options.addOption(OptionFactory.createOption("chp-dir", "Just a flag", false));
-
-		// second input: the typical ped and map files
+		// the typical ped and map files
 		options.addOption(OptionFactory.createOption("ped-file", "Just a flag", false));
 		options.addOption(OptionFactory.createOption("map-file", "Just a flag", false));
 
-
-		options.addOption(OptionFactory.createOption("create-ped-map", "Just a flag", false, false));
-		options.addOption(OptionFactory.createOption("stratification", "Just a flag", false, false));
 		options.addOption(OptionFactory.createOption("tdt", "Just a flag", false, false));
-		options.addOption(OptionFactory.createOption("assoc", "Either is a assoc or fisher", false));
-		options.addOption(OptionFactory.createOption("assoc-odd-ratio-log", "Just a flag", false, false));
+		
 	}
 
+	protected void parseGenotypeCommonOptions() {
+		pedFilePath = commandLine.getOptionValue("ped-file");
+		mapFilePath = commandLine.getOptionValue("map-file");
+		
+	}
+	
 	@Override
 	protected void execute() {
 		File pedFile = null;
