@@ -151,18 +151,18 @@ public class Clustering extends BabelomicsTool {
 			File imgFile;
 			String imgFilename;
 			try {
-				imgFilename = this.getOutdir() + "/samples." + method;
+				imgFilename = this.getOutdir() + "/samples." + method + ".png";
 				ClusteringUtils.saveImageTree(nwSamples, "Clusters of samples",  imgFilename, false);
-				imgFile = new File(imgFilename + ".png");
+				imgFile = new File(imgFilename);
 				if ( imgFile.exists() ) {
 					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " sample clustering image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Cluster images"));					
 				} else {
 					printError("execute" + method + "_clustering", "error saving sample clustering image", "error saving sample clustering image");										
 				}
 				
-				imgFilename = this.getOutdir() + "/genes." + method;
+				imgFilename = this.getOutdir() + "/genes." + method + ".png";
 				ClusteringUtils.saveImageTree(nwGenes, "Clusters of genes",  imgFilename, true);
-				imgFile = new File(imgFilename + ".png");
+				imgFile = new File(imgFilename);
 				if ( imgFile.exists() ) {
 					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " gene clustering image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Cluster images"));					
 				} else {
