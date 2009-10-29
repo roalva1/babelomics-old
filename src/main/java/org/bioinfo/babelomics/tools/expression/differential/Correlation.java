@@ -110,7 +110,7 @@ public class Correlation extends BabelomicsTool {
 
 			File outFile = new File(getOutdir() + "/" + test + ".txt");
 			FeatureData featureData = new FeatureData(dataFrame);
-			featureData.write(outFile);
+			featureData.save(outFile);
 			result.addOutputItem(new Item(test + "_file", outFile.getName(), test.toUpperCase() + " output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Output files"));
 
 			outFile = new File(getOutdir() + "/" + test + "_table.txt");
@@ -172,7 +172,7 @@ public class Correlation extends BabelomicsTool {
 
 			File outFile = new File(getOutdir() + "/" + test + ".txt");
 			FeatureData featureData = new FeatureData(dataFrame);
-			featureData.write(outFile);
+			featureData.save(outFile);
 			result.addOutputItem(new Item(test + "_file", outFile.getName(), test.toUpperCase() + " output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Output files"));
 
 			outFile = new File(getOutdir() + "/" + test + "_table.txt");

@@ -47,8 +47,6 @@ public class Snow extends BabelomicsTool {
 			
 		} catch (IOException e) {
 			logger.error("Error opening the dataset", e.toString());
-		} catch (InvalidColumnIndexException e) {
-			e.printStackTrace();
 		}
 	}
 	

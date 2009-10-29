@@ -170,7 +170,7 @@ public class Marmite extends BabelomicsTool {
 			// output file
 			String filename = "marmite_output.txt";
 			FeatureData featureData = new FeatureData(dataFrame);
-			featureData.write(new File(getOutdir() + "/" + filename));
+			featureData.save(new File(getOutdir() + "/" + filename));
 			result.addOutputItem(new Item("marmite_file", filename, "MARMITE output file", TYPE.FILE));
 
 			// output table

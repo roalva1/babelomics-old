@@ -239,7 +239,7 @@ public class AffyTmt extends Tmt {
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
 
 			FeatureData featureData = new FeatureData(dataFrame);
-			featureData.write(new File(outdir + "/tmt.txt"));
+			featureData.save(new File(outdir + "/tmt.txt"));
 			result.addOutputItem(new Item("tmt_file", "tmt.txt", "TMT output file:", TYPE.FILE));
 			
 			if ( dupGeneList1 != null && dupGeneList1.size() > 0 ) {

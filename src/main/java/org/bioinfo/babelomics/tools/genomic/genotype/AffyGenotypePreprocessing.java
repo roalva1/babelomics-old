@@ -26,16 +26,13 @@ public class AffyGenotypePreprocessing extends BabelomicsTool {
 
 		options.addOption(OptionFactory.createOption("chp-to-ped-map", "the data", false, false));
 		options.addOption(OptionFactory.createOption("pedigree-file", "Just a flag", false));
+		options.addOption(OptionFactory.createOption("mapping-genome-wide-6-file", "Just a flag", false));
 		options.addOption(OptionFactory.createOption("mapping-250k-sty-file", "Just a flag", false));
 		options.addOption(OptionFactory.createOption("mapping-250k-nsp-file", "Just a flag", false));
 	}
 
 	@Override
 	protected void execute() {
-		//		File dataDirFile = new File(commandLine.getOptionValue("data-dir"));
-		//		if(dataDirFile == null || !dataDirFile.exists()) {
-		//			abort("", "", "", "");
-		//		}
 
 		if(!commandLine.hasOption("calls") && !commandLine.hasOption("chp-to-ped-map")) {
 			printUsage("./babelomics.sh");
@@ -69,6 +66,7 @@ public class AffyGenotypePreprocessing extends BabelomicsTool {
 			dataDirFile = new File(outdir+"/chp-files");
 		}
 
+		
 		if(commandLine.hasOption("chp-to-ped-map")) {
 			logger.debug("in chp-to-ped-map");
 			// check that we have the parameters we need
@@ -76,23 +74,24 @@ public class AffyGenotypePreprocessing extends BabelomicsTool {
 				printUsage("./babelomics.sh");
 				abort("", "", "", "");
 			}
-			if(!commandLine.hasOption("mapping-250k-sty-file") || !commandLine.hasOption("mapping-250k-nsp-file")) {
+			if(!commandLine.hasOption("mapping-genome-wide-6-file") && (!commandLine.hasOption("mapping-250k-sty-file") || !commandLine.hasOption("mapping-250k-nsp-file"))) {
 				printUsage("./babelomics.sh");
 				abort("", "", "", "");
 			}
 			
 			File pedigreeFile = new File(commandLine.getOptionValue("pedigree-file"));
-			File mapping250kStyFile = new File(commandLine.getOptionValue("mapping-250k-sty-file"));
-			File mapping250kNspFile = new File(commandLine.getOptionValue("mapping-250k-nsp-file"));
 			
 			try {
 				if(commandLine.getOptionValue("chip-type").equalsIgnoreCase("500k")) {
 					logger.debug("calling to affyHumanMapping500kChpCallsToPedAndMap...");
-					AffyGenotypeUtils.affyHumanMapping500kChpCallsToPedAndMap(mapping250kStyFile.getAbsolutePath(), mapping250kNspFile.getAbsolutePath(),pedigreeFile.getAbsolutePath(), outdir, dataDirFile.getAbsolutePath());
+					File mapping250kStyFile = new File(commandLine.getOptionValue("mapping-250k-sty-file"));
+					File mapping250kNspFile = new File(commandLine.getOptionValue("mapping-250k-nsp-file"));
+					AffyGenotypeUtils.affyHumanMapping500kChpCallsToPedAndMap(mapping250kStyFile.getAbsolutePath(), mapping250kNspFile.getAbsolutePath(),pedigreeFile.getAbsolutePath(), dataDirFile.getAbsolutePath(), outdir);
 				}else {
 					if(commandLine.getOptionValue("chip-type").equalsIgnoreCase("6.0")){
-//						AffyGenotypeUtils.affyGenomeWide6ChpCallResultsToPedAndMap(pedigreeFile.getAbsolutePath(), outdir, dataDirFile.getAbsolutePath());
-						AffyGenotypeUtils.affyGenomeWide6ChpCallsToPedAndMap("/home/imedina/appl/analysis/src/snp/GenomeWideSNP_6.na29.annot.csv", "/tmp/map_GW6_file.txt", "", "");
+						logger.debug("calling to affyGenomeWide6ChpCallsToPedAndMap...");
+						File mappingGW6File = new File(commandLine.getOptionValue("mapping-genome-wide-6-file"));
+						AffyGenotypeUtils.affyGenomeWide6ChpCallsToPedAndMap("/home/imedina/appl/analysis/src/snp/GenomeWideSNP_6.na29.annot.csv", "/tmp/map_GW6_file.txt", "", outdir);
 					}else {
 						abort("", "", "", "");
 						logger.error("No valid chip type: 500k or 6.0");

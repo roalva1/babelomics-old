@@ -127,7 +127,12 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 				abort("filenotfoundexception_execute_affynormalization", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 			}
 
-			AffyExpresionUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", tmpDir.getAbsolutePath(), celFiles);			
+			try {
+				AffyExpresionUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", tmpDir.getAbsolutePath(), celFiles.getAbsolutePath());
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}			
 
 			File[] rawFiles = FileUtils.listFiles(tmpDir, ".+.CEL", true);
 			rawFilenames = ListUtils.toStringList(rawFiles);
@@ -176,7 +181,12 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 			if ( calls ) analysis.add("pm-mm,mas5-detect.calls=1.pairs=1");
 			if ( plier ) analysis.add("plier-mm");
 			
-			AffyExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", outdir, analysis, new File(System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf")), celFiles);
+			try {
+				AffyExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", outdir, analysis, new File(System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf")), celFiles);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		} else {
 			
@@ -184,7 +194,12 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 			if ( calls ) analysis.add("dabg");
 			if ( plier ) analysis.add("plier-gcbg");
 			
-			AffyExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", outdir, analysis, new File(System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf")), celFiles);
+			try {
+				AffyExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", outdir, analysis, new File(System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf")), celFiles);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		//		System.err.println("cmd output: " + sp.getRunnableProcess().getOutput());

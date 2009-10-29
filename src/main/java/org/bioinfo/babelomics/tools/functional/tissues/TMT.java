@@ -233,7 +233,7 @@ public class TMT extends BabelomicsTool {
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
 
 			FeatureData featureData = new FeatureData(dataFrame);
-			featureData.write(new File(getOutdir() + "/tmt.txt"));
+			featureData.save(new File(getOutdir() + "/tmt.txt"));
 
 //			FileUtils.writeStringToFile(new File(getOutdir() + "/replicates.txt"), "Removed " + replicated1 + " genes from list 1\nRemoved " + replicated2 + " genes from list 2");
 
