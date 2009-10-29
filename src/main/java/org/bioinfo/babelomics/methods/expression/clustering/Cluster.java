@@ -2,7 +2,7 @@ package org.bioinfo.babelomics.methods.expression.clustering;
 
 import java.util.List;
 
-import org.bioinfo.data.format.core.newick.NewickTree;
+import org.bioinfo.collections.tree.multiple.MultipleTree;
 import org.bioinfo.math.data.DoubleMatrix;
 
 public abstract class Cluster {
@@ -19,5 +19,5 @@ public abstract class Cluster {
 		this.distance = distance;
 	}
 
-	public abstract NewickTree run() throws Exception;
+	public abstract MultipleTree run() throws Exception;
 }

@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bioinfo.babelomics.methods.expression.AffyUtils;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
@@ -19,6 +18,7 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.data.preprocess.microarray.AffyExpresionUtils;
 import org.bioinfo.io.file.compress.CompressFactory;
 import org.bioinfo.io.file.compress.GenericCompressManager;
 import org.bioinfo.tool.OptionFactory;
@@ -45,7 +45,6 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 		getOptions().addOption(OptionFactory.createOption("calls", "Present-absent calls analysis", false, false));
 		getOptions().addOption(OptionFactory.createOption("sample-filter", "class variable", false));
 		getOptions().addOption(OptionFactory.createOption("feature-filter", "class variable", false));
-
 	}
 
 	@Override
@@ -128,7 +127,12 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 				abort("filenotfoundexception_execute_affynormalization", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 			}
 
-			AffyUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", tmpDir.getAbsolutePath(), celFiles);			
+			try {
+				AffyExpresionUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", tmpDir.getAbsolutePath(), celFiles.getAbsolutePath());
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}			
 
 			File[] rawFiles = FileUtils.listFiles(tmpDir, ".+.CEL", true);
 			rawFilenames = ListUtils.toStringList(rawFiles);
@@ -177,7 +181,12 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 			if ( calls ) analysis.add("pm-mm,mas5-detect.calls=1.pairs=1");
 			if ( plier ) analysis.add("plier-mm");
 			
-			AffyUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", outdir, analysis, new File(System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf")), celFiles);
+			try {
+				AffyExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", outdir, analysis, new File(System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf")), celFiles);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		} else {
 			
@@ -185,7 +194,12 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 			if ( calls ) analysis.add("dabg");
 			if ( plier ) analysis.add("plier-gcbg");
 			
-			AffyUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", outdir, analysis, new File(System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf")), celFiles);
+			try {
+				AffyExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", outdir, analysis, new File(System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf")), celFiles);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		//		System.err.println("cmd output: " + sp.getRunnableProcess().getOutput());
@@ -349,7 +363,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 	private void saveAsDataset(File file) throws IOException, InvalidColumnIndexException {
 		Dataset dataset = new Dataset(file);
 		dataset.load();
-		dataset.write();
+		dataset.save();
 	}
 	
 	public void saveBoxPlot(File file, String title, String resultId, String group) throws IOException, InvalidColumnIndexException {

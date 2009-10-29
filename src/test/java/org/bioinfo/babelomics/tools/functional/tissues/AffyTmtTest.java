@@ -20,7 +20,6 @@ public class AffyTmtTest {
 	public void notest() throws Exception {
 	}
 
-	@Test
 	public void test1() throws Exception {
 		System.out.println("-----     ------");
 //		String []args = {"-tool", "tmt-affy", "-list1", "/mnt/commons/test/tools/tmt/list1_brain.txt",  "-o", "/mnt/commons/test/tools/tmt/out/", "-organism", "human", "-platform", "affy", "-tissues", "all tissues"};

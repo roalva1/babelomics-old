@@ -8,12 +8,14 @@ import org.bioinfo.babelomics.tools.expression.differential.Correlation;
 import org.bioinfo.babelomics.tools.expression.differential.Survival;
 import org.bioinfo.babelomics.tools.expression.differential.TimeSeries;
 import org.bioinfo.babelomics.tools.expression.normalization.AffyExpressionNormalization;
+import org.bioinfo.babelomics.tools.expression.normalization.AgilentExpression2CNormalization;
 import org.bioinfo.babelomics.tools.functional.Blast2Go;
 import org.bioinfo.babelomics.tools.functional.FatiGOTool;
 import org.bioinfo.babelomics.tools.functional.FatiScanTool;
 import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
 import org.bioinfo.babelomics.tools.functional.tissues.AffyTmt;
+import org.bioinfo.babelomics.tools.genomic.copynumber.AgilentCGHNormalization;
 import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
 import org.bioinfo.babelomics.tools.interactome.Snow;
@@ -33,7 +35,9 @@ public class BabelomicsFactory {
 		if(toolName.equalsIgnoreCase("affy-expression-normalization")) {
 			return new AffyExpressionNormalization();
 		}
-		
+		if(toolName.equalsIgnoreCase("agilent-expression-two-colors-normalization")) {
+			return new AgilentExpression2CNormalization();
+		}
 		if(toolName.equalsIgnoreCase("affy-snp-preprocess")) {
 			return new AffyGenotypePreprocessing();
 		}
@@ -98,6 +102,10 @@ public class BabelomicsFactory {
 			return new AffyTmt();
 		}
 		
+		if(toolName.equalsIgnoreCase("copy-number-normalization")) {
+			return new AgilentCGHNormalization();
+		}
+
 		if(toolName.equalsIgnoreCase("copy-number")) {
 			return new CopyNumberAnalysis();
 		}

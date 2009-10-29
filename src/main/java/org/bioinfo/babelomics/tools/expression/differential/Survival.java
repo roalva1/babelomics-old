@@ -97,7 +97,7 @@ public class Survival extends BabelomicsTool {
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
 
 			FeatureData featureData = new FeatureData(dataFrame);
-			featureData.write(new File(getOutdir() + "/cox.txt"));
+			featureData.save(new File(getOutdir() + "/cox.txt"));
 			result.addOutputItem(new Item("cox_file", "cox.txt", "Cox output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Output files"));
 			
 			IOUtils.write(new File(getOutdir() + "/cox_table.txt"), dataFrame.toString(true, true));			

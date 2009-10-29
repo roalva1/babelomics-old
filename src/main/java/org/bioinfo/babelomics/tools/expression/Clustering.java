@@ -1,10 +1,9 @@
 package org.bioinfo.babelomics.tools.expression;
 
 import java.io.File;
-import java.io.FileNotFoundException; 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,11 +12,10 @@ import org.bioinfo.babelomics.methods.expression.clustering.Kmeans;
 import org.bioinfo.babelomics.methods.expression.clustering.Sota;
 import org.bioinfo.babelomics.methods.expression.clustering.Upgma;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.collections.tree.multiple.MultipleTree;
 import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
-import org.bioinfo.data.format.core.newick.NewickTree;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
@@ -94,7 +92,7 @@ public class Clustering extends BabelomicsTool {
 			abort("unknownclusteringmethod_execute_clustering", "Unknown clustering method '" + method + "'", "Unknown clustering method '" + method + "'", "Unknown clustering method '" + method + "'");
 		}
 		
-		NewickTree nwGenes = null, nwSamples = null;
+		MultipleTree nwGenes = null, nwSamples = null;
 		
 		try {
 			jobStatus.addStatusMessage("40", "generating genes clusters");
@@ -151,18 +149,18 @@ public class Clustering extends BabelomicsTool {
 			File imgFile;
 			String imgFilename;
 			try {
-				imgFilename = this.getOutdir() + "/samples." + method;
+				imgFilename = this.getOutdir() + "/samples." + method + ".png";
 				ClusteringUtils.saveImageTree(nwSamples, "Clusters of samples",  imgFilename, false);
-				imgFile = new File(imgFilename + ".png");
+				imgFile = new File(imgFilename);
 				if ( imgFile.exists() ) {
 					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " sample clustering image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Cluster images"));					
 				} else {
 					printError("execute" + method + "_clustering", "error saving sample clustering image", "error saving sample clustering image");										
 				}
 				
-				imgFilename = this.getOutdir() + "/genes." + method;
+				imgFilename = this.getOutdir() + "/genes." + method + ".png";
 				ClusteringUtils.saveImageTree(nwGenes, "Clusters of genes",  imgFilename, true);
-				imgFile = new File(imgFilename + ".png");
+				imgFile = new File(imgFilename);
 				if ( imgFile.exists() ) {
 					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " gene clustering image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Cluster images"));					
 				} else {
@@ -203,8 +201,8 @@ public class Clustering extends BabelomicsTool {
 	 * @return
 	 * @throws Exception
 	 */
-	private NewickTree runClustering(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String method, String distance, int kvalue) throws Exception {
-		NewickTree tree = null;
+	private MultipleTree runClustering(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String method, String distance, int kvalue) throws Exception {
+		MultipleTree tree = null;
 
 		
 		if ( "sota".equalsIgnoreCase(method) ) {

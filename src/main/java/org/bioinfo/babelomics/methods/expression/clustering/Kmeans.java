@@ -6,14 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bioinfo.collections.tree.multiple.MultipleTree;
 import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
-import org.bioinfo.data.format.core.newick.NewickTree;
-import org.bioinfo.data.format.io.NewickParser;
+import org.bioinfo.data.format.io.parser.NewickParser;
 import org.bioinfo.math.data.DoubleMatrix;
 
 public class Kmeans extends Cluster {
@@ -25,8 +25,8 @@ public class Kmeans extends Cluster {
 	}
 
 	@Override
-	public NewickTree run() throws Exception {
-		NewickTree nw = null;
+	public MultipleTree run() throws Exception {
+		MultipleTree nw = null;
 		
 		File tmpDir = File.createTempFile("input", ".dir");
 		tmpDir.delete();

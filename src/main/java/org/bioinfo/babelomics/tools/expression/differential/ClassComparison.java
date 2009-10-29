@@ -133,7 +133,7 @@ public class ClassComparison extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 
 			File file = new File(outdir + "/t.txt");
-			featureData.write(file);
+			featureData.save(file);
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("tfile", file.getName(), "T-test output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "T-test output files"));							
 			}
@@ -176,7 +176,7 @@ public class ClassComparison extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 
 			File file = new File(outdir + "/foldchange.txt");
-			featureData.write(file);
+			featureData.save(file);
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("foldchangefile", file.getName(), "Fold-change output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Fold-change output files"));							
 			}
@@ -234,7 +234,7 @@ public class ClassComparison extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 
 			File file = new File(outdir + "/anova.txt");
-			featureData.write(file);
+			featureData.save(file);
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("anovafile", file.getName(), "Anova output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Anova output files"));							
 			}
@@ -295,7 +295,7 @@ public class ClassComparison extends BabelomicsTool {
 			FeatureData featureData = new FeatureData(dataFrame);
 
 			File file = new File(outdir + "/limma.txt");
-			featureData.write(file);
+			featureData.save(file);
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("limmafile", file.getName(), "Limma output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Lima output files"));							
 			}

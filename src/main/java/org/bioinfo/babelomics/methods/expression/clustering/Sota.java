@@ -4,13 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bioinfo.collections.tree.multiple.MultipleTree;
 import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
-import org.bioinfo.data.format.core.newick.NewickTree;
-import org.bioinfo.data.format.io.NewickParser;
+import org.bioinfo.data.format.io.parser.NewickParser;
 import org.bioinfo.math.data.DoubleMatrix;
 
 public class Sota extends Cluster {
@@ -20,8 +20,8 @@ public class Sota extends Cluster {
 	}
 	
 	@Override
-	public NewickTree run() throws Exception {
-		NewickTree nw = null;
+	public MultipleTree run() throws Exception {
+		MultipleTree nw = null;
 		
 		File inputFile = File.createTempFile("input", null);
 		File outputFile = File.createTempFile("output", null);

@@ -3,14 +3,14 @@ package org.bioinfo.babelomics.methods.expression.clustering;
 import java.awt.Color;
 import java.io.IOException;
 
-import org.bioinfo.data.format.core.newick.NewickTree;
+import org.bioinfo.collections.tree.multiple.MultipleTree;
 import org.bioinfo.graphics.canvas.Canvas;
 import org.bioinfo.graphics.canvas.panel.NewickPanel;
 
 public class ClusteringUtils {
 	
 
-	public static void saveImageTree(NewickTree tree, String title, String imgFilename, boolean vertical) throws IOException {
+	public static void saveImageTree(MultipleTree tree, String title, String imgFilename, boolean vertical) throws IOException {
 				
 		int width = vertical ? (tree.getNumberOfLevels() * 10 + 30) : (tree.getNumberOfLeaves() * 10);
 		int height = vertical ? (tree.getNumberOfLeaves() * 10) : (tree.getNumberOfLevels() * 10 + 30);
@@ -25,7 +25,7 @@ public class ClusteringUtils {
 		if (width > 8000) width = 8000;
 		if (height > 8000) height = 8000;
 		
-		NewickPanel newickPanel = new NewickPanel(title, width, height, 0, 0);
+		NewickPanel newickPanel = new NewickPanel(title, 0, 0, width, height);
 		
 		newickPanel.setNewick(tree);
 		newickPanel.setShowLabels(true);
@@ -52,7 +52,7 @@ public class ClusteringUtils {
 	}
 
 	
-//	public static void saveImageTree(DoubleMatrix matrix, NewickTree vTree, NewickTree hTree, String imgFilename) throws IOException {
+//	public static void saveImageTree(DoubleMatrix matrix, BinaryTree vTree, BinaryTree hTree, String imgFilename) throws IOException {
 //		
 //		int cellSide = 20;
 //		int rowLabelsWidth = getMaxStringLengh(vTree.getLabels()) * 9;
