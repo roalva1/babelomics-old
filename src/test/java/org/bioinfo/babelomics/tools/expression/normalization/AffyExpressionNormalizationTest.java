@@ -13,6 +13,7 @@ public class AffyExpressionNormalizationTest {
 	@Test
 	public void Test() {
 		String dataset = "/mnt/commons/test/biodata/example/CEL.tar.gz";
+		//String dataset = "/mnt/commons/test/biodata/example/cel.zip";
 		String outdir = "/tmp/affy-normalization";
 		String []args = { "--tool", "affy-expression-normalization","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--rma", "--plier", "--calls"};
 

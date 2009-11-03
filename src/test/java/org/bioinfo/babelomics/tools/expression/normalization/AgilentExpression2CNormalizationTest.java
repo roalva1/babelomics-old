@@ -27,9 +27,24 @@ public class AgilentExpression2CNormalizationTest {
 		}
 	}	
 
-	
 	@Test
 	public void Test1() {
+		String outDirName = "/tmp/agilent-normalization";
+		new File(outDirName).mkdir();
+		String rawDirName = "/mnt/commons/test/biodata/example/GSE11968_RAW/agilent.zip";
+		
+		String []args = { "--tool", "agilent-expression-two-colors-normalization","--log-level", "2", "--compressed-file", rawDirName, "-o", outDirName};
+
+		System.out.println("command line parameters --> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}	
+
+	public void Test2() {
 		String outDirName = "/tmp/agilent-normalization";
 		new File(outDirName).mkdir();
 		String rawDirName = "/mnt/commons/test/biodata/example/cgh/agilent/normalization/dataset1";
