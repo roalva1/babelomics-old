@@ -114,8 +114,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			// prepare params
 			prepare();			
 	
-			// list 1
-			System.err.println("list1: " + list1);
+			// list 1			
 			List<String> idList1 = list1.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list1.getDataFrame().getColumn(0));
 			
 			// list 2

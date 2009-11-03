@@ -136,8 +136,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		}
 		// your annotations
 		if(commandLine.hasOption("annotations") && !commandLine.getOptionValue("annotations").equalsIgnoreCase("") && !commandLine.getOptionValue("annotations").equalsIgnoreCase("none")) {
-			isYourAnnotations = true;
-			System.err.println("annotation file: " + commandLine.getOptionValue("annotations"));
+			isYourAnnotations = true;			
 			FeatureData annotations = new FeatureData(new File(commandLine.getOptionValue("annotations")), true);
 			List<String> ids = annotations.getDataFrame().getColumn(0);
 			List<String> terms = annotations.getDataFrame().getColumn(1);			
