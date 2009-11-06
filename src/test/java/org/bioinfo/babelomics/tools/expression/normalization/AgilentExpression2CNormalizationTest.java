@@ -31,7 +31,8 @@ public class AgilentExpression2CNormalizationTest {
 	public void Test1() {
 		String outDirName = "/tmp/agilent-normalization";
 		new File(outDirName).mkdir();
-		String rawDirName = "/mnt/commons/test/biodata/example/GSE11968_RAW/agilent.zip";
+		String rawDirName = "/mnt/commons/test/biodata/example/GSE11968_RAW/agilent.tar.gz";
+		//String rawDirName = "/mnt/commons/test/biodata/example/GSE11968_RAW/agilent.zip";
 		
 		String []args = { "--tool", "agilent-expression-two-colors-normalization","--log-level", "2", "--compressed-file", rawDirName, "-o", outDirName};
 
