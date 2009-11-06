@@ -27,7 +27,7 @@ public class PredictorTest {
 
 	public void Test1() {
 		String dataset = "/mnt/commons/test/biodata/example/predictor_input.txt";
-		String outdir = "/tmp/predictors";
+		String outdir = "/tmp/";
 		
 		String []args = { "--tool", "predictor","--log-level", "2", "--dataset", dataset, "-o", outdir, "--knn", "--knn-tune", "--svm", "--svm-tune", "--random-forest", "--random-forest-tune", "--class", "class"};
 

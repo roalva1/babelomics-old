@@ -12,7 +12,7 @@ import org.junit.Test;
 
 public class AgilentExpression2CNormalizationTest {
 	public void Test() {
-		String outDirName = "/tmp/agilent-normalization";
+		String outDirName = "/tmp/";
 		new File(outDirName).mkdir();
 		String rawDirName = "/mnt/commons/test/biodata/example/GSE11968_RAW/";
 		
@@ -30,7 +30,7 @@ public class AgilentExpression2CNormalizationTest {
 	
 	@Test
 	public void Test1() {
-		String outDirName = "/tmp/agilent-normalization";
+		String outDirName = "/tmp/";
 		new File(outDirName).mkdir();
 		String rawDirName = "/mnt/commons/test/biodata/example/cgh/agilent/normalization/dataset1";
 		

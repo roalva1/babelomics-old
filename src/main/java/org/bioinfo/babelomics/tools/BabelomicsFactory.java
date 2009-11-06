@@ -18,6 +18,7 @@ import org.bioinfo.babelomics.tools.functional.tissues.AffyTmt;
 import org.bioinfo.babelomics.tools.genomic.copynumber.AgilentCGHNormalization;
 import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
+import org.bioinfo.babelomics.tools.genomic.genotype.AssociationTool;
 import org.bioinfo.babelomics.tools.interactome.Snow;
 import org.bioinfo.babelomics.tools.preprocessing.IdConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
@@ -32,12 +33,19 @@ public class BabelomicsFactory {
 		if(toolName.equalsIgnoreCase("affy-genotype-preprocess")) {
 			return new AffyGenotypePreprocessing();
 		}
+		
 		if(toolName.equalsIgnoreCase("affy-expression-normalization")) {
 			return new AffyExpressionNormalization();
 		}
+		
+		if(toolName.equalsIgnoreCase("association")) {
+			return new AssociationTool();
+		}
+		
 		if(toolName.equalsIgnoreCase("agilent-expression-two-colors-normalization")) {
 			return new AgilentExpression2CNormalization();
 		}
+		
 		if(toolName.equalsIgnoreCase("affy-snp-preprocess")) {
 			return new AffyGenotypePreprocessing();
 		}
