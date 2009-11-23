@@ -48,7 +48,6 @@ public class ClusteringTest {
 		}
 	}	
 
-	@Test
 	public void Test2() {
 //		String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
 		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";

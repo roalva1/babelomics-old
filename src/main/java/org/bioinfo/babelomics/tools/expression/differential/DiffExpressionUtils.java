@@ -34,7 +34,7 @@ public class DiffExpressionUtils {
 		canvas.setBorderColor(Color.BLACK);
 		canvas.setBackGroundColor(Color.WHITE);
 
-		GridPanel gridPanel = new GridPanel("", (columnDimension * cellSide) + rowLabelsWidth + infoWidth + canvas.getBorderPadding() + canvas.getSpaceSeparator(), ((rowDimension+1) * cellSide) + colLabelsWidth + canvas.getBorderPadding() + canvas.getSpaceSeparator(), xHeatMap, yHeatMap);
+		GridPanel gridPanel = new GridPanel("", xHeatMap, yHeatMap, (columnDimension * cellSide) + rowLabelsWidth + infoWidth + canvas.getBorderPadding() + canvas.getSpaceSeparator(), ((rowDimension+1) * cellSide) + colLabelsWidth + canvas.getBorderPadding() + canvas.getSpaceSeparator());
 		GridTrack gridTrack = new GridTrack(rowDimension, columnDimension, cellSide, cellSide);
 		gridTrack.setRowLabels(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 		List<String> columnLabels = new ArrayList<String>(dataset.getSampleNames().size());
