@@ -12,13 +12,8 @@ import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
-import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
-import org.bioinfo.infrared.core.Gene;
-import org.bioinfo.infrared.core.dbsql.GeneDBManager;
-import org.bioinfo.infrared.core.dbsql.XRefDBManager;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
-import org.bioinfo.infrared.funcannot.dbsql.AnnotationDBManager;
 import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
 import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
@@ -38,19 +33,10 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	// test
 	protected int testMode;
 		
-// GO biological process
-//	protected List<GOFilter> goBpFilterList;
-//	protected List<GOFilter> goMfFilterList;
-//	protected List<GOFilter> goCcFilterList;
-//	protected KeggFilter keggFilter;
-//	protected BiocartaFilter biocartaFilter;
-	
+	// dbs
 	protected List<Filter> filterList;
 	
-//	private int goBpMinLevel, goBpMaxLevel, goBpMinNumberGenes, goBpMaxNumberGenes;
-//	private String goBpDBKeywords, goBpDBKeywordsLogic;
-//	private boolean goBpAllGenome, goBpInclusive;
-
+	// your annotations
 	protected boolean isYourAnnotations;
 	protected FeatureList<AnnotationItem> yourAnnotations;
 
@@ -85,7 +71,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 
 
 	private void addGOOptions(String namespace){
-		String namespaceTitle = "biological process";		
+		String namespaceTitle = "biological process";
 		if(namespace.equalsIgnoreCase("cc")) namespaceTitle = "cellular component";
 		if(namespace.equalsIgnoreCase("mf")) namespaceTitle = "molecular function";
 		getOptions().addOption(OptionFactory.createOption("go-" + namespace, "GO " + namespaceTitle + " database",false,false));
@@ -134,6 +120,12 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			BiocartaFilter biocartaFilter = new BiocartaFilter(Integer.parseInt(commandLine.getOptionValue("biocarta-min-num-genes","5")),Integer.parseInt(commandLine.getOptionValue("biocarta-max-num-genes","500")));
 			filterList.add(biocartaFilter);
 		}
+		
+		// species must be provided if any db is selected
+		if(commandLine.hasOption("go-bp") || commandLine.hasOption("go-mf") || commandLine.hasOption("go-cc") || commandLine.hasOption("kegg") || commandLine.hasOption("biocarta")){
+			if(!commandLine.hasOption("species")) throw new ParseException("species is mandatory if any database specified");
+		}
+		
 		// your annotations
 		if(commandLine.hasOption("annotations") && !commandLine.getOptionValue("annotations").equalsIgnoreCase("") && !commandLine.getOptionValue("annotations").equalsIgnoreCase("none")) {
 			isYourAnnotations = true;			
@@ -167,16 +159,23 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	}
 	
 	public GOFilter parseGOFilter(CommandLine cmdLine, String namespace){
+		// ontology
 		String infraredNamespace = "biological_process";		
 		if(namespace.equalsIgnoreCase("cc")) infraredNamespace = "cellular_component";
 		if(namespace.equalsIgnoreCase("mf")) infraredNamespace = "molecular_function";
 		GOFilter goFilter = new GOFilter(infraredNamespace);
+		// levels
 		goFilter.setMinLevel(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-min-level","5")));
 		goFilter.setMaxLevel(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-max-level","12")));
+		// number of annotations
 		goFilter.setMinNumberGenes(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-min-num-genes","5")));	
 		goFilter.setMaxNumberGenes(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-max-num-genes","500")));
-		//goFilter.addKeywords(arg0);
-		goFilter.setLogicalOperator(cmdLine.getOptionValue("go-" + namespace + "-keywords-logic","AND"));
+		
+		// filter by keywords
+		if(cmdLine.hasOption("go-" + namespace + "-keywords")){
+			goFilter.addKeywords(StringUtils.toList(cmdLine.getOptionValue("go-" + namespace + "-keywords", "")));
+			goFilter.setLogicalOperator(cmdLine.getOptionValue("go-" + namespace + "-keywords-logic","AND"));			
+		}
 		return goFilter;
 	}
 	

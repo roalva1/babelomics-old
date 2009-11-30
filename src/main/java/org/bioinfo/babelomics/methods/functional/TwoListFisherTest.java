@@ -84,7 +84,7 @@ public class TwoListFisherTest extends FunctionalTest {
 			
 		} else {
 			//FIXME thrown an exception
-			System.out.println("\nannotation is nullllll\n");
+			System.out.println("\nannotation is null\n");
 			results = null;
 		}
 			
@@ -96,8 +96,7 @@ public class TwoListFisherTest extends FunctionalTest {
 	
 	public List<TwoListFisherTestResult> getSignificantResults(double threshold){
 		List<TwoListFisherTestResult> significant = new ArrayList<TwoListFisherTestResult>();
-		for(TwoListFisherTestResult result: this.results){
-			System.err.println("rr: " + result.getAdjPValue() + ": " + threshold);
+		for(TwoListFisherTestResult result: this.results){			
 			if(result.getAdjPValue()<threshold) significant.add(result);
 		}
 		return significant;
