@@ -98,14 +98,12 @@ public class FatiGOTool extends FunctionalProfilingTool{
 	@Override
 	public void execute() {
 		try {
-			logger.debug("EXECUTING FATIGOOOOO!!!!");
+			logger.println("Starting FatiGO...");
 			
 			// infrared connector
-			DBConnector dbConnector = new DBConnector(getSpecies(), new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));			
+			System.err.println("species: " + getSpecies());
+			DBConnector dbConnector = new DBConnector(getSpecies(), new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));		
 			
-//			System.out.println("FatiGOTool.java, execute: getSpecies() = " + getSpecies());
-//			System.out.println("FatiGOTool.java, execute: from file " + new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf").getAbsolutePath() + ", dbConnector = " + dbConnector);
-
 			// prepare params
 			prepare();			
 	
@@ -115,7 +113,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			// list 2
 			List<String> idList2 = null;
 			if(list2!=null) {
-				idList2 = list2.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list2.getDataFrame().getColumn(0));
+				idList2 = list2.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list2.getDataFrame().getColumn(0));				
 			} else if(isRestOfGenome()) {				
 				duplicatesMode = FatiGO.REMOVE_GENOME;
 			} else if(chromosomes!=null) {
@@ -155,6 +153,8 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				
 			}
 			
+		}catch(ParseException pe){
+			logger.error(pe.getMessage());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -167,7 +167,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		String name = getDBName(filter);
 		String title = getDBTitle(filter);					
 				
-		logger.info(title + "...\n");
+		logger.println(title + "...");
 
 		// init test
 		FatiGO fatigo = null;
@@ -183,7 +183,9 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		// acum significant values
 		significant.addAll(testResultToStringList(fatigo.getSignificant(DEFAULT_PVALUE_THRESHOLD),false));
 
-		logger.info("...end of " + title);
+		//logger.println("...end of " + title);
+		logger.println("...finished");
+		
 	}
 	
 	private void doFatigoYourAnnotations(List<String> idList1, List<String> idList2,FeatureList<AnnotationItem> yourAnnotations, List<String> significant) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException{
@@ -192,7 +194,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		String name = "your_annotations";
 		String title = "Your annotations";					
 				
-		logger.info(title + "...\n");
+		logger.println(title + "...");
 
 		// init test
 		FatiGO fatigo = null;
@@ -208,7 +210,8 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		// acum significant values
 		significant.addAll(testResultToStringList(fatigo.getSignificant(DEFAULT_PVALUE_THRESHOLD),false));
 		
-		logger.info("...end of " + title);
+		//logger.println("...end of " + title);
+		logger.println("...finished");
 		
 	}
 	
