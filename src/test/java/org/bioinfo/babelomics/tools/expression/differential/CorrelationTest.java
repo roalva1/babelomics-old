@@ -32,7 +32,6 @@ public class CorrelationTest {
 		}		
 	}
 	
-	@Test
 	public void test3() {
 		System.out.println("-----  regression  ------");
 		//String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/regression", "-test", "regression", "-class", "O2_conc"};

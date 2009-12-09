@@ -150,7 +150,7 @@ public class Correlation extends BabelomicsTool {
 		//
 		updateJobStatus("60", "generating heatmap");
 		Canvas heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "slope", res.getSlopes(), "adj. p-value", res.getAdjPValues());
-		String heatmapFilename = getOutdir() + "/" + test + "_heatmap";
+		String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
 		try {
 			heatmap.save(heatmapFilename);
 		} catch (IOException e) {
