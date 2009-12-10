@@ -47,6 +47,7 @@ public class PreprocessingTest {
 		System.out.println("----------------> ");
 	}
 	
+	@Test
 	public void Test3() {
 		String dataset = "/mnt/commons/test/biodata/example/dataset1.txt";
 		String outdir = "/tmp/preprocessing";
@@ -65,6 +66,7 @@ public class PreprocessingTest {
 		}
 	}	
 
+	@Test
 	public void Test4() {
 		String dataset = "/mnt/commons/test/biodata/example/dataset1.txt";
 		String outdir = "/tmp/preprocessing";
@@ -84,6 +86,7 @@ public class PreprocessingTest {
 	}	
 
 
+	@Test
 	public void Test5() {
 		String dataset = "/mnt/commons/test/biodata/example/dataset1.txt";
 		String outdir = "/tmp/preprocessing";
@@ -103,6 +106,7 @@ public class PreprocessingTest {
 		}
 	}	
 
+	@Test
 	public void Test6() {
 		String dataset = "/mnt/commons/test/biodata/example/dataset1.txt";
 		String outdir = "/tmp/preprocessing";

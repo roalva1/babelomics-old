@@ -56,7 +56,7 @@ public class AffyGenotypePreprocessing extends BabelomicsTool {
 					logger.error("No valid chip type: 500k or 6.0");
 				}
 
-				AffyGenotypeUtils.affyGenotypeNormalization(babelomicsHomePath+"/bin/apt/apt-probeset-genotype", commandLine.getOptionValue("chip-type"), cdfFile.getAbsolutePath(), chrXSnpsFile.getAbsolutePath(), outdir, dataDirFile.getAbsolutePath());
+				AffyGenotypeUtils.affyGenotypeNormalization(babelomicsHomePath+"/bin/apt/apt-probeset-genotype", commandLine.getOptionValue("chip-type"), cdfFile.getAbsolutePath(), chrXSnpsFile.getAbsolutePath(), dataDirFile.getAbsolutePath(), outdir);
 
 			}catch (IOException e) {
 				abort("", "", "", "");
