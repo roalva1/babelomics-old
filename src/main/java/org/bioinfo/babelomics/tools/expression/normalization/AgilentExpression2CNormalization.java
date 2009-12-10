@@ -105,7 +105,7 @@ public class AgilentExpression2CNormalization extends BabelomicsTool {
 			File file;
 			List<String> tags = StringUtils.toList("data,datamatrix,expression", ",");
 
-			file = new File(outdir + "/" + AgilentExpressionUtils.getNormalizedDatasetName()); 
+			file = new File(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName()); 
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("normalized", file.getName(), "Two-colors agilent normalization ", TYPE.FILE, tags, new HashMap<String, String>(2), "Two-colors agilent normalization files"));
 			} else {

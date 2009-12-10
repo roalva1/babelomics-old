@@ -1,5 +1,7 @@
 package org.bioinfo.babelomics.tools.expression.differential;
 
+import java.io.File;
+
 import org.bioinfo.babelomics.BabelomicsMain;
 import org.junit.Test;
 
@@ -7,9 +9,13 @@ import org.junit.Test;
 public class SurvivalTest {
 	
 	@Test
-	public void test() {
-		System.out.println("----- cox ------");
-		String []args = {"--tool", "survival", "--dataset", "/mnt/commons/test/biodata/example/survival.txt", "-o", "/tmp/cox", "--test", "cox", "--time-class", "time", "--censored-class", "censored"};
+	public void Test() {
+		String dataset = "/mnt/commons/test/biodata/example/survival.txt";
+		String outdir = "/tmp/SurvivalTest";
+		new File(outdir).mkdir();
+		
+		System.out.println("----- survival : cox ------");
+		String []args = {"--tool", "survival", "--dataset", dataset, "-o", outdir, "--test", "cox", "--time-class", "time", "--censored-class", "censored", "--correction", "fdr"};
 		
 		try {
 			BabelomicsMain.main(args); 

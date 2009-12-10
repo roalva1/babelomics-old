@@ -9,6 +9,7 @@ import java.util.List;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
@@ -30,6 +31,7 @@ public class Correlation extends BabelomicsTool {
 	String className;
 	List<String> vars;
 	List<Double> doubleVars;
+	String correction;
 	
 	public Correlation() {
 	}
@@ -38,6 +40,7 @@ public class Correlation extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
 		options.addOption(OptionFactory.createOption("test", "the test, possible values: pearson, spearman, regression"));
 		options.addOption(OptionFactory.createOption("class", "class variable", false));
+		options.addOption(OptionFactory.createOption("correction", "Multiple-test correction: fdr, bh, by, bonferroni, hochberg, hold"));
 	}
 
 	@Override
@@ -49,6 +52,7 @@ public class Correlation extends BabelomicsTool {
 
 		test = commandLine.getOptionValue("test", null);
 		className = commandLine.getOptionValue("class", null);
+		correction = commandLine.getOptionValue("correction", null);
 
 		if ( ! "pearson".equalsIgnoreCase(test) && ! "spearman".equalsIgnoreCase(test) && ! "regression".equalsIgnoreCase(test) ) {
 			abort("unknowntest_execute_correlation", "unknown test (" + test + ")", "unknown test (" + test + ")", "unknown test (" + test + ")");
@@ -78,18 +82,21 @@ public class Correlation extends BabelomicsTool {
 		try {
 			CorrelationTest corrTest = new CorrelationTest(dataset.getDoubleMatrix(), doubleVars, test);
 			res = corrTest.compute();
+			
+			// apply multiple test correction according to input correction
+			DiffExpressionUtils.multipleTestCorrection(res, correction);			
 		} catch (Exception e) {
 			abort("exception_executecorrelation_correlation", "error running " + test + " test", e.toString(), StringUtils.getStackTrace(e));
 		}
 		
 		int[] columnOrder = ListUtils.order(vars);
-		int[] rowOrder = ListUtils.order(ListUtils.toList(res.getCorrelations()), true);
+		int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getCorrelations()), true);
 
 		// generating heatmap
 		//
 		updateJobStatus("60", "generating heatmap");
 		Canvas heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "correlation", res.getCorrelations(), "adj. p-value", res.getAdjPValues());
-		String heatmapFilename = getOutdir() + "/" + test + "_heatmap";
+		String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
 		try {
 			heatmap.save(heatmapFilename);
 		} catch (IOException e) {
@@ -103,10 +110,10 @@ public class Correlation extends BabelomicsTool {
 		dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
 		try {
-			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
-			dataFrame.addColumn("correlation", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getCorrelations()), rowOrder)));
-			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
-			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
+			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
+			dataFrame.addColumn("correlation", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getCorrelations()), rowOrder)));
+			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
+			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
 
 			File outFile = new File(getOutdir() + "/" + test + ".txt");
 			FeatureData featureData = new FeatureData(dataFrame);
@@ -122,7 +129,7 @@ public class Correlation extends BabelomicsTool {
 			printError("ioexception_executecorrelation_correlation", "error saving " + test + " results", e.toString(), e);
 		}
 
-		if ( new File(heatmapFilename + ".png").exists() ) {
+		if ( new File(heatmapFilename).exists() ) {
 			result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
 		}
 	}
@@ -139,12 +146,15 @@ public class Correlation extends BabelomicsTool {
 		try {
 			SimpleRegressionTest regression = new SimpleRegressionTest();
 			res = regression.compute(dataset.getDoubleMatrix(), doubleVars);
+			
+			// apply multiple test correction according to input correction
+			DiffExpressionUtils.multipleTestCorrection(res, correction);			
 		} catch (Exception e) {
 			abort("exception_executecorrelation_correlation", "error running " + test + " test", e.toString(), StringUtils.getStackTrace(e));
 		}
 		
 		int[] columnOrder = ListUtils.order(vars);
-		int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
+		int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
 
 		// generating heatmap
 		//
@@ -164,11 +174,11 @@ public class Correlation extends BabelomicsTool {
 		dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
 		try {
-			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
-			dataFrame.addColumn("slope", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getSlopes()), rowOrder)));
-			dataFrame.addColumn("intercept", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getIntercepts()), rowOrder)));
-			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
-			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
+			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
+			dataFrame.addColumn("slope", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getSlopes()), rowOrder)));
+			dataFrame.addColumn("intercept", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getIntercepts()), rowOrder)));
+			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
+			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
 
 			File outFile = new File(getOutdir() + "/" + test + ".txt");
 			FeatureData featureData = new FeatureData(dataFrame);
@@ -184,7 +194,7 @@ public class Correlation extends BabelomicsTool {
 			printError("ioexception_executecorrelation_correlation", "error saving " + test + " results", e.toString(), e);
 		}
 
-		if ( new File(heatmapFilename + ".png").exists() ) {
+		if ( new File(heatmapFilename).exists() ) {
 			result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
 		}		
 	}

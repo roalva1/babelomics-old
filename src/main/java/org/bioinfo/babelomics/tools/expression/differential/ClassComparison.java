@@ -16,12 +16,12 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.graphics.canvas.Canvas;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.math.result.AnovaTestResult;
 import org.bioinfo.math.result.LimmaTestResult;
 import org.bioinfo.math.result.TTestResult;
 import org.bioinfo.math.result.TestResultList;
-import org.bioinfo.math.stats.MultipleTestCorrection;
 import org.bioinfo.math.stats.inference.AnovaTest;
 import org.bioinfo.math.stats.inference.FoldChangeTest;
 import org.bioinfo.math.stats.inference.TTest;
@@ -35,6 +35,7 @@ public class ClassComparison extends BabelomicsTool {
 	private String test;
 	private String className;
 	private List<String> classValues;
+	private String correction;
 
 	public ClassComparison() {
 		initOptions();
@@ -45,6 +46,7 @@ public class ClassComparison extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("class-name", "class"));
 		options.addOption(OptionFactory.createOption("class-values", "value"));
 		options.addOption(OptionFactory.createOption("test", "test"));
+		options.addOption(OptionFactory.createOption("correction", "Multiple-test correction: fdr, bh, by, bonferroni, hochberg, hold"));
 		//options.addOption(OptionFactory.createOption("batch", "class class variable"));
 	}
 
@@ -58,6 +60,7 @@ public class ClassComparison extends BabelomicsTool {
 		test = commandLine.getOptionValue("test", null);
 		className = commandLine.getOptionValue("class-name", null);
 		classValues = (commandLine.hasOption("class-values") ? StringUtils.toList(commandLine.getOptionValue("class-values", null), ",") : null);
+		correction = commandLine.getOptionValue("correction", "fdr");
 
 		if ( classValues == null ) {
 			classValues = ListUtils.unique(dataset.getVariables().getByName(className).getValues());
@@ -116,19 +119,30 @@ public class ClassComparison extends BabelomicsTool {
 		try {
 			TTest tTest = new TTest();
 			TestResultList<TTestResult> res = tTest.tTest(sample1, sample2);
-			MultipleTestCorrection.BHCorrection(res);
-
+			
+			// apply multiple test correction according to input correction
+			DiffExpressionUtils.multipleTestCorrection(res, correction);
+			
+			// generating heatmap
+			//
+			updateJobStatus("60", "generating heatmap");
+			int[] columnOrder = ListUtils.order(dataset.getVariables().getByName(className).getValues());
+			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
+			Canvas heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());
+			String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
+			try {
+				heatmap.save(heatmapFilename);
+			} catch (IOException e) {
+				printError("ioexception_executet_classcomparison", "error generating heatmap", e.toString(), e);
+			}
+			
 			updateJobStatus("80", "saving results");
-
-			//		int[] columnOrder = ListUtils.order(dataset.getVariables().getByName(className).getValues());
-			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
-
 			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
 			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
-			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
-			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
-			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
+			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
+			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
+			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
 
 			FeatureData featureData = new FeatureData(dataFrame);
 
@@ -142,7 +156,11 @@ public class ClassComparison extends BabelomicsTool {
 			IOUtils.write(file, dataFrame.toString(true, true));
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("ttable", file.getName(), "T-test output table", TYPE.FILE, StringUtils.toList("TABLE", ","), new HashMap<String, String>(2), "T-test output files"));											
-			}						
+			}
+			
+			if ( new File(heatmapFilename).exists() ) {
+				result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			abort("exception_executet_classcomparison", "error running t-test", "error running t-test: " + e.getMessage(), "error running t-test: " + e.getMessage());
@@ -170,8 +188,8 @@ public class ClassComparison extends BabelomicsTool {
 			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
 			dataFrame.setRowNames(dataset.getFeatureNames());
 
-			dataFrame.addColumn("log", ListUtils.toStringList(logRes));
-			dataFrame.addColumn("diff", ListUtils.toStringList(diffRes));
+			dataFrame.addColumn("log", ArrayUtils.toStringList(logRes));
+			dataFrame.addColumn("diff", ArrayUtils.toStringList(diffRes));
 
 			FeatureData featureData = new FeatureData(dataFrame);
 
@@ -212,24 +230,36 @@ public class ClassComparison extends BabelomicsTool {
 					vars.add(values.get(i));
 				}
 			}
-			matrix = dataset.getSubMatrixByColumns(ArrayUtils.toIntegerArray(indices));
+			matrix = dataset.getSubMatrixByColumns(ListUtils.toArray(indices));
 		}
 
 		try {
 			AnovaTest anova = new AnovaTest(matrix, vars);			
 			TestResultList<AnovaTestResult> res = anova.compute();
 			
-			updateJobStatus("80", "saving results");
+			// apply multiple test correction according to input correction
+			DiffExpressionUtils.multipleTestCorrection(res, correction);
 
-			//			int[] columnOrder = ListUtils.order(vars);
-			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
+			// generating heatmap
+			//
+			updateJobStatus("60", "generating heatmap");
+			int[] columnOrder = ListUtils.order(dataset.getVariables().getByName(className).getValues());
+			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
+			Canvas heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());
+			String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
+			try {
+				heatmap.save(heatmapFilename);
+			} catch (IOException e) {
+				printError("ioexception_executeanova_classcomparison", "error generating heatmap", e.toString(), e);
+			}
 			
+			updateJobStatus("80", "saving results");			
 			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
 			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
-			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
-			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
-			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
+			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
+			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
+			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
 
 			FeatureData featureData = new FeatureData(dataFrame);
 
@@ -243,7 +273,11 @@ public class ClassComparison extends BabelomicsTool {
 			IOUtils.write(file, dataFrame.toString(true, true));
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("anovatable", file.getName(), "Anova output table", TYPE.FILE, StringUtils.toList("TABLE", ","), new HashMap<String, String>(2), "Anova output files"));											
-			}						
+			}
+			
+			if ( new File(heatmapFilename).exists() ) {
+				result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			abort("exception_executeanova_classcomparison", "error running anova", "error running anova: " + e.getMessage(), "error running anova: " + e.getMessage());
@@ -277,20 +311,31 @@ public class ClassComparison extends BabelomicsTool {
 
 		try {
 			TestResultList<LimmaTestResult> res = limma.compute();
-			MultipleTestCorrection.BHCorrection(res);
+			
+			// apply multiple test correction according to input correction
+			DiffExpressionUtils.multipleTestCorrection(res, correction);
+
+			// generating heatmap
+			//
+			updateJobStatus("60", "generating heatmap");
+			int[] columnOrder = ListUtils.order(dataset.getVariables().getByName(className).getValues());
+			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
+			Canvas heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());
+			String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
+			try {
+				heatmap.save(heatmapFilename);
+			} catch (IOException e) {
+				printError("ioexception_executelimma_classcomparison", "error generating heatmap", e.toString(), e);
+			}
 
 			updateJobStatus("80", "saving results");
-
-			//int[] columnOrder = ListUtils.order(dataset.getVariables().getByName(className).getValues());
-			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
-
 			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
 			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
-			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
-			dataFrame.addColumn("lod", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getLods()), rowOrder)));
-			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
-			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
+			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
+			dataFrame.addColumn("lod", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getLods()), rowOrder)));
+			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
+			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
 
 			FeatureData featureData = new FeatureData(dataFrame);
 
@@ -304,10 +349,14 @@ public class ClassComparison extends BabelomicsTool {
 			IOUtils.write(file, dataFrame.toString(true, true));
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("limmatable", file.getName(), "Limma output table", TYPE.FILE, StringUtils.toList("TABLE", ","), new HashMap<String, String>(2), "Lima output files"));											
-			}			
+			}		
+			
+			if ( new File(heatmapFilename).exists() ) {
+				result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			abort("exception_executelimma_classcomparison", "error running limma", "error running limma: " + e.toString(), "error running limma: " + e.toString());
 		}		
-	}
+	}	
 }

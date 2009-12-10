@@ -12,6 +12,9 @@ import org.bioinfo.graphics.canvas.Canvas;
 import org.bioinfo.graphics.canvas.feature.ScoreFeature;
 import org.bioinfo.graphics.canvas.panel.GridPanel;
 import org.bioinfo.graphics.canvas.track.GridTrack;
+import org.bioinfo.math.result.TestResult;
+import org.bioinfo.math.result.TestResultList;
+import org.bioinfo.math.stats.MultipleTestCorrection;
 
 public class DiffExpressionUtils {
 
@@ -104,5 +107,26 @@ public class DiffExpressionUtils {
 		
 		return canvas;
 	}
+	
+	/**
+	 * 
+	 * @param res
+	 */
+	public static void multipleTestCorrection(TestResultList<? extends TestResult> res, String correction) {
+		if ( "bonferroni".equalsIgnoreCase(correction) ) {
+			MultipleTestCorrection.BonferroniCorrection(res);	
+		} else if ( "bh".equalsIgnoreCase(correction) ) {
+			MultipleTestCorrection.BHCorrection(res);	
+		} else if ( "by".equalsIgnoreCase(correction) ) {
+			MultipleTestCorrection.BYCorrection(res);	
+		} else if ( "hochberg".equalsIgnoreCase(correction) ) {
+			MultipleTestCorrection.HochbergCorrection(res);	
+		} else if ( "holm".equalsIgnoreCase(correction) ) {
+			MultipleTestCorrection.HolmCorrection(res);	
+		} else {
+			MultipleTestCorrection.FDRCorrection(res);	
+		}
+	}
+
 
 }
