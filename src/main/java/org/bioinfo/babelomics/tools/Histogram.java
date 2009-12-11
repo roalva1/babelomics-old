@@ -23,6 +23,7 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.data.dataset.FeatureVariable;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
@@ -95,22 +96,30 @@ public class Histogram extends BabelomicsTool {
 		canvas.setBackGroundColor(Color.WHITE);
 		
 		
+		
 		XYPanel xyPanel;
 		XYTrack xtTrack;
 		DataFrame dataFrame = rankedList.getDataFrame();
-//		for (int i = 0;i < xyBarDataset.getSeriesCount(); i++){
-//			 
-//			//ScoreFeature sf = xyBarDataset.getYValue(i, 0);
+		FeatureData fd= new FeatureData(dataFrame);
+		
+		for (int i = 0;i < xyBarDataset.getSeriesCount(); i++){
+		//	ScoreFeature sf = rankedList.getVariables().get(i);
+		//	xtTrack.add(sf);
+			//ScoreFeature sf = xyBarDataset.getYValue(i, 0);
 //			ScoreFeature sf;
 //			sf.setScore(xyBarDataset.getYValue(i, 0));
 //			sf.setName(rankedList.getDataFrame());
 //			
 //			xtTrack.add(sf);
-//			
-//		}
-		FeatureData fd= new FeatureData(dataFrame);
+			
+		}
 		
-//		xtTrack.add(scoreFeature);
+		
+		
+		
+//		xyPanel.addXYTrack(xtTrack);
+//		canvas.addPanel(xyPanel);
+		//		xtTrack.add(scoreFeature);
 //		xyPanel.addXYTrack(fd);
 		
 		
