@@ -60,12 +60,28 @@ public class Histogram extends BabelomicsTool {
 		}
 
 		// ranked list
-		FeatureData rankedList = new FeatureData(new File(commandLine.getOptionValue("ranked-list")), true);
+		FeatureData rankedList = null;
+		try {
+			rankedList = new FeatureData(new File(commandLine.getOptionValue("ranked-list")), true);
+		} catch (IOException e3) {
+			// TODO Auto-generated catch block
+			e3.printStackTrace();
+		}
 		
 		// save id lists				
-		IOUtils.write(outdir + "/ranked_list.txt", rankedList.toString());
+		try {
+			IOUtils.write(outdir + "/ranked_list.txt", rankedList.toString());
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 		result.addOutputItem(new Item("ranked_list","ranked_list.txt","Ranked list",Item.TYPE.FILE,Arrays.asList("RANKED_LIST","CLEAN"),new HashMap<String,String>(),"Input data"));
-		jobStatus.addStatusMessage("" + (progress*100/finalProgress), "reading ok");
+		try {
+			jobStatus.addStatusMessage("" + (progress*100/finalProgress), "reading ok");
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		if ( rankedList == null ) {
 			abort("rankedisnull_execute_historgam", "ranked is null", "ranked is null after reading file '", "ranked is null after reading file ");
@@ -100,7 +116,12 @@ public class Histogram extends BabelomicsTool {
 		
 		progress++;
 
-		jobStatus.addStatusMessage("" + (progress*100/finalProgress), "making graph");
+		try {
+			jobStatus.addStatusMessage("" + (progress*100/finalProgress), "making graph");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		// apply logarithm
 		//
