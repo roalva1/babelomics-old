@@ -133,6 +133,10 @@ public class BabelomicsFactory {
 		if(toolName.equalsIgnoreCase("blast2go")) {
 			return new Blast2Go();
 		}
+		
+		if(toolName.equalsIgnoreCase("histogram")) {
+			return new Histogram();
+		}
 
 		return babelomicsTool;
 	}
