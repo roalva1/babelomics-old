@@ -12,6 +12,9 @@ import org.bioinfo.graphics.canvas.Canvas;
 import org.bioinfo.graphics.canvas.feature.ScoreFeature;
 import org.bioinfo.graphics.canvas.panel.GridPanel;
 import org.bioinfo.graphics.canvas.track.GridTrack;
+import org.bioinfo.math.result.TestResult;
+import org.bioinfo.math.result.TestResultList;
+import org.bioinfo.math.stats.MultipleTestCorrection;
 
 public class DiffExpressionUtils {
 
@@ -34,7 +37,7 @@ public class DiffExpressionUtils {
 		canvas.setBorderColor(Color.BLACK);
 		canvas.setBackGroundColor(Color.WHITE);
 
-		GridPanel gridPanel = new GridPanel("", (columnDimension * cellSide) + rowLabelsWidth + infoWidth + canvas.getBorderPadding() + canvas.getSpaceSeparator(), ((rowDimension+1) * cellSide) + colLabelsWidth + canvas.getBorderPadding() + canvas.getSpaceSeparator(), xHeatMap, yHeatMap);
+		GridPanel gridPanel = new GridPanel("", xHeatMap, yHeatMap, (columnDimension * cellSide) + rowLabelsWidth + infoWidth + canvas.getBorderPadding() + canvas.getSpaceSeparator(), ((rowDimension+1) * cellSide) + colLabelsWidth + canvas.getBorderPadding() + canvas.getSpaceSeparator());
 		GridTrack gridTrack = new GridTrack(rowDimension, columnDimension, cellSide, cellSide);
 		gridTrack.setRowLabels(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 		List<String> columnLabels = new ArrayList<String>(dataset.getSampleNames().size());
@@ -104,5 +107,26 @@ public class DiffExpressionUtils {
 		
 		return canvas;
 	}
+	
+	/**
+	 * 
+	 * @param res
+	 */
+	public static void multipleTestCorrection(TestResultList<? extends TestResult> res, String correction) {
+		if ( "bonferroni".equalsIgnoreCase(correction) ) {
+			MultipleTestCorrection.BonferroniCorrection(res);	
+		} else if ( "bh".equalsIgnoreCase(correction) ) {
+			MultipleTestCorrection.BHCorrection(res);	
+		} else if ( "by".equalsIgnoreCase(correction) ) {
+			MultipleTestCorrection.BYCorrection(res);	
+		} else if ( "hochberg".equalsIgnoreCase(correction) ) {
+			MultipleTestCorrection.HochbergCorrection(res);	
+		} else if ( "holm".equalsIgnoreCase(correction) ) {
+			MultipleTestCorrection.HolmCorrection(res);	
+		} else {
+			MultipleTestCorrection.FDRCorrection(res);	
+		}
+	}
+
 
 }

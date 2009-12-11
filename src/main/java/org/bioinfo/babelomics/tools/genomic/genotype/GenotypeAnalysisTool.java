@@ -14,6 +14,7 @@ public class GenotypeAnalysisTool extends BabelomicsTool {
 	
 	protected String pedFilePath;
 	protected String mapFilePath;
+	protected String plinkPath;
 	
 	public GenotypeAnalysisTool() {
 		genotypeAnalysis = new GenotypeAnalysis();
@@ -24,19 +25,21 @@ public class GenotypeAnalysisTool extends BabelomicsTool {
 		// the typical ped and map files
 		options.addOption(OptionFactory.createOption("ped-file", "Just a flag", false));
 		options.addOption(OptionFactory.createOption("map-file", "Just a flag", false));
-
-		options.addOption(OptionFactory.createOption("tdt", "Just a flag", false, false));
+		options.addOption(OptionFactory.createOption("plink", "Just a flag", false));
 		
+		options.addOption(OptionFactory.createOption("tdt", "Just a flag", false, false));
 	}
 
 	protected void parseGenotypeCommonOptions() {
 		pedFilePath = commandLine.getOptionValue("ped-file");
 		mapFilePath = commandLine.getOptionValue("map-file");
-		
+		plinkPath = commandLine.getOptionValue("plink");
 	}
 	
 	@Override
 	protected void execute() {
+		
+		logger.debug("executing the test");
 		File pedFile = null;
 		File mapFile = null;
 		GenotypeAnalysis genotypeAnalysis;

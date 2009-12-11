@@ -4,14 +4,19 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.cli.OptionGroup;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.chart.XYLineChart;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.mlpr.classifier.GenericClassifier;
 import org.bioinfo.mlpr.classifier.Knn;
 import org.bioinfo.mlpr.classifier.RForest;
 import org.bioinfo.mlpr.classifier.Svm;
@@ -28,6 +33,8 @@ public class Predictor extends BabelomicsTool {
 
 	private double progressStep;
 	private double progressCurrent = 0;
+	private StringBuilder combinedTable;
+	private int numberOfBestSelectedClassifications = 5;
 	
 	public Predictor() {
 		initOptions();
@@ -36,22 +43,18 @@ public class Predictor extends BabelomicsTool {
 	@Override
 	public void initOptions() {
 		// data
-		//
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
 		options.addOption(OptionFactory.createOption("dataset-arff", "dataset is in arff format",false,false));
 		
 		// class attribute
-		//
-		options.addOption(OptionFactory.createOption("class", "corresponding class attribute in the dataset"));
+		options.addOption(OptionFactory.createOption("class", "corresponding class attribute in the dataset",false,true));
 		options.addOption(OptionFactory.createOption("class-file", "class variable file",false));
 		
 		// sample and feature filters
-		//
 		options.addOption(OptionFactory.createOption("sample-filter", "Sample filter", false));
 		options.addOption(OptionFactory.createOption("feature-filter", "Feature filter", false));
 
 		// classifiers algorithms
-		//
 		OptionGroup classifiers = new OptionGroup();
 		classifiers.setRequired(false);
 
@@ -84,7 +87,6 @@ public class Predictor extends BabelomicsTool {
 		options.addOptionGroup(classifiers);
 
 		// feature selection (gene selection), and other options
-		//
 		options.addOption(OptionFactory.createOption("gene-selection", "the gene selection, valid values: f-ratio, wilcoxon", false));
 		//options.addOption(OptionFactory.createOption("trainning-size", "number of genes to use in trainning separated by commas, default:2,5,10,20,35,50", false));		
 
@@ -92,53 +94,49 @@ public class Predictor extends BabelomicsTool {
 
 	@Override
 	public void execute() {
-		initProgress();
+		
 		logger.info("Welcome to prophet...");
-
+		
+		// init status
+		initStatus();
+		
 		try {
 
 			Instances instances = null;
 			File datasetFile = new File(commandLine.getOptionValue("dataset"));
-			String className = commandLine.getOptionValue("class");
 
 			// data file checking
-			//
 			if(datasetFile.exists()) {
 
-				try {
-					jobStatus.addStatusMessage(StringUtils.decimalFormat(progressCurrent), "reading dataset");
-					progressCurrent += progressStep;
-				} catch (FileNotFoundException e) {
-					abort("filenotfoundexception_execute_predictor", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
-				}
-
+				// update status
+				updateStatus(progressCurrent,"Reading dataset");
+				
 				// data set loading 
 				if(commandLine.hasOption("dataset-arff")){
-					instances = InstancesBuilder.getInstancesFromArrfFile(datasetFile,"sample_name");
+					instances = InstancesBuilder.getInstancesFromArrfFile(datasetFile,"sample_name");					
+					instances.setClassIndex(instances.numAttributes()-1);					
 				} else {
+					String className = commandLine.getOptionValue("class");
 					Dataset dataset = new Dataset(datasetFile, true);
 					List<List<String>> data = new ArrayList<List<String>>(dataset.getColumnDimension());
 					for(int i = 0 ; i<dataset.getColumnDimension() ; i++) {
-						//						System.out.println("row -> " + Arrays.toString(dataset.getDoubleMatrix().getRow(i)));
-						//						System.out.println("list -> " + ListUtils.toString(ListUtils.toStringList(dataset.getDoubleMatrix().getRow(i)), "\t"));
-						data.add(ListUtils.toStringList(dataset.getDoubleMatrix().getColumn(i)));
+						data.add(ArrayUtils.toStringList(dataset.getDoubleMatrix().getColumn(i)));
 					}
 					System.out.println("0,0 = " + data.get(0).get(0));
 					System.out.println("variables value = " + ListUtils.toString(dataset.getVariables().getByName(className).getValues()));
 
 					instances = InstancesBuilder.getInstancesFromDataList(data, dataset.getFeatureNames(), dataset.getSampleNames(), dataset.getVariables().getByName(className).getValues());
+					Attribute classAttr = instances.attribute(className);
+					instances.setClassIndex(classAttr.index());
+					
 				}				
 			} else {
 				abort("execute_predictor", "dataset " + datasetFile.getName() + "not found", "dataset " + datasetFile.getName() + "not found", "dataset " + datasetFile.getName() + "not found");
 			}
 
-			// class definition 
-			//
-			Attribute classAttr = instances.attribute(className);
-			instances.setClassIndex(classAttr.index());					
-
+			combinedTable = new StringBuilder(); 
+			
 			// classifiers
-			//
 			if(commandLine.hasOption("svm")) executeSvm(instances);
 			if(commandLine.hasOption("knn")) executeKnn(instances);
 			if(commandLine.hasOption("random-forest")) executeRandomForest(instances);
@@ -146,56 +144,106 @@ public class Predictor extends BabelomicsTool {
 			if(commandLine.hasOption("som")) executeSom(instances);
 			if(commandLine.hasOption("pam")) executePam(instances);
 
+			
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			e.printStackTrace(logger.getLogWriter());
 		}
-
+		
+		// classification table
+		try {
+			IOUtils.write(new File(outdir + "/combined_table.txt"), GenericClassifier.getResultsTableHeader() + "\n" +  combinedTable.toString());	
+			result.getOutputItems().add(0, new Item("combined_table", "combined_table.txt", " Combined results (best " + numberOfBestSelectedClassifications + " per classifier)", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR_COMBINED_TABLE"),new HashMap<String,String>(),"Summary",""));
+		} catch (IOException e) {
+			printError("ioexception_predictor", "Error saving combined table", "Error saving combined table");
+		}
+		
 	}
 
 
 	private void executeKnn(Instances instances) {
-		try {
-			jobStatus.addStatusMessage(StringUtils.decimalFormat(progressCurrent), "executing KNN classifier");
-			progressCurrent += progressStep;
-		} catch (FileNotFoundException e) {
-			abort("filenotfoundexception_executeknn_predictor", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
-		}
 		
+		// update status
+		updateStatus(progressCurrent,"executing KNN classifier");
+				
 		// init classifier
 		Knn knn = new Knn();
-		// init params
-		if(commandLine.hasOption("knn-tune")) knn.setTuneParameters(true);
-		else {
+		
+		// params
+		if(commandLine.hasOption("knn-tune")) {
+			knn.setTuneParameters(true);
+		} else {
 			if(commandLine.hasOption("knn-neighbors")) knn.setKnn(Integer.parseInt(commandLine.getOptionValue("knn-neighbors")));						
 		}
+		
 		// train
 		knn.train(instances);
-		// results
+		
+		// output results
 		int best = knn.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
-		EvaluationResult bestRMSE = knn.getEvaluationResultList().get(best);
+		EvaluationResult bestRMSE = knn.getEvaluationResultList().get(best);		
 		logger.println("Best RMSE classification");
 		logger.println("Knn: " + knn.getKnnValues()[best] + " neighbors");
 		logger.println(bestRMSE.toString());
-
-		try {
-			IOUtils.write(new File(outdir + "/knn.txt"), "Best RMSE classification\n\nKnn: " + knn.getKnnValues()[best] + " neighbors\n\n" + bestRMSE.toString());
-			result.addOutputItem(new Item("knn_result_file", "knn.txt", "KNN result file", TYPE.FILE));
-		} catch (IOException e) {
-			printError("ioexception_executeknn_predictor", "Error saving KNN results", "Error saving KNN results");
-		}
+		
+		// save results
+		saveClassifierResults(knn);
 		
 		
-		// ??????
 	}
-
-	private void executeSvm(Instances instances) {
+	
+	
+	private void saveClassifierResults(GenericClassifier classifier){
+		
+		int best = classifier.getEvaluationResultList().getBestAreaUnderRocIndex();
+		String name = classifier.getClassifierName();
+		
+		
 		try {
-			jobStatus.addStatusMessage(StringUtils.decimalFormat(progressCurrent), "executing SVM classifier");
-			progressCurrent += progressStep;
-		} catch (FileNotFoundException e) {
-			abort("filenotfoundexception_executesvm_predictor", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
+			IOUtils.write(new File(outdir + "/" + name + ".txt"), "Best AUC classification\n\nParameters: " + classifier.getParamList().get(best) + "\n\n" + classifier.getEvaluationResultList().getBestAreaUnderRoc().toString());			
+			result.addOutputItem(new Item(name + "_result_file", name + ".txt", name + " result file", TYPE.FILE,name + " results",""));
+		} catch (IOException e) {
+			printError("ioexception_execute_" + name + "_predictor", "Error saving " + name + " results", "Error saving " + name + " results");
 		}
+		
+		// classification table
+		try {
+			IOUtils.write(new File(outdir + "/" + name + "_table.txt"), classifier.getResultsTable(true));			
+			result.addOutputItem(new Item(name + "_table", name + "_table.txt", name + " classifications", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR_" + name.toUpperCase() + "_TABLE"),new HashMap<String,String>(),name + " results",""));
+		} catch (IOException e) {
+			printError("ioexception_" + name + "_predictor", "Error saving " + name + " classifications table", "Error saving " + name + " classifications table");
+		}
+				
+		// Comparative plot
+		try {
+			XYLineChart comparativeplot = classifier.getComparativeMetricsPlot();
+			comparativeplot.save(outdir + "/" + name + "_comparative_plot.png",500,350,"png");
+			result.addOutputItem(new Item(name + "_comparative_plot", name + "_comparative_plot.png", name + " comparative plot", TYPE.IMAGE, Arrays.asList(""),new HashMap<String,String>(),name + " results",""));
+		} catch (IOException e) {
+			printError("ioexception_" + name + "_predictor", "Error saving " + name + " comparative plot", "Error saving " + name + " comparative plot");
+			e.printStackTrace();
+		}
+		
+//		// Sample classification rate plot
+//		try {
+//			Canvas sampleClassficationPlot = classifier.getSampleClassificationRatePlot();			 
+//			sampleClassficationPlot.save(outdir + "/" + name + "_classification_rate_plot.png");
+//			result.addOutputItem(new Item(name + "_classification_rate_plot", name + "_classification_rate_plot.png", name + " classification rate plot", TYPE.IMAGE, Arrays.asList(""),new HashMap<String,String>(),name + " results",""));
+//		} catch (IOException e) {			
+//			printError("ioexception_" + name + "_predictor", "Error saving " + name + " classification rate plot", "Error saving " + name + " classification rate plot");
+//			e.printStackTrace();
+//		} catch (InvalidColumnIndexException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+		combinedTable.append(classifier.getSortedResultsTable(numberOfBestSelectedClassifications));
+	}
+	
+	private void executeSvm(Instances instances) {
+		
+		// update status
+		updateStatus(progressCurrent,"executing SVM classifier");
 		
 		// init classifier
 		Svm svm = new Svm();
@@ -220,15 +268,15 @@ public class Predictor extends BabelomicsTool {
 			printError("ioexception_executesvm_predictor", "Error saving SVM results", "Error saving SVM results");
 		}
 		// ??????
+		
+		// save results
+		saveClassifierResults(svm);
 	}
 
 	private void executeRandomForest(Instances instances) {
-		try {
-			jobStatus.addStatusMessage(StringUtils.decimalFormat(progressCurrent), "executing Random Forest classifier");
-			progressCurrent += progressStep;
-		} catch (FileNotFoundException e) {
-			abort("filenotfoundexception_executerandomforest_predictor", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
-		}
+		
+		// update status
+		updateStatus(progressCurrent,"executing Random Forest classifier");
 
 		// init classifier
 		RForest randomForest = new RForest();
@@ -246,13 +294,8 @@ public class Predictor extends BabelomicsTool {
 		logger.println("Number of trees: " + randomForest.getNumTreesArray()[best]);
 		logger.println(bestRMSE.toString());
 
-		try {
-			IOUtils.write(new File(outdir + "/random_forest.txt"), "Best RMSE classification\n\nNumber of trees: " + randomForest.getNumTreesArray()[best] + "\n\n" + bestRMSE.toString());
-			result.addOutputItem(new Item("random_forest_result_file", "random_forest.txt", "Random Forest result file", TYPE.FILE));
-		} catch (IOException e) {
-			printError("ioexception_executerandomforest_predictor", "Error saving Random Forest results", "Error saving Random Forest results");
-		}
-		// ??????
+		saveClassifierResults(randomForest);
+		
 	}
 
 	private void executeDlda(Instances instances) {		
@@ -267,7 +310,14 @@ public class Predictor extends BabelomicsTool {
 		printError("executeDlda_predictor", "PAM is not implemented yet", "DLDA is not implemented yet");
 	}	
 	
-	private void initProgress() {
+	
+	/*
+	 * 
+	 * STATUS MANAGEMENT (TO REMOVE!!!!!!!!)
+	 * 
+	 */
+	
+	private void initStatus() {
 		int steps = 2; // it includes reading dataset and done
 		
 		if(commandLine.hasOption("svm")) steps++;
@@ -279,5 +329,14 @@ public class Predictor extends BabelomicsTool {
 		
 		progressStep = 100.0 / steps;
 		progressCurrent = progressStep;
+	}
+	
+	private void updateStatus(double progressCurrent, String message){
+		try {
+			jobStatus.addStatusMessage(StringUtils.decimalFormat(progressCurrent),message);
+			progressCurrent += progressStep;
+		} catch (FileNotFoundException e) {
+			abort("filenotfoundexception_executeknn_predictor", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
+		}
 	}
 }

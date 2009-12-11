@@ -23,34 +23,23 @@ public class PreprocessingTest {
 	}
 	
 	@Test
-	public void Test0() {
-		System.out.println("----------------> " );
-	}
-
-//	public void Test1() {
-//		System.out.println("-----     ------");
-//		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10"};
-//		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--impute-missing", "zero"};
-//		//String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--merge-replicates", "mean"};
-//		String []args = {"-dataset", "/mnt/commons/test/biodata/example/dataset_example1.txt", "-o", "/tmp", "--logarithm-base", "10", "--impute-missing", "zero", "--filter-missing", "90", "--merge-replicates", "mean"};
-//		
-//		try {
-//			Preprocessing prep = new Preprocessing(args);
-//			prep.execute();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			//System.out.println(e.toString());
-//		}
-//	}
-	@Test
 	public void notest(){
 		System.out.println("----------------> ");
 	}
 	
+<<<<<<< HEAD:src/test/java/org/bioinfo/babelomics/tools/preprocessing/PreprocessingTest.java
 	public void Test3() {
 		String dataset = "/mnt/commons/test/biodata/example/dataset1.txt";
 		String outdir = "/tmp/preprocessing";
 		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir,"--merge-replicates", "mean", "--logarithm-base", "2", "--impute-missing", "zero", "--filter-missing", "90", "--report", "pdf"};
+=======
+	@Test
+	public void Test() {
+		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
+		String outdir = "/tmp/PreprocessingTest";
+		new File(outdir).mkdir();
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir,"--merge-replicates", "mean", "--logarithm-base", "2", "--impute-missing", "zero", "--filter-missing", "90"};
+>>>>>>> a78add3d31a7884921cb78eab15152ae82b8b5b8:src/test/java/org/bioinfo/babelomics/tools/preprocessing/PreprocessingTest.java
 
 		System.out.println("----------------> " + Arrays.toString(args));
 		
@@ -65,9 +54,11 @@ public class PreprocessingTest {
 		}
 	}	
 
-	public void Test4() {
-		String dataset = "/mnt/commons/test/biodata/example/dataset1.txt";
-		String outdir = "/tmp/preprocessing";
+	@Test
+	public void Test1() {
+		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
+		String outdir = "/tmp/PreprocessingTest1";
+		new File(outdir).mkdir();
 		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--impute-missing", "zero"};
 
 		System.out.println("----------------> " + Arrays.toString(args));
@@ -84,11 +75,13 @@ public class PreprocessingTest {
 	}	
 
 
-	public void Test5() {
-		String dataset = "/mnt/commons/test/biodata/example/dataset1.txt";
-		String outdir = "/tmp/preprocessing";
-		String filename = "/mnt/commons/test/biodata/example/known.txt";
-		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--gene-list-filter", filename};
+	@Test
+	public void Test2() {
+		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
+		String outdir = "/tmp/PreprocessingTest2";
+		new File(outdir).mkdir();
+		String filename = "/mnt/commons/test/biodata/example/known_genes.txt";
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--gene-file-filter", filename};
 
 		System.out.println("----------------> " + Arrays.toString(args));
 		
@@ -103,9 +96,11 @@ public class PreprocessingTest {
 		}
 	}	
 
-	public void Test6() {
-		String dataset = "/mnt/commons/test/biodata/example/dataset1.txt";
-		String outdir = "/tmp/preprocessing";
+	@Test
+	public void Test3() {
+		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
+		String outdir = "/tmp/PreprocessingTest3";
+		new File(outdir).mkdir();
 		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--impute-missing", "knn", "--kvalue", "3"};
 
 		System.out.println("----------------> " + Arrays.toString(args));

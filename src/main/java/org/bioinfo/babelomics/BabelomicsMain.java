@@ -72,7 +72,7 @@ public class BabelomicsMain {
 		System.out.println("Usage: ./babelomics.sh --tool <arg> --outdir <arg> [--species <arg>] [--log-level <arg>] [--log-file <arg>] [--report <arg>] ");
 		System.out.println("\t--tool <arg>			The tool to execute: preprocessing, differential-expression, predictor, clustering, fatigo");
 		System.out.println("\t--outdir <arg>		");
-		System.out.println("\t--species <arg>		The species: hsa, mmu, rno");
+		//System.out.println("\t--species <arg>		The species: hsa, mmu, rno");
 		System.out.println("\t--log-level <arg>		Levels: DEBUG: 1, INFO: 2, WARNING: 3, ERROR: 4, FATAL: 5");
 		System.out.println("\t--log-file <arg>		The name of the log file, default: result.log");
 		System.out.println("\t--report <arg>		The possible values are: pdf, html or txt");

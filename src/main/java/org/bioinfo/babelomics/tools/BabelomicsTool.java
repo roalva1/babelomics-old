@@ -89,6 +89,7 @@ public abstract class BabelomicsTool extends GenericBioTool {
 		}
 		return null;
 	}
+	
 
 	public void updateJobStatus(String progress, String message) {
 		logger.debug(message + "...\n");

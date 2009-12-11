@@ -31,7 +31,7 @@ public class ClusteringTest {
 	public void Test1() {
 //		String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
 		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
-		String outdir = "/tmp/upgma";
+		String outdir = "/tmp/";
 		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "upgma", "--distance", "euclidean"};
 
 		System.out.println("UPGMA ----------------> " + Arrays.toString(args));
@@ -48,11 +48,10 @@ public class ClusteringTest {
 		}
 	}	
 
-	@Test
 	public void Test2() {
 //		String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
 		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
-		String outdir = "/tmp/sota";
+		String outdir = "/tmp/";
 		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "sota", "--distance", "euclidean"};
 
 		System.out.println("SOTA ----------------> " + Arrays.toString(args));
