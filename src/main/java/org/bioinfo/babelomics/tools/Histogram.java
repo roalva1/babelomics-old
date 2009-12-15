@@ -1,7 +1,5 @@
 package org.bioinfo.babelomics.tools;
 
-import java.awt.Color;
-import java.awt.Panel;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,47 +8,58 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.cli.ParseException;
-import org.bioinfo.babelomics.methods.functional.FatiScan;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
-import org.bioinfo.collections.matrix.DataFrame;
-import org.bioinfo.commons.exec.Command;
-import org.bioinfo.commons.exec.SingleProcess;
-import org.bioinfo.commons.io.utils.FileUtils;
-import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.utils.ArrayUtils;
-import org.bioinfo.commons.utils.ListUtils;
+import org.bioinfo.chart.HistogramChart;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
-import org.bioinfo.data.dataset.FeatureData;
-import org.bioinfo.data.dataset.FeatureVariable;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
-import org.bioinfo.graphics.canvas.Canvas;
-import org.bioinfo.graphics.canvas.feature.AnnotationFeature;
-import org.bioinfo.graphics.canvas.feature.ScoreFeature;
-import org.bioinfo.graphics.canvas.panel.AnnotationPanel;
-import org.bioinfo.graphics.canvas.panel.XYPanel;
-import org.bioinfo.graphics.canvas.track.AnnotationTrack;
-import org.bioinfo.graphics.canvas.track.XYTrack;
-import org.jfree.chart.renderer.xy.XYBarRenderer;
-import org.jfree.data.xy.XYBarDataset;
-import org.jfree.data.xy.XYDataset;
-
+import org.jfree.chart.ChartUtilities;
 public class Histogram extends BabelomicsTool {
-
+	Dataset dataset;
+	String test;
+	String className;
+	List<String> values;
+	List<Double> doubleVars;
+	String correction;
+	
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("ranked-list", "the feature data containig the ranked list"));
+		options.addOption(OptionFactory.createOption("datalist", "the feature data containig the ranked list"));		
+		options.addOption(OptionFactory.createOption("column", "",false));
+		options.addOption(OptionFactory.createOption("class", "",false,true));
+		options.addOption(OptionFactory.createOption("width", "",false,true));
+		options.addOption(OptionFactory.createOption("height", "",false,true));
 	}
 
 	
-		
 	@Override
 	protected void execute() {
-		Dataset dataset = null;
+		dataset = null;
+		className = commandLine.getOptionValue("class", null);
+		HistogramChart hc = new HistogramChart("Histogram chart", "label", "values");
+		try {
+			if (className!=null){
+				dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
+				values = dataset.getVariables().getByName(className).getLabels();
+				for (String str: values){
+					int[] colIndexByVariableValue = dataset.getColumnIndexesByVariableValue(className, str);
+					doubleVars = new ArrayList<Double>(colIndexByVariableValue.length);
+					DoubleMatrix matrixByVal =dataset.getSubMatrixByColumns(colIndexByVariableValue);
+					addSeries(matrixByVal, hc, str);
+				}
+			
+			}
+			else{
+				dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
+				addSeries(dataset.getDoubleMatrix(),hc,"PUT HERE THE COLUMN_NAME/NUMBER");
+			}
+			
+		} catch (IOException e4) {
+			// TODO Auto-generated catch block
+			e4.printStackTrace();
+		}
 		int progress = 1;
 		int finalProgress = 3;
 		
@@ -60,82 +69,45 @@ public class Histogram extends BabelomicsTool {
 			abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
 
-		// ranked list
-		FeatureData rankedList = null;
-		try {
-			rankedList = new FeatureData(new File(commandLine.getOptionValue("ranked-list")), true);
-		} catch (IOException e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
-		}
-		
-		// save id lists				
-		try {
-			IOUtils.write(outdir + "/ranked_list.txt", rankedList.toString());
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-		result.addOutputItem(new Item("ranked_list","ranked_list.txt","Ranked list",Item.TYPE.FILE,Arrays.asList("RANKED_LIST","CLEAN"),new HashMap<String,String>(),"Input data"));
-		try {
-			jobStatus.addStatusMessage("" + (progress*100/finalProgress), "reading ok");
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		if ( rankedList == null ) {
-			abort("rankedisnull_execute_historgam", "ranked is null", "ranked is null after reading file '", "ranked is null after reading file ");
-		}
-		
-		double barWidth = 15;
-		XYBarDataset xyBarDataset = new XYBarDataset((XYDataset) rankedList , barWidth);
-		Canvas canvas = new Canvas("Histrogram");
-		canvas.setBorderWidth(1);
-		canvas.setBorderColor(Color.BLACK);
-		canvas.setBackGroundColor(Color.WHITE);
+		progress ++;
+		updateJobStatus(""+progress,"reading ok");
 		
 		
+		// Generate histogram
+		String imgFilename = this.getOutdir() + "/histogram.png";
+		//int columnDimension = dataset.getColumnDimension();		
 		
-		XYPanel xyPanel;
-		XYTrack xtTrack;
-		DataFrame dataFrame = rankedList.getDataFrame();
-		FeatureData fd= new FeatureData(dataFrame);
 		
-		for (int i = 0;i < xyBarDataset.getSeriesCount(); i++){
-		//	ScoreFeature sf = rankedList.getVariables().get(i);
-		//	xtTrack.add(sf);
-			//ScoreFeature sf = xyBarDataset.getYValue(i, 0);
-//			ScoreFeature sf;
-//			sf.setScore(xyBarDataset.getYValue(i, 0));
-//			sf.setName(rankedList.getDataFrame());
-//			
-//			xtTrack.add(sf);
+//		if (className!=null){
+//			hc.addSeries(dataset.getDoubleMatrix().getColumn(0),"PUT HERE THE COLUMN_NAME/NUMBER");
+//		
+//		}
+		
+//		else{
+//			hc.addSeries(dataset.getDoubleMatrix().getColumn(0),"PUT HERE THE COLUMN_NAME/NUMBER");
+//		}
 			
-		}
-		
-		
-		
-		
-//		xyPanel.addXYTrack(xtTrack);
-//		canvas.addPanel(xyPanel);
-		//		xtTrack.add(scoreFeature);
-//		xyPanel.addXYTrack(fd);
-		
+		// Save histogram
 		
 		progress++;
+		updateJobStatus(""+(progress*100/finalProgress),"saving graph");
 
 		try {
-			jobStatus.addStatusMessage("" + (progress*100/finalProgress), "making graph");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ChartUtilities.saveChartAsPNG(new File(imgFilename), hc, 700, 500);
+			
+			result.addOutputItem(new Item("histogram_image","histogram.png","histogram image (png format)",TYPE.IMAGE, Arrays.asList("IMAGE","HISTOGRAM_IMAGE"),new HashMap<String,String>(),"histogram image"));
+			//result.addOutputItem(item)
+		} catch (IOException e) {
+			e.printStackTrace();			
 		}
 		
-		// apply logarithm
-		//
-//		logger.debug("executing logarithm base " + logBase + "...\n");
-//		logger.debug("end of executing logarithm base " + logBase + "\n");
-			progress++;
+		
 	}
+
+
+
+	private void addSeries(DoubleMatrix matrixByVal, HistogramChart hc, String str) {
+		hc.addSeries(matrixByVal.getColumn(0),str);
+	}
+	
 }
