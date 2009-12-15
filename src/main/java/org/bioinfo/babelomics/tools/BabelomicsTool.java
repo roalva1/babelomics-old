@@ -27,8 +27,7 @@ public abstract class BabelomicsTool extends GenericBioTool {
 	
 	private void initCommonsOptions() {
 		getOptions().addOption(OptionFactory.createOption("tool", "to", "tool name", true));
-		getOptions().addOption(OptionFactory.createOption("species", "The specie of the ids", false));	
-
+		getOptions().addOption(OptionFactory.createOption("species", "The specie of the ids", false));
 	}
 
 	
