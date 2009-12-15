@@ -10,6 +10,7 @@ import org.bioinfo.babelomics.methods.expression.differential.maSigPro;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
@@ -24,23 +25,40 @@ public class TimeSeries extends BabelomicsTool {
 	}
 
 	public void initOptions() {
+		options.addOption(OptionFactory.createOption("test", "test: masigpro", false));
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
 		options.addOption(OptionFactory.createOption("contin-class", "class variable"));
 		options.addOption(OptionFactory.createOption("series-class", "class class variable"));
-		options.addOption(OptionFactory.createOption("test", "the test", false));
+		options.addOption(OptionFactory.createOption("degree", "Polynomial degree", false));
+		options.addOption(OptionFactory.createOption("q-value", "Q-value", false));
+		options.addOption(OptionFactory.createOption("correction", "Multiple testing adjustment", false));
+		options.addOption(OptionFactory.createOption("significance-level", "Significance levelfor model variable", false));
+		options.addOption(OptionFactory.createOption("clustering-method", "Clustering method", false));
+		options.addOption(OptionFactory.createOption("k-value", "Number of clusters (k-value) for K-means clustering", false));
 	}
 
+	
 	@Override
 	public void execute() {
+		String test = commandLine.getOptionValue("test", "masigpro");
+		executeMaSigPro();
+	}
+	
+	public void executeMaSigPro() {
 		
 		// reading dataset
 		//
 		Dataset dataset = initDataset(new File(commandLine.getOptionValue("dataset")));
 				
-		String test = commandLine.getOptionValue("contin-class", "masigpro");
 		String continClass = commandLine.getOptionValue("contin-class", null);
 		String seriesClass = commandLine.getOptionValue("series-class", null);
-		
+		int degree = Integer.parseInt(commandLine.getOptionValue("degree", "2"));
+		double q = Double.parseDouble(commandLine.getOptionValue("q-value", "0.05"));
+		String correction = commandLine.getOptionValue("correction", "BH");
+		double alfa = Double.parseDouble(commandLine.getOptionValue("significance-level", "0.05"));
+		String clustering = commandLine.getOptionValue("clustering-method", "hclust");
+		int kvalue = Integer.parseInt(commandLine.getOptionValue("k-value", "9"));
+			
 		List<String> continVars = dataset.getVariables().getByName(continClass).getValues();
 		List<String> seriesVars = dataset.getVariables().getByName(seriesClass).getValues();
 
@@ -52,7 +70,7 @@ public class TimeSeries extends BabelomicsTool {
 		lines.add("#contin\t" + ListUtils.toString(continVars, "\t"));
 		lines.add("#series\t" + ListUtils.toString(seriesVars, "\t"));
 		for(int i=0 ; i<dataset.getRowDimension() ; i++) {
-			lines.add(dataset.getFeatureNames().get(i) + "\t" + ListUtils.toString(ListUtils.toStringList(dataset.getDoubleMatrix().getRow(i)), "\t"));
+			lines.add(dataset.getFeatureNames().get(i) + "\t" + ListUtils.toString(ArrayUtils.toStringList(dataset.getDoubleMatrix().getRow(i)), "\t"));
 		}
 		File inputFile = new File(outdir + "/input.maSigPro.txt");
 		try {
@@ -65,7 +83,7 @@ public class TimeSeries extends BabelomicsTool {
 		masigpro.setInputFilename(inputFile.getAbsolutePath());
 		masigpro.setOutdir(outdir);
 		
-		masigpro.compute();
+		masigpro.compute(degree, q, correction, alfa, clustering, kvalue);
 		
 		// saving data
 		//

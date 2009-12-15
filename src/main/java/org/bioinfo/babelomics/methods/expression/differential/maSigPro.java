@@ -18,14 +18,18 @@ public class maSigPro {
 	}
 
 	public void compute() {
+		compute(2, 0.05, "BH", 0.05, "hclust", 9);
+	}
+
+	public void compute(int degree, double q, String correction, double alfa, String clustering, int kvalue) {
 		List<String> env = new ArrayList<String>();
 		env.add("data=" + inputFilename);
-		env.add("degree=2");
-		env.add("Q=0.05");
-		env.add("adjust=BH");
-		env.add("alfa=0.05");
-		env.add("clustermethod=hclust");
-		env.add("k=9");
+		env.add("degree=" + degree);
+		env.add("Q=" + q);
+		env.add("adjust=" + correction);
+		env.add("alfa=" + alfa);
+		env.add("clustermethod=" + clustering);
+		env.add("k=" + kvalue);
 		env.add("main=");
 		env.add("outdir=" + outdir);
 

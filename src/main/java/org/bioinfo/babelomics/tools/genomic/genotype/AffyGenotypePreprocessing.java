@@ -56,7 +56,7 @@ public class AffyGenotypePreprocessing extends BabelomicsTool {
 					logger.error("No valid chip type: 500k or 6.0");
 				}
 
-				AffyGenotypeUtils.affyGenotypeNormalization(babelomicsHomePath+"/bin/apt/apt-probeset-genotype", commandLine.getOptionValue("chip-type"), cdfFile.getAbsolutePath(), chrXSnpsFile.getAbsolutePath(), outdir, dataDirFile.getAbsolutePath());
+				AffyGenotypeUtils.affyGenotypeNormalization(babelomicsHomePath+"/bin/apt/apt-probeset-genotype", commandLine.getOptionValue("chip-type"), cdfFile.getAbsolutePath(), chrXSnpsFile.getAbsolutePath(), dataDirFile.getAbsolutePath(), outdir);
 
 			}catch (IOException e) {
 				abort("", "", "", "");
@@ -86,12 +86,12 @@ public class AffyGenotypePreprocessing extends BabelomicsTool {
 					logger.debug("calling to affyHumanMapping500kChpCallsToPedAndMap...");
 					File mapping250kStyFile = new File(commandLine.getOptionValue("mapping-250k-sty-file"));
 					File mapping250kNspFile = new File(commandLine.getOptionValue("mapping-250k-nsp-file"));
-					AffyGenotypeUtils.affyHumanMapping500kChpCallsToPedAndMap(mapping250kStyFile.getAbsolutePath(), mapping250kNspFile.getAbsolutePath(),pedigreeFile.getAbsolutePath(), dataDirFile.getAbsolutePath(), outdir);
+					AffyGenotypeUtils.affyHumanMapping500kChpCallsToPedAndMap(mapping250kStyFile.getAbsolutePath(), mapping250kNspFile.getAbsolutePath(), pedigreeFile.getAbsolutePath(), dataDirFile.getAbsolutePath(), outdir);
 				}else {
 					if(commandLine.getOptionValue("chip-type").equalsIgnoreCase("6.0")){
-						logger.debug("calling to affyGenomeWide6ChpCallsToPedAndMap...");
 						File mappingGW6File = new File(commandLine.getOptionValue("mapping-genome-wide-6-file"));
-						AffyGenotypeUtils.affyGenomeWide6ChpCallsToPedAndMap("/home/imedina/appl/analysis/src/snp/GenomeWideSNP_6.na29.annot.csv", "/tmp/map_GW6_file.txt", "", outdir);
+						logger.debug("calling to affyGenomeWide6ChpCallsToPedAndMap... :"+mappingGW6File.getAbsolutePath()+":"+pedigreeFile.getAbsolutePath()+":"+dataDirFile.getAbsolutePath()+":"+outdir);
+						AffyGenotypeUtils.affyGenomeWide6ChpCallsToPedAndMap(mappingGW6File.getAbsolutePath(), pedigreeFile.getAbsolutePath(), dataDirFile.getAbsolutePath(), outdir);
 					}else {
 						abort("", "", "", "");
 						logger.error("No valid chip type: 500k or 6.0");

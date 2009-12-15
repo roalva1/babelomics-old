@@ -1,16 +1,21 @@
 package org.bioinfo.babelomics.tools.expression.differential;
 
+import java.io.File;
+
 import org.bioinfo.babelomics.BabelomicsMain;
 import org.junit.Test;
 
 
 public class CorrelationTest {
 
-	public void test1() {
-	    
-		System.out.println("-----   pearson ------");
-		//String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/pearson", "-test", "pearson", "-class", "O2_conc"};
-		String []args = {"-tool", "correlation", "-dataset", "/mnt/commons/test/biodata/example/correlation.txt", "-o", "/tmp/pearson", "-test", "pearson", "-class", "indep"};
+	@Test
+	public void Test() {   
+		String dataset = "/mnt/commons/test/biodata/example/correlation.txt";
+		String outdir = "/tmp/CorrelationTest";
+		new File(outdir).mkdir();
+		
+		System.out.println("-----   correlation : pearson ------");
+		String []args = {"--tool", "correlation", "--dataset", dataset, "-o", outdir, "--test", "pearson", "--class", "indep", "--correction", "fdr"};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -20,29 +25,34 @@ public class CorrelationTest {
 	}
 	
 	@Test
-	public void test2() {
-		System.out.println("-----  spearman ------");
-		//String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/spearman", "-test", "spearman", "-class", "O2_conc"};
-		String []args = {"-tool", "correlation", "-dataset", "/mnt/commons/test/biodata/example/correlation.txt", "-o", "/tmp/spearman", "-test", "spearman", "-class", "indep"};
-		
-		try {
-			BabelomicsMain.main(args); 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}		
-	}
-	
-	@Test
-	public void test3() {
-		System.out.println("-----  regression  ------");
-		//String []args = {"-tool", "differential-expression", "-dataset", "/mnt/commons/test/biodata/example/dataset_example.txt", "-o", "/tmp/regression", "-test", "regression", "-class", "O2_conc"};
-		String []args = {"-tool", "correlation", "-dataset", "/mnt/commons/test/biodata/example/correlation.txt", "-o", "/tmp/regression", "-test", "regression", "-class", "indep"};
-		
-		try {
-			BabelomicsMain.main(args); 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}		
-	}
+	public void Test1() {
+		String dataset = "/mnt/commons/test/biodata/example/correlation.txt";
+		String outdir = "/tmp/CorrelationTest1";
+		new File(outdir).mkdir();
 
+		System.out.println("-----  correlation : spearman ------");
+		String []args = {"--tool", "correlation", "--dataset", dataset, "-o", outdir, "--test", "spearman", "--class", "indep", "--correction", "holm"};
+		
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+	}
+	
+	@Test
+	public void Test2() {
+		String dataset = "/mnt/commons/test/biodata/example/correlation.txt";
+		String outdir = "/tmp/CorrelationTest2";
+		new File(outdir).mkdir();
+
+		System.out.println("-----  correlation : regression  ------");
+		String []args = {"--tool", "correlation", "--dataset", dataset, "-o", outdir, "--test", "regression", "--class", "indep", "--correction", "bonferroni"};
+		
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+	}
 }

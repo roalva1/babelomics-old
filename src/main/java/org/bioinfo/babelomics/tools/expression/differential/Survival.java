@@ -9,6 +9,7 @@ import java.util.List;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
@@ -31,6 +32,7 @@ public class Survival extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("test", "the test, possible values: cox"));
 		options.addOption(OptionFactory.createOption("time-class", "class variable", false));
 		options.addOption(OptionFactory.createOption("censored-class", "class class variable", false));
+		options.addOption(OptionFactory.createOption("correction", "Multiple-test correction: fdr, bh, by, bonferroni, hochberg, hold"));
 	}
 
 	@Override
@@ -43,6 +45,7 @@ public class Survival extends BabelomicsTool {
 		String test = commandLine.getOptionValue("test", null);
 		String timeClass = commandLine.getOptionValue("time-class", null);
 		String censoredClass = commandLine.getOptionValue("censored-class", null);
+		String correction = commandLine.getOptionValue("correction", "fdr");
 
 		if ( ! "cox".equalsIgnoreCase(test) ) {
 			abort("unknowntest_execute_survival", "unknown test (" + test + ")", "unknown test (" + test + ")", "unknown test (" + test + ")");
@@ -66,18 +69,21 @@ public class Survival extends BabelomicsTool {
 		TestResultList<CoxTestResult> res = null;
 		try {
 			res = coxtest.compute(dataset.getDoubleMatrix(), timeVars, censoredVars);
+			
+			// apply multiple test correction according to input correction
+			DiffExpressionUtils.multipleTestCorrection(res, correction);						
 		} catch (Exception e) {
 			abort("exception_run_cox", "error running cox test", e.toString(), StringUtils.getStackTrace(e));
 		}
 
 		int[] columnOrder = ListUtils.order(vars);
-		int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
+		int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
 
 		// generating heatmap
 		//
 		updateJobStatus("60", "generating heatmap");
 		Canvas heatmap = DiffExpressionUtils.generateHeatmap(dataset, timeClass, columnOrder, rowOrder, "coeff.", res.getCoefs(), "adj. p-value", res.getAdjPValues());
-		String heatmapFilename = getOutdir() + "/cox_heatmap";
+		String heatmapFilename = getOutdir() + "/cox_heatmap.png";
 		try {
 			heatmap.save(heatmapFilename);
 		} catch (IOException e) {
@@ -108,7 +114,7 @@ public class Survival extends BabelomicsTool {
 			printError("ioexception_cox_cox", "error saving results", e.toString(), e);
 		}
 
-		if ( new File(heatmapFilename + ".png").exists() ) {
+		if ( new File(heatmapFilename).exists() ) {
 			result.addOutputItem(new Item("cox_heatmap", "cox_heatmap.png", "Cox heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
 		}
 	}
