@@ -102,7 +102,7 @@ public class BabelomicsFactory {
 			return new Marmite();
 		}
 
-		if(toolName.equalsIgnoreCase("marmite-scan")) {
+		if(toolName.equalsIgnoreCase("marmitescan")) {
 			return new MarmiteScan();
 		}
 		

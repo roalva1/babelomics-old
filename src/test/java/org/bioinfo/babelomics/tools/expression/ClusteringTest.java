@@ -27,86 +27,68 @@ public class ClusteringTest {
 	public void notest() {		
 	}
 
-	@Test
-	public void Test1() {
-//		String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
+	public void Test() {
 		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
-		String outdir = "/tmp/";
+		String outdir = "/tmp/ClusteringTest";
+		new File(outdir).mkdir();
+
 		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "upgma", "--distance", "euclidean"};
 
-		System.out.println("UPGMA ----------------> " + Arrays.toString(args));
+		System.out.println("----- clustering : UPGMA ----------------> " + Arrays.toString(args));
+		
 		try {
-			FileUtils.createDirectory(outdir);
 			BabelomicsMain.main(args); 
-			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
-			System.out.println("cluster of genes:\n" + IOUtils.toString(new File(outdir + "/genes.nw")));
-			System.out.println("cluster of samples:\n" + IOUtils.toString(new File(outdir + "/samples.nw")));
 		} catch (Exception e) {
 			e.printStackTrace();
-			//fail(e.toString());
-			//System.out.println(e.toString());
 		}
 	}	
 
-	public void Test2() {
-//		String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
+	public void Test1() {
 		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
-		String outdir = "/tmp/";
+		String outdir = "/tmp/ClusteringTest1";
+		new File(outdir).mkdir();
+
 		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "sota", "--distance", "euclidean"};
 
-		System.out.println("SOTA ----------------> " + Arrays.toString(args));
+		System.out.println("----- clustering : SOTA ----------------> " + Arrays.toString(args));
 		
 		try {
-			FileUtils.createDirectory(outdir);
 			BabelomicsMain.main(args); 
-			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
-//			System.out.println("cluster of genes:\n" + IOUtils.toString(new File(outdir + "/genes.nw")));
-//			System.out.println("cluster of samples:\n" + IOUtils.toString(new File(outdir + "/samples.nw")));
 		} catch (Exception e) {
 			e.printStackTrace();
-			//fail(e.toString());
-			//System.out.println(e.toString());
+		}
+	}	
+
+	@Test
+	public void Test2() {
+		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
+		String outdir = "/tmp/ClusteringTest2";
+		new File(outdir).mkdir();
+
+		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "som", "--distance", "euclidean"};
+
+		System.out.println("----- clustering : SOM ----------------> " + Arrays.toString(args));
+		
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}	
 
 	public void Test3() {
-		String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
-		String outdir = "/tmp/som";
-		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "som", "--distance", "euclidean"};
+		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
+		String outdir = "/tmp/ClusteringTest3";
+		new File(outdir).mkdir();
 
-		System.out.println("SOM ----------------> " + Arrays.toString(args));
-		
-		try {
-			FileUtils.createDirectory(outdir);
-			BabelomicsMain.main(args); 
-			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
-			System.out.println("cluster of genes:\n" + IOUtils.toString(new File(outdir + "/genes.nw")));
-			System.out.println("cluster of samples:\n" + IOUtils.toString(new File(outdir + "/samples.nw")));
-		} catch (Exception e) {
-			e.printStackTrace();
-			//fail(e.toString());
-			//System.out.println(e.toString());
-		}
-	}	
-
-	public void Test4() {
-		String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
-//		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
-		String outdir = "/tmp/kmeans";
 		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "kmeans", "--distance", "euclidean", "--kvalue", "4"};
 
-		System.out.println("KMEANS ----------------> " + Arrays.toString(args));
+		System.out.println("----- clustering : KMEANS ----------------> " + Arrays.toString(args));
 		
 		try {
-			FileUtils.createDirectory(outdir);
 			BabelomicsMain.main(args); 
-//			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
-			System.out.println("cluster of genes:\n" + IOUtils.toString(new File(outdir + "/genes.nw")));
-			System.out.println("cluster of samples:\n" + IOUtils.toString(new File(outdir + "/samples.nw")));
 		} catch (Exception e) {
 			e.printStackTrace();
-			//fail(e.toString());
-			//System.out.println(e.toString());
 		}
 	}	
 }

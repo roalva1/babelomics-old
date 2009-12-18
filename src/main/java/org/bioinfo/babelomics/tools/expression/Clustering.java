@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.bioinfo.babelomics.methods.expression.clustering.ClusteringUtils;
 import org.bioinfo.babelomics.methods.expression.clustering.Kmeans;
+import org.bioinfo.babelomics.methods.expression.clustering.Som;
 import org.bioinfo.babelomics.methods.expression.clustering.Sota;
 import org.bioinfo.babelomics.methods.expression.clustering.Upgma;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
@@ -209,7 +210,8 @@ public class Clustering extends BabelomicsTool {
 			Sota sota = new Sota(matrix, rowNames, colNames, distance);
 			tree = sota.run();
 		} else if ( "som".equalsIgnoreCase(method) ) {
-			throw new Exception("SOM algorithm is not implemented yet");
+			Som som = new Som(matrix, rowNames, colNames, distance);
+			tree = som.run();
 		} else if ( "upgma".equalsIgnoreCase(method) ) {
 			Upgma upgma = new Upgma(matrix, rowNames, colNames, distance);
 			tree = upgma.run();
