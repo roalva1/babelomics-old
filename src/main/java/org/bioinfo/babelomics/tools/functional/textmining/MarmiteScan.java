@@ -57,7 +57,15 @@ public class MarmiteScan extends BabelomicsTool {
 		String bioentity = commandLine.getOptionValue("bioentity-name");
 		int scoreFilter = Integer.parseInt(commandLine.getOptionValue("bioentity-score-filter", "5"));
 		int numberFilter = Integer.parseInt(commandLine.getOptionValue("bioentity-number-filter", "50"));
-		int order = Integer.parseInt(commandLine.getOptionValue("sort", ""+MarmiteUtils.ASCENDING_SORT));
+		String sort = commandLine.getOptionValue("sort", "desc");
+		
+		int order;
+		if ( "asc".equalsIgnoreCase(sort) ) {
+			order = MarmiteUtils.ASCENDING_SORT;
+		} else {
+			order = MarmiteUtils.DESCENDING_SORT;
+		}
+		
 
 		executeMarmiteScan(listFile, bioentity, scoreFilter, numberFilter, order);			
 		//executeMarmiteScan(dataset, bioEntityName, bioentityScoreFilter, bioentityNumberFilter,geneNameList, partitionNumber, significance,  sort);			
@@ -218,8 +226,8 @@ public class MarmiteScan extends BabelomicsTool {
 				boxplot = MarmiteUtils.createBoxplot(entity, adjPvalues.get(i), doubleList1, doubleList2);
 				filename = cleanName + ".png";
 				boxplotList.add(filename);
-				ChartUtilities.saveChartAsPNG(new File(getOutdir() + "/" + filename), boxplot, 400, 200);
-				result.addOutputItem(new Item(cleanName + "_boxplot", filename, "Boxplot for " + entity, TYPE.IMAGE));
+				ChartUtilities.saveChartAsPNG(new File(getOutdir() + "/" + filename), boxplot, 200, 100);
+				//result.addOutputItem(new Item(cleanName + "_boxplot", filename, "Boxplot for " + entity, TYPE.IMAGE));
 			}
 
 
@@ -242,7 +250,7 @@ public class MarmiteScan extends BabelomicsTool {
 			dataFrame.addColumn("Genes (list #1)", resGeneList1);
 			dataFrame.addColumn("Genes (list #2)", resGeneList2);
 			IOUtils.write(getOutdir() + "/" + filename, dataFrame.toString(true, true));
-			result.addOutputItem(new Item("marmite_table", filename, "MARMITE SCAN output table", TYPE.FILE, StringUtils.toList("TABLE"), new HashMap<String, String>(), "Results"));			
+			result.addOutputItem(new Item("marmite_table", filename, "MARMITE SCAN output table", TYPE.FILE, StringUtils.toList("TABLE,MARMITE_TABLE", ","), new HashMap<String, String>(), "Results"));			
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InvalidColumnIndexException e) {

@@ -25,8 +25,8 @@ public class MarmiteScanTest {
 	
 	@Test
 	public void Test() {
-		//String list = "/mnt/commons/test/tools/marmitescan/marmitescan100.txt";
-		String list = "/mnt/commons/test/tools/marmitescan/marmitescan.txt";
+		String list = "/mnt/commons/test/tools/marmitescan/marmitescan100.txt";
+		//String list = "/mnt/commons/test/tools/marmitescan/marmitescan.txt";
 		String outdir = "/tmp/MarmiteScanTest";
 		new File(outdir).mkdir();
 

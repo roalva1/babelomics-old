@@ -19,6 +19,7 @@ import org.jfree.chart.plot.PlotOrientation;
 
 public class MarmiteUtils {
 
+	public static int NO_SORT = 0;
 	public static int ASCENDING_SORT = 1;
 	public static int DESCENDING_SORT = 2;
 
