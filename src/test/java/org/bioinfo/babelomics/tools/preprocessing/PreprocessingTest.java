@@ -114,10 +114,13 @@ public class PreprocessingTest {
 	@Test
 	public void Test4() {
 		//String dataset = "/mnt/commons/test/fatiscanmini2.txt";
-		String dataset = "/mnt/commons/test/biodata/example/dataset_example4.txt";
+		
+		//String dataset = "/mnt/commons/test/biodata/example/dataset_example4.txt";
+		String dataset = "/mnt/commons/test/biodata/newick1.nw";
 		String outdir = "/tmp/histogram";
 		new File(outdir).mkdir();
-		String []args = { "--tool", "histogram","--log-level", "2", "--datalist", dataset,"--class", "sex", "-o", outdir};
+		//String []args = { "--tool", "histogram","--log-level", "2", "--datalist", dataset,"--class", "sex","--boxplot","true","--histogram","true", "-o", outdir};
+		String []args = { "--tool", "histogram","--log-level", "2", "--datalist", dataset,"-tree","true", "-o", outdir};
 
 		System.out.println("----------------> " + args.toString());
 		
