@@ -1,4 +1,4 @@
-package org.bioinfo.babelomics.tools;
+package org.bioinfo.babelomics.tools.graph;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.bioinfo.babelomics.methods.expression.clustering.ClusteringUtils;
+import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.chart.HistogramChart;
 import org.bioinfo.collections.tree.multiple.MultipleTree;

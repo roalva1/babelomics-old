@@ -19,6 +19,7 @@ import org.bioinfo.babelomics.tools.genomic.copynumber.AgilentCGHNormalization;
 import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
 import org.bioinfo.babelomics.tools.genomic.genotype.AssociationTool;
+import org.bioinfo.babelomics.tools.graph.DescriptiveStatistics;
 import org.bioinfo.babelomics.tools.interactome.Snow;
 import org.bioinfo.babelomics.tools.preprocessing.IdConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
