@@ -15,6 +15,7 @@ import org.bioinfo.babelomics.tools.functional.FatiScanTool;
 import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
 import org.bioinfo.babelomics.tools.functional.tissues.AffyTmt;
+import org.bioinfo.babelomics.tools.functional.tissues.SageTmt;
 import org.bioinfo.babelomics.tools.genomic.copynumber.AgilentCGHNormalization;
 import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
@@ -110,6 +111,10 @@ public class BabelomicsFactory {
 			return new AffyTmt();
 		}
 		
+		if(toolName.equalsIgnoreCase("tmt-sage")) {
+			return new SageTmt();
+		}
+
 		if(toolName.equalsIgnoreCase("copy-number-normalization")) {
 			return new AgilentCGHNormalization();
 		}
