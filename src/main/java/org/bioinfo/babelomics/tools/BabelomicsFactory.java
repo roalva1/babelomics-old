@@ -21,6 +21,7 @@ import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
 import org.bioinfo.babelomics.tools.genomic.genotype.AssociationTool;
 import org.bioinfo.babelomics.tools.graph.DescriptiveStatistics;
+import org.bioinfo.babelomics.tools.graph.GoGraphViewerTool;
 import org.bioinfo.babelomics.tools.interactome.Snow;
 import org.bioinfo.babelomics.tools.preprocessing.CreateAnnotation;
 import org.bioinfo.babelomics.tools.preprocessing.IDConverter;
@@ -164,6 +165,11 @@ public class BabelomicsFactory {
 		if(toolName.equalsIgnoreCase("clustering-tree")) {
 			return new DescriptiveStatistics();
 		}
+		
+		if(toolName.equalsIgnoreCase("go-graph-viewer")) {
+			return new GoGraphViewerTool();
+		}
+		
 
 		return babelomicsTool;
 	}

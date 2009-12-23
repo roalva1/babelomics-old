@@ -51,6 +51,11 @@
 			<artifactId>bioinfo-collections</artifactId>
 			<version>0.2.0</version>
 		</dependency>
+		<dependency>
+			<groupId>es.blast2go</groupId>
+			<artifactId>blast2go</artifactId>
+			<version>babel</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
