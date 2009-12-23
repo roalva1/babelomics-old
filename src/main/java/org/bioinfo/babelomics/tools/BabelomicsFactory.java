@@ -110,7 +110,7 @@ public class BabelomicsFactory {
 			return new AffyTmt();
 		}
 		
-		if(toolName.equalsIgnoreCase("copy-number-normalization")) {
+		if(toolName.equalsIgnoreCase("agilent-cgh-normalization")) {
 			return new AgilentCGHNormalization();
 		}
 
@@ -143,6 +143,10 @@ public class BabelomicsFactory {
 		}
 		
 		if(toolName.equalsIgnoreCase("descriptive-statistics")) {
+			return new DescriptiveStatistics();
+		}
+		
+		if(toolName.equalsIgnoreCase("clustering-tree")) {
 			return new DescriptiveStatistics();
 		}
 
