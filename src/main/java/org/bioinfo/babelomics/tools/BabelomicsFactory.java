@@ -21,7 +21,8 @@ import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
 import org.bioinfo.babelomics.tools.genomic.genotype.AssociationTool;
 import org.bioinfo.babelomics.tools.interactome.Snow;
-import org.bioinfo.babelomics.tools.preprocessing.IdConverter;
+import org.bioinfo.babelomics.tools.preprocessing.CreateAnnotation;
+import org.bioinfo.babelomics.tools.preprocessing.IDConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
 
 
@@ -56,9 +57,13 @@ public class BabelomicsFactory {
 		}
 		
 		if(toolName.equalsIgnoreCase("id-converter")) {
-			return new IdConverter();
+			return new IDConverter();
 		}
 		
+		if(toolName.equalsIgnoreCase("create-annotation")) {
+			return new CreateAnnotation();
+		}
+
 		if(toolName.equalsIgnoreCase("class-comparison")) {
 			return new ClassComparison();
 		}
