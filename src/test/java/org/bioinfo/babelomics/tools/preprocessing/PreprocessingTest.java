@@ -28,109 +28,89 @@ public class PreprocessingTest {
 	}
 	
 
-//	@Test
-//	public void Test() {
-//		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
-//		String outdir = "/tmp/PreprocessingTest";
-//		new File(outdir).mkdir();
-//		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir,"--merge-replicates", "mean", "--logarithm-base", "2", "--impute-missing", "zero", "--filter-missing", "90"};
-//
-//		System.out.println("----------------> " + Arrays.toString(args));
-//		
-//		try {
-//			BabelomicsMain.main(args); 
-//			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
-//			System.out.println("output dataset:\n" + IOUtils.toString(new File(outdir + "/preprocessed.txt")));
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			fail(e.toString());
-//			//System.out.println(e.toString());
-//		}
-//	}	
-//
-//	@Test
-//	public void Test1() {
-//		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
-//		String outdir = "/tmp/PreprocessingTest1";
-//		new File(outdir).mkdir();
-//		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--impute-missing", "zero"};
-//
-//		System.out.println("----------------> " + Arrays.toString(args));
-//		
-//		try {
-//			BabelomicsMain.main(args);
-//			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
-//			System.out.println("output dataset:\n" + IOUtils.toString(new File(outdir + "/preprocessed.txt")));
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			fail(e.toString());
-//			//System.out.println(e.toString());
-//		}
-//	}	
-//
-//
-//	@Test
-//	public void Test2() {
-//		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
-//		String outdir = "/tmp/PreprocessingTest2";
-//		new File(outdir).mkdir();
-//		String filename = "/mnt/commons/test/biodata/example/known_genes.txt";
-//		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--gene-file-filter", filename};
-//
-//		System.out.println("----------------> " + Arrays.toString(args));
-//		
-//		try {
-//			BabelomicsMain.main(args);
-//			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
-//			System.out.println("output dataset:\n" + IOUtils.toString(new File(outdir + "/preprocessed.txt")));
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			fail(e.toString());
-//			//System.out.println(e.toString());
-//		}
-//	}	
-//
-//	@Test
-//	public void Test3() {
-//		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
-//		String outdir = "/tmp/PreprocessingTest3";
-//		new File(outdir).mkdir();
-//		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--impute-missing", "knn", "--kvalue", "3"};
-//
-//		System.out.println("----------------> " + Arrays.toString(args));
-//		
-//		try {
-//			BabelomicsMain.main(args); 
-//			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
-//			System.out.println("output dataset:\n" + IOUtils.toString(new File(outdir + "/preprocessed.txt")));
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			fail(e.toString());
-//			//System.out.println(e.toString());
-//		}
-//	}	
-//	
-	
 	@Test
-	public void Test4() {
-		//String dataset = "/mnt/commons/test/fatiscanmini2.txt";
-		String dataset = "/mnt/commons/test/biodata/example/dataset_example4.txt";
-		String outdir = "/tmp/histogram";
+	public void Test() {
+		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
+		String outdir = "/tmp/PreprocessingTest";
 		new File(outdir).mkdir();
-		String []args = { "--tool", "histogram","--log-level", "2", "--datalist", dataset,"--class", "sex", "-o", outdir};
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir,"--merge-replicates", "mean", "--logarithm-base", "2", "--impute-missing", "zero", "--filter-missing", "90"};
 
-		System.out.println("----------------> " + args.toString());
+		System.out.println("----------------> " + Arrays.toString(args));
 		
 		try {
 			BabelomicsMain.main(args); 
-//			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
-//			System.out.println("output dataset:\n" + IOUtils.toString(new File(outdir + "/histogram.txt")));
+			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
+			System.out.println("output dataset:\n" + IOUtils.toString(new File(outdir + "/preprocessed.txt")));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.toString());
 			//System.out.println(e.toString());
 		}
 	}	
+
+	@Test
+	public void Test1() {
+		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
+		String outdir = "/tmp/PreprocessingTest1";
+		new File(outdir).mkdir();
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--impute-missing", "zero"};
+
+		System.out.println("----------------> " + Arrays.toString(args));
+		
+		try {
+			BabelomicsMain.main(args);
+			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
+			System.out.println("output dataset:\n" + IOUtils.toString(new File(outdir + "/preprocessed.txt")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+			//System.out.println(e.toString());
+		}
+	}	
+
+
+	@Test
+	public void Test2() {
+		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
+		String outdir = "/tmp/PreprocessingTest2";
+		new File(outdir).mkdir();
+		String filename = "/mnt/commons/test/biodata/example/known_genes.txt";
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--gene-file-filter", filename};
+
+		System.out.println("----------------> " + Arrays.toString(args));
+		
+		try {
+			BabelomicsMain.main(args);
+			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
+			System.out.println("output dataset:\n" + IOUtils.toString(new File(outdir + "/preprocessed.txt")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+			//System.out.println(e.toString());
+		}
+	}	
+
+	@Test
+	public void Test3() {
+		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
+		String outdir = "/tmp/PreprocessingTest3";
+		new File(outdir).mkdir();
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--impute-missing", "knn", "--kvalue", "3"};
+
+		System.out.println("----------------> " + Arrays.toString(args));
+		
+		try {
+			BabelomicsMain.main(args); 
+			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
+			System.out.println("output dataset:\n" + IOUtils.toString(new File(outdir + "/preprocessed.txt")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+			//System.out.println(e.toString());
+		}
+	}
+	
+}	
 	
 	
 	
@@ -140,5 +120,3 @@ public class PreprocessingTest {
 	
 	
 	
-	
-}

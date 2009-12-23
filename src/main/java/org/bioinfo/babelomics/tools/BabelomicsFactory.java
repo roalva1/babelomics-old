@@ -147,8 +147,8 @@ public class BabelomicsFactory {
 			return new Blast2Go();
 		}
 		
-		if(toolName.equalsIgnoreCase("histogram")) {
-			return new Histogram();
+		if(toolName.equalsIgnoreCase("descriptive-statistics")) {
+			return new DescriptiveStatistics();
 		}
 
 		return babelomicsTool;
