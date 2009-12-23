@@ -87,7 +87,6 @@ public class InfraredUtils {
 			Map<String, List<String>> map = new HashMap<String, List<String>>();			
 			List<List<String>> lists = new XRefDBManager(dbConnector).getIdsByDBName(ids, "ensembl_gene");
 
-			List<String> ensemblIds = new ArrayList<String>();
 			if ( lists == null ) {
 				map = null;
 			} else {
@@ -109,5 +108,31 @@ public class InfraredUtils {
 		}
 	}
 
+	// translate a list of ids to unigene format
+	public static Map<String, List<String>> getUnigeneMap(DBConnector dbConnector, List<String> ids) {
+		try {
+			Map<String, List<String>> map = new HashMap<String, List<String>>();			
+			List<List<String>> lists = new XRefDBManager(dbConnector).getIdsByDBName(ids, "unigene");
+
+			if ( lists == null ) {
+				map = null;
+			} else {
+				for(int i=0 ; i<lists.size() ; i++) {
+					if ( lists.get(i) == null || lists.get(i).size() <= 0) {
+						map.put(ids.get(i), null);
+					} else {
+						if ( !map.containsKey(ids.get(i)) ) {
+							map.put(ids.get(i), new ArrayList<String>());
+						}
+						map.get(ids.get(i)).addAll(lists.get(i));
+					}
+				}
+			}
+			return map;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 	
 }

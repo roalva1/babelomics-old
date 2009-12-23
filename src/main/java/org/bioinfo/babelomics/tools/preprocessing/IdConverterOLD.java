@@ -8,10 +8,10 @@ import org.bioinfo.tool.OptionFactory;
 
 
 
-public class IdConverter extends BabelomicsTool  {
+public class IdConverterOLD extends BabelomicsTool  {
 
 	
-		public IdConverter() {
+		public IdConverterOLD() {
 			initOptions();
 		}
 

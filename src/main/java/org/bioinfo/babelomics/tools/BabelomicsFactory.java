@@ -15,13 +15,15 @@ import org.bioinfo.babelomics.tools.functional.FatiScanTool;
 import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
 import org.bioinfo.babelomics.tools.functional.tissues.AffyTmt;
+import org.bioinfo.babelomics.tools.functional.tissues.SageTmt;
 import org.bioinfo.babelomics.tools.genomic.copynumber.AgilentCGHNormalization;
 import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
 import org.bioinfo.babelomics.tools.genomic.genotype.AssociationTool;
 import org.bioinfo.babelomics.tools.graph.DescriptiveStatistics;
 import org.bioinfo.babelomics.tools.interactome.Snow;
-import org.bioinfo.babelomics.tools.preprocessing.IdConverter;
+import org.bioinfo.babelomics.tools.preprocessing.CreateAnnotation;
+import org.bioinfo.babelomics.tools.preprocessing.IDConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
 
 
@@ -56,9 +58,13 @@ public class BabelomicsFactory {
 		}
 		
 		if(toolName.equalsIgnoreCase("id-converter")) {
-			return new IdConverter();
+			return new IDConverter();
 		}
 		
+		if(toolName.equalsIgnoreCase("create-annotation")) {
+			return new CreateAnnotation();
+		}
+
 		if(toolName.equalsIgnoreCase("class-comparison")) {
 			return new ClassComparison();
 		}
@@ -112,6 +118,14 @@ public class BabelomicsFactory {
 		}
 		
 		if(toolName.equalsIgnoreCase("agilent-cgh-normalization")) {
+			return new AgilentCGHNormalization();
+		}
+
+		if(toolName.equalsIgnoreCase("tmt-sage")) {
+			return new SageTmt();
+		}
+
+		if(toolName.equalsIgnoreCase("copy-number-normalization")) {
 			return new AgilentCGHNormalization();
 		}
 

@@ -1,6 +1,8 @@
 package org.bioinfo.babelomics.tools.functional.tissues;
 
 
+import java.io.File;
+
 import org.bioinfo.babelomics.BabelomicsMain;
 import org.junit.After;
 import org.junit.Before;
@@ -16,15 +18,20 @@ public class AffyTmtTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
 	public void notest() throws Exception {
 	}
 
-	public void test1() throws Exception {
-		System.out.println("-----     ------");
-//		String []args = {"-tool", "tmt-affy", "-list1", "/mnt/commons/test/tools/tmt/list1_brain.txt",  "-o", "/mnt/commons/test/tools/tmt/out/", "-organism", "human", "-platform", "affy", "-tissues", "all tissues"};
-		String []args = {"-tool", "tmt-affy", "-list1", "/mnt/commons/test/tools/tmt/list1_brain.txt",  "-list2", "/mnt/commons/test/tools/tmt/list2_liver.txt", "-o", "/tmp/affytmt", "-species", "human", "-tissues", "all tissues"};
-//		String []args = {"-tool", "tmt-affy", "-list1", "/mnt/commons/test/tools/tmt/ensembl1.txt",  "-list2", "/mnt/commons/test/tools/tmt/ensembl2.txt", "-o", "/mnt/commons/test/tools/tmt/out/", "-organism", "human", "-platform", "affy", "-tissues", "721 B lymphoblasts,Adipocyte,Adrenal Cortex"};
+	@Test
+	public void Test1() throws Exception {
+		String list1 = "/mnt/commons/test/tools/tmt/list1_brain.txt"; // /ensembl1.txt
+		String list2 = "/mnt/commons/test/tools/tmt/list2_liver.txt"; // /ensembl2.txt
+		String outdir = "/tmp/AffyTmtTest";
+		new File(outdir).mkdir();
+
+		System.out.println("----- affy tmt test  ------");
+//		String []args = {"--tool", "tmt-affy", "--list1", list1,  "-o", outdir, "--species", "human", "--tissues", "all tissues"};
+//		String []args = {"--tool", "tmt-affy", "--list1", list1,  "--list2", list2, "-o", outdir, "--species", "human", "--tissues", "all tissues"};
+		String []args = {"--tool", "tmt-affy", "--list1", list1,  "--list2", list2, "-o", outdir, "--species", "human", "--tissues", "721 B lymphoblasts,Adipocyte,Adrenal Cortex"};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -32,5 +39,4 @@ public class AffyTmtTest {
 			e.printStackTrace();
 		}		
 	}
-
 }

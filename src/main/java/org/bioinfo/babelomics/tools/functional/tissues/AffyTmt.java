@@ -80,7 +80,7 @@ public class AffyTmt extends Tmt {
 
 			System.out.println("tissues:\n" + ListUtils.toString(tissues));
 
-			DBConnector dbConnector = new DBConnector("mouse".equalsIgnoreCase(species) ? "mmu" : "hsa");
+			DBConnector dbConnector = new DBConnector("mouse".equalsIgnoreCase(species) ? "mmu" : "hsa", "mysqlweb", "3306", "biouser", "biopass");
 			System.out.println("db connector = " + dbConnector.toString());
 
 			// reading data
@@ -101,22 +101,25 @@ public class AffyTmt extends Tmt {
 			if ( geneList1.size() != uniqueGeneList1.size() ) {
 				dupGeneList1 = ListUtils.duplicated(geneList1);
 				logger.debug("removing " + dupGeneList1.size() + " duplicated genes from List #1: " + ListUtils.toString(dupGeneList1, ","));
+				System.out.println("removing " + dupGeneList1.size() + " duplicated genes from List #1: " + ListUtils.toString(dupGeneList1, ","));
 			}
 			
 			ensemblList1 = new ArrayList<String> ();
 			genesToConvert1 = new ArrayList<String> ();
 			for(String id: uniqueGeneList1) {
 				if ( FunctionalUtils.isEnsemblID(id) ) {
-					genesToConvert1.add(id);
-				} else {
 					ensemblList1.add(id);
+				} else {
+					genesToConvert1.add(id);
 				}
 			}
 			if ( genesToConvert1.size() > 0 ) {
-				logger.debug("found " + genesToConvert1.size() + " IDs non-Ensembl ID in List #1: " + ListUtils.toString(dupGeneList1, ","));
+				logger.debug("found " + genesToConvert1.size() + " IDs non-Ensembl ID in List #1: " + ListUtils.toString(genesToConvert1, ","));
+				System.out.println("found " + genesToConvert1.size() + " IDs non-Ensembl ID in List #1: " + ListUtils.toString(genesToConvert1, ","));
 				ensemblMap1 = InfraredUtils.getEnsemblMap(dbConnector, genesToConvert1);
 				if ( ensemblMap1 == null || ensemblMap1.size() == 0 ) {
 					logger.debug("No Ensembl IDs found for your input genes in List #1 when converting your input genes to Ensembl ID");
+					System.out.println("No Ensembl IDs found for your input genes in List #1 when converting your input genes to Ensembl ID");
 				}
 				noConverted1 = new ArrayList<String> ();
 				for(String key: ensemblMap1.keySet()) {
@@ -163,22 +166,25 @@ public class AffyTmt extends Tmt {
 				if ( geneList2.size() != uniqueGeneList2.size() ) {
 					dupGeneList2 = ListUtils.duplicated(geneList2);
 					logger.debug("removing " + dupGeneList2.size() + " duplicated genes from List #2: " + ListUtils.toString(dupGeneList2, ","));
+					System.out.println("removing " + dupGeneList2.size() + " duplicated genes from List #2: " + ListUtils.toString(dupGeneList2, ","));
 				}
 				
 				ensemblList2 = new ArrayList<String> ();
 				genesToConvert2 = new ArrayList<String> ();
 				for(String id: uniqueGeneList2) {
 					if ( FunctionalUtils.isEnsemblID(id) ) {
-						genesToConvert2.add(id);
-					} else {
 						ensemblList2.add(id);
+					} else {
+						genesToConvert2.add(id);
 					}
 				}
 				if ( genesToConvert2.size() > 0 ) {
-					logger.debug("found " + genesToConvert1.size() + " IDs non-Ensembl ID in List #2: " + ListUtils.toString(dupGeneList2, ","));
+					logger.debug("found " + genesToConvert1.size() + " IDs non-Ensembl ID in List #2: " + ListUtils.toString(genesToConvert2, ","));
+					System.out.println("found " + genesToConvert1.size() + " IDs non-Ensembl ID in List #2: " + ListUtils.toString(genesToConvert2, ","));
 					ensemblMap2 = InfraredUtils.getEnsemblMap(dbConnector, genesToConvert2);
 					if ( ensemblMap2 == null || ensemblMap2.size() == 0 ) {
 						logger.debug("No Ensembl IDs found for your input genes in List #2 when converting your input genes to Ensembl ID");
+						System.out.println("No Ensembl IDs found for your input genes in List #2 when converting your input genes to Ensembl ID");
 					}
 					noConverted2 = new ArrayList<String> ();
 					for(String key: ensemblMap2.keySet()) {
@@ -223,7 +229,7 @@ public class AffyTmt extends Tmt {
 			TestResultList<TTestResult> res = tTest.tTest(matrix1, matrix2);				
 			MultipleTestCorrection.BHCorrection(res);
 
-			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
+			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
 
 			// saving data
 			//
@@ -231,13 +237,14 @@ public class AffyTmt extends Tmt {
 			logger.debug("saving results...");
 
 			DataFrame dataFrame = new DataFrame(libraryNames.size(), 0);
-			dataFrame.setRowNames(ListUtils.ordered(libraryNames, rowOrder));
 
 			//dataFrame.addColumn("id", ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
-			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
-			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
-			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
+			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
+			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
+			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
 
+			dataFrame.setRowNames(ListUtils.ordered(libraryNames, rowOrder));
+			
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.save(new File(outdir + "/tmt.txt"));
 			result.addOutputItem(new Item("tmt_file", "tmt.txt", "TMT output file:", TYPE.FILE));
