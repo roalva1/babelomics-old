@@ -40,7 +40,7 @@ public class FatiScan {
 	TwoListFisherTest fisher;
 	
 	// results
-	List<TwoListFisherTestResult> results;	
+	List<GeneSetAnalysisTestResult> results;	
 	FeatureList<AnnotationItem> annotations;
 
 	// Two list constructor
@@ -72,13 +72,13 @@ public class FatiScan {
 		idList = rankedList.getDataFrame().getColumn(0);
 		// statistic
 		statistic = ArrayUtils.toList(rankedList.getDataFrame().getColumnAsDoubleArray(1));
-		// order ranked list
+		// order ranked list		
 		int[] sortIndex = ListUtils.order(statistic);
-		ListUtils.ordered(idList,sortIndex);
-		ListUtils.ordered(statistic,sortIndex);
+		statistic = ListUtils.ordered(statistic,sortIndex);		
+		idList = ListUtils.ordered(idList,sortIndex);		
 		if(order==ASCENDING_SORT){
 			Collections.reverse(idList);
-			Collections.reverse(statistic);			
+			Collections.reverse(statistic);
 		}		
 		
 	}
@@ -91,7 +91,7 @@ public class FatiScan {
 		// annotation		
 		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);		
 
-		results = new ArrayList<TwoListFisherTestResult>();
+		results = new ArrayList<GeneSetAnalysisTestResult>();
 		
 		double inc = -(double)(statistic.get(0)-statistic.get(statistic.size()-1))/(numberOfPartitions+1);
 		double acum = statistic.get(0) + inc;
@@ -115,16 +115,16 @@ public class FatiScan {
 			fisher.test(list1, list2, annotations, testMode);
 		
 			// get result
-			results.addAll(fisher.getResults());
+			results.addAll(toGeneSetAnalysisTestResult(fisher.getResults()));
 						
 			acum+=inc;
 			
 		}
 
 		if(outputFormat == SHORT_FORMAT) {
-			HashMap<String,TwoListFisherTestResult> resultsMap = new HashMap<String,TwoListFisherTestResult>();
+			HashMap<String,GeneSetAnalysisTestResult> resultsMap = new HashMap<String,GeneSetAnalysisTestResult>();
 			// unique term
-			for(TwoListFisherTestResult testResult: results){
+			for(GeneSetAnalysisTestResult testResult: results){
 				if(resultsMap.containsKey(testResult.getTerm())){
 					if(resultsMap.get(testResult.getTerm()).getAdjPValue()>testResult.getAdjPValue()){
 						resultsMap.remove(testResult.getTerm());
@@ -140,10 +140,18 @@ public class FatiScan {
 			
 		}
 				
-		System.err.println("final results.size: " + results.size());	
+		System.err.println("final results.size: " + results.size());
 		
 	}
 		
+	private List<GeneSetAnalysisTestResult> toGeneSetAnalysisTestResult(List<TwoListFisherTestResult> raw){
+		List<GeneSetAnalysisTestResult> result = new ArrayList<GeneSetAnalysisTestResult>(raw.size());
+		for(TwoListFisherTestResult test: raw){			
+			GeneSetAnalysisTestResult gseaTest = new GeneSetAnalysisTestResult(test);
+			result.add(gseaTest);
+		}
+		return result;
+	}
 	
 	
 	private int getThresholdPosition(double acum){
@@ -157,13 +165,13 @@ public class FatiScan {
 		return position;
 	}
 
-	public List<TwoListFisherTestResult> getSignificant(){
+	public List<GeneSetAnalysisTestResult> getSignificant(){
 		return getSignificant(TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD);
 	}
 	
-	public List<TwoListFisherTestResult> getSignificant(double threshold){
-		List<TwoListFisherTestResult> significant = new ArrayList<TwoListFisherTestResult>();
-		for(TwoListFisherTestResult result: this.results){			
+	public List<GeneSetAnalysisTestResult> getSignificant(double threshold){
+		List<GeneSetAnalysisTestResult> significant = new ArrayList<GeneSetAnalysisTestResult>();
+		for(GeneSetAnalysisTestResult result: this.results){			
 			if(result.getAdjPValue()<threshold) significant.add(result);
 		}
 		return significant;
@@ -198,20 +206,6 @@ public class FatiScan {
 	}
 
 	/**
-	 * @return the results
-	 */
-	public List<TwoListFisherTestResult> getResults() {
-		return results;
-	}
-
-	/**
-	 * @param results the results to set
-	 */
-	public void setResults(List<TwoListFisherTestResult> results) {
-		this.results = results;
-	}
-
-	/**
 	 * @return the annotations
 	 */
 	public FeatureList<AnnotationItem> getAnnotations() {
@@ -223,6 +217,20 @@ public class FatiScan {
 	 */
 	public void setAnnotations(FeatureList<AnnotationItem> annotations) {
 		this.annotations = annotations;
+	}
+
+	/**
+	 * @return the results
+	 */
+	public List<GeneSetAnalysisTestResult> getResults() {
+		return results;
+	}
+
+	/**
+	 * @param results the results to set
+	 */
+	public void setResults(List<GeneSetAnalysisTestResult> results) {
+		this.results = results;
 	}
 
 }
