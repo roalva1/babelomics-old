@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bioinfo.babelomics.methods.functional.textmining.MarmiteTest;
 import org.bioinfo.babelomics.methods.functional.textmining.MarmiteUtils;
 import org.bioinfo.babelomics.methods.functional.textmining.Score;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
@@ -15,7 +14,6 @@ import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;

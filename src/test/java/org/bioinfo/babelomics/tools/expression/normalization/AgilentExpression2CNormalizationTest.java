@@ -6,7 +6,6 @@ import java.io.File;
 import java.util.Arrays;
 
 import org.bioinfo.babelomics.BabelomicsMain;
-import org.bioinfo.commons.io.utils.FileUtils;
 import org.junit.Test;
 
 

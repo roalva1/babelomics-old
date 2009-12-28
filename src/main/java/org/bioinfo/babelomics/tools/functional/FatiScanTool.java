@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.methods.functional.FatiScan;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTest;
