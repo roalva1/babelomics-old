@@ -19,6 +19,7 @@ public class BabelomicsMain {
 		if(args.length == 0) {
 			logger.println("No options have been provided");
 			printUsage();
+			return;
 		}
 		
 		String toolName = null;
