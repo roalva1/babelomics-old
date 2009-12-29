@@ -10,6 +10,8 @@ import java.util.List;
 
 import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.methods.functional.FatiScan;
+import org.bioinfo.babelomics.methods.functional.GeneSetAnalysisTestResult;
+import org.bioinfo.babelomics.methods.functional.LogisticScan;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTest;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.babelomics.methods.functional.graph.FatiScanGraph;
@@ -28,6 +30,8 @@ import org.bioinfo.tool.result.Item;
 public class FatiScanTool  extends FunctionalProfilingTool{
 		
 	// list1
+	private enum Method {FatiScan,Logistic};	
+	private Method method;
 	private FeatureData rankedList;
 	private int numberOfPartitions;
 	private int outputFormat;
@@ -41,6 +45,8 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 	public void initOptions() {
 		// parent options
 		super.initOptions();
+		// mode
+		options.addOption(OptionFactory.createOption("method", "Gene set analysis method [fatiscan, logistic]", false, true));
 		// list 1
 		options.addOption(OptionFactory.createOption("ranked-list", "the feature data containig the ranked list"));
 		// test
@@ -57,7 +63,14 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 	public void prepare() throws IOException, ParseException, InvalidColumnIndexException {
 		super.prepare();
 
-		// ranked list
+		// method 
+		method = Method.Logistic;
+		
+		if(commandLine.hasOption("method") && commandLine.getOptionValue("method").equalsIgnoreCase("fatiscan")) {
+			method = Method.FatiScan;
+		}
+		
+		// ranked list		
 		rankedList = new FeatureData(new File(commandLine.getOptionValue("ranked-list")), true);
 		// test
 		numberOfPartitions = Integer.parseInt(commandLine.getOptionValue("partitions","" + FatiScan.DEFAULT_NUMBER_OF_PARTITIONS));
@@ -90,10 +103,6 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				throw new ParseException("No biological database selected (eg. --go-bp)");
 			} else {
 				
-				// significant terms
-				List<TwoListFisherTestResult> significants = new ArrayList<TwoListFisherTestResult>();				
-				List<String> significantOutput = new ArrayList<String>();
-				
 				// save id lists				
 				IOUtils.write(outdir + "/ranked_list.txt", rankedList.toString());
 				result.addOutputItem(new Item("ranked_list","ranked_list.txt","Ranked list",Item.TYPE.FILE,Arrays.asList("RANKED_LIST","CLEAN"),new HashMap<String,String>(),"Input data"));
@@ -105,31 +114,43 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				result.addOutputItem(new Item("id_list","id_list.txt","Id list (sorted)",Item.TYPE.FILE,Arrays.asList("IDLIST","SORTED"),new HashMap<String,String>(),"Input data"));
 				IOUtils.write(outdir + "/statistic.txt", ListUtils.toStringArray(fatiscan.getStatistic()));
 				result.addOutputItem(new Item("statistic","statistic.txt","Statistic (sorted)",Item.TYPE.FILE,Arrays.asList("STATISTIC","SORTED"),new HashMap<String,String>(),"Input data"));
-								
-				// Significant results must appear after than complete tables!!
-				result.addOutputItem(new Item("significant","significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE"),new HashMap<String,String>(),"Significant Results"));
-								
-				// do fatiscans
-				for(Filter filter: filterList) {
-					doFatiScan(rankedList,filter,dbConnector,significants);
-				}
-				if(isYourAnnotations){
-					doFatiScanYourAnnotations(rankedList,yourAnnotations,significants);
-				}
-				
-				significantOutput.addAll(testResultToStringList(significants));
 				
 				// significant terms
-				System.err.println("sig size: " + significants.size());
-				if(significants!=null && significants.size()>0){						
-					IOUtils.write(outdir + "/significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significantOutput,"\n"));
-					FatiScanGraph.fatiScanGraph(significants,"Significant terms graph for all databases",outdir + "/significant_graph.png");			
-					result.addOutputItem(new Item("graph_alldbs","significant_graph.png","Significant terms graph for all databases",Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Significant Results"));
-				} else {
-					result.addOutputItem(new Item("graph_alldbs","No significant terms found","Significant terms for all databases",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant Results"));
+				List<GeneSetAnalysisTestResult> significants = new ArrayList<GeneSetAnalysisTestResult>();				
+				List<String> significantOutput = new ArrayList<String>();
+					
+				
+				// do fatiscans
+				for(Filter filter: filterList) {
+					doTest(rankedList,filter,dbConnector,significants,method);
+				}
+				if(isYourAnnotations){
+					doYourAnnotationsTest(rankedList,yourAnnotations,significants,method);
 				}
 				
-									
+				System.err.println("significants: " + significants.size());
+				if(method==Method.Logistic){
+					significantOutput.addAll(LogisticResultToStringList(significants));
+				} else {
+					significantOutput.addAll(FatiScanResultToStringList(significants));					
+				}		
+				
+				// significant terms				
+				if(significants!=null && significants.size()>0){
+					
+					// Significant results must appear after than complete tables!!
+					result.getOutputItems().add(0, new Item("significant","significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE"),new HashMap<String,String>(),"Significant Results"));
+					IOUtils.write(outdir + "/significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significantOutput,"\n"));
+					
+					// FatiScan graph
+					if(method==Method.FatiScan){
+						FatiScanGraph.fatiScanGraph(significants,"Significant terms graph for all databases",outdir + "/significant_graph.png");
+						result.addOutputItem(new Item("graph_alldbs","significant_graph.png","Significant terms graph for all databases",Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Significant Results"));
+					}
+					
+				} else {
+					result.addOutputItem(new Item("graph_alldbs","No significant terms found","Significant terms for all databases",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant Results"));
+				}		
 			}
 					
 		}catch(Exception e){
@@ -138,50 +159,76 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		
 	}
 
-	private void doFatiScan(FeatureData rankedList,Filter filter,DBConnector dbConnector, List<TwoListFisherTestResult> significant) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidColumnIndexException{
+	
+	
+	/*
+	 * 
+	 * FATISCAN
+	 * 
+	 * 
+	 */
+	
+	
+	private void doTest(FeatureData rankedList,Filter filter,DBConnector dbConnector, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidColumnIndexException{
 		
 		// db attributes
 		String name = getDBName(filter);
 		String title = getDBTitle(filter);					
-		
-		
+				
 		logger.info(title + "...\n");
 
-		// init test
-		FatiScan fatiscan = new FatiScan(rankedList,filter,dbConnector,numberOfPartitions,testMode,outputFormat,order);
-		
-		// run
-		fatiscan.run();
-
-		// save results
-		saveFatiScanResults(fatiscan,name,title);
+		if(method==Method.Logistic){
+			// init test
+			LogisticScan logistic = new LogisticScan(rankedList,filter,dbConnector,order);		
+			// run
+			logistic.run();
+			// save results
+			saveLogisticScanResults(logistic,name,title);
+			// acum significant values
+			significant.addAll(logistic.getSignificant());
+		} else {
+			// init test
+			FatiScan fatiscan = new FatiScan(rankedList,filter,dbConnector,numberOfPartitions,testMode,outputFormat,order);		
+			// run
+			fatiscan.run();
+			// save results
+			saveFatiScanResults(fatiscan,name,title);
+			// acum significant values
+			significant.addAll(fatiscan.getSignificant());
+		}
 				
-		// acum significant values
-		significant.addAll(fatiscan.getSignificant());
+
 		
 		logger.info("...end of " + title);
 		
 	}
 	
-	private void doFatiScanYourAnnotations(FeatureData rankedList, FeatureList<AnnotationItem> annotations, List<TwoListFisherTestResult> significant) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidColumnIndexException{
+	private void doYourAnnotationsTest(FeatureData rankedList, FeatureList<AnnotationItem> annotations, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidColumnIndexException{
 		
 		// db attributes
 		String name = "your_annotations";
 		String title = "Your annotations";		
 		
 		logger.info(title + "...\n");
-
-		// init test
-		FatiScan fatiscan = new FatiScan(rankedList, annotations,numberOfPartitions,testMode,outputFormat,order);
-		
-		// run
-		fatiscan.run();
-				
-		// save results
-		saveFatiScanResults(fatiscan,name,title);
-		
-		// acum significant values
-		significant.addAll(fatiscan.getSignificant());
+		if(method==Method.Logistic){
+			// init test
+			LogisticScan logistic = new LogisticScan(rankedList, annotations,order);		
+			// run
+			logistic.run();				
+			// save results
+			saveLogisticScanResults(logistic,name,title);
+			// acum significant values
+			significant.addAll(logistic.getSignificant());
+		} else {
+			// init test
+			FatiScan fatiscan = new FatiScan(rankedList, annotations,numberOfPartitions,testMode,outputFormat,order);		
+			// run
+			fatiscan.run();				
+			// save results
+			saveFatiScanResults(fatiscan,name,title);		
+			// acum significant values
+			significant.addAll(fatiscan.getSignificant());
+		}
 		
 		logger.info("...end of " + title);
 		
@@ -193,7 +240,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		String annotFileName = name + ".annot";
 		
 		// save statistic results					
-		List<String> testResultOutput = testResultToStringList(fatiscan.getResults());
+		List<String> testResultOutput = FatiScanResultToStringList(fatiscan.getResults());
 		
 		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
 		result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE"),new HashMap<String,String>(),"Database tests"));
@@ -203,7 +250,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		result.addOutputItem(new Item("annot_" + name,annotFileName,"Annotations for " + title,Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
 		
 		// save graph
-		List<TwoListFisherTestResult> significants = fatiscan.getSignificant();
+		List<GeneSetAnalysisTestResult> significants = fatiscan.getSignificant();
 		if(significants!=null && significants.size()>0){
 			String graphFileName = name + "_graph.png"; 
 			FatiScanGraph.fatiScanGraph(significants,"Significant terms graph for " + title,outdir + "/" +  graphFileName);			
@@ -211,8 +258,60 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		} else {
 			result.addOutputItem(new Item("graph_" + name,"No significant terms found","Significant terms graph for " + title,Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Database tests"));
 		}
-
 		
 	}
-
+	
+	private void saveLogisticScanResults(LogisticScan logistic, String name, String title) throws IOException{
+		
+		String fileName = name + ".txt";
+		String annotFileName = name + ".annot";
+		
+		// save statistic results					
+		List<String> testResultOutput = LogisticResultToStringList(logistic.getResults());
+		
+		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
+		result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE"),new HashMap<String,String>(),"Database tests"));
+						
+		// save annotation
+		IOUtils.write(outdir + "/" + annotFileName, logistic.getAnnotations().toString());
+		result.addOutputItem(new Item("annot_" + name,annotFileName,"Annotations for " + title,Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
+		
+//		// save graph
+//		List<GeneSetAnalysisTestResult> significants = logistic.getSignificant();
+//		if(significants!=null && significants.size()>0){
+//			String graphFileName = name + "_graph.png"; 
+//			FatiScanGraph.fatiScanGraph(significants,"Significant terms graph for " + title,outdir + "/" +  graphFileName);			
+//			result.addOutputItem(new Item("graph_" + name,graphFileName,"Significant terms graph for " + title,Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Database tests"));
+//		} else {
+//			result.addOutputItem(new Item("graph_" + name,"No significant terms found","Significant terms graph for " + title,Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Database tests"));
+//		}
+		
+	}
+	
+	
+	protected List<String> FatiScanResultToStringList(List<GeneSetAnalysisTestResult> testResult){
+		return FatiScanResultToStringList(testResult,true);
+	}	
+	protected List<String> FatiScanResultToStringList(List<GeneSetAnalysisTestResult> testResult, boolean header){
+		List<String> result = new ArrayList<String>();
+		if(header) result.add(GeneSetAnalysisTestResult.fatiScanHeader());
+		for(int i=0; i<testResult.size(); i++){			
+			result.add(testResult.get(i).toFatiScanString());
+		}
+		return result;
+	}
+	
+	protected List<String> LogisticResultToStringList(List<GeneSetAnalysisTestResult> testResult){
+		return LogisticResultToStringList(testResult,true);
+	}	
+	protected List<String> LogisticResultToStringList(List<GeneSetAnalysisTestResult> testResult, boolean header){
+		List<String> result = new ArrayList<String>();
+		if(header) result.add(GeneSetAnalysisTestResult.LogisticHeader());
+		for(int i=0; i<testResult.size(); i++){			
+			result.add(testResult.get(i).toLogisticString());
+		}
+		return result;
+	}
+	
+	
 }

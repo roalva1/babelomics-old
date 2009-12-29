@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bioinfo.babelomics.methods.functional.GeneSetAnalysisTestResult;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.graphics.canvas.Canvas;
@@ -15,7 +16,7 @@ import org.bioinfo.graphics.canvas.track.AnnotationTrack;
 
 public class FatiScanGraph {
 
-	public static void fatiScanGraph(List<TwoListFisherTestResult> significants, String title, String fileName){
+	public static void fatiScanGraph(List<GeneSetAnalysisTestResult> significants, String title, String fileName){
 		
 		Canvas canvas = new Canvas(title);
 		canvas.setBorderWidth(0);
@@ -29,7 +30,7 @@ public class FatiScanGraph {
 		List<Double> percentages = new ArrayList<Double>(significants.size());
 		
 		// get term order
-		for(TwoListFisherTestResult testResult: significants){
+		for(GeneSetAnalysisTestResult testResult: significants){
 			percentages.add(getPercentage(testResult.getList1Positives(),testResult.getList1Negatives(),testResult.getList2Positives(), testResult.getList2Negatives()));
 		}
 		int[] termOrder = ListUtils.order(percentages);
@@ -37,7 +38,7 @@ public class FatiScanGraph {
 		Color leftColor,rightColor;
 		
 		double percentage;
-		TwoListFisherTestResult testResult;
+		GeneSetAnalysisTestResult testResult;
 		int i;
 		
 		for(int si=0; si<termOrder.length; si++){
