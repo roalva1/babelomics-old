@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bioinfo.babelomics.methods.functional.textmining.MarmiteTest;
 import org.bioinfo.babelomics.methods.functional.textmining.MarmiteUtils;
 import org.bioinfo.babelomics.methods.functional.textmining.Score;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
