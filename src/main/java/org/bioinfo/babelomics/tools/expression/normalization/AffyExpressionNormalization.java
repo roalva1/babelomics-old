@@ -21,6 +21,7 @@ import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.preprocess.microarray.AffyExpresionUtils;
 import org.bioinfo.io.file.compress.CompressFactory;
 import org.bioinfo.io.file.compress.GenericCompressManager;
+import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
