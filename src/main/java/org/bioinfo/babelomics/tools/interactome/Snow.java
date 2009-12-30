@@ -18,7 +18,7 @@ import org.bioinfo.tool.result.Item.TYPE;
 import sun.management.FileSystem;
 
 public class Snow extends BabelomicsTool {
-	
+
 	public Snow() {
 	}
 
@@ -36,29 +36,29 @@ public class Snow extends BabelomicsTool {
 
 	@Override
 	public void execute() {
-		
+
 		System.out.println("Snow.java:execute, outdir = " + outdir);
-//		try {
-			File f1 = new File(commandLine.getOptionValue("list1"));
-			File f2 = commandLine.hasOption("list2") ? new File(commandLine.getOptionValue("list2")) :  null;
-			String interactome = commandLine.getOptionValue("interactome", "join");
-			File interactionsFile = commandLine.hasOption("own-interactions") ? new File(commandLine.getOptionValue("own-interactions")) :  null;
-			boolean checkInteractions = commandLine.hasOption("check-interactions");
-			String idNature = commandLine.getOptionValue("id-nature", "proteins");
-			int interactionsNumber = Integer.parseInt(commandLine.getOptionValue("interactions-number", "1"));
-						
-			executeSnow(interactome, idNature, interactionsNumber, f1, f2, interactionsFile, checkInteractions);
-			
-//		} catch (IOException e) {
-//			logger.error("Error opening the dataset", e.toString());
-//		}
+		//		try {
+		File f1 = new File(commandLine.getOptionValue("list1"));
+		File f2 = commandLine.hasOption("list2") ? new File(commandLine.getOptionValue("list2")) :  null;
+		String interactome = commandLine.getOptionValue("interactome", "join");
+		File interactionsFile = commandLine.hasOption("own-interactions") ? new File(commandLine.getOptionValue("own-interactions")) :  null;
+		boolean checkInteractions = commandLine.hasOption("check-interactions");
+		String idNature = commandLine.getOptionValue("id-nature", "proteins");
+		int interactionsNumber = Integer.parseInt(commandLine.getOptionValue("interactions-number", "1"));
+
+		executeSnow(interactome, idNature, interactionsNumber, f1, f2, interactionsFile, checkInteractions);
+
+		//		} catch (IOException e) {
+		//			logger.error("Error opening the dataset", e.toString());
+		//		}
 	}
-	
+
 	private void executeSnow(String interactome, String idNature, int interactionsNumber, File f1, File f2, File interactionsFile, boolean checkInteractions) {
 		SnowTest snowTest = null;
 		String snowBinPath = System.getenv("BABELOMICS_HOME") + "/bin/snow/snow.pl";		
 		System.out.println("Snow.java:executeSnow, snowBinPath = " + snowBinPath);
-		
+
 		// create the snow test object according to the parameters
 		//
 		if ( f2 == null ) {
@@ -78,102 +78,81 @@ public class Snow extends BabelomicsTool {
 				snowTest = new SnowTest(snowBinPath, f1.getAbsolutePath(), f2.getAbsolutePath(), interactome, idNature, interactionsNumber, outdir);
 			}			
 		}
-		
+
 		if ( snowTest == null ) {
 			abort("snow_executesnow", "invalid parameters", "invalid parameters", "invalid parameters");
 		}
-		
+
 		try {
 			snowTest.run();
-			
+
 			String uniqueId = IOUtils.readLines(new File(outdir + "/unique_id.txt")).get(0).trim();
 			String baseDir = "/temp/" + uniqueId + "/";
 			System.out.println("Snow.java:executeSnow, uniqueId = " + uniqueId);
-			
-			File file, outFile;
-			String fileName, dirName;
-			
+
+			//			File file, outFile;
+			//			String fileName, dirName;
+
 			// interactome images
 			//
-			fileName = "interactome_betweenness.png";
-			file = new File(outdir + baseDir + fileName);
-			if ( file.exists() ) {
-				outFile = new File(outdir + "/" + fileName);
-				System.out.println("Snow.java:executeSnow, infile = " + file.getAbsolutePath() + ", outfile = " + outFile.getAbsolutePath());
-				FileUtils.touch(outFile);
-				FileUtils.copy(file, outFile);
-				if ( outFile.exists() ) {
-					result.addOutputItem(new Item("interactome_betweenness_image", file.getName(), "Interactome betweenness image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Interactome images"));
-				}
-			}
-
-			fileName = "interactome_coefficient.png";
-			file = new File(outdir + baseDir + fileName);
-			if ( file.exists() ) {
-				outFile = new File(outdir + "/" + fileName);
-				FileUtils.touch(outFile);
-				FileUtils.copy(file, outFile);
-				if ( outFile.exists() ) {
-					result.addOutputItem(new Item("interactome_coefficient_image", file.getName(), "Interactome coefficient image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Interactome images"));
-				}
-			}
-
-			fileName = "interactome_connections.png";
-			file = new File(outdir + baseDir + fileName);
-			if ( file.exists() ) {
-				outFile = new File(outdir + "/" + fileName);
-				FileUtils.touch(outFile);
-				FileUtils.copy(file, outFile);
-				if ( outFile.exists() ) {
-					result.addOutputItem(new Item("interactome_connections_image", file.getName(), "Interactome connections image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Interactome images"));
-				}
-			}
+			addResultImage("interactome_betweenness_image", "Interactome betweenness image (png format)", "Interactome images", "interactome_betweenness.png", baseDir);
+			addResultImage("interactome_coefficient_image", "Interactome coefficient image (png format)", "Interactome images", "interactome_coefficient.png", baseDir);
+			addResultImage("interactome_connections_image", "Interactome connections image (png format)", "Interactome images", "interactome_connections.png", baseDir);
 
 			// network images
 			//
-			fileName = "network_betweenness.png";
-			file = new File(outdir + baseDir + fileName);
-			if ( file.exists() ) {
-				outFile = new File(outdir + "/" + fileName);
-				FileUtils.touch(outFile);
-				FileUtils.copy(file, outFile);
-				if ( outFile.exists() ) {
-					result.addOutputItem(new Item("network_betweenness_image", file.getName(), "Interactome betweenness image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Network images"));
-				}
+			addResultImage("network_betweenness_image", "Network betweenness image (png format)", "Network images", "network_betweenness.png", baseDir);
+			addResultImage("network_coefficient_image", "Network coefficient image (png format)", "Network images", "network_coefficient.png", baseDir);
+			addResultImage("network_connections_image", "Network connections image (png format)", "Network images", "network_connections.png", baseDir);
+
+			// list #1 files
+			//
+			addResultFile("list1_bicomp_file", "BiComponents & subnetwork parameters", "List #1 results", "List1_bicomp.txt", baseDir);
+			addResultFile("list1_comp_file", "Components & subnetwork parameters", "List #1 results", "List1_comp.txt", baseDir);
+			addResultFile("list1_paths_file", "Shortest paths found with a maximun of 1 external proteins introduced", "List #1 results", "List1_paths.txt", baseDir);
+			addResultFile("list1_art_file", "BiComponents & articulation points", "List #1 results", "List1_art_points.txt", baseDir);
+
+
+			if ( f2 != null ) {
+				addResultFile("list2_bicomp_file", "BiComponents & subnetwork parameters", "List #2 results", "List2_bicomp.txt", baseDir);
+				addResultFile("list2_comp_file", "Components & subnetwork parameters", "List #2 results", "List2_comp.txt", baseDir);
+				addResultFile("list2_paths_file", "Shortest paths found with a maximun of 1 external proteins introduced", "List #2 results", "List2_paths.txt", baseDir);
+				addResultFile("list2_art_file", "BiComponents & articulation points", "List #2 results", "List2_art_points.txt", baseDir);
 			}
 
-			fileName = "network_coefficient.png";
-			file = new File(outdir + baseDir + fileName);
-			if ( file.exists() ) {
-				outFile = new File(outdir + "/" + fileName);
-				FileUtils.touch(outFile);
-				FileUtils.copy(file, outFile);
-				if ( outFile.exists() ) {
-					result.addOutputItem(new Item("network_coefficient_image", file.getName(), "Network coefficient image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Network images"));
-				}
-			}
+			//			result.addOutputItem(new Item("List_file", filename, "MARMITE output file", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Results"));
 
-			fileName = "network_connections.png";
-			file = new File(outdir + baseDir + fileName);
-			if ( file.exists() ) {
-				outFile = new File(outdir + "/" + fileName);
-				FileUtils.touch(outFile);
-				FileUtils.copy(file, outFile);
-				if ( outFile.exists() ) {
-					result.addOutputItem(new Item("network_connections_image", file.getName(), "Network connections image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Network images"));
-				}
-			}
-			
-//			result.addOutputItem(new Item("List_file", filename, "MARMITE output file", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Results"));
 
-			
 		} catch (InvalidParameterException e) {
 			printError("snow_executesnow_invalidparameterexception", e.toString(), e.toString(), e);
 		} catch (IOException e) {
 			printError("snow_executesnow_ioexception", e.toString(), e.toString(), e);		}
 	}
 
+	private void addResultImage(String name, String label, String groupName, String fileName, String baseDir) throws IOException {
+		File file = new File(outdir + baseDir + fileName);
+		if ( file.exists() ) {
+			File outFile = new File(outdir + "/" + fileName);
+			FileUtils.touch(outFile);
+			FileUtils.copy(file, outFile);
+			if ( outFile.exists() ) {
+				result.addOutputItem(new Item(name, file.getName(), label, TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), groupName));
+			}
+		}
+	}
 	
-	
-	
+	private void addResultFile(String name, String label, String groupName, String fileName, String baseDir) throws IOException {
+		File file = new File(outdir + baseDir + fileName);
+		if ( file.exists() ) {
+			File outFile = new File(outdir + "/" + fileName);
+			FileUtils.touch(outFile);
+			FileUtils.copy(file, outFile);
+			if ( outFile.exists() ) {
+				result.addOutputItem(new Item(name, file.getName(), label, TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), groupName));
+			}
+		}
+
+	}
+
+
 }
