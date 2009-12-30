@@ -16,33 +16,27 @@ public class Snow extends BabelomicsTool {
 
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("dataset", "the data"));		
-		options.addOption(OptionFactory.createOption("interactions-check", " if proteins in interactions and list are in same id",false,false));
-		options.addOption(OptionFactory.createOption("bioentity-name", "Select interactome"));
-		options.addOption(OptionFactory.createOption("list-genes-prots", "genes/proteins list ", false));
-		options.addOption(OptionFactory.createOption("interactions-file", "submit a file with interactome ",false));
-		options.addOption(OptionFactory.createOption("genes-prots-file", "ubmit a file with genes/proteins list",false));
-		options.addOption(OptionFactory.createOption("label-genes-prots", "Label for list of genes/proteins"));
-		options.addOption(OptionFactory.createOption("nature-filter", "Nature of your lists"));
-		options.addOption(OptionFactory.createOption("interactions-number", "Nature of your lists"));
+		options.addOption(OptionFactory.createOption("list1", "the list1"));		
+		options.addOption(OptionFactory.createOption("list2", "the list2", false));		
+		options.addOption(OptionFactory.createOption("interactome", "Select interactome: join (for human interactome with all ppis), intersect (for human interacionts with only ppis detected by two methods) and own (for your own interactions)", false));
+		options.addOption(OptionFactory.createOption("own-interactions", "submit a file with interactome ",false));
+		options.addOption(OptionFactory.createOption("check-interactions", "Set this option if proteins in interactions and list are in same id",false,false));
+		options.addOption(OptionFactory.createOption("id-nature", "Nature of your lists: genes or proteins", false));
+		options.addOption(OptionFactory.createOption("interactions-number", "Maximum number of external proteins introduced: 0, 1, 2 or 3", false));
 	}
 
 
 	@Override
 	public void execute() {
 		try {
-			Dataset dataset = new Dataset(new File(commandLine.getOptionValue("dataset")));
-			String bioEntityName = commandLine.getOptionValue("bioentity-name");
-			String bioentityInteractionsCheck = commandLine.getOptionValue("interactions-check", null);
-			String bioentityListGenesProts = commandLine.getOptionValue("list-genes-prots");			
-			String bioentityInteracionsFile = commandLine.getOptionValue("interactions-file", null);
-			String bioentityGenesProtsFile = commandLine.getOptionValue("genes-prots-file");	
-			String bioentityLabelGenProts = commandLine.getOptionValue("label-genes-prots");
-			String bioentityNatureFilter = commandLine.getOptionValue("nature-filter");
-			String bioentityInteracionsNumber = commandLine.getOptionValue("interactions-number");			
-			
-			System.out.println(dataset.toString()+"\n");
-			
+			File f1 = new File(commandLine.getOptionValue("list1"));
+			File f2 = commandLine.hasOption("list2") ? new File(commandLine.getOptionValue("list2")) :  null;
+			String interactome = commandLine.getOptionValue("interactome", "join");
+			File interactionsFile = commandLine.hasOption("own-interactions") ? new File(commandLine.getOptionValue("own-interactions")) :  null;
+			boolean checkInteractions = commandLine.hasOption("check-interactions");
+			String idNature = commandLine.getOptionValue("id-nature", "proteins");
+			int interactionsNumber = Integer.parseInt(commandLine.getOptionValue("interactions-number", "1"));
+						
 			executeSnow(dataset, bioEntityName, bioentityInteractionsCheck, bioentityListGenesProts,bioentityInteracionsFile, bioentityGenesProtsFile, bioentityLabelGenProts,  bioentityNatureFilter,bioentityInteracionsNumber);
 			
 		} catch (IOException e) {
@@ -52,7 +46,7 @@ public class Snow extends BabelomicsTool {
 	
 	private void executeSnow(Dataset dataset, String bioEntityName,	String bioentityInteractionsCheck, String bioentityListGenesProts, String bioentityInteracionsFile, String bioentityGenesProtsFile,	String bioentityLabelGenProts, String bioentityNatureFilter, String bioentityInteracionsNumber) {
 		// TODO Auto-generated method stub
-		
+c		
 	}
 
 	
