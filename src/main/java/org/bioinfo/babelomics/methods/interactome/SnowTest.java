@@ -4,7 +4,7 @@ import org.bioinfo.babelomics.exception.InvalidParameterException;
 import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
 
-public class Snow {
+public class SnowTest {
 
 	String mode = "unknown";
 	String interactome = "unknown";
@@ -18,7 +18,7 @@ public class Snow {
 	String snowBinPath = null;
 	String outDirName = null;
 	
-	public Snow(String snowBinPath, String list1FileName, String interactome, String idNature, int interactionsNumber, String outdirName) {
+	public SnowTest(String snowBinPath, String list1FileName, String interactome, String idNature, int interactionsNumber, String outDirName) {
 		this.snowBinPath = snowBinPath;
 		this.list1FileName = list1FileName;
 		this.interactome = interactome;
@@ -29,7 +29,7 @@ public class Snow {
 		this.mode = "one-list";
 	}
 	
-	public Snow(String snowBinPath, String list1FileName, String interactionsFileName, boolean checkInteractions, String idNature, int interactionsNumber, String outdirName) {
+	public SnowTest(String snowBinPath, String list1FileName, String interactionsFileName, boolean checkInteractions, String idNature, int interactionsNumber, String outDirName) {
 		this.snowBinPath = snowBinPath;
 		this.list1FileName = list1FileName;
 		this.interactome = "own";
@@ -42,7 +42,7 @@ public class Snow {
 		this.mode = "one-list";
 	}
 
-	public Snow(String snowBinPath, String list1FileName, String list2FileName, String interactome, String idNature, int interactionsNumber, String outdirName) {
+	public SnowTest(String snowBinPath, String list1FileName, String list2FileName, String interactome, String idNature, int interactionsNumber, String outDirName) {
 		this.snowBinPath = snowBinPath;
 		this.list1FileName = list1FileName;
 		this.list2FileName = list2FileName;
@@ -51,10 +51,10 @@ public class Snow {
 		this.interactionsNumber = interactionsNumber;
 		this.outDirName = outDirName;
 		
-		this.mode = "two-list";
+		this.mode = "two-lists";
 	}
 
-	public Snow(String snowBinPath, String list1FileName, String list2FileName, String interactionsFileName, boolean checkInteractions, String idNature, int interactionsNumber, String outdirName) {		
+	public SnowTest(String snowBinPath, String list1FileName, String list2FileName, String interactionsFileName, boolean checkInteractions, String idNature, int interactionsNumber, String outDirName) {		
 		this.snowBinPath = snowBinPath;
 		this.list1FileName = list1FileName;
 		this.list2FileName = list2FileName;
@@ -65,7 +65,7 @@ public class Snow {
 		this.interactionsNumber = interactionsNumber;
 		this.outDirName = outDirName;
 		
-		this.mode = "two-list";
+		this.mode = "two-lists";
 	}
 
 
@@ -75,15 +75,28 @@ public class Snow {
 		}
 		
 		String cmd = createSnowCommand();
-		executeSnowCommand(cmd);
 		
+		System.out.println("SnowTest.java:run, cmd = " + cmd);
+
+		executeSnowCommand(cmd);		
 	}
 	
 	private String createSnowCommand() {
 		StringBuilder cmd = new StringBuilder(snowBinPath);
-		if ( )
+
+		//die "usage: ./snow.pl <interactome> <specie> <nature> <mode> <limit> <jobname> <list-file-1> <list-file-2> <interactome-file> <same-id> <out-dir>\n";
+		cmd.append(" ").append(this.interactome);
+		cmd.append(" ").append("hsa");
+		cmd.append(" ").append(this.idNature);
+		cmd.append(" ").append(this.mode);
+		cmd.append(" ").append(this.interactionsNumber);
+		cmd.append(" ").append("snow");
 		cmd.append(" ").append(list1FileName);
-		cmd.append(" ").append(outDirName);
+		cmd.append(" ").append("two-lists".equalsIgnoreCase(mode) ? this.list2FileName : "unknown");
+		cmd.append(" ").append("own".equalsIgnoreCase(interactome) ? this.interactionsFileName : "unknown");
+		cmd.append(" ").append("own".equalsIgnoreCase(interactome) ? (this.checkInteractions ? "on" : "off") : "unknown");
+		cmd.append(" ").append(this.outDirName);
+			
 		return cmd.toString();
 	}
 
