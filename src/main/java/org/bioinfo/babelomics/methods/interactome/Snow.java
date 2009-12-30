@@ -18,17 +18,19 @@ public class Snow {
 	String snowBinPath = null;
 	String outDirName = null;
 	
-	public Snow(String list1FileName, String interactome, String idNature, int interactionsNumber, String outdirName) {
-		this.mode = "one-list";
+	public Snow(String snowBinPath, String list1FileName, String interactome, String idNature, int interactionsNumber, String outdirName) {
+		this.snowBinPath = snowBinPath;
 		this.list1FileName = list1FileName;
 		this.interactome = interactome;
 		this.idNature = idNature;
 		this.interactionsNumber = interactionsNumber;
 		this.outDirName = outDirName;
+
+		this.mode = "one-list";
 	}
 	
-	public Snow(String list1FileName, String interactionsFileName, boolean checkInteractions, String idNature, int interactionsNumber, String outdirName) {
-		this.mode = "one-list";
+	public Snow(String snowBinPath, String list1FileName, String interactionsFileName, boolean checkInteractions, String idNature, int interactionsNumber, String outdirName) {
+		this.snowBinPath = snowBinPath;
 		this.list1FileName = list1FileName;
 		this.interactome = "own";
 		this.interactionsFileName = interactionsFileName;
@@ -36,20 +38,24 @@ public class Snow {
 		this.idNature = idNature;
 		this.interactionsNumber = interactionsNumber;
 		this.outDirName = outDirName;
+
+		this.mode = "one-list";
 	}
 
-	public Snow(String list1FileName, String list2FileName, String interactome, String idNature, int interactionsNumber, String outdirName) {
-		this.mode = "two-list";
+	public Snow(String snowBinPath, String list1FileName, String list2FileName, String interactome, String idNature, int interactionsNumber, String outdirName) {
+		this.snowBinPath = snowBinPath;
 		this.list1FileName = list1FileName;
 		this.list2FileName = list2FileName;
 		this.interactome = interactome;
 		this.idNature = idNature;
 		this.interactionsNumber = interactionsNumber;
 		this.outDirName = outDirName;
+		
+		this.mode = "two-list";
 	}
 
-	public Snow(String list1FileName, String list2FileName, String interactionsFileName, boolean checkInteractions, String idNature, int interactionsNumber, String outdirName) {
-		this.mode = "two-list";
+	public Snow(String snowBinPath, String list1FileName, String list2FileName, String interactionsFileName, boolean checkInteractions, String idNature, int interactionsNumber, String outdirName) {		
+		this.snowBinPath = snowBinPath;
 		this.list1FileName = list1FileName;
 		this.list2FileName = list2FileName;
 		this.interactome = "own";
@@ -58,6 +64,8 @@ public class Snow {
 		this.idNature = idNature;
 		this.interactionsNumber = interactionsNumber;
 		this.outDirName = outDirName;
+		
+		this.mode = "two-list";
 	}
 
 
@@ -73,6 +81,7 @@ public class Snow {
 	
 	private String createSnowCommand() {
 		StringBuilder cmd = new StringBuilder(snowBinPath);
+		if ( )
 		cmd.append(" ").append(list1FileName);
 		cmd.append(" ").append(outDirName);
 		return cmd.toString();
@@ -82,14 +91,5 @@ public class Snow {
 		Command snowCommand = new Command(cmd);
 		SingleProcess sp = new SingleProcess(snowCommand);
 		sp.runSync();
-	}
-	
-	
-	public String getSnowBinPath() {
-		return snowBinPath;
-	}
-
-	public void setSnowBinPath(String snowBinPath) {
-		this.snowBinPath = snowBinPath;
 	}
 }
