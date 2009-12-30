@@ -39,10 +39,12 @@ public class Snow extends BabelomicsTool {
 
 		System.out.println("Snow.java:execute, outdir = " + outdir);
 		//		try {
+		
+		
 		File f1 = new File(commandLine.getOptionValue("list1"));
-		File f2 = commandLine.hasOption("list2") ? new File(commandLine.getOptionValue("list2")) :  null;
+		File f2 = commandLine.hasOption("list2") ? ("none".equalsIgnoreCase(commandLine.getOptionValue("list2")) ? null : new File(commandLine.getOptionValue("list2"))) :  null;
 		String interactome = commandLine.getOptionValue("interactome", "join");
-		File interactionsFile = commandLine.hasOption("own-interactions") ? new File(commandLine.getOptionValue("own-interactions")) :  null;
+		File interactionsFile = commandLine.hasOption("own-interactions") ? ("none".equalsIgnoreCase(commandLine.getOptionValue("list2")) ? null : new File(commandLine.getOptionValue("own-interactions"))) :  null;
 		boolean checkInteractions = commandLine.hasOption("check-interactions");
 		String idNature = commandLine.getOptionValue("id-nature", "proteins");
 		int interactionsNumber = Integer.parseInt(commandLine.getOptionValue("interactions-number", "1"));
