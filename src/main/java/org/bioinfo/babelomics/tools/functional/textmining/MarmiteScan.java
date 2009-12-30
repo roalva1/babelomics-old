@@ -15,7 +15,6 @@ import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;

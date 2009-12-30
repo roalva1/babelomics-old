@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.bioinfo.babelomics.methods.genomic.genotype.GenotypeAnalysis;
 import org.bioinfo.data.dataset.Dataset;
-import org.bioinfo.math.util.MathUtils;
 import org.bioinfo.tool.OptionFactory;
 
 public class AssociationTool extends GenotypeAnalysisTool {

@@ -1,14 +1,10 @@
 package org.bioinfo.babelomics.tools.expression;
 
 
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.util.Arrays;
 
 import org.bioinfo.babelomics.BabelomicsMain;
-import org.bioinfo.commons.io.utils.FileUtils;
-import org.bioinfo.commons.io.utils.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -19,15 +19,17 @@ public class BabelomicsMain {
 		if(args.length == 0) {
 			logger.println("No options have been provided");
 			printUsage();
+			return;
 		}
 		
 		String toolName = null;
+		
 		// looking for the tool name 
 		for(int i=0; i < args.length; i++) {
 			if(args[i].equals("--tool") || args[i].equals("-tool")) {
 				// this fixes the case that --tool is the last option
 				// and no name has been provided
-				if(i < args.length) {
+				if(i < (args.length-1)) {
 					toolName = args[i+1];
 					break;
 				}

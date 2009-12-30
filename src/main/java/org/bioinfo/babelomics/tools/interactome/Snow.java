@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.OptionFactory;
 

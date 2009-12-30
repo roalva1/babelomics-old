@@ -10,7 +10,6 @@ import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
-import org.bioinfo.data.dataset.Dataset;
 
 public class CopyNumberAnalysisExecutor {
 	

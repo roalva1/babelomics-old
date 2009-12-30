@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
+import org.bioinfo.babelomics.methods.functional.GeneSetAnalysisTestResult;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
@@ -226,8 +227,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		}
 		return result;
 	}
-	
-	
+		
 	
 	public void setRestOfGenome(boolean restOfGenome) {
 		this.restOfGenome = restOfGenome;
