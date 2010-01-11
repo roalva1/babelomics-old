@@ -59,7 +59,7 @@ public class GoGraphViewerTool  extends BabelomicsTool{
 			}
 			
 			// go domain
-			goDomain = "b";		
+			goDomain = "b";
 			if(commandLine.hasOption("go-domain")) goDomain = commandLine.getOptionValue("go-domain");
 			if(!goDomain.equals("b") && !goDomain.equals("m") && !goDomain.equals("c")) throw new InvalidParameterException("value " + goDomain + " for go-domain parameter is not valid");
 	
@@ -101,7 +101,7 @@ public class GoGraphViewerTool  extends BabelomicsTool{
 				throw new Exception("Properties file $BABELOMICS_HOME/conf/blast2go.properties cannot be read");
 			}
 					
-		} catch (Exception e){
+		} catch (Exception e){			
 			e.printStackTrace();
 		}
 			
