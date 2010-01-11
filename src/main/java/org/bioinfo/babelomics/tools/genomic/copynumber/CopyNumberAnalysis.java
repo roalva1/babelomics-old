@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.bioinfo.babelomics.exception.InvalidParameterException;
 import org.bioinfo.babelomics.methods.genomic.copynumber.CopyNumberAnalysisExecutor;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -100,10 +102,21 @@ public class CopyNumberAnalysis extends BabelomicsTool {
 			printError("segmentedfileerror_execute_copynumberanalyis", "error creating segmented file", "error creating segmented file");
 		}
 		if ( cghMcr ) {
-			if ( cghFile.exists() ) {
-				result.addOutputItem(new Item("cghfile", cghFile.getName(), "CGH file for " + segmentation.toUpperCase() + " segmentation", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), segmentation.toUpperCase() + " CGH"));						
+			if ( cghFile.exists() ) {			
+				List<String> lines = null;
+				try {
+					lines = IOUtils.grep(cghFile, "#ERROR.*");
+					if ( lines != null ) {
+						String error = lines.get(0).replace("#ERROR\t", ""); 
+						printError("cghfileerror_execute_copynumberanalyis", "Error", error);			
+					} else {
+						result.addOutputItem(new Item("cghfile", cghFile.getName(), "CGH file for " + segmentation.toUpperCase() + " segmentation", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), segmentation.toUpperCase() + " CGH"));						
+					}				
+				} catch (IOException e) {
+					printError("cghfileerror_execute_copynumberanalyis", "Error", "error creating cgh file");			
+				}
 			} else {
-				printError("cghfileerror_execute_copynumberanalyis", "error creating cgh file", "error creating cgh file");			
+				printError("cghfileerror_execute_copynumberanalyis", "Error", "error creating cgh file");			
 			}
 		}
 	}
