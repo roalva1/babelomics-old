@@ -8,14 +8,11 @@ import java.util.HashMap;
 import org.bioinfo.babelomics.exception.InvalidParameterException;
 import org.bioinfo.babelomics.methods.interactome.SnowTest;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.commons.io.utils.FileSystemUtils;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
-
-import sun.management.FileSystem;
 
 public class Snow extends BabelomicsTool {
 

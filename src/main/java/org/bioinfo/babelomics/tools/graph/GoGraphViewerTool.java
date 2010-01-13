@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.security.InvalidParameterException;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Properties;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
@@ -12,6 +14,8 @@ import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 
 import es.blast2go.prog.graph.GetGraphApi;
+import es.blast2go.prog.graph.GoGraphException;
+
 
 public class GoGraphViewerTool  extends BabelomicsTool{
 
@@ -91,11 +95,19 @@ public class GoGraphViewerTool  extends BabelomicsTool{
 				graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));				
 				graph.setDataBase(config.getProperty("BLAST2GO_HOST_NAME"),config.getProperty("BLAST2GO_DB_NAME"),config.getProperty("BLAST2GO_DB_USER"), config.getProperty("BLAST2GO_DB_PASSWORD"));
 				
-				// run
-				graph.run();
-				
-				// fill output
-				fillResultXML();
+				try {
+					// run
+					graph.run();
+					
+					// fill output
+					fillResultXML();
+
+				  // continuar normal
+				} catch (GoGraphException e) {
+					// fill output
+					fillFailedResultXML(e.getMessage());
+				}
+					
 				
 			} else {
 				throw new Exception("Properties file $BABELOMICS_HOME/conf/blast2go.properties cannot be read");
@@ -107,7 +119,7 @@ public class GoGraphViewerTool  extends BabelomicsTool{
 			
 		
 	}
-	
+		
 	private void fillResultXML() {
 		// images
 		result.addOutputItem(new Item("imageJpgsmall", PREFIX + "_graphimagesmall.jpg", "Graph as JPG image (low resolution)", Item.TYPE.IMAGE, "Images"));
@@ -120,6 +132,10 @@ public class GoGraphViewerTool  extends BabelomicsTool{
 		result.addOutputItem(new Item("graphTxt", PREFIX + "_graph.txt", "Graph as textual representation",  Item.TYPE.FILE, "Graph as text"));		
 	}
 
+	private void fillFailedResultXML(String message) {
+		result.addOutputItem(new Item("error",message,"Error",Item.TYPE.MESSAGE,Arrays.asList("ERROR"), new HashMap<String,String>(),"Images"));
+	}
+	
 	private Properties loadConfig(){
 		config = new Properties();
 		try {

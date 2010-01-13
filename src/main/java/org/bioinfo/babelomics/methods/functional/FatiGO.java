@@ -58,7 +58,7 @@ public class FatiGO {
 		this.isYourAnnotations = false;
 	}
 
-	// Your anntoations two list constructor
+	// Your annotations two list constructor
 	public FatiGO(List<String> list1, List<String> list2, FeatureList<AnnotationItem> annotations, int testMode, int duplicatesMode ) {
 		this.list1 = list1;
 		this.list2 = list2;

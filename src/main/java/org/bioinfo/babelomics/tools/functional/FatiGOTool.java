@@ -80,7 +80,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		} else if(commandLine.hasOption("chromosomes")) {
 			throw new ParseException("chromosome reading not yet implemented");
 		} else {
-			throw new ParseException("No comparison provided, use list2, rest-of-genome or chromosome options to set your comparison");
+			throw new ParseException("No comparison provided, use list2, genome or chromosome options to set your comparison");
 		}
 		
 		// extras
@@ -107,20 +107,33 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			// prepare params
 			prepare();			
 	
+			FatiGO fatigo = null;
+			String list2label = "List 2 (after duplicates managing)";
+			
 			// list 1			
 			List<String> idList1 = list1.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list1.getDataFrame().getColumn(0));
 			
 			// list 2
 			List<String> idList2 = null;
 			if(list2!=null) {
-				idList2 = list2.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list2.getDataFrame().getColumn(0));				
+				idList2 = list2.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list2.getDataFrame().getColumn(0));
+				fatigo = new FatiGO(idList1, idList2, null, dbConnector, testMode, duplicatesMode);				
 			} else if(isRestOfGenome()) {				
 				duplicatesMode = FatiGO.REMOVE_GENOME;
+				fatigo = new FatiGO(idList1, null, dbConnector);
+				list2label = "Genome (after duplicates managing)";
 			} else if(chromosomes!=null) {
-				throw new ParseException("chromosome comparison not yet implemented");
+				throw new ParseException("chromosomes comparison not yet implemented");
 			} else {
 				throw new ParseException("No comparison provided, use list2, genome or chromosomes options to set your comparison");				
 			}
+			
+			// save data
+			IOUtils.write(outdir + "/clean_list1.txt", ListUtils.toString(fatigo.getList1(),"\n"));
+			result.addOutputItem(new Item("clean_list1","clean_list1.txt","List 1 (after duplicates managing)",Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
+			IOUtils.write(outdir + "/clean_list2.txt", ListUtils.toString(fatigo.getList2(),"\n"));
+			result.addOutputItem(new Item("clean_list2","clean_list2.txt",list2label,Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
+			
 			
 			// run fatigo's
 			if(filterList.size()==0 && !isYourAnnotations){
@@ -129,12 +142,6 @@ public class FatiGOTool extends FunctionalProfilingTool{
 
 				// significant terms
 				List<String> significant = new ArrayList<String>();
-
-				FatiGO fatigo = new FatiGO(idList1, idList2, null, dbConnector, testMode, duplicatesMode);
-				IOUtils.write(outdir + "/clean_list1.txt", ListUtils.toString(fatigo.getList1(),"\n"));
-				result.addOutputItem(new Item("clean_list1","clean_list1.txt","List 1 (after duplicates managing)",Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
-				IOUtils.write(outdir + "/clean_list2.txt", ListUtils.toString(fatigo.getList2(),"\n"));
-				result.addOutputItem(new Item("clean_list2","clean_list2.txt","List 2 (after duplicates managing)",Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
 				
 				// Significant results must appear after than complete tables!!
 				result.addOutputItem(new Item("significant","significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE"),new HashMap<String,String>(),"Significant Results"));
@@ -149,7 +156,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				}
 				
 				// significant terms
-				IOUtils.write(outdir + "/significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt", StringUtils.join(significant,"\n"));
+				IOUtils.write(outdir + "/significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significant,"\n"));
 				
 			}
 			
