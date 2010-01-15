@@ -36,8 +36,8 @@ public class RCommand {
 	public void exec(){
 		addParam("outdir", outdir);
 		Command cmd = new Command("R CMD BATCH --no-save --no-restore " + scriptPath + " " + outdir + "/r.log", params);
-		System.out.println("cmd line = " + cmd.getCommandLine());
-		System.out.println("cmd env = " + ListUtils.toString(params, " "));
+		System.out.println("=====cmd line = " + cmd.getCommandLine());
+		System.out.println("=====cmd env = " + ListUtils.toString(params, " "));
 		SingleProcess sp = new SingleProcess(cmd);
 		sp.runSync();	
 	}

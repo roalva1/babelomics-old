@@ -86,7 +86,7 @@ public class BabelomicsFactory {
 			return new TimeSeries();
 		}
 		
-		if(toolName.equalsIgnoreCase("predictor")) {
+		if(toolName.equalsIgnoreCase("class-prediction")) {
 			return new Predictor();
 		}
 
@@ -168,6 +168,10 @@ public class BabelomicsFactory {
 		
 		if(toolName.equalsIgnoreCase("go-graph-viewer")) {
 			return new GoGraphViewerTool();
+		}
+		
+		if(toolName.equalsIgnoreCase("pca-plot")) {
+			return new DescriptiveStatistics();
 		}
 		
 

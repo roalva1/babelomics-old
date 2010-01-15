@@ -8,11 +8,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bioinfo.babelomics.exception.InvalidParameterException;
 import org.bioinfo.babelomics.methods.expression.clustering.ClusteringUtils;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.babelomics.utils.RCommand;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.chart.HistogramChart;
 import org.bioinfo.collections.tree.multiple.MultipleTree;
+import org.bioinfo.commons.exec.Command;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.format.io.exception.InvalidFileFormatException;
@@ -40,6 +44,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("tree", "",false));
 		options.addOption(OptionFactory.createOption("histogram", "",false));
 		options.addOption(OptionFactory.createOption("boxplot", "",false));
+		options.addOption(OptionFactory.createOption("pcaplot", "",false));
 		//options.addOption(OptionFactory.createOption("histogramboxplot", "",false,false));
 		options.addOption(OptionFactory.createOption("class", "",false,true));
 		options.addOption(OptionFactory.createOption("width", "",false,true));
@@ -70,7 +75,55 @@ public class DescriptiveStatistics extends BabelomicsTool {
 			 doTree();
 		}
 		
+		else if(commandLine.hasOption("pcaplot")){
+			
+				try {
+					doPcaPlot(babelomicsHomePath + "/bin/pcaplot/pcaplot.r");
+				} catch (InvalidParameterException e) {
+					e.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			
+		}
+		
 
+	}
+
+
+	private void doPcaPlot(String pcaPlotBinPath) throws InvalidParameterException, IOException  {
+		
+		String pcaplotFileName = "pca.png";
+		
+		List<String> env = new ArrayList<String>();
+		env.add("datafile=" + commandLine.getOptionValue("datalist"));		
+		env.add("outfile=" + this.getOutdir() + "/" + pcaplotFileName);
+		Command cmd = new Command("/usr/local/R-292/bin/R CMD BATCH --verbose --no-save --no-restore " + pcaPlotBinPath + " " + this.getOutdir() + "/rLog.log", env);		
+		System.out.println("command = " + cmd.getCommandLine());
+		System.out.println("env = " + ListUtils.toString(env, " "));
+		cmd.run();
+		
+		System.out.println("out std = " + cmd.getOutput());
+		System.out.println("out std = " + cmd.getStatus());
+		System.out.println("out std = " + cmd.getException());
+		System.out.println("out error = " + cmd.getError());
+		
+//		System.err.println("salida:" + this.getOutdir() + " " + outdir);
+//		
+//		RCommand rCommand = new RCommand(pcaPlotBinPath, this.getOutdir());
+//		rCommand.addParam("datafile", commandLine.getOptionValue("datalist"));
+//		rCommand.addParam("outfile", this.getOutdir() + "/" + pcaplotFileName);
+//
+//		updateJobStatus("40", "executing segmentation");
+//
+//		rCommand.exec();
+		
+		// saving results
+		//
+		updateJobStatus("90", "saving results");
+		
+		result.addOutputItem(new Item("pca_plot", pcaplotFileName,"pca plot (png format)",TYPE.IMAGE, Arrays.asList("IMAGE","PCA_IMAGE"),new HashMap<String,String>(),"pca image"));
+	
 	}
 
 
@@ -90,7 +143,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 			}
 			else{
 				dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
-				addSeries(dataset.getDoubleMatrix(),hc,bp, "PUT HERE THE COLUMN_NAME/NUMBER");
+				addSeries(dataset.getDoubleMatrix(),hc,bp, "");
 			}
 			
 		} catch (IOException e4) {
@@ -105,7 +158,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 			hc.addSeries(matrixByVal.getColumn(0),str);
 		}
 		if(bp != null ){
-			bp.addSeries(matrixByVal.getColumn(0),str, "hola");
+			bp.addSeries(matrixByVal.getColumn(0),str, "");
 		}
 	}
 	
