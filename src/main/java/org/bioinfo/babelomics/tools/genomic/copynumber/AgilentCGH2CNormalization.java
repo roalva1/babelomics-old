@@ -1,4 +1,4 @@
-package org.bioinfo.babelomics.tools.expression.normalization;
+package org.bioinfo.babelomics.tools.genomic.copynumber;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,9 +19,9 @@ import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 
 
-public class AgilentExpression2CNormalization extends BabelomicsTool {
+public class AgilentCGH2CNormalization extends BabelomicsTool {
 
-	public AgilentExpression2CNormalization() {
+	public AgilentCGH2CNormalization() {
 		initOptions();
 	}
 
@@ -114,7 +114,7 @@ public class AgilentExpression2CNormalization extends BabelomicsTool {
 
 			file = new File(outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName()); 
 			if ( file.exists() ) {
-				result.addOutputItem(new Item("normalized", file.getName(), "Feature data", TYPE.FILE, tags, new HashMap<String, String>(2), "Two-colors agilent normalization files"));
+				result.addOutputItem(new Item("feature_data", file.getName(), "Feature data", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Two-colors agilent normalization files"));
 			}
 
 			file = new File(outdir + "/" + AgilentExpressionUtils.getaValuesFileName()); 

@@ -66,10 +66,19 @@ public class CopyNumberAnalysisExecutor {
 		if ( cghMcrBinPath != null ) {		
 			File segmentedFile = new File(segmentedFilename);
 			if ( segmentedFile.exists() ) {
+				
+				String tmpNormalizedFilename = cghFilename + ".norm.tmp";
+				String tmpSegmentedFilename = cghFilename + ".segm.tmp";
+				
+				//namesToIdTag(normalizedFilename, tmpNormalizedFilename);
+				//namesToIdTag(segmentedFilename, tmpSegmentedFilename);
+								
 				env = new ArrayList<String>();
 				env.add("normalizedfile=" + normalizedFilename);		
-				env.add("normnames=" + normNames);
+				//env.add("normalizedfile=" + tmpNormalizedFilename);		
+				env.add("normnames=" + getColumnNames(normalizedFilename));
 				env.add("segmentedfile=" + segmentedFilename);		
+				//env.add("segmentedfile=" + tmpSegmentedFilename);		
 				env.add("segnames=" + getColumnNames(segmentedFilename));
 				env.add("outfile=" + cghFilename);
 
@@ -90,6 +99,11 @@ public class CopyNumberAnalysisExecutor {
 				if ( ! cghFile.exists() ) {
 					System.err.println("error creating cgh file");
 				}
+				
+				File file = new File(tmpNormalizedFilename);
+				if ( file.exists() ) file.delete();
+				file = new File(tmpSegmentedFilename);
+				if ( file.exists() ) file.delete();				 
 			} else {
 				System.err.println("error creating segmented file");
 			}
@@ -99,16 +113,29 @@ public class CopyNumberAnalysisExecutor {
 	
 	private String getColumnNames(String filename) throws IOException {
 		String names = null;
-		List<String> lines = IOUtils.grep(filename, "#NAMES.*");
+		List<String> lines = IOUtils.grep(filename, "#ID.*");
 		if ( lines != null ) {
 			names = lines.get(0).replace("#", "");
 			names = names.replace("\t", ",");
 		} else {
-			throw new IOException("File " + filename + " does not contain #NAMES label");
+			throw new IOException("File " + filename + " does not contain ID label");
 		}
 		return names;
 	}
 
+//	private void namesToIdTag(String inputFilename, String outFilename) throws IOException {
+//		List<String> lines = IOUtils.readLines(inputFilename);
+//		for(int i=0 ; i<lines.size() ; i++) {
+//			if ( lines.get(i).startsWith("#NAMES\t") ) {
+//				List<String> newLines = new ArrayList<String>(lines.size());
+//				newLines.add(lines.get(i).replace("#NAMES\t", "#ID\t"));
+//				lines.remove(i);
+//				newLines.addAll(lines);						
+//				IOUtils.write(outFilename, newLines);
+//			}
+//		}
+//	}
+	
 	public int getGapAllowed() {
 		return gapAllowed;
 	}

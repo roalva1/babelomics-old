@@ -16,7 +16,7 @@ import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
 import org.bioinfo.babelomics.tools.functional.tissues.AffyTmt;
 import org.bioinfo.babelomics.tools.functional.tissues.SageTmt;
-import org.bioinfo.babelomics.tools.genomic.copynumber.AgilentCGHNormalization;
+import org.bioinfo.babelomics.tools.genomic.copynumber.AgilentCGH2CNormalization;
 import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
 import org.bioinfo.babelomics.tools.genomic.genotype.AssociationTool;
@@ -118,8 +118,8 @@ public class BabelomicsFactory {
 			return new AffyTmt();
 		}
 		
-		if(toolName.equalsIgnoreCase("agilent-cgh-normalization")) {
-			return new AgilentCGHNormalization();
+		if(toolName.equalsIgnoreCase("agilent-cgh-two-colors-normalization")) {
+			return new AgilentCGH2CNormalization();
 		}
 
 		if(toolName.equalsIgnoreCase("tmt-sage")) {
@@ -127,7 +127,7 @@ public class BabelomicsFactory {
 		}
 
 		if(toolName.equalsIgnoreCase("copy-number-normalization")) {
-			return new AgilentCGHNormalization();
+			return new AgilentCGH2CNormalization();
 		}
 
 		if(toolName.equalsIgnoreCase("copy-number")) {
@@ -170,7 +170,6 @@ public class BabelomicsFactory {
 			return new GoGraphViewerTool();
 		}
 		
-
 		return babelomicsTool;
 	}
 
