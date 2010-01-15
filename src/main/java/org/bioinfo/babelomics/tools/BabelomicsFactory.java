@@ -9,7 +9,7 @@ import org.bioinfo.babelomics.tools.expression.differential.Survival;
 import org.bioinfo.babelomics.tools.expression.differential.TimeSeries;
 import org.bioinfo.babelomics.tools.expression.normalization.AffyExpressionNormalization;
 import org.bioinfo.babelomics.tools.expression.normalization.AgilentExpression2CNormalization;
-import org.bioinfo.babelomics.tools.functional.Blast2Go;
+import org.bioinfo.babelomics.tools.functional.Blast2GoTool;
 import org.bioinfo.babelomics.tools.functional.FatiGOTool;
 import org.bioinfo.babelomics.tools.functional.FatiScanTool;
 import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
@@ -155,7 +155,7 @@ public class BabelomicsFactory {
 		}
 
 		if(toolName.equalsIgnoreCase("blast2go")) {
-			return new Blast2Go();
+			return new Blast2GoTool();
 		}
 		
 		if(toolName.equalsIgnoreCase("descriptive-statistics")) {
