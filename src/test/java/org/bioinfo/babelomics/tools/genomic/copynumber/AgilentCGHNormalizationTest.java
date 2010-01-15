@@ -10,10 +10,10 @@ public class AgilentCGHNormalizationTest {
 	
 	@Test
 	public void test() {
-		String outdirname = "/tmp/";
+		String outdirname = "/tmp/agilent-cgh-normalization";
 		new File(outdirname).mkdir();
 		
-		System.out.println("----- copynumberanalysis dnacopy from directory ------");
+		System.out.println("----- agilent cgh normalization from dir ------");
 		String []args = {"-tool", "copy-number-normalization", "--raw-dir", "/mnt/commons/test/biodata/example/cgh/agilent/normalization/dataset1", "-o", outdirname, "--bg-correction", "normexp", "--wa-normalization", "loess", "--ba-normalization", "quantile", "--design", "1"};
 		
 		try {

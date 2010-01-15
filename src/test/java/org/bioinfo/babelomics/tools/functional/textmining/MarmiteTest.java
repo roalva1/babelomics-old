@@ -8,7 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class MarmiteJunitTest {
+public class MarmiteTest {
 
 	@Before
 	public void setUp() throws Exception {
@@ -27,7 +27,7 @@ public class MarmiteJunitTest {
 	public void Test() {
 		String list1 = "/mnt/commons/test/tools/marmite/marmite1a.txt"; ///marmite1a.txt /marmite1_40.txt
 		String list2 = "/mnt/commons/test/tools/marmite/marmite2a.txt"; ///marmite2a.txt /marmite2_40.txt
-		String outdir = "/tmp/MarmiteJunitTest";
+		String outdir = "/tmp/MarmiteTest";
 		new File(outdir).mkdir();
 
 		System.out.println("----- marmite test  ------");

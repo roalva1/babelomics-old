@@ -52,7 +52,7 @@ public class CopyNumberAnalysisExecutor {
 		env.add("infile=" + normalizedFilename);		
 		env.add("outfile=" + segmentedFilename);
 	
-		normNames = getColumnNames(normalizedFilename, "#NAMES.*");
+		normNames = getColumnNames(normalizedFilename);
 		env.add("colnames=" + normNames);
 						
 		Command cmd = new Command("R CMD BATCH --no-save --no-restore " + segmentationBinPath + " " + segmentedFilename + ".log", env);
@@ -70,16 +70,16 @@ public class CopyNumberAnalysisExecutor {
 				String tmpNormalizedFilename = cghFilename + ".norm.tmp";
 				String tmpSegmentedFilename = cghFilename + ".segm.tmp";
 				
-				namesToIdTag(normalizedFilename, tmpNormalizedFilename);
-				namesToIdTag(segmentedFilename, tmpSegmentedFilename);
+				//namesToIdTag(normalizedFilename, tmpNormalizedFilename);
+				//namesToIdTag(segmentedFilename, tmpSegmentedFilename);
 								
 				env = new ArrayList<String>();
-				//env.add("normalizedfile=" + normalizedFilename);		
-				env.add("normalizedfile=" + tmpNormalizedFilename);		
-				env.add("normnames=" + getColumnNames(tmpNormalizedFilename, "#ID.*"));
-//				env.add("segmentedfile=" + segmentedFilename);		
-				env.add("segmentedfile=" + tmpSegmentedFilename);		
-				env.add("segnames=" + getColumnNames(tmpSegmentedFilename, "#ID.*"));
+				env.add("normalizedfile=" + normalizedFilename);		
+				//env.add("normalizedfile=" + tmpNormalizedFilename);		
+				env.add("normnames=" + getColumnNames(normalizedFilename));
+				env.add("segmentedfile=" + segmentedFilename);		
+				//env.add("segmentedfile=" + tmpSegmentedFilename);		
+				env.add("segnames=" + getColumnNames(segmentedFilename));
 				env.add("outfile=" + cghFilename);
 
 				env.add("gapAllowed=" + gapAllowed);
@@ -111,30 +111,30 @@ public class CopyNumberAnalysisExecutor {
 	}
 
 	
-	private String getColumnNames(String filename, String pattern) throws IOException {
+	private String getColumnNames(String filename) throws IOException {
 		String names = null;
-		List<String> lines = IOUtils.grep(filename, pattern);
+		List<String> lines = IOUtils.grep(filename, "#ID.*");
 		if ( lines != null ) {
 			names = lines.get(0).replace("#", "");
 			names = names.replace("\t", ",");
 		} else {
-			throw new IOException("File " + filename + " does not contain names label");
+			throw new IOException("File " + filename + " does not contain ID label");
 		}
 		return names;
 	}
 
-	private void namesToIdTag(String inputFilename, String outFilename) throws IOException {
-		List<String> lines = IOUtils.readLines(inputFilename);
-		for(int i=0 ; i<lines.size() ; i++) {
-			if ( lines.get(i).startsWith("#NAMES\t") ) {
-				List<String> newLines = new ArrayList<String>(lines.size());
-				newLines.add(lines.get(i).replace("#NAMES\t", "#ID\t"));
-				lines.remove(i);
-				newLines.addAll(lines);						
-				IOUtils.write(outFilename, newLines);
-			}
-		}
-	}
+//	private void namesToIdTag(String inputFilename, String outFilename) throws IOException {
+//		List<String> lines = IOUtils.readLines(inputFilename);
+//		for(int i=0 ; i<lines.size() ; i++) {
+//			if ( lines.get(i).startsWith("#NAMES\t") ) {
+//				List<String> newLines = new ArrayList<String>(lines.size());
+//				newLines.add(lines.get(i).replace("#NAMES\t", "#ID\t"));
+//				lines.remove(i);
+//				newLines.addAll(lines);						
+//				IOUtils.write(outFilename, newLines);
+//			}
+//		}
+//	}
 	
 	public int getGapAllowed() {
 		return gapAllowed;
