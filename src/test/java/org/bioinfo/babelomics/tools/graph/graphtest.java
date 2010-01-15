@@ -30,12 +30,12 @@ public class graphtest {
 	public void Test1() {
 		//String dataset = "/mnt/commons/test/fatiscanmini2.txt";
 		
-		//String dataset = "/mnt/commons/test/biodata/example/dataset_example4.txt";
-		String dataset = "/mnt/commons/test/biodata/newick1.nw";
+		String dataset = "/mnt/commons/test/biodata/example/dataset_example4.txt";
+		//String dataset = "/mnt/commons/test/biodata/newick1.nw";
 		String outdir = "/tmp/histogram";
 		new File(outdir).mkdir();
-		//String []args = { "--tool", "histogram","--log-level", "2", "--datalist", dataset,"--class", "sex","--boxplot","true","--histogram","true", "-o", outdir};
-		String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"-tree","true", "-o", outdir};
+		String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"--class", "sex","--boxplot","true","--histogram","true", "-o", outdir};
+		//String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"-tree","true", "-o", outdir};
 
 		System.out.println("----------------> " + args.toString());
 		
@@ -48,6 +48,31 @@ public class graphtest {
 			fail(e.toString());
 			//System.out.println(e.toString());
 		}
+	}
+		
+		@Test
+		public void Test2() {
+			//String dataset = "/mnt/commons/test/fatiscanmini2.txt";
+			
+			String dataset = "/mnt/commons/test/tools/pcaPlot/datos.txt";
+			//String dataset = "/mnt/commons/test/biodata/newick1.nw";
+			String outdir = "/tmp/pcaPlot";
+			new File(outdir).mkdir();
+			String []args = { "--tool", "pca-plot","--log-level", "2", "--datalist", dataset,"--pcaplot","true", "-o", outdir};
+			//String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"-tree","true", "-o", outdir};
+
+			System.out.println("----------------> " + args.toString());
+			
+			try {
+				BabelomicsMain.main(args); 
+//				System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
+//				System.out.println("output dataset:\n" + IOUtils.toString(new File(outdir + "/histogram.txt")));
+			} catch (Exception e) {
+				e.printStackTrace();
+				fail(e.toString());
+				//System.out.println(e.toString());
+			}
+
 	}	
 	
 	
