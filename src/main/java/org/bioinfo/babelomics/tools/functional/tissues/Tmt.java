@@ -1,6 +1,16 @@
 package org.bioinfo.babelomics.tools.functional.tissues;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.math.MathException;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.commons.utils.ListUtils;
+import org.bioinfo.math.data.DoubleMatrix;
+import org.bioinfo.math.exception.InvalidParameterException;
+import org.bioinfo.math.result.TTestResult;
+import org.bioinfo.math.result.TestResultList;
+import org.bioinfo.math.stats.inference.TTest;
 import org.bioinfo.tool.OptionFactory;
 
 public class Tmt extends BabelomicsTool {
@@ -15,6 +25,79 @@ public class Tmt extends BabelomicsTool {
 
 	@Override
 	protected void execute() {
+	}
+
+	protected  TestResultList<TTestResult> runTtest(DoubleMatrix matrix1, DoubleMatrix matrix2) throws InvalidParameterException, MathException {
+		List<Integer> rowIndexes = new ArrayList<Integer>(matrix1.getRowDimension());
+		for(int i=0 ; i<matrix1.getRowDimension() ; i++) {
+			rowIndexes.add(i);
+		}
+		return runTtest(matrix1, matrix2, rowIndexes);
+	}
+
+	protected  TestResultList<TTestResult> runTtest(DoubleMatrix matrix1, DoubleMatrix matrix2, List<Integer> rowIndexes) throws InvalidParameterException, MathException {
+		TTest tTest = new TTest();
+		List<Double> sample1, sample2;
+		TestResultList<TTestResult> res = new TestResultList<TTestResult>(rowIndexes.size());
+		for(int index: rowIndexes) {
+				
+			sample1 = new ArrayList<Double>();
+			sample2 = new ArrayList<Double>();
+		
+			for(int col=0 ; col < matrix1.getColumnDimension() ; col++) {
+				if ( ! Double.isNaN(matrix1.get(index, col)) ) {
+					sample1.add(matrix1.get(index, col));
+				}
+			}
+			for(int col=0 ; col < matrix2.getColumnDimension() ; col++) {
+				if ( ! Double.isNaN(matrix2.get(index, col)) ) {
+					sample2.add(matrix2.get(index, col));
+				}
+			}
+		
+			res.add(tTest.tTest(ListUtils.toArray(sample1), ListUtils.toArray(sample2)));
+		}
+		
+		return res;
+	}
+
+	protected List<Integer> getColumns(DoubleMatrix matrix, double filter) {
+		int nullValues;
+		List<Integer> columnIndexes = new ArrayList<Integer>();
+		double limit = matrix.getRowDimension() * filter / 100;
+		//System.out.println("getColumns, limit = " + limit);
+		for(int col=0 ; col<matrix.getColumnDimension() ; col++) {
+			nullValues = 0;
+			for(int row=0 ; row<matrix.getRowDimension() ; row++) {
+				if ( Double.isNaN(matrix.get(row, col)) ) {
+					nullValues++;
+				}
+			}
+			if ( nullValues < limit ) {
+				columnIndexes.add(col);
+			}
+		}
+		return columnIndexes;
+	}
+
+	protected List<Integer> getRows(DoubleMatrix matrix, double filter) {
+		int nullValues;
+		List<Integer> rowIndexes = new ArrayList<Integer>();
+		double limit = matrix.getColumnDimension() * filter / 100;
+		//System.out.println("getRow, limit = " + limit);
+		for(int row=0 ; row<matrix.getRowDimension() ; row++) {
+			nullValues = 0;
+			for(int col=0 ; col<matrix.getColumnDimension() ; col++) {
+				if ( Double.isNaN(matrix.get(row, col)) ) {
+					nullValues++;
+				}
+			}
+			//System.out.println("----> nullValues = " + nullValues);
+			if ( nullValues < limit ) {
+				rowIndexes.add(row);
+			}
+		}
+		return rowIndexes;
 	}
 
 }

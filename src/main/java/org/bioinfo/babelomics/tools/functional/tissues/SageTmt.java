@@ -25,7 +25,6 @@ import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.math.result.TTestResult;
 import org.bioinfo.math.result.TestResultList;
 import org.bioinfo.math.stats.MultipleTestCorrection;
-import org.bioinfo.math.stats.inference.TTest;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -71,8 +70,10 @@ public class SageTmt extends Tmt {
 		List<String> histologies = StringUtils.toList(commandLine.getOptionValue("histologies"), ",");
 
 		String tagType = commandLine.getOptionValue("tag-type", "short");
-		int minTags = Integer.parseInt(commandLine.getOptionValue("minTags", "5000"));
 		boolean excludeCellLines = commandLine.hasOption("exclude-cell-lines");
+		int minTags = Integer.parseInt(commandLine.getOptionValue("minTags", "5000"));
+		double filterGenes = Double.parseDouble(commandLine.getOptionValue("perc-null-genes", "80"));
+		double filterLibraries = Double.parseDouble(commandLine.getOptionValue("perc-null-libraries", "80"));
 		
 		
 		//String multipleProbes = commandLine.getOptionValue("multiple-probes", "mean");
@@ -222,16 +223,49 @@ public class SageTmt extends Tmt {
 
 			System.out.println("matrix1 :\n" + matrix1);
 			System.out.println("matrix2 :\n" + matrix2);
-			// computing t-test
+			
+			System.out.println("filtering....\n");
+			
+			// filtering...
+			//
+			List<Integer> columnIndexes1 = getColumns(matrix1, filterLibraries);			
+			System.out.println("matrix1, columns: " + ListUtils.toString(columnIndexes1, ","));
+			List<Integer> rowIndexes1 = getRows(matrix1, filterGenes);
+			System.out.println("matrix1, row: " + ListUtils.toString(rowIndexes1, ","));
+
+			List<Integer> columnIndexes2 = getColumns(matrix2, filterLibraries);
+			System.out.println("matrix2, columns: " + ListUtils.toString(columnIndexes2, ","));
+			List<Integer> rowIndexes2 = getRows(matrix2, filterGenes);
+			System.out.println("matrix2, row: " + ListUtils.toString(rowIndexes2, ","));
+			
+			List<Integer> rowIndexes = new ArrayList<Integer>();
+			rowIndexes.addAll(rowIndexes1);
+			rowIndexes.addAll(rowIndexes2);
+			rowIndexes = ListUtils.unique(rowIndexes);
+			
+			matrix1 = new DoubleMatrix(matrix1.getSubMatrix(ListUtils.toArray(rowIndexes), ListUtils.toArray(columnIndexes1)).getData());
+			matrix2 = new DoubleMatrix(matrix2.getSubMatrix(ListUtils.toArray(rowIndexes), ListUtils.toArray(columnIndexes2)).getData());
+
+			System.out.println("matrix1 :\n" + matrix1);
+			System.out.println("matrix2 :\n" + matrix2);
+
+			// computing t-test (but removing NaN before running the t-test)
 			//
 			jobStatus.addStatusMessage("60", "computing t-test");
 			logger.debug("computing t-test...\n");
+			
 
-			TTest tTest = new TTest();
-			TestResultList<TTestResult> res = tTest.tTest(matrix1, matrix2);				
+			List<String> names = new ArrayList<String>(rowIndexes.size());
+			for(int index: rowIndexes) {
+				names.add(libraryNames.get(index));
+			}
+
+			TestResultList<TTestResult> res = runTtest(matrix1, matrix2, rowIndexes);
+
+//			TTest tTest = new TTest();
+//			TestResultList<TTestResult> res = tTest.tTest(matrix1, matrix2);				
 			MultipleTestCorrection.BHCorrection(res);
 
-			//			int[] rowOrder = ListUtils.order(ListUtils.toList(res.getStatistics()), true);
 			int[] rowOrder = ArrayUtils.order(res.getStatistics(), true);
 
 			// saving data
@@ -239,18 +273,20 @@ public class SageTmt extends Tmt {
 			jobStatus.addStatusMessage("80", "saving results");
 			logger.debug("saving results...");
 
-			DataFrame dataFrame = new DataFrame(libraryNames.size(), 0);
+			DataFrame dataFrame = new DataFrame(names.size(), 0);
 
 			//dataFrame.addColumn("id", ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
 
-			dataFrame.setRowNames(ListUtils.ordered(libraryNames, rowOrder));
+			dataFrame.setRowNames(ListUtils.ordered(names, rowOrder));
 
 			FeatureData featureData = new FeatureData(dataFrame);
-			featureData.save(new File(outdir + "/sage.txt"));
-			result.addOutputItem(new Item("sage_file", "sage.txt", "SAGE output file:", TYPE.FILE));
+			featureData.save(new File(outdir + "/sage-tmt.txt"));
+			result.addOutputItem(new Item("sage_file", "sage-tmt.txt", "Output file:", TYPE.FILE));
+
+			System.out.println("results :\n" + dataFrame.toString(true, true));
 
 			if ( dupGeneList1 != null && dupGeneList1.size() > 0 ) {
 				IOUtils.write(new File(outdir + "/duplicated_list1.txt"), dupGeneList1);
