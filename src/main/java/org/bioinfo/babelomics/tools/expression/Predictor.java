@@ -21,6 +21,7 @@ import org.bioinfo.mlpr.classifier.Knn;
 import org.bioinfo.mlpr.classifier.RForest;
 import org.bioinfo.mlpr.classifier.Svm;
 import org.bioinfo.mlpr.evaluation.result.EvaluationResult;
+import org.bioinfo.mlpr.utils.InstanceBuilder;
 import org.bioinfo.mlpr.utils.InstancesBuilder;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
@@ -114,7 +115,7 @@ public class Predictor extends BabelomicsTool {
 				// data set loading 
 				if(commandLine.hasOption("dataset-arff")){
 					instances = InstancesBuilder.getInstancesFromArrfFile(datasetFile,"sample_name");					
-					instances.setClassIndex(instances.numAttributes()-1);					
+					instances.setClassIndex(instances.numAttributes()-1);
 				} else {
 					String className = commandLine.getOptionValue("class");
 					Dataset dataset = new Dataset(datasetFile, true);
@@ -125,8 +126,11 @@ public class Predictor extends BabelomicsTool {
 					System.out.println("0,0 = " + data.get(0).get(0));
 					System.out.println("variables value = " + ListUtils.toString(dataset.getVariables().getByName(className).getValues()));
 
+					//instances = InstanceBuilder.getInstancesFromData(data, dataset.getFeatureNames(), dataset.getSampleNames(), dataset.getVariables().getByName(className).getValues());
 					instances = InstancesBuilder.getInstancesFromDataList(data, dataset.getFeatureNames(), dataset.getSampleNames(), dataset.getVariables().getByName(className).getValues());
-					Attribute classAttr = instances.attribute(className);
+					//System.err.println("la clase 0:" + className + " " + instances.attribute("class").index() + " " + instances.numAttributes() + "  " + instances.attribute(997).name());
+					//Attribute classAttr = instances.attribute(className);
+					Attribute classAttr = instances.attribute("class");
 					instances.setClassIndex(classAttr.index());
 					
 				}				
