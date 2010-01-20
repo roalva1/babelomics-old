@@ -1,6 +1,7 @@
 package org.bioinfo.babelomics.tools.functional;
 
 
+import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.cli.ParseException;
@@ -21,10 +22,13 @@ public class FatiGOTest {
 	
 	@Test
 	public void Test0() {
+		String outdir = "/tmp/fatigo";
+		new File(outdir).mkdir();
+		
 		String list1 = "/mnt/commons/test/example.motor";
 		String list2 = "/mnt/commons/test/example.apoptosis";
 //		String []args = {"--tool", "fatigo" ,"--list1", list1, "--list2", list2, "-o", "/tmp/fatigo"};
-		String []args = {"--tool", "fatigo" ,"--list1", list1, "--list2", list2, "--go-bp", "--kegg", "-o", "/tmp/fatigo", "--species", "hsa"};
+		String []args = {"--tool", "fatigo" ,"--list1", list1, "--list2", list2, "--go-bp", "--kegg", "-o", outdir, "--species", "hsa"};
 		try {
 			FatiGOTool fatigo = (FatiGOTool)BabelomicsFactory.createTool("fatigo");
 			fatigo.parse(args);

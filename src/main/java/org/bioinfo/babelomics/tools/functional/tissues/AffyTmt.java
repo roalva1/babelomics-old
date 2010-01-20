@@ -27,7 +27,6 @@ import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.math.result.TTestResult;
 import org.bioinfo.math.result.TestResultList;
 import org.bioinfo.math.stats.MultipleTestCorrection;
-import org.bioinfo.math.stats.inference.TTest;
 import org.bioinfo.math.util.MathUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
@@ -224,9 +223,10 @@ public class AffyTmt extends Tmt {
 			//
 			jobStatus.addStatusMessage("60", "computing t-test");
 			logger.debug("computing t-test...\n");
-
-			TTest tTest = new TTest();
-			TestResultList<TTestResult> res = tTest.tTest(matrix1, matrix2);				
+			
+			TestResultList<TTestResult> res = runTtest(matrix1, matrix2);				
+//			TTest tTest = new TTest();
+//			TestResultList<TTestResult> res = tTest.tTest(matrix1, matrix2);				
 			MultipleTestCorrection.BHCorrection(res);
 
 			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
@@ -246,8 +246,8 @@ public class AffyTmt extends Tmt {
 			dataFrame.setRowNames(ListUtils.ordered(libraryNames, rowOrder));
 			
 			FeatureData featureData = new FeatureData(dataFrame);
-			featureData.save(new File(outdir + "/tmt.txt"));
-			result.addOutputItem(new Item("tmt_file", "tmt.txt", "TMT output file:", TYPE.FILE));
+			featureData.save(new File(outdir + "/affy-tmt.txt"));
+			result.addOutputItem(new Item("tmt_file", "affy-tmt.txt", "Output file:", TYPE.FILE));
 			
 			if ( dupGeneList1 != null && dupGeneList1.size() > 0 ) {
 				IOUtils.write(new File(outdir + "/duplicated_list1.txt"), dupGeneList1);
