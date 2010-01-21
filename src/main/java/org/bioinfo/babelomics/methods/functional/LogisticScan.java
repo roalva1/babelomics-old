@@ -95,9 +95,9 @@ public class LogisticScan {
 	public void prepare() throws InvalidColumnIndexException{
 		
 		// id list
-		idList = rankedList.getDataFrame().getColumn(0);
+		idList = rankedList.getDataFrame().getRowNames();
 		// statistic
-		statistic = ArrayUtils.toList(rankedList.getDataFrame().getColumnAsDoubleArray(1));
+		statistic = ArrayUtils.toList(rankedList.getDataFrame().getColumnAsDoubleArray(0));
 		// order ranked list
 		int[] sortIndex = ListUtils.order(statistic);
 		ListUtils.ordered(idList,sortIndex);

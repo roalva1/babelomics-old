@@ -69,14 +69,15 @@ public class FatiScan {
 	public void prepare() throws InvalidColumnIndexException{
 		
 		// id list
-		idList = rankedList.getDataFrame().getColumn(0);
-		// statistic
-		statistic = ArrayUtils.toList(rankedList.getDataFrame().getColumnAsDoubleArray(1));
+		idList = rankedList.getDataFrame().getRowNames();//.getColumn(0);
+		// statistic		
+		statistic = ArrayUtils.toList(rankedList.getDataFrame().getColumnAsDoubleArray(0));
 		// order ranked list		
 		int[] sortIndex = ListUtils.order(statistic);
 		statistic = ListUtils.ordered(statistic,sortIndex);		
 		idList = ListUtils.ordered(idList,sortIndex);		
-		if(order==ASCENDING_SORT){
+		//if(order==ASCENDING_SORT){
+		if(order==DESCENDING_SORT){
 			Collections.reverse(idList);
 			Collections.reverse(statistic);
 		}		
@@ -94,21 +95,22 @@ public class FatiScan {
 		results = new ArrayList<GeneSetAnalysisTestResult>();
 		
 		double inc = -(double)(statistic.get(0)-statistic.get(statistic.size()-1))/(numberOfPartitions+1);
+		System.err.println("inc: " + inc);
 		double acum = statistic.get(0) + inc;
 		
 		int thresholdPosition;
 		List<String> list1,list2;
-		
+				
 		for(int i=0; i<numberOfPartitions; i++){
 			
 			thresholdPosition = getThresholdPosition(acum);
 			
-			System.err.print(i + ": threshold = " + acum + " (" + thresholdPosition + ") ");
+			System.err.println(i + ": threshold = " + acum + " (" + thresholdPosition + ") ");
 			
 			list1 = idList.subList(0, thresholdPosition);
 			list2 = idList.subList(thresholdPosition + 1, idList.size()-1);
 			
-			System.err.println("l1.size: " + list1.size() + "l2.size: " + list2.size());
+			//System.err.println("l1.size: " + list1.size() + "l2.size: " + list2.size());
 			
 			// run test
 			fisher = new TwoListFisherTest();
@@ -156,8 +158,10 @@ public class FatiScan {
 	
 	private int getThresholdPosition(double acum){
 		int position = 0;
+		//System.err.println("acum: " + acum + " statistic.size: " + statistic.size());
 		for(int i=0; i<statistic.size(); i++){
-			if( (order==ASCENDING_SORT && statistic.get(i)>=acum) || (order==DESCENDING_SORT && statistic.get(i)<acum) ) {
+			//System.err.println("position: " + i + " acum: " + acum + " value: " + statistic.get(i) + " order: " + order);
+			if( (order==ASCENDING_SORT && statistic.get(i)>=acum) || (order==DESCENDING_SORT && statistic.get(i)<acum) ) {				
 				position = i;
 				break;
 			}			
