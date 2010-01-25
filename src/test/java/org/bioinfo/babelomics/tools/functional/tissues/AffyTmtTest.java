@@ -30,7 +30,7 @@ public class AffyTmtTest {
 
 		System.out.println("----- affy tmt test  ------");
 //		String []args = {"--tool", "tmt-affy", "--list1", list1,  "-o", outdir, "--species", "human", "--tissues", "all tissues"};
-//		String []args = {"--tool", "tmt-affy", "--list1", list1,  "--list2", list2, "-o", outdir, "--species", "human", "--tissues", "all tissues"};
+//		String []args = {"--tool", "tmt-affy", "--list1", list1,  "--list2", list2, "-o", outdir, "--species", "human", "--tissues", "alltissues"};
 		String []args = {"--tool", "tmt-affy", "--list1", list1,  "--list2", list2, "-o", outdir, "--species", "human", "--tissues", "721 B lymphoblasts,Adipocyte,Adrenal Cortex"};
 		
 		try {

@@ -8,6 +8,7 @@ import org.junit.Test;
 
 public class CopyNumberAnalysisTest {
 	
+	@Test
 	public void test() {
 		String outDirName = "/tmp/CopyNumberAnalysisTest";
 		new File(outDirName).mkdir();

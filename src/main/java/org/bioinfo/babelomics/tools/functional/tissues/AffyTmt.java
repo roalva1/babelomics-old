@@ -73,7 +73,7 @@ public class AffyTmt extends Tmt {
 		dbName = "mouse".equalsIgnoreCase(species) ? "gnf_mouse" : "gnf_human";
 
 		try {		
-			if ( tissues.contains("all tissues") ) {
+			if ( tissues.contains("alltissues") ) {
 				tissues = getAllTissues(species);
 			}
 
@@ -94,7 +94,7 @@ public class AffyTmt extends Tmt {
 			Map<String, List<String>> ensemblMap1 = null;
 			geneList1 = IOUtils.readLines(f1);
 			if ( geneList1 == null || geneList1.size() == 0 ) {
-				throw new Exception("No genes found in your list #1");
+				throw new Exception("No genes found in list #1");
 			}
 			uniqueGeneList1 = ListUtils.unique(geneList1);
 			if ( geneList1.size() != uniqueGeneList1.size() ) {
@@ -131,13 +131,13 @@ public class AffyTmt extends Tmt {
 			}
 			uniqueGeneList1 = ListUtils.unique(ensemblList1);
 			if ( uniqueGeneList1.size() == 0 ) {
-				throw new Exception("No Ensembl IDs found for your input genes in List #1 when converting your input genes to Ensembl ID");				
+				throw new Exception("No Ensembl IDs found for list #1 when converting to Ensembl ID");
 			}
 			
 			Map<String, List<String>> probesMap1 = getProbes(species, uniqueGeneList1);
 			System.out.println(probesMap1);
 			if ( probesMap1 == null || probesMap1.size() == 0 ) {
-				throw new Exception("No Affymetrix probes found for your genes in List #1");
+				throw new Exception("No Affymetrix probes found for list #1");
 			}
 
 
@@ -159,7 +159,7 @@ public class AffyTmt extends Tmt {
 			} else {
 				geneList2 = IOUtils.readLines(f2);
 				if ( geneList2 == null || geneList2.size() == 0 ) {
-					throw new Exception("No genes found in your list #2");
+					throw new Exception("No genes found in list #2");
 				}
 				uniqueGeneList2 = ListUtils.unique(geneList2);
 				if ( geneList2.size() != uniqueGeneList2.size() ) {
@@ -198,26 +198,38 @@ public class AffyTmt extends Tmt {
 			
 			uniqueGeneList2 = ListUtils.unique(ensemblList2);
 			if ( ensemblList2.size() == 0 ) {
-				throw new Exception("No Ensembl IDs found for your input genes in List #2 when converting your input genes to Ensembl ID");				
+				throw new Exception("No Ensembl IDs found for list #2 when converting to Ensembl ID");
 			}				
 			
 			Map<String, List<String>> probesMap2 = getProbes(species, uniqueGeneList2);
 			if ( probesMap2 == null || probesMap2.size() == 0 ) {
-				throw new Exception("No Affymetrix probes found for your genes in List #2");
+				throw new Exception("No Affymetrix probes found for list #2");
 			}
 
 			// getting libraries
 			//
+			System.out.println("tissues = " + tissues);
 			Map<String, String> libraryMap = getTissueLibraries(species, tissues);
 			List<String> libraryNames = MapUtils.getKeys(libraryMap);
 
+			if ( libraryMap == null || libraryMap.size() ==  0 ) {
+				throw new Exception("No tissue libraries found for your input parameters. Please, change your parameters and try again");
+			}
+			
 			// getting frequency matrixes
 			//
 			jobStatus.addStatusMessage("40", "getting frequency matrixes");
 			logger.debug("getting frequency matrixes...\n");
 
 			DoubleMatrix matrix1 = getFreqMatrix(uniqueGeneList1, libraryNames, libraryMap, probesMap1, normMethod, multipleProbes);
+			if ( matrix1 == null || matrix1.getColumnDimension() ==  0 || matrix1.getRowDimension() == 0) {
+				throw new Exception("Impossible to create the frequency matrix for list #1 for your input parameters. Please, change your parameters and try again");
+			}
+						
 			DoubleMatrix matrix2 = getFreqMatrix(uniqueGeneList2, libraryNames, libraryMap, probesMap2, normMethod, multipleProbes);
+			if ( matrix1 == null || matrix1.getColumnDimension() ==  0 || matrix1.getRowDimension() == 0) {
+				throw new Exception("Impossible to create the frequency matrix for list #2 for your input parameters. Please, change your parameters and try again");
+			}
 
 			// computing t-test
 			//
@@ -244,29 +256,28 @@ public class AffyTmt extends Tmt {
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
 
 			dataFrame.setRowNames(ListUtils.ordered(libraryNames, rowOrder));
-			
-			FeatureData featureData = new FeatureData(dataFrame);
-			featureData.save(new File(outdir + "/affy-tmt.txt"));
-			result.addOutputItem(new Item("tmt_file", "affy-tmt.txt", "Output file:", TYPE.FILE));
-			
+						
 			if ( dupGeneList1 != null && dupGeneList1.size() > 0 ) {
 				IOUtils.write(new File(outdir + "/duplicated_list1.txt"), dupGeneList1);
-				result.addOutputItem(new Item("duplicated_list1_file", "duplicated_list1.txt", "Duplicated genes from list #1 (they were not taken into accout)", TYPE.FILE));
+				result.addOutputItem(new Item("duplicated_list1_file", "duplicated_list1.txt", "Duplicated genes from list #1 (they were not taken into accout)", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "List management"));
 			}
 			if ( dupGeneList2 != null && dupGeneList2.size() > 0 ) {
 				IOUtils.write(new File(outdir + "/duplicated_list2.txt"), dupGeneList2);
-				result.addOutputItem(new Item("duplicated_list2_file", "duplicated_list2.txt", "Duplicated genes from list #2 (they were not taken into accout)", TYPE.FILE));
+				result.addOutputItem(new Item("duplicated_list2_file", "duplicated_list2.txt", "Duplicated genes from list #2 (they were not taken into accout)", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "List management"));
 			}
 
 			if ( noConverted1 != null && noConverted1.size() > 0 ) {
 				IOUtils.write(new File(outdir + "/no_converted_list1.txt"), noConverted1);
-				result.addOutputItem(new Item("no_converted_list1_file", "no_converted_list1.txt", "Not found Ensembl IDs for the following genes of list #1", TYPE.FILE));
+				result.addOutputItem(new Item("no_converted_list1_file", "no_converted_list1.txt", "Not found Ensembl IDs for the following genes of list #1", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "List management"));
 			}
 			if ( noConverted2 != null && noConverted2.size() > 0 ) {
 				IOUtils.write(new File(outdir + "/no_converted_list2.txt"), noConverted2);
-				result.addOutputItem(new Item("no_converted_list2_file", "no_converted_list2.txt", "Not found Ensembl IDs for the following genes of list #2", TYPE.FILE));
+				result.addOutputItem(new Item("no_converted_list2_file", "no_converted_list2.txt", "Not found Ensembl IDs for the following genes of list #2", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "List management"));
 			}
 			
+			FeatureData featureData = new FeatureData(dataFrame);
+			featureData.save(new File(outdir + "/affy-tmt.txt"));
+			result.addOutputItem(new Item("tmt_file", "affy-tmt.txt", "Output file:", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Output file"));
 			
 			//			FileUtils.writeStringToFile(new File(getOutdir() + "/replicates.txt"), "Removed " + replicated1 + " genes from list 1\nRemoved " + replicated2 + " genes from list 2");
 
@@ -284,7 +295,7 @@ public class AffyTmt extends Tmt {
 
 
 		} catch (Exception e) {
-			abort("exception_execute_tmt", "execute tmt error", e.getMessage(), StringUtils.getStackTrace(e));
+			abort("exception_execute_tmt", "Affymetrix profiling tissue error", e.getMessage(), StringUtils.getStackTrace(e));
 		}
 	}
 

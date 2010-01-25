@@ -27,31 +27,23 @@ public class Tmt extends BabelomicsTool {
 	protected void execute() {
 	}
 
-	protected  TestResultList<TTestResult> runTtest(DoubleMatrix matrix1, DoubleMatrix matrix2) throws InvalidParameterException, MathException {
-		List<Integer> rowIndexes = new ArrayList<Integer>(matrix1.getRowDimension());
-		for(int i=0 ; i<matrix1.getRowDimension() ; i++) {
-			rowIndexes.add(i);
-		}
-		return runTtest(matrix1, matrix2, rowIndexes);
-	}
-
-	protected  TestResultList<TTestResult> runTtest(DoubleMatrix matrix1, DoubleMatrix matrix2, List<Integer> rowIndexes) throws InvalidParameterException, MathException {
+	protected  TestResultList<TTestResult> runTtest(DoubleMatrix matrix1, DoubleMatrix matrix2) throws InvalidParameterException, MathException {		
 		TTest tTest = new TTest();
 		List<Double> sample1, sample2;
-		TestResultList<TTestResult> res = new TestResultList<TTestResult>(rowIndexes.size());
-		for(int index: rowIndexes) {
+		TestResultList<TTestResult> res = new TestResultList<TTestResult>(matrix1.getRowDimension());
+		for(int row=0 ; row < matrix1.getRowDimension() ; row++) {
 				
 			sample1 = new ArrayList<Double>();
 			sample2 = new ArrayList<Double>();
 		
 			for(int col=0 ; col < matrix1.getColumnDimension() ; col++) {
-				if ( ! Double.isNaN(matrix1.get(index, col)) ) {
-					sample1.add(matrix1.get(index, col));
+				if ( ! Double.isNaN(matrix1.get(row, col)) ) {
+					sample1.add(matrix1.get(row, col));
 				}
 			}
 			for(int col=0 ; col < matrix2.getColumnDimension() ; col++) {
-				if ( ! Double.isNaN(matrix2.get(index, col)) ) {
-					sample2.add(matrix2.get(index, col));
+				if ( ! Double.isNaN(matrix2.get(row, col)) ) {
+					sample2.add(matrix2.get(row, col));
 				}
 			}
 		
@@ -84,7 +76,7 @@ public class Tmt extends BabelomicsTool {
 		int nullValues;
 		List<Integer> rowIndexes = new ArrayList<Integer>();
 		double limit = matrix.getColumnDimension() * filter / 100;
-		//System.out.println("getRow, limit = " + limit);
+		System.out.println("getRow, " + filter + " % -> limit = " + limit);
 		for(int row=0 ; row<matrix.getRowDimension() ; row++) {
 			nullValues = 0;
 			for(int col=0 ; col<matrix.getColumnDimension() ; col++) {
@@ -92,7 +84,7 @@ public class Tmt extends BabelomicsTool {
 					nullValues++;
 				}
 			}
-			//System.out.println("----> nullValues = " + nullValues);
+			System.out.println("----> nullValues = " + nullValues);
 			if ( nullValues < limit ) {
 				rowIndexes.add(row);
 			}

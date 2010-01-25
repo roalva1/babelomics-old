@@ -76,6 +76,7 @@ public class SageTmt extends Tmt {
 		double filterLibraries = Double.parseDouble(commandLine.getOptionValue("perc-null-libraries", "80"));
 		
 		
+		
 		//String multipleProbes = commandLine.getOptionValue("multiple-probes", "mean");
 		//
 		//		
@@ -83,13 +84,13 @@ public class SageTmt extends Tmt {
 		System.out.println("db name = " + dbName);
 
 		try {			
-			if ( tissues.contains("all tissues") ) {
+			if ( tissues.contains("alltissues") ) {
 				tissues = getAllTissues(species);
 			}
 
-			if ( histologies.contains("all histologies") ) {
-				histologies = getAllHistologies(species);
-			}
+//			if ( histologies.contains("all histologies") ) {
+//				histologies = getAllHistologies(species);
+//			}
 
 			System.out.println("tissues:\n" + ListUtils.toString(tissues));
 
@@ -114,7 +115,7 @@ public class SageTmt extends Tmt {
 			}
 			unigeneMap1 = InfraredUtils.getUnigeneMap(dbConnector, uniqueGeneList1);
 			if ( unigeneMap1 == null || unigeneMap1.size() == 0 ) {
-				throw new Exception("No Unigene IDs found when converting your gene list #1 to Unigene IDs");
+				throw new Exception("No Unigene IDs for list #1 when convertion to Unigene IDs");
 			}
 			noConverted1 = new ArrayList<String> ();
 			unigeneList1 = new ArrayList<String> ();
@@ -161,7 +162,7 @@ public class SageTmt extends Tmt {
 				}
 					unigeneMap2 = InfraredUtils.getUnigeneMap(dbConnector, uniqueGeneList2);
 					if ( unigeneMap2 == null || unigeneMap2.size() == 0 ) {
-						throw new Exception("No Unigene IDs found when converting your gene list #2 to Unigene IDs");
+						throw new Exception("No Unigene IDs found for list #2 when converting to Unigene IDs");
 					}
 					noConverted2 = new ArrayList<String> ();
 					unigeneList2 = new ArrayList<String> ();
@@ -198,6 +199,9 @@ public class SageTmt extends Tmt {
 			System.out.println("libraries ids: " + ListUtils.toString(libraries.get(0), ","));
 			System.out.println("libraries names: " + ListUtils.toString(libraries.get(1), ","));
 			
+			if ( libraryIDs == null || libraryIDs.size() ==  0 ) {
+				throw new Exception("No tissue libraries found for your input parameters. Please, change your parameters and try again");
+			}
 			//System.out.println("frequencies for list1");
 			//getFrequencies(uniqueGeneList1);
 			
@@ -211,6 +215,10 @@ public class SageTmt extends Tmt {
 			
 			Map<String, Double> frequencyMap = getFrequencyMap(unigenes);
 
+			if ( frequencyMap == null || frequencyMap.size() ==  0 ) {
+				throw new Exception("Impossible to create the frequency map for your input parameters. Please, change your parameters and try again");
+			}
+
 			// getting frequency matrixes
 			//
 			jobStatus.addStatusMessage("40", "getting frequency matrixes");
@@ -218,11 +226,17 @@ public class SageTmt extends Tmt {
 
 			System.out.println("matrix 1");
 			DoubleMatrix matrix1 = getFreqMatrix(uniqueGeneList1, libraryIDs, frequencyMap);
+			System.out.println("matrix1 :\n" + matrix1);
+			if ( matrix1 == null || matrix1.getColumnDimension() ==  0 || matrix1.getRowDimension() == 0) {
+				throw new Exception("Impossible to create the frequency matrix for list #1 for your input parameters. Please, change your parameters and try again");
+			}
+			
 			System.out.println("matrix 2");
 			DoubleMatrix matrix2 = getFreqMatrix(uniqueGeneList2, libraryIDs, frequencyMap);
-
-			System.out.println("matrix1 :\n" + matrix1);
 			System.out.println("matrix2 :\n" + matrix2);
+			if ( matrix2 == null || matrix2.getColumnDimension() ==  0 || matrix2.getRowDimension() == 0) {
+				throw new Exception("Impossible to create the frequency matrix for list #2 for your input parameters. Please, change your parameters and try again");
+			}
 			
 			System.out.println("filtering....\n");
 			
@@ -239,15 +253,26 @@ public class SageTmt extends Tmt {
 			System.out.println("matrix2, row: " + ListUtils.toString(rowIndexes2, ","));
 			
 			List<Integer> rowIndexes = new ArrayList<Integer>();
-			rowIndexes.addAll(rowIndexes1);
-			rowIndexes.addAll(rowIndexes2);
-			rowIndexes = ListUtils.unique(rowIndexes);
+//			rowIndexes.addAll(rowIndexes1);
+//			rowIndexes.addAll(rowIndexes2);
+//			rowIndexes = ListUtils.unique(rowIndexes);
+			rowIndexes = ListUtils.intersection(rowIndexes1, rowIndexes2);
+			
+			if ( columnIndexes1 == null || columnIndexes1.size() ==  0 || columnIndexes2 == null || columnIndexes2.size() ==  0 || rowIndexes == null || rowIndexes.size() == 0) {
+				throw new Exception("Impossible to create the frequency matrixes for your filtering parameters. Please, change your parameters and try again");
+			}
 			
 			matrix1 = new DoubleMatrix(matrix1.getSubMatrix(ListUtils.toArray(rowIndexes), ListUtils.toArray(columnIndexes1)).getData());
-			matrix2 = new DoubleMatrix(matrix2.getSubMatrix(ListUtils.toArray(rowIndexes), ListUtils.toArray(columnIndexes2)).getData());
-
 			System.out.println("matrix1 :\n" + matrix1);
+			if ( matrix1 == null || matrix1.getColumnDimension() ==  0 || matrix1.getRowDimension() == 0) {
+				throw new Exception("Impossible to create the frequency matrix for list #1 for your filtering parameters. Please, change your parameters and try again");
+			}
+
+			matrix2 = new DoubleMatrix(matrix2.getSubMatrix(ListUtils.toArray(rowIndexes), ListUtils.toArray(columnIndexes2)).getData());
 			System.out.println("matrix2 :\n" + matrix2);
+			if ( matrix2 == null || matrix2.getColumnDimension() ==  0 || matrix2.getRowDimension() == 0) {
+				throw new Exception("Impossible to create the frequency matrix for list #2 for your filtering parameters. Please, change your parameters and try again");
+			}
 
 			// computing t-test (but removing NaN before running the t-test)
 			//
@@ -260,7 +285,7 @@ public class SageTmt extends Tmt {
 				names.add(libraryNames.get(index));
 			}
 
-			TestResultList<TTestResult> res = runTtest(matrix1, matrix2, rowIndexes);
+			TestResultList<TTestResult> res = runTtest(matrix1, matrix2);
 
 //			TTest tTest = new TTest();
 //			TestResultList<TTestResult> res = tTest.tTest(matrix1, matrix2);				
@@ -282,31 +307,32 @@ public class SageTmt extends Tmt {
 
 			dataFrame.setRowNames(ListUtils.ordered(names, rowOrder));
 
-			FeatureData featureData = new FeatureData(dataFrame);
-			featureData.save(new File(outdir + "/sage-tmt.txt"));
-			result.addOutputItem(new Item("sage_file", "sage-tmt.txt", "Output file:", TYPE.FILE));
-
 			System.out.println("results :\n" + dataFrame.toString(true, true));
 
 			if ( dupGeneList1 != null && dupGeneList1.size() > 0 ) {
 				IOUtils.write(new File(outdir + "/duplicated_list1.txt"), dupGeneList1);
-				result.addOutputItem(new Item("duplicated_list1_file", "duplicated_list1.txt", "Duplicated genes from list #1 (they were not taken into accout)", TYPE.FILE));
+				result.addOutputItem(new Item("duplicated_list1_file", "duplicated_list1.txt", "Duplicated genes from list #1 (they were not taken into accout)", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "List management"));
 			}
 			if ( dupGeneList2 != null && dupGeneList2.size() > 0 ) {
 				IOUtils.write(new File(outdir + "/duplicated_list2.txt"), dupGeneList2);
-				result.addOutputItem(new Item("duplicated_list2_file", "duplicated_list2.txt", "Duplicated genes from list #2 (they were not taken into accout)", TYPE.FILE));
+				result.addOutputItem(new Item("duplicated_list2_file", "duplicated_list2.txt", "Duplicated genes from list #2 (they were not taken into accout)", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "List management"));
 			}
 
 			if ( noConverted1 != null && noConverted1.size() > 0 ) {
 				IOUtils.write(new File(outdir + "/no_converted_list1.txt"), noConverted1);
-				result.addOutputItem(new Item("no_converted_list1_file", "no_converted_list1.txt", "Not found Ensembl IDs for the following genes of list #1", TYPE.FILE));
+				result.addOutputItem(new Item("no_converted_list1_file", "no_converted_list1.txt", "Not found Ensembl IDs for the following genes of list #1", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "List management"));
 			}
 			if ( noConverted2 != null && noConverted2.size() > 0 ) {
 				IOUtils.write(new File(outdir + "/no_converted_list2.txt"), noConverted2);
-				result.addOutputItem(new Item("no_converted_list2_file", "no_converted_list2.txt", "Not found Ensembl IDs for the following genes of list #2", TYPE.FILE));
+				result.addOutputItem(new Item("no_converted_list2_file", "no_converted_list2.txt", "Not found Ensembl IDs for the following genes of list #2", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "List management"));
 			}
+			
+			FeatureData featureData = new FeatureData(dataFrame);
+			featureData.save(new File(outdir + "/sage-tmt.txt"));
+			result.addOutputItem(new Item("sage_file", "sage-tmt.txt", "Output file:", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Output file"));
+			
 		} catch (Exception e) {
-			abort("exception_execute_tmt", "execute tmt error", e.getMessage(), StringUtils.getStackTrace(e));
+			abort("exception_execute_tmt", "SAGE tissue profiling error", e.getMessage(), StringUtils.getStackTrace(e));
 		}
 	}
 
@@ -321,7 +347,7 @@ public class SageTmt extends Tmt {
 				if ( frequencyMap.containsKey(key) ) {
 					value = frequencyMap.get(key);
 				} else {
-					System.out.println("not found: " + key);
+					//System.out.println("not found: " + key);
 				}
 				matrix.set(row, column, value);
 			}
