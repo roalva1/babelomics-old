@@ -10,6 +10,7 @@ import org.bioinfo.babelomics.methods.interactome.SnowTest;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -120,6 +121,8 @@ public class Snow extends BabelomicsTool {
 			}
 
 			//			result.addOutputItem(new Item("List_file", filename, "MARMITE output file", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Results"));
+			
+			addResultSnowViewerLink("subnetwork1", "Click to start the Snow viewer applet", "Snow viewer", "subnetwork1.xml", baseDir);
 
 
 		} catch (InvalidParameterException e) {
@@ -129,28 +132,42 @@ public class Snow extends BabelomicsTool {
 	}
 
 	private void addResultImage(String name, String label, String groupName, String fileName, String baseDir) throws IOException {
-		File file = new File(outdir + baseDir + fileName);
-		if ( file.exists() ) {
-			File outFile = new File(outdir + "/" + fileName);
-			FileUtils.touch(outFile);
-			FileUtils.copy(file, outFile);
-			if ( outFile.exists() ) {
-				result.addOutputItem(new Item(name, file.getName(), label, TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), groupName));
-			}
+		File outFile = copyFile(fileName, baseDir);
+		if ( outFile != null && outFile.exists() ) {
+			result.addOutputItem(new Item(name, outFile.getName(), label, TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), groupName));
 		}
 	}
 	
 	private void addResultFile(String name, String label, String groupName, String fileName, String baseDir) throws IOException {
+		File outFile = copyFile(fileName, baseDir);
+		if ( outFile != null && outFile.exists() ) {
+				result.addOutputItem(new Item(name, outFile.getName(), label, TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), groupName));
+		}
+	}
+	
+	private void addResultSnowViewerLink(String name, String label, String groupName, String fileName, String baseDir) throws IOException {
+		File outFile = copyFile(fileName, baseDir);
+		if ( outFile != null && outFile.exists() ) {
+			String url = "SnowViewer?filename=" + fileName;
+			//String url = "http://beta.babelomics.bioinfo.cipf.es/SnowViewer?filename=" + fileName;
+			//http://beta.babelomics.bioinfo.cipf.es/SnowViewer?filename=subnetwork1.xml&jobid=262&sessionid=7tySrwJgNRM0tyGOnj9N3eT2BCTsEC8Qw3StPMwwz1WfsFyt1zoIqR6lPa7fnv54
+			result.addOutputItem(new Item(name, url, label, TYPE.LINK, StringUtils.toList("LOCAL"), new HashMap<String, String>(2), groupName));
+		}
+	}
+
+	private File copyFile(String fileName, String baseDir) {
+		File outFile = null;
 		File file = new File(outdir + baseDir + fileName);
 		if ( file.exists() ) {
-			File outFile = new File(outdir + "/" + fileName);
-			FileUtils.touch(outFile);
-			FileUtils.copy(file, outFile);
-			if ( outFile.exists() ) {
-				result.addOutputItem(new Item(name, file.getName(), label, TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), groupName));
+			outFile = new File(outdir + "/" + fileName);
+			try {
+				FileUtils.touch(outFile);
+				FileUtils.copy(file, outFile);
+			} catch (IOException e) {
+				outFile = null;
 			}
 		}
-
+		return outFile;		
 	}
 
 

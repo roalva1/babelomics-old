@@ -37,8 +37,8 @@ public class IDConverterTest {
 
 	@Test
 	public void Test1() {
-		String dataset = "/mnt/commons/test/biodata/example/genes.txt";
-		
+		//String dataset = "/mnt/commons/test/biodata/example/genes.txt";
+		String dataset = "/mnt/commons/test/tools/tmt/list2_liver.txt";
 		String outdir = "/tmp/IDConverterTest1";
 		new File(outdir).mkdir();
 		
