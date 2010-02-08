@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bioinfo.collections.tree.multiple.MultipleTree;
 import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.IOUtils;
@@ -14,6 +13,7 @@ import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.data.format.io.parser.NewickParser;
+import org.bioinfo.data.tree.multiway.MultipleTree;
 import org.bioinfo.math.data.DoubleMatrix;
 
 public class Som extends Cluster {

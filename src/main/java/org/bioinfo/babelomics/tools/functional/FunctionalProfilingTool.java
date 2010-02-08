@@ -7,12 +7,11 @@ import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
-import org.bioinfo.babelomics.methods.functional.GeneSetAnalysisTestResult;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
@@ -86,7 +85,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-keywords-logic", "GO " + namespaceTitle + ", keywords filter logic: all or any",false));
 	}
 	
-	public void prepare() throws IOException, ParseException, InvalidColumnIndexException{
+	public void prepare() throws IOException, ParseException, InvalidIndexException{
 
 		// species
 		setSpecies(commandLine.getOptionValue("species","hsa"));

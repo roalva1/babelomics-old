@@ -7,13 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.data.list.DataFrame;
 import org.bioinfo.graphics.canvas.Canvas;
 import org.bioinfo.math.regression.SimpleRegressionTest;
 import org.bioinfo.math.result.CorrelationTestResult;

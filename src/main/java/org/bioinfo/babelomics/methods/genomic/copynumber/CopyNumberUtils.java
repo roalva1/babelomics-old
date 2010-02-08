@@ -5,16 +5,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
-import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.data.list.DataFrame;
+import org.bioinfo.data.list.exception.InvalidIndexException;
 
 public class CopyNumberUtils {
 
-	public static void saveAsCGHInput(Dataset dataset, String outFileName) throws IOException, InvalidColumnIndexException {
+	public static void saveAsCGHInput(Dataset dataset, String outFileName) throws IOException, InvalidIndexException {
 		dataset.load();
 		
 		List<String> sampleNames = dataset.getSampleNames();

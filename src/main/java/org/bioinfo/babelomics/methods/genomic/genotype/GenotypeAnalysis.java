@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.List;
 
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
-import org.bioinfo.collections.exceptions.InvalidRowIndexException;
-import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.FileUtils;
@@ -15,6 +12,8 @@ import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.data.list.DataFrame;
+import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.math.util.MathUtils;
 
 public class GenotypeAnalysis {
@@ -82,9 +81,7 @@ public class GenotypeAnalysis {
 				dataFrame.addColumn("log_p_values", ArrayUtils.toStringList(minusPvalueLog));
 				dataFrame.addColumn("odd_ratio", IOUtils.column(outdir+"/plink.fisher", 8, "\\s+"));
 				dataFrame.removeRow(0);
-			} catch (InvalidColumnIndexException e) {
-				e.printStackTrace();
-			} catch (InvalidRowIndexException e) {
+			} catch (InvalidIndexException e) {
 				e.printStackTrace();
 			}
 		}

@@ -4,13 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bioinfo.collections.tree.multiple.MultipleTree;
 import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.format.io.parser.NewickParser;
+import org.bioinfo.data.tree.multiway.MultipleTree;
 import org.bioinfo.math.data.DoubleMatrix;
 
 public class Sota extends Cluster {

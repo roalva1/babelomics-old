@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.bioinfo</groupId>
 	<artifactId>babelomics</artifactId>
-	<version>0.3.1</version>
+	<version>0.4.0</version>
 	<dependencies>
 		<dependency>
 			<groupId>org.bioinfo</groupId>
@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>org.bioinfo</groupId>
 			<artifactId>bioinfo-data</artifactId>
-			<version>0.5.0</version>
+			<version>0.6.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bioinfo</groupId>
@@ -45,11 +45,6 @@
 			<groupId>org.bioinfo</groupId>
 			<artifactId>bioinfo-chart</artifactId>
 			<version>0.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.bioinfo</groupId>
-			<artifactId>bioinfo-collections</artifactId>
-			<version>0.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>es.blast2go</groupId>

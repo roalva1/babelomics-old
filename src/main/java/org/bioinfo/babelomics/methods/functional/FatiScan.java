@@ -6,10 +6,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
@@ -66,7 +66,7 @@ public class FatiScan {
 	}
 	
 	
-	public void prepare() throws InvalidColumnIndexException{
+	public void prepare() throws InvalidIndexException{
 		
 		// id list
 		idList = rankedList.getDataFrame().getRowNames();//.getColumn(0);
@@ -84,7 +84,7 @@ public class FatiScan {
 		
 	}
 	
-	public void run() throws InvalidColumnIndexException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
+	public void run() throws InvalidIndexException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 				
 		// prepare list
 		prepare();

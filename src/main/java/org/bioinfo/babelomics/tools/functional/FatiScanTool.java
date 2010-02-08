@@ -13,12 +13,11 @@ import org.bioinfo.babelomics.methods.functional.FatiScan;
 import org.bioinfo.babelomics.methods.functional.GeneSetAnalysisTestResult;
 import org.bioinfo.babelomics.methods.functional.LogisticScan;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTest;
-import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.babelomics.methods.functional.graph.FatiScanGraph;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
@@ -60,7 +59,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 	}
 		
 	@Override
-	public void prepare() throws IOException, ParseException, InvalidColumnIndexException {
+	public void prepare() throws IOException, ParseException, InvalidIndexException {
 		super.prepare();
 
 		// method 
@@ -185,7 +184,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 	 */
 	
 	
-	private void doTest(FeatureData rankedList,Filter filter,DBConnector dbConnector, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidColumnIndexException{
+	private void doTest(FeatureData rankedList,Filter filter,DBConnector dbConnector, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidIndexException{
 		
 		// db attributes
 		String name = getDBName(filter);
@@ -219,7 +218,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		
 	}
 	
-	private void doYourAnnotationsTest(FeatureData rankedList, FeatureList<AnnotationItem> annotations, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidColumnIndexException{
+	private void doYourAnnotationsTest(FeatureData rankedList, FeatureList<AnnotationItem> annotations, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidIndexException{
 		
 		// db attributes
 		String name = "your_annotations";

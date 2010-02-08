@@ -13,11 +13,11 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.genetics.Chromosome;
 import org.bioinfo.babelomics.methods.functional.FatiGO;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
@@ -66,7 +66,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 
 	
 	@Override
-	public void prepare() throws IOException, ParseException, InvalidColumnIndexException {
+	public void prepare() throws IOException, ParseException, InvalidIndexException {
 		super.prepare();
 
 		// list 1		
