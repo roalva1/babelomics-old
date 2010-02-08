@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>org.bioinfo</groupId>
 			<artifactId>bioinfo-graphics</artifactId>
-			<version>0.3.0</version>
+			<version>0.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bioinfo</groupId>
