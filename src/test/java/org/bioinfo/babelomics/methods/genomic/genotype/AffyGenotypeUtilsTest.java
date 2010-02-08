@@ -4,7 +4,7 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
-import org.bioinfo.data.preprocess.microarray.AffyGenotypeUtils;
+import org.bioinfo.microarray.AffyGenotypeUtils;
 import org.junit.Test;
 
 public class AffyGenotypeUtilsTest {
