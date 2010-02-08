@@ -92,6 +92,10 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 	@Override
 	protected void execute() {
 		try {
+			
+			// update status
+			jobStatus.addStatusMessage("10", "Preparing data");
+			
 			// infrared connector			
 			DBConnector dbConnector = new DBConnector(getSpecies(), new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));			
 			
@@ -103,7 +107,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				throw new ParseException("No biological database selected (eg. --go-bp)");
 			} else {
 				
-				// save id lists				
+				// save id lists
 				IOUtils.write(outdir + "/ranked_list.txt", rankedList.toString());
 				result.addOutputItem(new Item("ranked_list","ranked_list.txt","Ranked list",Item.TYPE.FILE,Arrays.asList("RANKED_LIST","CLEAN"),new HashMap<String,String>(),"Input data"));
 				
@@ -121,12 +125,24 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 					
 				
 				// do fatiscans
+				double progress = 20;
+				double inc = 60.0/filterList.size();
 				for(Filter filter: filterList) {
 					doTest(rankedList,filter,dbConnector,significants,method);
+					// update status					
+					jobStatus.addStatusMessage("" + progress, "Executing test");
+					progress+=inc;
 				}
+				
+				// update status					
+				jobStatus.addStatusMessage("90", "Executing test");
+				
 				if(isYourAnnotations){
 					doYourAnnotationsTest(rankedList,yourAnnotations,significants,method);
 				}
+				
+				// update status					
+				jobStatus.addStatusMessage("95", "Saving results");
 				
 				System.err.println("significants: " + significants.size());
 				if(method==Method.Logistic){
@@ -145,11 +161,11 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 					// FatiScan graph
 					if(method==Method.FatiScan){
 						FatiScanGraph.fatiScanGraph(significants,"Significant terms graph for all databases",outdir + "/significant_graph.png");
-						result.addOutputItem(new Item("graph_alldbs","significant_graph.png","Significant terms graph for all databases",Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Significant Results"));
+						result.addOutputItem(new Item("graph_alldbs","significant_graph.png","Significant term graph",Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Significant results (all databases together)"));
 					}
 					
 				} else {
-					result.addOutputItem(new Item("graph_alldbs","No significant terms found","Significant terms for all databases",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant Results"));
+					result.addOutputItem(new Item("graph_alldbs","No significant terms found","Significant term graph",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant results (all databases together)"));
 				}		
 			}
 					

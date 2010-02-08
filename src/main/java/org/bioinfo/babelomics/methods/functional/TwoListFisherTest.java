@@ -22,12 +22,23 @@ public class TwoListFisherTest extends FunctionalTest {
 	@Override
 	public void test(List<String> list1, List<String> list2, FeatureList<AnnotationItem> annotations, int testMode) {
 		
+		HashMap<String, Boolean> mList1 = new HashMap<String,Boolean>();
+		for(String id0: list1){
+			mList1.put(id0, true);
+		}
+		HashMap<String, Boolean> mList2 = new HashMap<String,Boolean>();
+		for(String id0: list2){
+			mList2.put(id0,true);
+		}
+		//System.err.println("list1: " + list1);
+		
 		// init counters
 		Map<String, Integer> map1 = new HashMap<String, Integer>();
 		Map<String, Integer> map2 = new HashMap<String, Integer>();
 		Map<String, List<String>> list1Positives = new HashMap<String, List<String>>();
 		Map<String, List<String>> list2Positives = new HashMap<String, List<String>>();
 		List<String> terms = new ArrayList<String>();
+		HashMap<String,Boolean> mTerms = new HashMap<String,Boolean>();
 		String term,id;
 				
 		// count annotations for every gene
@@ -36,7 +47,10 @@ public class TwoListFisherTest extends FunctionalTest {
 			id = annotation.getId();
 			
 			// backup term name
-			if(!terms.contains(term)) terms.add(term);
+			if(!mTerms.containsKey(term)) {
+				terms.add(term);
+				mTerms.put(term, true);
+			}
 			
 			// list 1 count
 			  // init entry
@@ -45,7 +59,8 @@ public class TwoListFisherTest extends FunctionalTest {
 				list1Positives.put(term, new ArrayList<String>());
 			}
 			  // add term
-			if(list1.contains(id)) {
+			//if(list1.contains(id)) {
+			if(mList1.containsKey(id)){
 				map1.put(term, map1.get(term) + 1);
 				list1Positives.get(term).add(id);
 			}
@@ -57,7 +72,8 @@ public class TwoListFisherTest extends FunctionalTest {
 				list2Positives.put(term, new ArrayList<String>());
 			}
 			  // add term
-			if(list2.contains(id)) {
+			//if(list2.contains(id)) {
+			if(mList2.containsKey(id)){
 				map2.put(term, map2.get(term) + 1);
 				list2Positives.get(term).add(id);
 			}
