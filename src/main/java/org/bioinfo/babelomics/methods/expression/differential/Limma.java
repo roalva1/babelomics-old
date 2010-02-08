@@ -69,10 +69,11 @@ public class Limma {
 		SingleProcess sp = new SingleProcess(cmd);
 		sp.runSync();
 		
+		FileUtils.checkFile(outputFilename);
 		file = new File(outputFilename);
-		if ( ! file.exists() ) {
-			throw new Exception("error executing limma test (output file does not created)");
-		}
+//		if ( ! file.exists() ) {
+//			throw new Exception("error executing limma test (output file does not created)");
+//		}
 
 		Dataset ds = new Dataset(file, true);
 		
