@@ -8,6 +8,7 @@ import org.bioinfo.babelomics.tools.expression.differential.Correlation;
 import org.bioinfo.babelomics.tools.expression.differential.Survival;
 import org.bioinfo.babelomics.tools.expression.differential.TimeSeries;
 import org.bioinfo.babelomics.tools.expression.normalization.AffyExpressionNormalization;
+import org.bioinfo.babelomics.tools.expression.normalization.AgilentExpression1CNormalization;
 import org.bioinfo.babelomics.tools.expression.normalization.AgilentExpression2CNormalization;
 import org.bioinfo.babelomics.tools.functional.Blast2GoTool;
 import org.bioinfo.babelomics.tools.functional.FatiGOTool;
@@ -16,6 +17,7 @@ import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
 import org.bioinfo.babelomics.tools.functional.tissues.AffyTmt;
 import org.bioinfo.babelomics.tools.functional.tissues.SageTmt;
+import org.bioinfo.babelomics.tools.genomic.copynumber.AgilentCGH1CNormalization;
 import org.bioinfo.babelomics.tools.genomic.copynumber.AgilentCGH2CNormalization;
 import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
@@ -46,6 +48,10 @@ public class BabelomicsFactory {
 			return new AssociationTool();
 		}
 		
+		if(toolName.equalsIgnoreCase("agilent-expression-one-color-normalization")) {
+			return new AgilentExpression1CNormalization();
+		}
+
 		if(toolName.equalsIgnoreCase("agilent-expression-two-colors-normalization")) {
 			return new AgilentExpression2CNormalization();
 		}
@@ -118,6 +124,10 @@ public class BabelomicsFactory {
 			return new AffyTmt();
 		}
 		
+		if(toolName.equalsIgnoreCase("agilent-cgh-one-color-normalization")) {
+			return new AgilentCGH1CNormalization();
+		}
+
 		if(toolName.equalsIgnoreCase("agilent-cgh-two-colors-normalization")) {
 			return new AgilentCGH2CNormalization();
 		}
