@@ -14,13 +14,11 @@ import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.babelomics.utils.RCommand;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.chart.HistogramChart;
-import org.bioinfo.collections.tree.multiple.MultipleTree;
-import org.bioinfo.commons.exec.Command;
-import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.format.io.exception.InvalidFileFormatException;
 import org.bioinfo.data.format.io.parser.NewickParser;
+import org.bioinfo.data.tree.multiway.MultipleTree;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
@@ -39,8 +37,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 	 
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("datalist", "the feature data containig the ranked list"));		
-		options.addOption(OptionFactory.createOption("column", "",false));
+		options.addOption(OptionFactory.createOption("datalist", "the feature data containig the ranked list"));
 		options.addOption(OptionFactory.createOption("tree", "",false));
 		options.addOption(OptionFactory.createOption("histogram", "",false));
 		options.addOption(OptionFactory.createOption("boxplot", "",false));
@@ -54,6 +51,8 @@ public class DescriptiveStatistics extends BabelomicsTool {
 	
 	@Override
 	protected void execute() {
+		
+		updateJobStatus("10", "init execution");
 		dataset = null;
 		className = commandLine.getOptionValue("class", null);
 		
@@ -98,30 +97,33 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		List<String> env = new ArrayList<String>();
 		env.add("datafile=" + commandLine.getOptionValue("datalist"));		
 		env.add("outfile=" + this.getOutdir() + "/" + pcaplotFileName);
-		Command cmd = new Command("/usr/local/R-292/bin/R CMD BATCH --verbose --no-save --no-restore " + pcaPlotBinPath + " " + this.getOutdir() + "/rLog.log", env);		
-		System.out.println("command = " + cmd.getCommandLine());
-		System.out.println("env = " + ListUtils.toString(env, " "));
-		cmd.run();
+//		Command cmd = new Command("/usr/local/R-292/bin/R CMD BATCH --verbose --no-save --no-restore " + pcaPlotBinPath + " " + this.getOutdir() + "/rLog.log", env);		
+//		System.out.println("command = " + cmd.getCommandLine());
+//		System.out.println("env = " + ListUtils.toString(env, " "));
+//		cmd.run();
 		
-		System.out.println("out std = " + cmd.getOutput());
-		System.out.println("out std = " + cmd.getStatus());
-		System.out.println("out std = " + cmd.getException());
-		System.out.println("out error = " + cmd.getError());
+//		System.out.println("out std = " + cmd.getOutput());
+//		System.out.println("out std = " + cmd.getStatus());
+//		System.out.println("out std = " + cmd.getException());
+//		System.out.println("out error = " + cmd.getError());
 		
-//		System.err.println("salida:" + this.getOutdir() + " " + outdir);
-//		
-//		RCommand rCommand = new RCommand(pcaPlotBinPath, this.getOutdir());
-//		rCommand.addParam("datafile", commandLine.getOptionValue("datalist"));
-//		rCommand.addParam("outfile", this.getOutdir() + "/" + pcaplotFileName);
-//
-//		updateJobStatus("40", "executing segmentation");
-//
-//		rCommand.exec();
+		System.err.println("salidaPass1:");
 		
+		try {
+			jobStatus.addStatusMessage("" + ("40"), "preparing execution");
+		} catch (FileNotFoundException e) {
+			abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
+		}
+		
+		updateJobStatus("40", "preparing execution");
+		RCommand rCommand = new RCommand(pcaPlotBinPath, this.getOutdir());
+		rCommand.addParam("datafile", commandLine.getOptionValue("datalist"));
+		rCommand.addParam("outfile", this.getOutdir() + "/" + pcaplotFileName);
+		updateJobStatus("80", "exec");
+		rCommand.exec();		
 		// saving results
 		//
 		updateJobStatus("90", "saving results");
-		
 		result.addOutputItem(new Item("pca_plot", pcaplotFileName,"pca plot (png format)",TYPE.IMAGE, Arrays.asList("IMAGE","PCA_IMAGE"),new HashMap<String,String>(),"pca image"));
 	
 	}
@@ -209,12 +211,26 @@ public class DescriptiveStatistics extends BabelomicsTool {
 	}
 	
 	private void doTree() {
+		try {
+			jobStatus.addStatusMessage("" + ("40"), "preparing execution");
+		} catch (FileNotFoundException e) {
+			abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
+		}
+		
+		updateJobStatus("40", "preparing execution");
 		NewickParser nwParser = new NewickParser();
 		MultipleTree tree;
 		try {
 			tree = nwParser.parse(new File(commandLine.getOptionValue("datalist")));
 			String imgFilename = this.getOutdir() + "/tree.png";
 			ClusteringUtils.saveImageTree(tree, "Tree",  imgFilename, true);
+			try {
+				jobStatus.addStatusMessage("" + ("80"), "saving");
+			} catch (FileNotFoundException e) {
+				abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
+			}
+			
+			updateJobStatus("80", "saving");
 			result.addOutputItem(new Item("tree_image","tree.png","tree image (png format)",TYPE.IMAGE, Arrays.asList("IMAGE","TREE_IMAGE"),new HashMap<String,String>(),"tree image"));
 		} catch (IOException e) {
 			e.printStackTrace();

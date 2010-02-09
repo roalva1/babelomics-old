@@ -7,12 +7,11 @@ import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
-import org.bioinfo.babelomics.methods.functional.GeneSetAnalysisTestResult;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
@@ -86,7 +85,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-keywords-logic", "GO " + namespaceTitle + ", keywords filter logic: all or any",false));
 	}
 	
-	public void prepare() throws IOException, ParseException, InvalidColumnIndexException{
+	public void prepare() throws IOException, ParseException, InvalidIndexException{
 
 		// species
 		setSpecies(commandLine.getOptionValue("species","hsa"));
@@ -131,8 +130,8 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		if(commandLine.hasOption("annotations") && !commandLine.getOptionValue("annotations").equalsIgnoreCase("") && !commandLine.getOptionValue("annotations").equalsIgnoreCase("none")) {
 			isYourAnnotations = true;			
 			FeatureData annotations = new FeatureData(new File(commandLine.getOptionValue("annotations")), true);
-			List<String> ids = annotations.getDataFrame().getColumn(0);
-			List<String> terms = annotations.getDataFrame().getColumn(1);			
+			List<String> ids = annotations.getDataFrame().getRowNames();
+			List<String> terms = annotations.getDataFrame().getColumn(0);			
 			yourAnnotations = new FeatureList<AnnotationItem>(ids.size());// FeatureData(new File(cmdLine.getOptionValue("annotations")), true);
 			for(int i=0; i<ids.size(); i++){
 				yourAnnotations.add(new AnnotationItem(ids.get(i),terms.get(i)));

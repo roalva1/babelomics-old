@@ -3,7 +3,7 @@ package org.bioinfo.babelomics.methods.expression.clustering;
 import java.awt.Color;
 import java.io.IOException;
 
-import org.bioinfo.collections.tree.multiple.MultipleTree;
+import org.bioinfo.data.tree.multiway.MultipleTree;
 import org.bioinfo.graphics.canvas.Canvas;
 import org.bioinfo.graphics.canvas.panel.NewickPanel;
 

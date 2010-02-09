@@ -12,13 +12,13 @@ import org.bioinfo.babelomics.methods.functional.textmining.MarmiteUtils;
 import org.bioinfo.babelomics.methods.functional.textmining.Score;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.chart.BoxPlotChart;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
-import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.data.list.DataFrame;
+import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.result.KolmogorovSmirnovTestResult;
 import org.bioinfo.math.result.TestResultList;
@@ -252,7 +252,7 @@ public class MarmiteScan extends BabelomicsTool {
 			result.addOutputItem(new Item("marmite_table", filename, "MARMITE SCAN output table", TYPE.FILE, StringUtils.toList("TABLE,MARMITE_TABLE", ","), new HashMap<String, String>(), "Results"));			
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (InvalidColumnIndexException e) {
+		} catch (InvalidIndexException e) {
 			e.printStackTrace();
 		}	
 

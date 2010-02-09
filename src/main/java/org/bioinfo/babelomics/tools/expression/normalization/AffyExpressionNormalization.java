@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.chart.BoxPlotChart;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.Config;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
@@ -18,10 +17,11 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
-import org.bioinfo.data.preprocess.microarray.AffyExpresionUtils;
+import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.io.file.compress.CompressFactory;
 import org.bioinfo.io.file.compress.GenericCompressManager;
 import org.bioinfo.math.exception.InvalidParameterException;
+import org.bioinfo.microarray.AffymetrixExpresionUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -109,7 +109,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 			if ( celConvert ) {			
 				jobStatus.addStatusMessage("40", "converting CEL to GCOS text file format");
 
-				AffyExpresionUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", celFiles.getAbsolutePath(), tmpDir.getAbsolutePath());
+				AffymetrixExpresionUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", celFiles.getAbsolutePath(), tmpDir.getAbsolutePath());
 
 				File[] rawFiles = FileUtils.listFiles(tmpDir, ".+.CEL", true);
 				rawFilenames = ArrayUtils.toStringList(rawFiles);
@@ -146,7 +146,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 				if ( calls ) analysis.add("pm-mm,mas5-detect.calls=1.pairs=1");
 				if ( plier ) analysis.add("plier-mm");
 
-				AffyExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf"), celFiles.getAbsolutePath(), outdir);
+				AffymetrixExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf"), celFiles.getAbsolutePath(), outdir);
 
 			} else {
 
@@ -154,7 +154,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 				if ( calls ) analysis.add("dabg");
 				if ( plier ) analysis.add("plier-gcbg");
 
-				AffyExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf"), celFiles.getAbsolutePath(), outdir);
+				AffymetrixExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf"), celFiles.getAbsolutePath(), outdir);
 			}
 
 			//		System.err.println("cmd output: " + sp.getRunnableProcess().getOutput());
@@ -219,7 +219,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 			}
 		} catch (IOException e) {
 			printError("ioexception_execute_affyexpressionnormalization", e.toString(), e.getMessage(), e);
-		} catch (InvalidColumnIndexException e) {
+		} catch (InvalidIndexException e) {
 			printError("invalidcolumnindexexception_execute_affyexpressionnormalization", e.toString(), e.getMessage(), e);
 		} catch (InvalidParameterException e) {
 			printError("invalidparameterexception_execute_affyexpressionnormalization", e.toString(), e.getMessage(), e);
@@ -293,15 +293,15 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 	 * 
 	 * @param file
 	 * @throws IOException
-	 * @throws InvalidColumnIndexException
+	 * @throws InvalidIndexException
 	 */
-	private void saveAsDataset(File file) throws IOException, InvalidColumnIndexException {
+	private void saveAsDataset(File file) throws IOException, InvalidIndexException {
 		Dataset dataset = new Dataset(file);
 		dataset.load();
 		dataset.save();
 	}
 
-	public void saveBoxPlot(File file, String title, String resultId, String group) throws IOException, InvalidColumnIndexException {
+	public void saveBoxPlot(File file, String title, String resultId, String group) throws IOException, InvalidIndexException {
 		File imgFile = new File(file.getAbsolutePath().replace(".txt", ".png"));
 		Dataset dataset = new Dataset(file, true);
 		BoxPlotChart bpc = new BoxPlotChart(title, "", "");

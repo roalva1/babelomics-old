@@ -13,12 +13,11 @@ import org.bioinfo.babelomics.methods.functional.FatiScan;
 import org.bioinfo.babelomics.methods.functional.GeneSetAnalysisTestResult;
 import org.bioinfo.babelomics.methods.functional.LogisticScan;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTest;
-import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.babelomics.methods.functional.graph.FatiScanGraph;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
@@ -60,7 +59,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 	}
 		
 	@Override
-	public void prepare() throws IOException, ParseException, InvalidColumnIndexException {
+	public void prepare() throws IOException, ParseException, InvalidIndexException {
 		super.prepare();
 
 		// method 
@@ -92,6 +91,10 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 	@Override
 	protected void execute() {
 		try {
+			
+			// update status
+			jobStatus.addStatusMessage("10", "Preparing data");
+			
 			// infrared connector			
 			DBConnector dbConnector = new DBConnector(getSpecies(), new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));			
 			
@@ -103,7 +106,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				throw new ParseException("No biological database selected (eg. --go-bp)");
 			} else {
 				
-				// save id lists				
+				// save id lists
 				IOUtils.write(outdir + "/ranked_list.txt", rankedList.toString());
 				result.addOutputItem(new Item("ranked_list","ranked_list.txt","Ranked list",Item.TYPE.FILE,Arrays.asList("RANKED_LIST","CLEAN"),new HashMap<String,String>(),"Input data"));
 				
@@ -121,12 +124,24 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 					
 				
 				// do fatiscans
+				double progress = 20;
+				double inc = 60.0/filterList.size();
 				for(Filter filter: filterList) {
 					doTest(rankedList,filter,dbConnector,significants,method);
+					// update status					
+					jobStatus.addStatusMessage("" + progress, "Executing test");
+					progress+=inc;
 				}
+				
+				// update status					
+				jobStatus.addStatusMessage("90", "Executing test");
+				
 				if(isYourAnnotations){
 					doYourAnnotationsTest(rankedList,yourAnnotations,significants,method);
 				}
+				
+				// update status					
+				jobStatus.addStatusMessage("95", "Saving results");
 				
 				System.err.println("significants: " + significants.size());
 				if(method==Method.Logistic){
@@ -145,11 +160,11 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 					// FatiScan graph
 					if(method==Method.FatiScan){
 						FatiScanGraph.fatiScanGraph(significants,"Significant terms graph for all databases",outdir + "/significant_graph.png");
-						result.addOutputItem(new Item("graph_alldbs","significant_graph.png","Significant terms graph for all databases",Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Significant Results"));
+						result.addOutputItem(new Item("graph_alldbs","significant_graph.png","Significant term graph",Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Significant results (all databases together)"));
 					}
 					
 				} else {
-					result.addOutputItem(new Item("graph_alldbs","No significant terms found","Significant terms for all databases",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant Results"));
+					result.addOutputItem(new Item("graph_alldbs","No significant terms found","Significant term graph",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant results (all databases together)"));
 				}		
 			}
 					
@@ -169,7 +184,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 	 */
 	
 	
-	private void doTest(FeatureData rankedList,Filter filter,DBConnector dbConnector, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidColumnIndexException{
+	private void doTest(FeatureData rankedList,Filter filter,DBConnector dbConnector, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidIndexException{
 		
 		// db attributes
 		String name = getDBName(filter);
@@ -203,7 +218,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		
 	}
 	
-	private void doYourAnnotationsTest(FeatureData rankedList, FeatureList<AnnotationItem> annotations, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidColumnIndexException{
+	private void doYourAnnotationsTest(FeatureData rankedList, FeatureList<AnnotationItem> annotations, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidIndexException{
 		
 		// db attributes
 		String name = "your_annotations";

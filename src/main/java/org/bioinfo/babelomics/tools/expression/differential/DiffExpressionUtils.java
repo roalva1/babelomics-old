@@ -5,9 +5,9 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bioinfo.collections.list.NamedArrayList;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.data.list.NamedArrayList;
 import org.bioinfo.graphics.canvas.Canvas;
 import org.bioinfo.graphics.canvas.feature.ScoreFeature;
 import org.bioinfo.graphics.canvas.panel.GridPanel;

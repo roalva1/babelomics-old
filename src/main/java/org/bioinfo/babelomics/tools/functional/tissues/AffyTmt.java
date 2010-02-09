@@ -9,13 +9,13 @@ import java.util.Map;
 
 import org.bioinfo.babelomics.methods.functional.InfraredUtils;
 import org.bioinfo.babelomics.tools.functional.FunctionalUtils;
-import org.bioinfo.collections.matrix.DataFrame;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.data.list.DataFrame;
 import org.bioinfo.db.DBConnection;
 import org.bioinfo.db.api.PreparedQuery;
 import org.bioinfo.db.api.Query;

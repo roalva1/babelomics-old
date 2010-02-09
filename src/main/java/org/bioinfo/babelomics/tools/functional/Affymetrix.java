@@ -4,10 +4,10 @@ import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.OptionFactory;
 
-public class Affimetrix extends BabelomicsTool {
+public class Affymetrix extends BabelomicsTool {
 
 
-	public Affimetrix(String[] args) {
+	public Affymetrix(String[] args) {
 		initOptions();
 	}
 

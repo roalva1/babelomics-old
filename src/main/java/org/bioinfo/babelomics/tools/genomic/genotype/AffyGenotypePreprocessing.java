@@ -6,7 +6,7 @@ import java.security.InvalidParameterException;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.utils.StringUtils;
-import org.bioinfo.data.preprocess.microarray.AffyGenotypeUtils;
+import org.bioinfo.microarray.AffyGenotypeUtils;
 import org.bioinfo.tool.OptionFactory;
 
 public class AffyGenotypePreprocessing extends BabelomicsTool {

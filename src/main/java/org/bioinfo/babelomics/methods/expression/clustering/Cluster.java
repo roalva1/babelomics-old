@@ -2,7 +2,7 @@ package org.bioinfo.babelomics.methods.expression.clustering;
 
 import java.util.List;
 
-import org.bioinfo.collections.tree.multiple.MultipleTree;
+import org.bioinfo.data.tree.multiway.MultipleTree;
 import org.bioinfo.math.data.DoubleMatrix;
 
 public abstract class Cluster {
