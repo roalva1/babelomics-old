@@ -14,7 +14,6 @@
 			<groupId>org.bioinfo</groupId>
 			<artifactId>bioinfo-math</artifactId>
 			<version>0.3.0</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.bioinfo</groupId>
