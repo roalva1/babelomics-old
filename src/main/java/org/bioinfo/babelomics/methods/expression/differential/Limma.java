@@ -80,9 +80,13 @@ public class Limma {
 //		new File(file.getAbsoluteFile() + ".log").delete();
 //		file.delete();
 				
+		if ( ds == null || ds.getDoubleMatrix() == null || ds.getDoubleMatrix().getColumnDimension() != 2) {
+			throw new Exception("error running limma test, output dataset can not be created");
+		}
+		
 		result = new TestResultList<LimmaTestResult>(ds.getRowDimension());
 		for(int i=0 ; i < ds.getRowDimension() ; i++) {
-			result.add(new LimmaTestResult(ds.getDoubleMatrix().getRow(i)[1], ds.getDoubleMatrix().getRow(i)[0], ds.getDoubleMatrix().getRow(i)[2], 0.0));			
+			result.add(new LimmaTestResult(ds.getDoubleMatrix().getRow(i)[0], ds.getDoubleMatrix().getRow(i)[1], 0.0));			
 		}
 		
 		return result;

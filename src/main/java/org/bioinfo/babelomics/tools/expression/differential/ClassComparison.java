@@ -332,7 +332,7 @@ public class ClassComparison extends BabelomicsTool {
 			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
-			dataFrame.addColumn("lod", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getLods()), rowOrder)));
+			//dataFrame.addColumn("lod", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getLods()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
 
