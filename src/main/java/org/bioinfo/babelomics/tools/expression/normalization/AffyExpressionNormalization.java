@@ -118,11 +118,16 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 				IOUtils.write(celFiles, "cel_files\n" + ListUtils.toString(rawFilenames, "\n"));
 			}		
 
-			Map<String, String> chipInfo = null;
-			Config config = new Config(System.getenv("BABELOMICS_HOME") + "/conf/apt.conf");		
+			//Config config = new Config();
+			config.append(new File(System.getenv("BABELOMICS_HOME") + "/conf/apt.conf"));
 			String chipName = getChipName(rawFilenames, config.getKeys());
+						
+			if ( chipName == null ) {
+				abort("exception_execute_affynormalization", "array type not supported", "array type not supported", "array type not supported");			
+			}
+			
 			String infoStr = config.getProperty(chipName);
-			chipInfo = MapUtils.stringToMap(infoStr);
+			Map<String, String> chipInfo = MapUtils.stringToMap(infoStr);
 			chipInfo.put("name", chipName);
 
 			System.out.println(" chip info = " + chipInfo.toString());
@@ -146,7 +151,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 				if ( calls ) analysis.add("pm-mm,mas5-detect.calls=1.pairs=1");
 				if ( plier ) analysis.add("plier-mm");
 
-				AffymetrixExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf"), celFiles.getAbsolutePath(), outdir);
+				AffymetrixExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, config.getProperty("BABELOMICS_DATA_HOME") + chipInfo.get("cdf"), celFiles.getAbsolutePath(), outdir);
 
 			} else {
 
@@ -154,7 +159,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 				if ( calls ) analysis.add("dabg");
 				if ( plier ) analysis.add("plier-gcbg");
 
-				AffymetrixExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, System.getenv("BABELOMICS_HOME") + chipInfo.get("cdf"), celFiles.getAbsolutePath(), outdir);
+				AffymetrixExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, config.getProperty("BABELOMICS_DATA_HOME") + chipInfo.get("cdf"), celFiles.getAbsolutePath(), outdir);
 			}
 
 			//		System.err.println("cmd output: " + sp.getRunnableProcess().getOutput());
@@ -239,7 +244,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 		List<String> lines = null;
 		List<String> results = new ArrayList<String>(rawFilenames.size());
 
-		System.out.println("----------> getChipPath, chip names = " + ListUtils.toString(chipNames, ", "));
+		System.out.println("----------> getChipName, chip names = " + ListUtils.toString(chipNames, ", "));
 
 		for(int i=0 ; i<rawFilenames.size() ; i++) {
 			results.add(i, null);
