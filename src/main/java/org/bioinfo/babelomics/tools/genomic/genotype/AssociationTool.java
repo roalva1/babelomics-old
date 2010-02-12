@@ -14,8 +14,6 @@ public class AssociationTool extends GenotypeAnalysisTool {
 
 	@Override
 	public void initOptions() {
-		super.initOptions();
-
 		options.addOption(OptionFactory.createOption("test", "Valid values: assoc, fisher, linear, logistic"));
 		options.addOption(OptionFactory.createOption("maf", "Default value: 0.01", false));
 		options.addOption(OptionFactory.createOption("log", "Odd ratio logarithm", false, false));
@@ -39,9 +37,9 @@ public class AssociationTool extends GenotypeAnalysisTool {
 				genotypeAnalysis.setPlinkPath(babelomicsHomePath+"/bin/genotype/plink64");
 			}
 
-			System.out.println(""+Math.log(1)/Math.log(2));
-			System.out.println(""+(0.0)*(-1));
-			System.out.println(""+(0.0==-0.0));
+//			System.out.println(""+Math.log(1)/Math.log(2));
+//			System.out.println(""+(0.0)*(-1));
+//			System.out.println(""+(0.0==-0.0));
 
 			logger.debug("executing the test");
 			genotypeAnalysis.association(test, maf);

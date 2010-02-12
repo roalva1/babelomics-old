@@ -22,6 +22,8 @@ import org.bioinfo.babelomics.tools.genomic.copynumber.AgilentCGH2CNormalization
 import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
 import org.bioinfo.babelomics.tools.genomic.genotype.AssociationTool;
+import org.bioinfo.babelomics.tools.genomic.genotype.StratificationTool;
+import org.bioinfo.babelomics.tools.genomic.genotype.TransmissionDisequilibriumTool;
 import org.bioinfo.babelomics.tools.graph.DescriptiveStatistics;
 import org.bioinfo.babelomics.tools.graph.GoGraphViewerTool;
 import org.bioinfo.babelomics.tools.interactome.Snow;
@@ -42,10 +44,6 @@ public class BabelomicsFactory {
 		
 		if(toolName.equalsIgnoreCase("affy-expression-normalization")) {
 			return new AffyExpressionNormalization();
-		}
-		
-		if(toolName.equalsIgnoreCase("association")) {
-			return new AssociationTool();
 		}
 		
 		if(toolName.equalsIgnoreCase("agilent-expression-one-color-normalization")) {
@@ -145,11 +143,15 @@ public class BabelomicsFactory {
 		}
 
 		if(toolName.equalsIgnoreCase("association")) {
-			return new OutlierLrs();
+			return new AssociationTool();
 		}
 		
 		if(toolName.equalsIgnoreCase("tdt")) {
-			return new OutlierLrs();
+			return new TransmissionDisequilibriumTool();
+		}
+
+		if(toolName.equalsIgnoreCase("stratification")) {
+			return new StratificationTool();
 		}
 		
 		if(toolName.equalsIgnoreCase("linkage")) {

@@ -3,9 +3,9 @@ package org.bioinfo.babelomics.tools.genomic.genotype;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.tool.OptionFactory;
 
-public class StratificationTest extends BabelomicsTool {
+public class StratificationTool extends BabelomicsTool {
 	
-	public StratificationTest() {
+	public StratificationTool() {
 		
 	}
 

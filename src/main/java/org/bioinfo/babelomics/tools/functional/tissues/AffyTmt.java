@@ -179,7 +179,6 @@ public class AffyTmt extends Tmt {
 				}
 				if ( genesToConvert2.size() > 0 ) {
 					logger.debug("found " + genesToConvert1.size() + " IDs non-Ensembl ID in List #2: " + ListUtils.toString(genesToConvert2, ","));
-					System.out.println("found " + genesToConvert1.size() + " IDs non-Ensembl ID in List #2: " + ListUtils.toString(genesToConvert2, ","));
 					ensemblMap2 = InfraredUtils.getEnsemblMap(dbConnector, genesToConvert2);
 					if ( ensemblMap2 == null || ensemblMap2.size() == 0 ) {
 						logger.debug("No Ensembl IDs found for your input genes in List #2 when converting your input genes to Ensembl ID");
@@ -201,8 +200,12 @@ public class AffyTmt extends Tmt {
 				throw new Exception("No Ensembl IDs found for list #2 when converting to Ensembl ID");
 			}				
 			
+			logger.debug("unique genes: " + uniqueGeneList2);
+			System.out.println("unique genes: " + uniqueGeneList2);
 			Map<String, List<String>> probesMap2 = getProbes(species, uniqueGeneList2);
 			if ( probesMap2 == null || probesMap2.size() == 0 ) {
+//				abort("exception_execute_tmt", "No Affymetrix probes found for list #2", "1", "2");
+//				return;
 				throw new Exception("No Affymetrix probes found for list #2");
 			}
 

@@ -40,6 +40,7 @@ public class ClassComparison extends BabelomicsTool {
 		initOptions();
 	}
 
+	@Override
 	public void initOptions() {
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
 		options.addOption(OptionFactory.createOption("class-name", "class"));

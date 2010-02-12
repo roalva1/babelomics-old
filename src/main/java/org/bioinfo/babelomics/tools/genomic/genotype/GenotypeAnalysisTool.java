@@ -25,9 +25,9 @@ public class GenotypeAnalysisTool extends BabelomicsTool {
 		// the typical ped and map files
 		options.addOption(OptionFactory.createOption("ped-file", "PED file path", false));
 		options.addOption(OptionFactory.createOption("map-file", "MAP file path", false));
-		options.addOption(OptionFactory.createOption("plink", "PLINK file path", false));
+		options.addOption(OptionFactory.createOption("zip-file", "ZIP file containing PED and MAP files", false));
 		
-		options.addOption(OptionFactory.createOption("tdt", "Just a flag", false, false));
+		options.addOption(OptionFactory.createOption("plink", "PLINK file path", false));
 	}
 
 	protected void parseGenotypeCommonOptions() {
