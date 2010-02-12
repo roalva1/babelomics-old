@@ -15,6 +15,7 @@ import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
+import org.bioinfo.infrared.core.dbsql.GeneDBManager;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.dbsql.AnnotationDBManager;
 import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
@@ -34,7 +35,8 @@ public class CreateAnnotation extends BabelomicsTool {
 
 		getOptions().addOption(OptionFactory.createOption("listfile", "File containning the IDs to convert", false));
 		getOptions().addOption(OptionFactory.createOption("list", "IDs to convert separated by commas", false));
-
+		getOptions().addOption(OptionFactory.createOption("all-genome", "All genome",false));
+		
 		// GO biological process options
 		addGOOptions("bp");
 		addGOOptions("cc");
@@ -79,6 +81,8 @@ public class CreateAnnotation extends BabelomicsTool {
 			
 			DBConnector dbConnector = new DBConnector(species, new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));	
 
+			System.out.println("species = " + species + ", db connector = " + dbConnector.toString());
+
 			List<String> ids = null;
 
 			// check input IDs
@@ -93,7 +97,12 @@ public class CreateAnnotation extends BabelomicsTool {
 						abort("ioexception_execute_newannotation", e.getMessage(), e.getMessage(), e.getMessage());
 					}
 				} else {
-					abort("error_execute_idconverter", "Missing input file", "Missing input file", "Missing input file");					
+					if ( commandLine.hasOption("all-genome") ) {
+						GeneDBManager geneDBManager = new GeneDBManager(dbConnector);
+						ids = geneDBManager.getAllEnsemblIds();
+					} else {
+						abort("error_execute_idconverter", "Missing input file", "Missing input file", "Missing input file");
+					}
 				}
 			} else {
 				ids = StringUtils.toList(inputIds, ",");
@@ -131,8 +140,8 @@ public class CreateAnnotation extends BabelomicsTool {
 			FeatureList<AnnotationItem> al = null;
 			AnnotationDBManager af = new AnnotationDBManager(dbConnector);
 
-			System.out.println("dbConnector = " + dbConnector.toString());
-			System.out.println("ids = " + ListUtils.toString(ids, ","));
+			//System.out.println("dbConnector = " + dbConnector.toString());
+			//System.out.println("ids = " + ListUtils.toString(ids, ","));
 
 			String fileName = null;
 
