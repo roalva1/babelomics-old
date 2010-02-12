@@ -21,7 +21,7 @@ public abstract class BabelomicsTool extends GenericBioTool {
 		babelomicsHomePath = System.getenv("BABELOMICS_HOME");
 		
 		try {
-			this.appendConfig(new File(babelomicsHomePath + "/conf/babelomics.conf"));
+			this.appendConfig(new File(babelomicsHomePath + "/conf/babelomics.properties"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
