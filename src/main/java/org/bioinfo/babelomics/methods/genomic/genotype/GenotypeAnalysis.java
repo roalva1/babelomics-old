@@ -52,8 +52,8 @@ public class GenotypeAnalysis {
 		if(assocTest == null) {
 			throw new InvalidParameterException("association test is null");
 		}
-		if(!assocTest.equalsIgnoreCase("assoc") && !assocTest.equalsIgnoreCase("fisher") && !assocTest.equalsIgnoreCase("linear") && !assocTest.equalsIgnoreCase("logistic")) {
-			throw new InvalidParameterException("association test is not valid, valid options are: 'assoc', 'fisher', 'linear' or 'logistic', parameter: " + assocTest);
+		if(!assocTest.equalsIgnoreCase("assoc") && !assocTest.equalsIgnoreCase("fisher") && !assocTest.equalsIgnoreCase("linear") && !assocTest.equalsIgnoreCase("logistic") && !assocTest.equalsIgnoreCase("tdt")) {
+			throw new InvalidParameterException("association test is not valid, valid options are: 'assoc', 'fisher', 'linear', 'logistic' or 'tdt', parameter: " + assocTest);
 		}
 		// executing plink binary
 		StringBuilder plinkCommandLine = createBasicPlinkCommand();
@@ -93,6 +93,9 @@ public class GenotypeAnalysis {
 		if(assocTest.equalsIgnoreCase("logistic")) {
 			// columns: CHR, SNP, BP, A1, TEST, NMISS, OR, STAT, P
 			
+		}
+		if(assocTest.equalsIgnoreCase("tdt")) {
+
 		}
 		
 		featureData = new FeatureData(dataFrame);
