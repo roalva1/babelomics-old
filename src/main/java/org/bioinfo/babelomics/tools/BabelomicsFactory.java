@@ -23,7 +23,7 @@ import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
 import org.bioinfo.babelomics.tools.genomic.genotype.AssociationTool;
 import org.bioinfo.babelomics.tools.genomic.genotype.StratificationTool;
-import org.bioinfo.babelomics.tools.genomic.genotype.TransmissionDisequilibriumTool;
+import org.bioinfo.babelomics.tools.genomic.genotype.FamilyBasedTool;
 import org.bioinfo.babelomics.tools.graph.DescriptiveStatistics;
 import org.bioinfo.babelomics.tools.graph.GoGraphViewerTool;
 import org.bioinfo.babelomics.tools.interactome.Snow;
@@ -142,12 +142,17 @@ public class BabelomicsFactory {
 			return new CopyNumberAnalysis();
 		}
 
+		/*
+		 * **************************************************************************************************
+		 * *****	Genotype tools: Association, Transmission Disequilibrium Test and Startification	*****
+		 * **************************************************************************************************
+		 */
 		if(toolName.equalsIgnoreCase("association")) {
 			return new AssociationTool();
 		}
 		
 		if(toolName.equalsIgnoreCase("tdt")) {
-			return new TransmissionDisequilibriumTool();
+			return new FamilyBasedTool();
 		}
 
 		if(toolName.equalsIgnoreCase("stratification")) {
@@ -157,6 +162,10 @@ public class BabelomicsFactory {
 		if(toolName.equalsIgnoreCase("linkage")) {
 			return new OutlierLrs();
 		}
+		/*
+		 * **************************************************************************************************
+		 * **************************************************************************************************
+		 */
 		
 		if(toolName.equalsIgnoreCase("gesbap")) {
 			return new OutlierLrs();
