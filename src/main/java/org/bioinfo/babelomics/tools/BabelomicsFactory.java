@@ -151,9 +151,9 @@ public class BabelomicsFactory {
 			return new AssociationTool();
 		}
 		
-		if(toolName.equalsIgnoreCase("tdt")) {
-			return new FamilyBasedTool();
-		}
+//		if(toolName.equalsIgnoreCase("tdt")) {
+//			return new FamilyBasedTool();
+//		}
 
 		if(toolName.equalsIgnoreCase("stratification")) {
 			return new StratificationTool();

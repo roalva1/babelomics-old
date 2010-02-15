@@ -3,7 +3,6 @@ package org.bioinfo.babelomics.tools.genomic.genotype;
 import java.io.IOException;
 
 import org.bioinfo.babelomics.methods.genomic.genotype.GenotypeAnalysis;
-import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.tool.OptionFactory;
 
 public class AssociationTool extends GenotypeAnalysisTool {
@@ -14,11 +13,9 @@ public class AssociationTool extends GenotypeAnalysisTool {
 
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("test", "Valid values: assoc, fisher, linear, logistic"));
-		options.addOption(OptionFactory.createOption("maf", "Default value: 0.02", false));
-		options.addOption(OptionFactory.createOption("log", "Odd ratio logarithm", false, false));
-
-		options.addOption(OptionFactory.createOption("stratification", "Just a flag", false, false));
+		options.addOption(OptionFactory.createOption("test", "Valid values: assoc, fisher, linear, logistic, tdt", true, true));
+		options.addOption(OptionFactory.createOption("maf", "Minor allele frequency, default value: 0.02", false));
+		options.addOption(OptionFactory.createOption("log", "Wether to apply Odd ratio logarithm to the file result", false, false));
 	}
 
 	@Override
@@ -34,7 +31,7 @@ public class AssociationTool extends GenotypeAnalysisTool {
 			genotypeAnalysis = new GenotypeAnalysis(pedFilePath, mapFilePath);
 			genotypeAnalysis.setPlinkPath(plinkPath);
 			genotypeAnalysis.setOutdir(outdir);
-			logger.debug("executing: "+plinkPath+" --ped "+pedFilePath+" --map "+mapFilePath+" --out "+outdir+"/plink --"+test+" --maf "+maf);
+			logger.debug("executing: "+plinkPath+" --ped "+pedFilePath+" --map "+mapFilePath+" --out "+outdir+"/plink --maf "+maf + "--"+test);
 			genotypeAnalysis.association(test, maf);
 			
 //			if(commandLine.hasOption("plink-path")) {
