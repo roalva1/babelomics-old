@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.Arrays;
 
 import org.bioinfo.babelomics.BabelomicsMain;
+import org.bioinfo.commons.io.utils.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +20,6 @@ public class CreateAnnotationTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
 	public void Test1() {
 		String outdir = "/tmp/CreateAnnotationTest1";
 		new File(outdir).mkdir();
@@ -34,4 +34,37 @@ public class CreateAnnotationTest {
 		}
 	}	
 
+	@Test
+	public void Test2() {
+		String outdir = "/tmp/CreateAnnotationTest2";
+		new File(outdir).mkdir();
+
+		String []args = { "--tool", "create-annotation","--log-level", "2", "--species", "hsa", "--list", "AATK,BIRC7,PARM1,kkkkkk", "--go-bp", "--kegg", "--go-cc", "--output-format", "extended", "-o", outdir};
+
+		System.out.println("CreateAnnotationTest2, args : " + Arrays.toString(args));
+
+		try {
+			FileUtils.createDirectory(outdir);
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}	
+
+	@Test
+	public void Test3() {
+		String outdir = "/tmp/CreateAnnotationTest3";
+		new File(outdir).mkdir();
+
+		String []args = { "--tool", "create-annotation","--log-level", "2", "--species", "hsa", "--list", "AATK,BIRC7,PARM1,kkkkkk", "--go-bp", "--kegg", "--go-cc", "--output-format", "compact", "-o", outdir};
+
+		System.out.println("CreateAnnotationTest3, args : " + Arrays.toString(args));
+
+		try {
+			FileUtils.createDirectory(outdir);
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}	
 }
