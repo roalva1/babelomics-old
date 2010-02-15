@@ -44,7 +44,7 @@ public class GenotypeAnalysis {
 	 * 
 	 */
 	public void association(String assocTest) throws IOException {
-		association(assocTest, 0.01);
+		association(assocTest, 0.02);
 	}
 
 	public void association(String assocTest, double maf) throws IOException {
@@ -57,7 +57,7 @@ public class GenotypeAnalysis {
 		}
 		// executing plink binary
 		StringBuilder plinkCommandLine = createBasicPlinkCommand();
-		plinkCommandLine.append(" --" + assocTest.toLowerCase() + " --maf " + maf + " ");
+		plinkCommandLine.append(" --maf " + maf + " --" + assocTest.toLowerCase() + " ");
 		executePlinkCommand(plinkCommandLine.toString());
 
 		// saving the data
@@ -65,21 +65,23 @@ public class GenotypeAnalysis {
 		DataFrame dataFrame = new DataFrame();
 		if(assocTest.equalsIgnoreCase("assoc")) {
 			// columns:  CHR, SNP, BP, A1, F_A, F_U, A2, CHISQ, P, OR
+			FileUtils.checkFile(outdir+"/plink.assoc");
 
 		}
 		if(assocTest.equalsIgnoreCase("fisher")) {
 			// columns:  CHR, SNP, BP, A1, F_A, F_U, A2, P, OR
 			try {
-				dataFrame.addColumn("dbsnp", IOUtils.column(outdir+"/plink.fisher", 1, "\\s+"));
-				dataFrame.addColumn("chromosome", IOUtils.column(outdir+"/plink.fisher", 0, "\\s+"));
-				dataFrame.addColumn("position", IOUtils.column(outdir+"/plink.fisher", 2, "\\s+"));
+				FileUtils.checkFile(outdir+"/plink.assoc.fisher");
+				dataFrame.addColumn("dbsnp", IOUtils.column(outdir+"/plink.assoc.fisher", 1, "\\s+"));
+				dataFrame.addColumn("chromosome", IOUtils.column(outdir+"/plink.assoc.fisher", 0, "\\s+"));
+				dataFrame.addColumn("position", IOUtils.column(outdir+"/plink.assoc.fisher", 2, "\\s+"));
 				
-				List<String> pvalues = IOUtils.column(outdir+"/plink.fisher", 7, "\\s+");
+				List<String> pvalues = IOUtils.column(outdir+"/plink.assoc.fisher", 7, "\\s+");
 				double[] minusPvalueLog = MathUtils.log(ListUtils.toDoubleArray(pvalues), 2);
 				minusPvalueLog = MathUtils.scalarMultiply(minusPvalueLog, -1);
 				dataFrame.addColumn("p_values", pvalues);
 				dataFrame.addColumn("log_p_values", ArrayUtils.toStringList(minusPvalueLog));
-				dataFrame.addColumn("odd_ratio", IOUtils.column(outdir+"/plink.fisher", 8, "\\s+"));
+				dataFrame.addColumn("odd_ratio", IOUtils.column(outdir+"/plink.assoc.fisher", 8, "\\s+"));
 				dataFrame.removeRow(0);
 			} catch (InvalidIndexException e) {
 				e.printStackTrace();
@@ -97,6 +99,19 @@ public class GenotypeAnalysis {
 		featureData.save(new File(outdir+"/plink.featdata"));
 	}
 
+	public void familyBased(String test) throws IOException {
+		checkParameters();
+		if(test == null) {
+			throw new InvalidParameterException("association test is null");
+		}
+		// executing plink binary
+		StringBuilder plinkCommandLine = createBasicPlinkCommand();
+		if(test.equalsIgnoreCase("tdt")) {
+			plinkCommandLine.append(" --tdt ");
+			executePlinkCommand(plinkCommandLine.toString());	
+		}
+		
+	}
 
 	public void stratification() throws IOException {
 		checkParameters();
@@ -120,10 +135,29 @@ public class GenotypeAnalysis {
 		return plinkCommandLine;
 	}
 
-	private void executePlinkCommand(String command) {
+	private void executePlinkCommand(String command) throws IOException {
+		System.out.println("executing: "+command);
+//		List<String> params= new ArrayList<String>();
+//		params.add(plinkPath);
+//		params.add(" --ped "+pedFile.getAbsolutePath());
+//		params.add(" --map "+mapFile.getAbsolutePath());
+//		params.add(" --out "+outdir+"/plink");
+//		params.add(" --assoc");
+//		Process p = Runtime.getRuntime().exec(ListUtils.toArray(params));
+		
+//		Process p = Runtime.getRuntime().exec(command);
+//		System.out.println(IOUtils.toString(p.getInputStream()));
+//		System.out.println(IOUtils.toString(p.getErrorStream()));
+//		System.out.println("exitValue: "+p.exitValue());
+		
 		Command plinkCommand = new Command(command);
 		SingleProcess sp = new SingleProcess(plinkCommand);
 		sp.runSync();
+		
+//		System.out.println(sp.getRunnableProcess().getError());
+//		System.out.println(sp.getRunnableProcess().getException());
+//		System.out.println(sp.getRunnableProcess().getExitValue());
+//		System.out.println(sp.getRunnableProcess().getOutput());
 	}
 
 	private void checkParameters() throws IOException {
