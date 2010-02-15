@@ -116,11 +116,30 @@ public class GenotypeAnalysis {
 		
 	}
 
-	public void stratification() throws IOException {
+	public void stratification(String test, boolean ibsTest, double ppc, int mc, double maf) throws IOException {
 		checkParameters();
+		if(test == null) {
+			throw new InvalidParameterException("association test is null");
+		}
+		// executing plink binary
 		StringBuilder plinkCommandLine = createBasicPlinkCommand();
-		plinkCommandLine.append(" --cluster ");
-		executePlinkCommand(plinkCommandLine.toString());
+		if(test.equalsIgnoreCase("ibs-cluster")) {
+			if(maf > 0) {
+				plinkCommandLine.append(" --maf "+maf);
+			}
+			plinkCommandLine.append(" --cluster ");
+			if(ibsTest) {
+				plinkCommandLine.append(" --ibs-test ");
+			}
+			if(ppc > 0) {
+				plinkCommandLine.append(" --ppc "+ppc);
+			}
+			if(mc > 0) {
+				plinkCommandLine.append(" --mc "+mc);
+			}
+			executePlinkCommand(plinkCommandLine.toString());
+		}
+		
 	}
 
 
