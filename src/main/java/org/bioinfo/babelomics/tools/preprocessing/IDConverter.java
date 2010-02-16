@@ -179,7 +179,7 @@ public class IDConverter extends BabelomicsTool {
 
 
 		try {
-			DBConnector dbConnector = new DBConnector(species, new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));	
+			DBConnector dbConnector = new DBConnector(species, new File(babelomicsHomePath + "/conf/infrared.properties"));
 			
 			StringBuilder line = new StringBuilder();
 			List<String> alls = new ArrayList<String>();
