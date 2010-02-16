@@ -32,6 +32,9 @@ public abstract class GenotypeAnalysisTool extends BabelomicsTool {
 
 	protected void parseGenotypeCommonOptions() throws IOException {
 		if(commandLine.hasOption("zip-file")) {
+			// update status
+			jobStatus.addStatusMessage("20", "Parsing parameters");
+			
 			FileUtils.checkFile(commandLine.getOptionValue("zip-file"));
 			FileUtils.unzipFiles(commandLine.getOptionValue("zip-file"), outdir);
 			// we expect just 1 PED file, if more than 1 the first one is selected
