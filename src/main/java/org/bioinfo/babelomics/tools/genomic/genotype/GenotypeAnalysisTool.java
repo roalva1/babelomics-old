@@ -2,7 +2,6 @@ package org.bioinfo.babelomics.tools.genomic.genotype;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.InvalidParameterException;
 
 import org.bioinfo.babelomics.methods.genomic.genotype.GenotypeAnalysis;
 import org.bioinfo.babelomics.tools.BabelomicsTool;

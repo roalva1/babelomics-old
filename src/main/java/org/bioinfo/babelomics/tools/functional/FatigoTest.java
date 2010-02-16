@@ -11,6 +11,7 @@ import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.result.FisherTestResult;
 import org.bioinfo.math.result.TestResultList;
 
+@Deprecated
 public class FatigoTest {
 
 	public static final int REMOVE_NEVER = 0;

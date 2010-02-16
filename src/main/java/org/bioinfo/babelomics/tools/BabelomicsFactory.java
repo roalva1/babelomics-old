@@ -23,7 +23,6 @@ import org.bioinfo.babelomics.tools.genomic.copynumber.CopyNumberAnalysis;
 import org.bioinfo.babelomics.tools.genomic.genotype.AffyGenotypePreprocessing;
 import org.bioinfo.babelomics.tools.genomic.genotype.AssociationTool;
 import org.bioinfo.babelomics.tools.genomic.genotype.StratificationTool;
-import org.bioinfo.babelomics.tools.genomic.genotype.FamilyBasedTool;
 import org.bioinfo.babelomics.tools.graph.DescriptiveStatistics;
 import org.bioinfo.babelomics.tools.graph.GoGraphViewerTool;
 import org.bioinfo.babelomics.tools.interactome.Snow;
@@ -36,8 +35,11 @@ public class BabelomicsFactory {
 
 	public static BabelomicsTool createTool(String toolName) {
 		
-		BabelomicsTool babelomicsTool = null;
-
+		/*
+		 * **************************************************************************************************
+		 * *****	Preprocessing, normalization and annotation tools	*************************************
+		 * **************************************************************************************************
+		 */
 		if(toolName.equalsIgnoreCase("affy-genotype-preprocess")) {
 			return new AffyGenotypePreprocessing();
 		}
@@ -54,6 +56,18 @@ public class BabelomicsFactory {
 			return new AgilentExpression2CNormalization();
 		}
 		
+		if(toolName.equalsIgnoreCase("agilent-cgh-one-color-normalization")) {
+			return new AgilentCGH1CNormalization();
+		}
+
+		if(toolName.equalsIgnoreCase("agilent-cgh-two-colors-normalization")) {
+			return new AgilentCGH2CNormalization();
+		}
+
+		if(toolName.equalsIgnoreCase("copy-number-normalization")) {
+			return new AgilentCGH2CNormalization();
+		}
+
 		if(toolName.equalsIgnoreCase("affy-snp-preprocess")) {
 			return new AffyGenotypePreprocessing();
 		}
@@ -69,7 +83,13 @@ public class BabelomicsFactory {
 		if(toolName.equalsIgnoreCase("create-annotation")) {
 			return new CreateAnnotation();
 		}
-
+		
+		
+		/*
+		 * **************************************************************************************************
+		 * *****	Expression tools (differential, predictors and clustering)	*****************************
+		 * **************************************************************************************************
+		 */
 		if(toolName.equalsIgnoreCase("class-comparison")) {
 			return new ClassComparison();
 		}
@@ -102,6 +122,34 @@ public class BabelomicsFactory {
 			return new Clustering();
 		}
 
+		
+		/*
+		 * **************************************************************************************************
+		 * *****	Genomic tools (Copy number, Association and Stratification)	*****************************
+		 * **************************************************************************************************
+		 */
+		if(toolName.equalsIgnoreCase("copy-number")) {
+			return new CopyNumberAnalysis();
+		}
+		
+		if(toolName.equalsIgnoreCase("association")) {
+			return new AssociationTool();
+		}
+		
+		if(toolName.equalsIgnoreCase("stratification")) {
+			return new StratificationTool();
+		}
+		
+//		if(toolName.equalsIgnoreCase("linkage")) {
+//			return new OutlierLrs();
+//		}
+		
+		
+		/*
+		 * **************************************************************************************************
+		 * *****	Functional profiling tools: *************************************************************
+		 * **************************************************************************************************
+		 */
 		if(toolName.equalsIgnoreCase("fatigo")) {
 			return new FatiGOTool();
 		}
@@ -122,51 +170,10 @@ public class BabelomicsFactory {
 			return new AffyTmt();
 		}
 		
-		if(toolName.equalsIgnoreCase("agilent-cgh-one-color-normalization")) {
-			return new AgilentCGH1CNormalization();
-		}
-
-		if(toolName.equalsIgnoreCase("agilent-cgh-two-colors-normalization")) {
-			return new AgilentCGH2CNormalization();
-		}
-
 		if(toolName.equalsIgnoreCase("tmt-sage")) {
 			return new SageTmt();
 		}
 
-		if(toolName.equalsIgnoreCase("copy-number-normalization")) {
-			return new AgilentCGH2CNormalization();
-		}
-
-		if(toolName.equalsIgnoreCase("copy-number")) {
-			return new CopyNumberAnalysis();
-		}
-
-		/*
-		 * **************************************************************************************************
-		 * *****	Genotype tools: Association, Transmission Disequilibrium Test and Startification	*****
-		 * **************************************************************************************************
-		 */
-		if(toolName.equalsIgnoreCase("association")) {
-			return new AssociationTool();
-		}
-		
-//		if(toolName.equalsIgnoreCase("tdt")) {
-//			return new FamilyBasedTool();
-//		}
-
-		if(toolName.equalsIgnoreCase("stratification")) {
-			return new StratificationTool();
-		}
-		
-		if(toolName.equalsIgnoreCase("linkage")) {
-			return new OutlierLrs();
-		}
-		/*
-		 * **************************************************************************************************
-		 * **************************************************************************************************
-		 */
-		
 		if(toolName.equalsIgnoreCase("gesbap")) {
 			return new OutlierLrs();
 		}
@@ -179,6 +186,12 @@ public class BabelomicsFactory {
 			return new Blast2GoTool();
 		}
 		
+		
+		/*
+		 * **************************************************************************************************
+		 * *****	Graphs and displays tools	*************************************************************
+		 * **************************************************************************************************
+		 */
 		if(toolName.equalsIgnoreCase("descriptive-statistics")) {
 			return new DescriptiveStatistics();
 		}
@@ -190,12 +203,13 @@ public class BabelomicsFactory {
 		if(toolName.equalsIgnoreCase("go-graph-viewer")) {
 			return new GoGraphViewerTool();
 		}
+		
 		if(toolName.equalsIgnoreCase("pca-plot")) {
 			return new DescriptiveStatistics();
 		}
 		
 
-		return babelomicsTool;
+		return null;
 	}
 
 }

@@ -79,7 +79,7 @@ public class CreateAnnotation extends BabelomicsTool {
 	protected void execute() {
 		try {	
 			
-			DBConnector dbConnector = new DBConnector(species, new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));	
+			DBConnector dbConnector = new DBConnector(species, new File(babelomicsHomePath + "/conf/infrared.properties"));	
 
 			System.out.println("species = " + species + ", db connector = " + dbConnector.toString());
 

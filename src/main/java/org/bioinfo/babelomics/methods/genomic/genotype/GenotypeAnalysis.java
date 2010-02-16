@@ -102,20 +102,6 @@ public class GenotypeAnalysis {
 		featureData.save(new File(outdir+"/plink.featdata"));
 	}
 
-	public void familyBased(String test) throws IOException {
-		checkParameters();
-		if(test == null) {
-			throw new InvalidParameterException("association test is null");
-		}
-		// executing plink binary
-		StringBuilder plinkCommandLine = createBasicPlinkCommand();
-		if(test.equalsIgnoreCase("tdt")) {
-			plinkCommandLine.append(" --tdt ");
-			executePlinkCommand(plinkCommandLine.toString());	
-		}
-		
-	}
-
 	public void stratification(String test, boolean ibsTest, double ppc, int mc, double maf) throws IOException {
 		checkParameters();
 		if(test == null) {

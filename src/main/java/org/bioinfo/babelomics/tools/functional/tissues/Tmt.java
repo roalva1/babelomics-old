@@ -13,7 +13,7 @@ import org.bioinfo.math.result.TestResultList;
 import org.bioinfo.math.stats.inference.TTest;
 import org.bioinfo.tool.OptionFactory;
 
-public class Tmt extends BabelomicsTool {
+public abstract class Tmt extends BabelomicsTool {
 
 	@Override
 	public void initOptions() {
@@ -23,9 +23,6 @@ public class Tmt extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("tissues", "the list of tissues separated by commas. Enter 'all tissues' to take into account all available tissues"));
 	}
 
-	@Override
-	protected void execute() {
-	}
 
 	protected  TestResultList<TTestResult> runTtest(DoubleMatrix matrix1, DoubleMatrix matrix2) throws InvalidParameterException, MathException {		
 		TTest tTest = new TTest();

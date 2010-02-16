@@ -49,6 +49,7 @@ public class SageTmt extends Tmt {
 	//	private List<String> genesWithoutProbes1 = null, genesWithoutProbes2 = null;
 
 	public SageTmt() {
+		
 	}
 
 	public void initOptions() {

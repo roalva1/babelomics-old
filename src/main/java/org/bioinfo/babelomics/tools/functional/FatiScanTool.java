@@ -96,7 +96,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 			jobStatus.addStatusMessage("10", "Preparing data");
 			
 			// infrared connector			
-			DBConnector dbConnector = new DBConnector(getSpecies(), new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));			
+			DBConnector dbConnector = new DBConnector(species, new File(babelomicsHomePath + "/conf/infrared.properties"));			
 			
 			// prepare params
 			prepare();			

@@ -22,6 +22,9 @@ public class AssociationTool extends GenotypeAnalysisTool {
 	public void execute() {
 		logger.debug("executing association test");
 		try {
+			// update status
+			jobStatus.addStatusMessage("10", "Parsing parameters");
+			
 			parseGenotypeCommonOptions();
 			// specific options
 			String test = commandLine.getOptionValue("test", "assoc");
@@ -31,17 +34,12 @@ public class AssociationTool extends GenotypeAnalysisTool {
 			genotypeAnalysis = new GenotypeAnalysis(pedFilePath, mapFilePath);
 			genotypeAnalysis.setPlinkPath(plinkPath);
 			genotypeAnalysis.setOutdir(outdir);
+			
 			logger.debug("executing: "+plinkPath+" --ped "+pedFilePath+" --map "+mapFilePath+" --out "+outdir+"/plink --maf "+maf + "--"+test);
+			jobStatus.addStatusMessage("30", "Executing association test");
+			
 			genotypeAnalysis.association(test, maf);
 			
-//			if(commandLine.hasOption("plink-path")) {
-//				genotypeAnalysis.setPlinkPath(plinkPath);			
-//			}else {
-//				genotypeAnalysis.setPlinkPath(babelomicsHomePath+"/bin/genotype/plink64");
-//			}
-//			System.out.println(""+Math.log(1)/Math.log(2));
-//			System.out.println(""+(0.0)*(-1));
-//			System.out.println(""+(0.0==-0.0));
 		} catch (IOException e) {
 			e.printStackTrace();
 			logger.error("Error opening the dataset", e.toString());

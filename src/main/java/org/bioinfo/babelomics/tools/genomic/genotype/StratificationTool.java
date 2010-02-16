@@ -25,6 +25,9 @@ public class StratificationTool extends GenotypeAnalysisTool {
 		logger.debug("executing Stratification analysis");
 		logger.debug("executing association test");
 		try {
+			// update status
+			jobStatus.addStatusMessage("10", "Reading options");
+			
 			parseGenotypeCommonOptions();
 			// specific options
 			String test = commandLine.getOptionValue("test", "ibs-cluster");
@@ -36,7 +39,10 @@ public class StratificationTool extends GenotypeAnalysisTool {
 			genotypeAnalysis = new GenotypeAnalysis(pedFilePath, mapFilePath);
 			genotypeAnalysis.setPlinkPath(plinkPath);
 			genotypeAnalysis.setOutdir(outdir);
+			
 			logger.debug("executing: "+plinkPath+" --ped "+pedFilePath+" --map "+mapFilePath+" --out "+outdir+"/plink --maf "+maf + "--"+test+" --ppc "+ppc+" --mc "+mc);
+			jobStatus.addStatusMessage("30", "Executing stratification job");
+			
 			genotypeAnalysis.stratification(test, commandLine.hasOption("ibs-test"), ppc, mc, maf);
 			
 		} catch (IOException e) {

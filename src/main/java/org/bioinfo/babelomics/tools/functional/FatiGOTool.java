@@ -56,7 +56,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		input2.setRequired(false);		
 			input2.addOption(OptionFactory.createOption("list2", "the file containig the list #2 of genes, or the feature data file",false));
 			input2.addOption(OptionFactory.createOption("genome", "compares list #1 with the rest of genome",false,false));
-			input2.addOption(OptionFactory.createOption("chromosomes", "the chromosome to compare with list #1. Use chromosome-start and chromosome-end options tp delimite the region within the chromosome",false));
+			input2.addOption(OptionFactory.createOption("chromosomes", "the chromosome region to compare with list #1. Use chromosome-start and chromosome-end options tp delimite the region within the chromosome",false));
 		options.addOptionGroup(input2);
 		// filters
 		
@@ -100,9 +100,12 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		try {
 			logger.println("Starting FatiGO...");
 			
+			// update status
+			jobStatus.addStatusMessage("10", "Preparing data");
+			
 			// infrared connector
-			System.err.println("species: " + getSpecies());
-			DBConnector dbConnector = new DBConnector(getSpecies(), new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));		
+			logger.debug("species: " + getSpecies());
+			DBConnector dbConnector = new DBConnector(species, new File(babelomicsHomePath + "/conf/infrared.properties"));
 			
 			// prepare params
 			prepare();			
