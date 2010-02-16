@@ -284,7 +284,10 @@ public class Preprocessing extends BabelomicsTool {
 				} catch (Exception e) {
 					abort("exception_filterbynames_execute_preprocessing", "Error filtering rows by names", e.toString(), StringUtils.getStackTrace(e));
 				}
-				dataset.validate();					
+				dataset.validate();	
+				
+				
+				System.out.println("------------> feature data is null ? " + (dataset.getFeatureData() == null));
 			}
 			
 			logger.debug("end of filtering by names\n");

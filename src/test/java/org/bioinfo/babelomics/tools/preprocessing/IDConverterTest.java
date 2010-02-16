@@ -20,11 +20,12 @@ public class IDConverterTest {
 	public void tearDown() throws Exception {
 	}
 
+	@Test
 	public void Test() {
 		String outdir = "/tmp/IDConverterTest";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "id-converter","--log-level", "2", "--list", "AATK,BIRC7,PARM1,kkkkkk", "--go", "--entrezgene", "--interpro", "-o", outdir};
+		String []args = { "--tool", "id-converter","--log-level", "2", "--species", "hsa", "--list", "AATK,BIRC7,PARM1,kkkkkk", "--go", "--entrezgene", "--interpro", "-o", outdir};
 
 		System.out.println("ID Converter Test, args : " + Arrays.toString(args));
 		try {
@@ -42,7 +43,8 @@ public class IDConverterTest {
 		String outdir = "/tmp/IDConverterTest1";
 		new File(outdir).mkdir();
 		
-		String []args = { "--tool", "id-converter","--log-level", "2", "--listfile", dataset, "--go", "--entrezgene", "--interpro", "--havana_gene", "--ensembl_gene", "--codelink", "--kegg", "-o", outdir};
+		String []args = { "--tool", "id-converter","--log-level", "2", "--species", "hsa", "--listfile", dataset, "--go", "--kegg", "-o", outdir};
+		//String []args = { "--tool", "id-converter","--log-level", "2", "--listfile", dataset, "--go", "--entrezgene", "--interpro", "--havana_gene", "--ensembl_gene", "--codelink", "--kegg", "-o", outdir};
 
 		System.out.println("ID Converter Test1, args : " + Arrays.toString(args));
 		try {

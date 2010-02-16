@@ -22,13 +22,11 @@ public class PreprocessingTest {
 	public void tearDown() throws Exception {
 	}
 	
-	@Test
 	public void notest(){
 		System.out.println("----------------> ");
 	}
 	
 
-	@Test
 	public void Test() {
 		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
 		String outdir = "/tmp/PreprocessingTest";
@@ -48,7 +46,6 @@ public class PreprocessingTest {
 		}
 	}	
 
-	@Test
 	public void Test1() {
 		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
 		String outdir = "/tmp/PreprocessingTest1";
@@ -80,8 +77,8 @@ public class PreprocessingTest {
 		System.out.println("----------------> " + Arrays.toString(args));
 		
 		try {
-			BabelomicsMain.main(args);
 			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
+			BabelomicsMain.main(args);
 			System.out.println("output dataset:\n" + IOUtils.toString(new File(outdir + "/preprocessed.txt")));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -90,7 +87,6 @@ public class PreprocessingTest {
 		}
 	}	
 
-	@Test
 	public void Test3() {
 		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
 		String outdir = "/tmp/PreprocessingTest3";

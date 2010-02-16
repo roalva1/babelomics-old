@@ -179,12 +179,17 @@ public class IDConverter extends BabelomicsTool {
 
 
 		try {
-			DBConnector dbConnector = new DBConnector(species);
-
+			DBConnector dbConnector = new DBConnector(species, new File(System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf"));	
+			
 			StringBuilder line = new StringBuilder();
 			List<String> alls = new ArrayList<String>();
 			List<String> outIds = new ArrayList<String>(); 
 			Map<String, List<String>> idsMap = new HashMap<String, List<String>>(); 
+			
+			System.out.println("-> infrared config = " + System.getenv("BABELOMICS_HOME") + "/conf/infrared.conf");
+			
+			System.out.println("-> db connector = " + dbConnector.toString());
+			System.out.println("-> db names = " + ListUtils.toString(dbNames, ","));
 			List<Map<String, FeatureList<XRef>>> list = new XRefDBManager(dbConnector).getListByDBNames(ids, dbNames);
 
 			if ( list != null && list.size() > 0 ) {
