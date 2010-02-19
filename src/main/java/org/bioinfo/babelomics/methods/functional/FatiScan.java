@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bioinfo.babelomics.exception.EmptyAnnotationException;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
@@ -75,7 +76,7 @@ public class FatiScan {
 		// order ranked list		
 		int[] sortIndex = ListUtils.order(statistic);
 		statistic = ListUtils.ordered(statistic,sortIndex);		
-		idList = ListUtils.ordered(idList,sortIndex);		
+		idList = ListUtils.ordered(idList,sortIndex);
 		//if(order==ASCENDING_SORT){
 		if(order==DESCENDING_SORT){
 			Collections.reverse(idList);
@@ -84,14 +85,15 @@ public class FatiScan {
 		
 	}
 	
-	public void run() throws InvalidIndexException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
+	public void run() throws InvalidIndexException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, EmptyAnnotationException {
 				
 		// prepare list
 		prepare();
 		
 		// annotation		
-		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);		
-
+		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);
+		if(annotations==null || annotations.size()==0) throw new EmptyAnnotationException();
+		System.err.println("annotations:" + annotations.size());
 		results = new ArrayList<GeneSetAnalysisTestResult>();
 		
 		double inc = -(double)(statistic.get(0)-statistic.get(statistic.size()-1))/(numberOfPartitions+1);
@@ -108,16 +110,18 @@ public class FatiScan {
 			System.err.println(i + ": threshold = " + acum + " (" + thresholdPosition + ") ");
 			
 			list1 = idList.subList(0, thresholdPosition);
-			list2 = idList.subList(thresholdPosition + 1, idList.size()-1);
+			if(thresholdPosition<(idList.size()-1)){
+				list2 = idList.subList(thresholdPosition + 1, idList.size()-1);
+				
+				//System.err.println("l1.size: " + list1.size() + "l2.size: " + list2.size());
+				
+				// run test
+				fisher = new TwoListFisherTest();
+				fisher.test(list1, list2, annotations, testMode);
 			
-			//System.err.println("l1.size: " + list1.size() + "l2.size: " + list2.size());
-			
-			// run test
-			fisher = new TwoListFisherTest();
-			fisher.test(list1, list2, annotations, testMode);
-		
-			// get result
-			results.addAll(toGeneSetAnalysisTestResult(fisher.getResults()));
+				// get result
+				results.addAll(toGeneSetAnalysisTestResult(fisher.getResults()));
+			}
 						
 			acum+=inc;
 			

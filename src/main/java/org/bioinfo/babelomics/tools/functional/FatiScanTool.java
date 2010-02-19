@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.cli.ParseException;
+import org.bioinfo.babelomics.exception.EmptyAnnotationException;
 import org.bioinfo.babelomics.methods.functional.FatiScan;
 import org.bioinfo.babelomics.methods.functional.GeneSetAnalysisTestResult;
 import org.bioinfo.babelomics.methods.functional.LogisticScan;
@@ -205,11 +206,16 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 			// init test
 			FatiScan fatiscan = new FatiScan(rankedList,filter,dbConnector,numberOfPartitions,testMode,outputFormat,order);		
 			// run
-			fatiscan.run();
-			// save results
-			saveFatiScanResults(fatiscan,name,title);
-			// acum significant values
-			significant.addAll(fatiscan.getSignificant());
+			try{
+				fatiscan.run();
+				// save results
+				saveFatiScanResults(fatiscan,name,title);
+				// acum significant values
+				significant.addAll(fatiscan.getSignificant());
+			} catch (EmptyAnnotationException ene){
+				result.addOutputItem(new Item("annot_" + name,"No annotation was found for " + name + " ids","Annotations for " + title,Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
+			}
+
 		}
 				
 
@@ -238,11 +244,15 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 			// init test
 			FatiScan fatiscan = new FatiScan(rankedList, annotations,numberOfPartitions,testMode,outputFormat,order);		
 			// run
-			fatiscan.run();				
-			// save results
-			saveFatiScanResults(fatiscan,name,title);		
-			// acum significant values
-			significant.addAll(fatiscan.getSignificant());
+			try{
+				fatiscan.run();				
+				// save results
+				saveFatiScanResults(fatiscan,name,title);		
+				// acum significant values
+				significant.addAll(fatiscan.getSignificant());
+			} catch (EmptyAnnotationException ene){
+				result.addOutputItem(new Item("annot_" + name,"No annotation was found for " + name + " ids","Annotations for " + title,Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
+			}
 		}
 		
 		logger.info("...end of " + title);
