@@ -13,6 +13,7 @@ import org.bioinfo.babelomics.tools.expression.normalization.AgilentExpression2C
 import org.bioinfo.babelomics.tools.functional.Blast2GoTool;
 import org.bioinfo.babelomics.tools.functional.FatiGOTool;
 import org.bioinfo.babelomics.tools.functional.FatiScanTool;
+import org.bioinfo.babelomics.tools.functional.GeneCodisTool;
 import org.bioinfo.babelomics.tools.functional.textmining.Marmite;
 import org.bioinfo.babelomics.tools.functional.textmining.MarmiteScan;
 import org.bioinfo.babelomics.tools.functional.tissues.AffyTmt;
@@ -186,6 +187,9 @@ public class BabelomicsFactory {
 			return new Blast2GoTool();
 		}
 		
+		if(toolName.equalsIgnoreCase("genecodis")) {
+			return new GeneCodisTool();
+		}
 		
 		/*
 		 * **************************************************************************************************
