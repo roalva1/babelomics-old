@@ -138,11 +138,12 @@ public class ClassComparison extends BabelomicsTool {
 			
 			updateJobStatus("80", "saving results");
 			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
-			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
+
+			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
 			FeatureData featureData = new FeatureData(dataFrame);
 
@@ -161,6 +162,9 @@ public class ClassComparison extends BabelomicsTool {
 			if ( new File(heatmapFilename).exists() ) {
 				result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
 			}
+			
+			DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			abort("exception_executet_classcomparison", "error running t-test", "error running t-test: " + e.getMessage(), "error running t-test: " + e.getMessage());
@@ -186,10 +190,11 @@ public class ClassComparison extends BabelomicsTool {
 			updateJobStatus("80", "saving results");
 
 			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
-			dataFrame.setRowNames(dataset.getFeatureNames());
 
 			dataFrame.addColumn("log", ArrayUtils.toStringList(logRes));
 			dataFrame.addColumn("diff", ArrayUtils.toStringList(diffRes));
+
+			dataFrame.setRowNames(dataset.getFeatureNames());
 
 			FeatureData featureData = new FeatureData(dataFrame);
 
@@ -204,6 +209,9 @@ public class ClassComparison extends BabelomicsTool {
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("foldchangetable", file.getName(), "Fold-change output table", TYPE.FILE, StringUtils.toList("TABLE", ","), new HashMap<String, String>(2), "Fold-change output files"));											
 			}						
+			
+			//DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			abort("exception_executefoldchange_classcomparison", "error running fold-change", "error running fold-change: " + e.getMessage(), "error running fold-change: " + e.getMessage());
@@ -255,11 +263,12 @@ public class ClassComparison extends BabelomicsTool {
 			
 			updateJobStatus("80", "saving results");			
 			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
-			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
+
+			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
 			FeatureData featureData = new FeatureData(dataFrame);
 
@@ -278,6 +287,9 @@ public class ClassComparison extends BabelomicsTool {
 			if ( new File(heatmapFilename).exists() ) {
 				result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
 			}
+			
+			DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			abort("exception_executeanova_classcomparison", "error running anova", "error running anova: " + e.getMessage(), "error running anova: " + e.getMessage());
@@ -330,12 +342,13 @@ public class ClassComparison extends BabelomicsTool {
 
 			updateJobStatus("80", "saving results");
 			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
-			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
 			//dataFrame.addColumn("lod", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getLods()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
+
+			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
 			FeatureData featureData = new FeatureData(dataFrame);
 
@@ -354,6 +367,9 @@ public class ClassComparison extends BabelomicsTool {
 			if ( new File(heatmapFilename).exists() ) {
 				result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
 			}
+			
+			DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			abort("exception_executelimma_classcomparison", "error running limma", "error running limma: " + e.toString(), "error running limma: " + e.toString());

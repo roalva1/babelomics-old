@@ -94,13 +94,14 @@ public class Survival extends BabelomicsTool {
 		//
 		updateJobStatus("80", "saving results");
 		DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
-		dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
 		try {
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getStatistics()), rowOrder)));
 			dataFrame.addColumn("coeff.", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getCoefs()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ListUtils.toList(res.getAdjPValues()), rowOrder)));
+
+			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.save(new File(getOutdir() + "/cox.txt"));
@@ -110,6 +111,9 @@ public class Survival extends BabelomicsTool {
 			List<String> tags = new ArrayList<String>();
 			tags.add("TABLE");
 			result.addOutputItem(new Item("cox_table", "cox_table.txt", "Cox table", TYPE.FILE, tags, new HashMap<String, String>(2), "Output files"));
+			
+			DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
+			
 		} catch (Exception e) {
 			printError("ioexception_cox_cox", "error saving results", e.toString(), e);
 		}
