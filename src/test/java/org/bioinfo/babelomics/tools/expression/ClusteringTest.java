@@ -23,6 +23,7 @@ public class ClusteringTest {
 	public void notest() {		
 	}
 
+	@Test
 	public void Test() {
 		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
 		String outdir = "/tmp/ClusteringTest";
@@ -55,7 +56,6 @@ public class ClusteringTest {
 		}
 	}	
 
-	@Test
 	public void Test2() {
 		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
 		String outdir = "/tmp/ClusteringTest2";
