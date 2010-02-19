@@ -14,21 +14,23 @@ import org.bioinfo.infrared.core.dbsql.GeneDBManager;
 import org.bioinfo.infrared.core.dbsql.XRefDBManager;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.dbsql.AnnotationDBManager;
-import org.bioinfo.infrared.funcannot.filter.Filter;
-import org.bioinfo.infrared.funcannot.filter.GOFilter;
-import org.bioinfo.infrared.funcannot.filter.KeggFilter;
+import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 
 public class InfraredUtils {
 
 	// get annotations from a filter
-	public static FeatureList<AnnotationItem> getAnnotations(DBConnector dbConnector, List<String> ids, Filter filter) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException{
+	public static FeatureList<AnnotationItem> getAnnotations(DBConnector dbConnector, List<String> ids, FunctionalFilter filter) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException{
 		AnnotationDBManager annotationMng = new AnnotationDBManager(dbConnector);
-		if(filter instanceof GOFilter){
-			return annotationMng.getGOAnnotation(ids, (GOFilter) filter);
-		} else if(filter instanceof KeggFilter){
-			return annotationMng.getKeggAnnotation(ids, (KeggFilter) filter);		
-		}
-		return null;
+		return annotationMng.getAnnotation(ids, filter);
+//		if(filter instanceof GOFilter){
+//			return annotationMng.getGOAnnotation(ids, (GOFilter) filter);
+//		} else if(filter instanceof KeggFilter){			
+//			return annotationMng.getKeggAnnotation(ids, (KeggFilter) filter);		
+//		} else if(filter instanceof ){
+//			return annotationMng.getKeggAnnotation(ids, (KeggFilter) filter);
+//		}
+//		System.err.println("is unknown filter");
+//		return null;
 	}	
 	
 	// get genome (ensembl gene format)

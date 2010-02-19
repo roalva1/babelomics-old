@@ -14,7 +14,8 @@ import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
-import org.bioinfo.infrared.funcannot.filter.Filter;
+import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
+
 
 public class FatiScan {
 
@@ -28,7 +29,7 @@ public class FatiScan {
 	private List<String> idList;	
 	private List<Double> statistic;
 	private FeatureData rankedList;
-	private Filter filter;
+	private FunctionalFilter filter;
 	private DBConnector dbConnector;
 	private int testMode;	
 	private int numberOfPartitions;
@@ -45,7 +46,7 @@ public class FatiScan {
 	FeatureList<AnnotationItem> annotations;
 
 	// Two list constructor
-	public FatiScan(FeatureData rankedList, Filter filter, DBConnector dbConnector, int numberOfPartitions, int testMode, int outputFormat, int order) {
+	public FatiScan(FeatureData rankedList, FunctionalFilter filter, DBConnector dbConnector, int numberOfPartitions, int testMode, int outputFormat, int order) {
 		this.rankedList = rankedList;
 		this.filter = filter;
 		this.dbConnector = dbConnector;		

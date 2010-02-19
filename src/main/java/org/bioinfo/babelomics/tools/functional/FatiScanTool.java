@@ -23,6 +23,7 @@ import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.Filter;
+import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
@@ -127,7 +128,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				// do fatiscans
 				double progress = 20;
 				double inc = 60.0/filterList.size();
-				for(Filter filter: filterList) {
+				for(FunctionalFilter filter: filterList) {
 					doTest(rankedList,filter,dbConnector,significants,method);
 					// update status					
 					jobStatus.addStatusMessage("" + progress, "Executing test");
@@ -185,7 +186,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 	 */
 	
 	
-	private void doTest(FeatureData rankedList,Filter filter,DBConnector dbConnector, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidIndexException{
+	private void doTest(FeatureData rankedList,FunctionalFilter filter,DBConnector dbConnector, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidIndexException{
 		
 		// db attributes
 		String name = getDBName(filter);

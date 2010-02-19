@@ -16,6 +16,7 @@ import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
 import org.bioinfo.infrared.funcannot.filter.Filter;
+import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.bioinfo.infrared.funcannot.filter.KeggFilter;
 import org.bioinfo.math.stats.inference.FisherExactTest;
@@ -34,7 +35,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	protected int testMode;
 		
 	// dbs
-	protected List<Filter> filterList;
+	protected List<FunctionalFilter> filterList;
 	
 	// your annotations
 	protected boolean isYourAnnotations;
@@ -96,7 +97,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		if(testMode.equals("greater")) setTestMode(FisherExactTest.GREATER);
 		if(testMode.equals("two-tailed")) setTestMode(FisherExactTest.TWO_SIDED);
 		
-		filterList = new ArrayList<Filter>();
+		filterList = new ArrayList<FunctionalFilter>();
 		
 		// go bp
 		if(commandLine.hasOption("go-bp")) {
