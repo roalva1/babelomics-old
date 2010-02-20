@@ -211,7 +211,7 @@ public class Blast2GoTool extends BabelomicsTool {
 	private void fillResultXML() {
 		
 		// RESULT FILES 
-		result.addOutputItem(new Item("annotation", PREFIX + "_output.annot", "Annotations (.txt)", Item.TYPE.FILE, Arrays.asList("ANNOTATION","GO"), new HashMap<String, String>(), "Result files"));
+		result.addOutputItem(new Item("annotation", PREFIX + "_output.annot", "Annotations (.txt)", Item.TYPE.FILE, Arrays.asList("DATA","annotation","GO"), new HashMap<String, String>(), "Result files"));
 		result.addOutputItem(new Item("resultTable", PREFIX + "_resultTable.xml", "Result table", Item.TYPE.FILE, "Result files"));
 		// BLAST2GO FILES
 //		result.addOutputItem(new Item("property_file", PREFIX + "_b2gPipe.properties", "Blast2GO properties file", Item.TYPE.FILE, "Blast2GO files"));
