@@ -106,8 +106,8 @@ public class Correlation extends BabelomicsTool {
 		// saving data
 		//
 		updateJobStatus("80", "saving results");
+		
 		DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
-		dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
 		try {
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
@@ -115,6 +115,8 @@ public class Correlation extends BabelomicsTool {
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
 
+			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
+			
 			File outFile = new File(getOutdir() + "/" + test + ".txt");
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.save(outFile);
@@ -125,6 +127,8 @@ public class Correlation extends BabelomicsTool {
 			List<String> tags = new ArrayList<String>();
 			tags.add("TABLE");
 			result.addOutputItem(new Item(test + "_table", outFile.getName(), test.toUpperCase() + " output table", TYPE.FILE, tags, new HashMap<String, String>(2), "Output files"));
+			
+			DiffExpressionUtils.addOutputLists(dataFrame, test, "correlation", result, outdir);
 		} catch (Exception e) {
 			printError("ioexception_executecorrelation_correlation", "error saving " + test + " results", e.toString(), e);
 		}
@@ -171,7 +175,6 @@ public class Correlation extends BabelomicsTool {
 		//
 		updateJobStatus("80", "saving results");
 		DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
-		dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
 		try {
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
@@ -179,6 +182,8 @@ public class Correlation extends BabelomicsTool {
 			dataFrame.addColumn("intercept", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getIntercepts()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
+
+			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 
 			File outFile = new File(getOutdir() + "/" + test + ".txt");
 			FeatureData featureData = new FeatureData(dataFrame);
@@ -190,6 +195,9 @@ public class Correlation extends BabelomicsTool {
 			List<String> tags = new ArrayList<String>();
 			tags.add("TABLE");
 			result.addOutputItem(new Item(test + "_table", outFile.getName(), test.toUpperCase() + " output table", TYPE.FILE, tags, new HashMap<String, String>(2), "Output files"));
+
+			DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
+		
 		} catch (Exception e) {
 			printError("ioexception_executecorrelation_correlation", "error saving " + test + " results", e.toString(), e);
 		}
