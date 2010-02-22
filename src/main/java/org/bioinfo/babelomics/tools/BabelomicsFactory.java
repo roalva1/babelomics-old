@@ -10,6 +10,8 @@ import org.bioinfo.babelomics.tools.expression.differential.TimeSeries;
 import org.bioinfo.babelomics.tools.expression.normalization.AffyExpressionNormalization;
 import org.bioinfo.babelomics.tools.expression.normalization.AgilentExpression1CNormalization;
 import org.bioinfo.babelomics.tools.expression.normalization.AgilentExpression2CNormalization;
+import org.bioinfo.babelomics.tools.expression.normalization.GenePixExpression1CNormalization;
+import org.bioinfo.babelomics.tools.expression.normalization.GenePixExpression2CNormalization;
 import org.bioinfo.babelomics.tools.functional.Blast2GoTool;
 import org.bioinfo.babelomics.tools.functional.FatiGOTool;
 import org.bioinfo.babelomics.tools.functional.FatiScanTool;
@@ -56,6 +58,14 @@ public class BabelomicsFactory {
 			return new AgilentExpression2CNormalization();
 		}
 		
+		if(toolName.equalsIgnoreCase("genepix-expression-one-color-normalization")) {
+			return new GenePixExpression1CNormalization();
+		}
+
+		if(toolName.equalsIgnoreCase("genepix-expression-two-colors-normalization")) {
+			return new GenePixExpression2CNormalization();
+		}
+
 		if(toolName.equalsIgnoreCase("agilent-cgh-one-color-normalization")) {
 			return new AgilentCGH1CNormalization();
 		}

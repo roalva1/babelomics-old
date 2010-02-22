@@ -195,7 +195,7 @@ public class DiffExpressionUtils {
 		if ( rankedListFile.exists() ) {
 			result.addOutputItem(new Item(test + "_ranked_list_file", rankedListFile.getName(), test.toUpperCase() + " ranked list", TYPE.FILE, StringUtils.toList("DATA,RANKED", ","), new HashMap<String, String>(2), "Output lists for profiling analysis"));
 		}
-
+		
 		// preparing significant list (top and bottom)
 		//
 		File topListFile = new File(outDir + "/" + test + "_top_list.txt");
