@@ -90,7 +90,7 @@ public class FatiGO {
 		
 		// annotation
 		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
-
+		
 		// run test
 		fisher = new TwoListFisherTest();
 		fisher.test(list1, list2, annotations, testMode);
