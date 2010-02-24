@@ -94,8 +94,8 @@ public class SageTmt extends Tmt {
 //			}
 
 			System.out.println("tissues:\n" + ListUtils.toString(tissues));
-
-			DBConnector dbConnector = new DBConnector("mouse".equalsIgnoreCase(species) ? "mmu" : "hsa");
+			
+			DBConnector dbConnector = new DBConnector("mouse".equalsIgnoreCase(species) ? "mmu" : "hsa", new File(babelomicsHomePath + "/conf/infrared.properties"));
 			System.out.println("db connector = " + dbConnector.toString());
 
 			// reading data
