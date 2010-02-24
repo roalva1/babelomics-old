@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.bioinfo.babelomics.utils.RCommand;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
@@ -19,6 +18,7 @@ import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.Filter;
+import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 
 public class LogisticScan {
 
@@ -35,7 +35,7 @@ public class LogisticScan {
 	private List<String> idList;	
 	private List<Double> statistic;
 	private FeatureData rankedList;
-	private Filter filter;
+	private FunctionalFilter filter;
 	private DBConnector dbConnector;	
 	private int order;
 	private boolean isYourAnnotations;
@@ -51,7 +51,7 @@ public class LogisticScan {
 
 	
 	// Infrared annotation constructor
-	public LogisticScan(FeatureData rankedList, Filter filter, DBConnector dbConnector, int order) {
+	public LogisticScan(FeatureData rankedList, FunctionalFilter filter, DBConnector dbConnector, int order) {
 			
 		// params
 		this.rankedList = rankedList;

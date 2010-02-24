@@ -22,7 +22,7 @@ import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
-import org.bioinfo.infrared.funcannot.filter.Filter;
+import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
@@ -164,8 +164,8 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 				throw new ParseException("No biological database selected (eg. --go-bp)");
 			} else {
 				logger.println("filterList.size()::::::::"+filterList.size() + "........toString:........"+filterList.toString());
-				for(Filter filter: filterList) {
-					logger.println("filter::::::::"+filter.toString());
+				for(FunctionalFilter filter: filterList) {
+					logger.println("filter::::::::"+filter.getMaxNumberGenes());
 					doTest(idList1,idList2,filter,dbConnector);
 					}
 				}
@@ -178,7 +178,7 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		
 	}
 	
-	private void doTest(List<String> idList1, List<String> idList2, Filter filter, DBConnector dbConnector) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException{
+	private void doTest(List<String> idList1, List<String> idList2, FunctionalFilter filter, DBConnector dbConnector) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException{
 		File inputFile = new File(outdir + "/geneInputWellFormed");
 		logger.println("Starting doing test...");
 		GeneCodis genecodis = null;

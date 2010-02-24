@@ -8,7 +8,7 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
-import org.bioinfo.infrared.funcannot.filter.Filter;
+import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.stats.inference.FisherExactTest;
 
@@ -23,7 +23,7 @@ public class FatiGO {
 	// input params
 	private List<String> list1;
 	private List<String> list2;
-	private Filter filter;
+	private FunctionalFilter filter;
 	private DBConnector dbConnector;
 	private int testMode;
 	private int duplicatesMode;
@@ -37,7 +37,7 @@ public class FatiGO {
 	FeatureList<AnnotationItem> annotations;
 
 	// Two list constructor
-	public FatiGO(List<String> list1, List<String> list2, Filter filter, DBConnector dbConnector, int testMode, int duplicatesMode ) {
+	public FatiGO(List<String> list1, List<String> list2, FunctionalFilter filter, DBConnector dbConnector, int testMode, int duplicatesMode ) {
 		this.list1 = list1;
 		this.list2 = list2;
 		this.filter = filter;
@@ -48,7 +48,7 @@ public class FatiGO {
 	}
 
 	// One list against Genome constructor
-	public FatiGO(List<String> list1, Filter filter, DBConnector dbConnector) {
+	public FatiGO(List<String> list1, FunctionalFilter filter, DBConnector dbConnector) {
 		this.list1 = list1;
 		this.list2 = InfraredUtils.getGenome(dbConnector);
 		this.filter = filter;
@@ -90,7 +90,7 @@ public class FatiGO {
 		
 		// annotation
 		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
-
+		
 		// run test
 		fisher = new TwoListFisherTest();
 		fisher.test(list1, list2, annotations, testMode);

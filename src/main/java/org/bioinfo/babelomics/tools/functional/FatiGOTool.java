@@ -22,6 +22,7 @@ import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.Filter;
+import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
@@ -152,8 +153,9 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				significant.add(TwoListFisherTestResult.header());
 				
 				// run fatigo's
-				for(Filter filter: filterList) {
-					logger.println("filter..."+filter.toString());
+
+				for(FunctionalFilter filter: filterList) {
+
 					doFatigo(idList1,idList2,filter,dbConnector,significant);					
 				}				
 				if(isYourAnnotations){					
@@ -173,7 +175,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		
 	}
 
-	private void doFatigo(List<String> idList1, List<String> idList2,Filter filter,DBConnector dbConnector, List<String> significant) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException{
+	private void doFatigo(List<String> idList1, List<String> idList2,FunctionalFilter filter,DBConnector dbConnector, List<String> significant) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException{
 		
 		// db attributes
 		String name = getDBName(filter);
