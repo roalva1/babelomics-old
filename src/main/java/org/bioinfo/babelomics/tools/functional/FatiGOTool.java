@@ -153,6 +153,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				
 				// run fatigo's
 				for(Filter filter: filterList) {
+					logger.println("filter..."+filter.toString());
 					doFatigo(idList1,idList2,filter,dbConnector,significant);					
 				}				
 				if(isYourAnnotations){					

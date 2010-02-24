@@ -114,6 +114,8 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		if(commandLine.hasOption("kegg")) {			
 			KeggFilter keggFilter = new KeggFilter(Integer.parseInt(commandLine.getOptionValue("kegg-min-num-genes","5")),Integer.parseInt(commandLine.getOptionValue("kegg-max-num-genes","500")));
 			filterList.add(keggFilter);
+			logger.println("keggFilter::::::::"+keggFilter.toString());
+			
 		}
 		// biocarta
 		if(commandLine.hasOption("biocarta")) {
