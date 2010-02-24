@@ -186,6 +186,8 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		if(list2!=null) fatigo = new FatiGO(idList1, idList2, filter, dbConnector, testMode, duplicatesMode);
 		else if(isRestOfGenome()) fatigo = new FatiGO(idList1, filter, dbConnector);
 		
+		fatigo.setLogger(logger);
+		
 		// run test
 		fatigo.run();
 		

@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bioinfo.commons.log.Logger;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
@@ -28,6 +29,7 @@ public class FatiGO {
 	private int testMode;
 	private int duplicatesMode;
 	private boolean isYourAnnotations;
+	private Logger logger;
 	
 	// test
 	TwoListFisherTest fisher;
@@ -80,24 +82,40 @@ public class FatiGO {
 	
 	
 	public void run() throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException {
+				
+		if(logger==null) logger = new Logger("FatiGO");
+
+		logger.println("Starting FatiGO test...");
 		
+		logger.print("removing duplicates...");
+		// duplicates managing
+		removeDuplicates();
+		logger.println("OK");
+		
+		logger.print("preparing list union...");
 		List<String> all = new ArrayList<String>(list1.size()+list2.size());
 		all.addAll(list1);
 		all.addAll(list2);	
-		
-		// duplicates managing
-		removeDuplicates();
+		logger.println("OK");
 		
 		// annotation
+		logger.print("getting annotations from infrared");
 		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
+		logger.println("OK");
 		
 		// run test
 		fisher = new TwoListFisherTest();
+		logger.print("executing fisher test...");
 		fisher.test(list1, list2, annotations, testMode);
+		logger.println("OK");
 		
 		// get result
+		logger.print("getting results...");
 		results = fisher.getResults();
+		logger.println("OK");
+		
 						
+		logger.println("end of FatiGO test...");
 	}
 	
 	
@@ -200,6 +218,20 @@ public class FatiGO {
 	 */
 	public void setList2(List<String> list2) {
 		this.list2 = list2;
+	}
+
+	/**
+	 * @return the logger
+	 */
+	public Logger getLogger() {
+		return logger;
+	}
+
+	/**
+	 * @param logger the logger to set
+	 */
+	public void setLogger(Logger logger) {
+		this.logger = logger;
 	}
 
 	
