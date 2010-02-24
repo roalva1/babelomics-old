@@ -237,7 +237,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		// save statistic results					
 		List<String> testResultOutput = testResultToStringList(fatigo.getResults());
 		IOUtils.write(outdir + "/" + fileName, StringUtils.join(testResultOutput,"\n"));
-		result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE"),new HashMap<String,String>(),"Database tests"));
+		result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",name.toUpperCase() + "_TERM"),new HashMap<String,String>(),"Database tests"));
 						
 		// save annotation
 		IOUtils.write(outdir + "/" + annotFileName, fatigo.getAnnotations().toString());

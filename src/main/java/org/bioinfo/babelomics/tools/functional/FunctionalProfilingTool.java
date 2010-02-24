@@ -236,13 +236,19 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			name = "go_" + goFilter.getNamespace() + "_" + goFilter.getMinLevel() + "_" + goFilter.getMaxLevel();
 		} else if(filter instanceof KeggFilter) {
 			name = "kegg";
-		}
-		else if(filter instanceof BiocartaFilter) {
+		} else if(filter instanceof InterproFilter) {
+			name = "interPro";
+		} else if(filter instanceof ReactomeFilter) {
+			name = "reactome";
+		} else if(filter instanceof BiocartaFilter) {
 			name = "biocarta";
+		} else if(filter instanceof JasparFilter) {
+			name = "jaspar";
+		} else if(filter instanceof OregannoFilter) {
+			name = "oreganno";
 		}
 		return name;
 	}
-	
 	
 	protected String getDBTitle(Filter filter){
 		String title = "Untitled",levels;
@@ -256,9 +262,17 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			title = "GO " + goFilter.getNamespace().replace("_", " ") + " " + levels;
 		} else if(filter instanceof KeggFilter) {
 			title = "Kegg";
-		} else if(filter instanceof BiocartaFilter) {
+		} else if(filter instanceof InterproFilter) {
+			title = "InterPro";
+		}  else if(filter instanceof ReactomeFilter) {
+			title = "Reactome";
+		}	else if(filter instanceof BiocartaFilter) {
 			title = "Biocarta";
-		}
+		}	else if(filter instanceof JasparFilter) {
+			title = "Jaspar";
+		}	else if(filter instanceof OregannoFilter) {
+			title = "Oreganno";
+		}	
 		return title;
 	}
 
