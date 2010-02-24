@@ -3,6 +3,7 @@ package org.bioinfo.babelomics.tools;
 import org.bioinfo.babelomics.tools.expression.Clustering;
 import org.bioinfo.babelomics.tools.expression.OutlierLrs;
 import org.bioinfo.babelomics.tools.expression.Predictor;
+import org.bioinfo.babelomics.tools.expression.RawExpressionViewer;
 import org.bioinfo.babelomics.tools.expression.differential.ClassComparison;
 import org.bioinfo.babelomics.tools.expression.differential.Correlation;
 import org.bioinfo.babelomics.tools.expression.differential.Survival;
@@ -42,6 +43,10 @@ public class BabelomicsFactory {
 		 * *****	Preprocessing, normalization and annotation tools	*************************************
 		 * **************************************************************************************************
 		 */
+		if(toolName.equalsIgnoreCase("raw-expression-viewer")) {
+			return new RawExpressionViewer();
+		}
+
 		if(toolName.equalsIgnoreCase("affy-genotype-preprocess")) {
 			return new AffyGenotypePreprocessing();
 		}
