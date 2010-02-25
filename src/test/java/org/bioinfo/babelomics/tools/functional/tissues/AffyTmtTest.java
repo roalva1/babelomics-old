@@ -23,20 +23,22 @@ public class AffyTmtTest {
 
 	@Test
 	public void Test1() throws Exception {
-		String list1 = "/mnt/commons/test/tools/tmt/list1_brain.txt"; // /ensembl1.txt
-		String list2 = "/mnt/commons/test/tools/tmt/list2_liver.txt"; // /ensembl2.txt
+//		String list1 = "/mnt/commons/test/tools/tmt/list1_brain.txt"; // /ensembl1.txt
+//		String list2 = "/mnt/commons/test/tools/tmt/list2_liver.txt"; // /ensembl2.txt
+		String list1 = "/mnt/commons/test/tools/tmt/ensembl1.txt";
+		String list2 = "/mnt/commons/test/tools/tmt/ensembl2.txt";
 		String outdir = "/tmp/AffyTmtTest";
 		new File(outdir).mkdir();
 
 		System.out.println("----- affy tmt test  ------");
 //		String []args = {"--tool", "tmt-affy", "--list1", list1,  "-o", outdir, "--species", "human", "--tissues", "all tissues"};
-//		String []args = {"--tool", "tmt-affy", "--list1", list1,  "--list2", list2, "-o", outdir, "--species", "human", "--tissues", "alltissues"};
-		String []args = {"--tool", "tmt-affy", "--list1", list1,  "--list2", list2, "-o", outdir, "--species", "human", "--tissues", "721 B lymphoblasts,Adipocyte,Adrenal Cortex"};
+		String []args = {"--tool", "tmt-affy", "--list1", list1,  "--list2", list2, "-o", outdir, "--species", "human", "--tissues", "alltissues"};
+//		String []args = {"--tool", "tmt-affy", "--list1", list1,  "--list2", list2, "-o", outdir, "--species", "human", "--tissues", "721 B lymphoblasts,Adipocyte,Adrenal Cortex"};
 		
-//		try {
-//			BabelomicsMain.main(args); 
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
