@@ -71,7 +71,10 @@ public class AffyTmt extends Tmt {
 
 		List<String> tissues = StringUtils.toList(commandLine.getOptionValue("tissues"), ",");
 		
-		dbName = "mouse".equalsIgnoreCase(species) ? "gnf_mouse" : "gnf_human";
+		System.out.println("tissues from getOptionValue: >>> " + commandLine.getOptionValue("tissues") + " <<<");
+		System.out.println("tissues: >>>> " + ListUtils.toString(tissues) + " <<<<");
+		
+		dbName = "mmu".equalsIgnoreCase(species) ? "gnf_mouse" : "gnf_human";
 
 		try {		
 			if ( tissues.contains("alltissues") ) {
@@ -80,8 +83,9 @@ public class AffyTmt extends Tmt {
 
 			System.out.println("tissues:\n" + ListUtils.toString(tissues));
 
-			DBConnector dbConnector = new DBConnector("mouse".equalsIgnoreCase(species) ? "mmu" : "hsa", "mysqlweb", "3306", "biouser", "biopass");
-			System.out.println("db connector = " + dbConnector.toString());
+			DBConnector dbConnector = new DBConnector("mouse".equalsIgnoreCase(species) ? "mmu" : "hsa", new File(babelomicsHomePath + "/conf/infrared.properties"));
+			//DBConnector dbConnector = new DBConnector(species, "mysqlweb", "3306", "biouser", "biopass");
+			System.out.println("species = " + species + ", db name = " +  dbName + ", db connector = " + dbConnector.toString());
 
 			// reading data
 			//

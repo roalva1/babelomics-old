@@ -12,11 +12,16 @@ public class RCommand {
 	private String scriptPath;
 	private String outdir;
 	private List<String> params;
-	
+	private String logFilename;
 	
 	public RCommand(String scriptPath, String outdir) {
+		this(scriptPath, outdir, "r.log");
+	}
+	
+	public RCommand(String scriptPath, String outdir, String logFilename) {
 		this.scriptPath = scriptPath;
 		this.outdir = outdir;
+		this.logFilename = logFilename;
 		this.params = new ArrayList<String>();
 	}
 
@@ -35,7 +40,7 @@ public class RCommand {
 	
 	public void exec(){
 		addParam("outdir", outdir);
-		Command cmd = new Command("R CMD BATCH --no-save --no-restore " + scriptPath + " " + outdir + "/r.log", params);
+		Command cmd = new Command("R CMD BATCH --no-save --no-restore " + scriptPath + " " + outdir + "/" + logFilename, params);
 		System.out.println("=====cmd line = " + cmd.getCommandLine());
 		System.out.println("=====cmd env = " + ListUtils.toString(params, " "));
 		SingleProcess sp = new SingleProcess(cmd);
