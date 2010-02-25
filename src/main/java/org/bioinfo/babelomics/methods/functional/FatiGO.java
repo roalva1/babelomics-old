@@ -89,7 +89,11 @@ public class FatiGO {
 		
 		logger.print("removing duplicates...");
 		// duplicates managing
+		logger.println("list1.size: " + list1.size());
+		logger.println("list2.size: " + list2.size());
 		removeDuplicates();
+		logger.println("list1.size: " + list1.size());
+		logger.println("list2.size: " + list2.size());
 		logger.println("OK");
 		
 		logger.print("preparing list union...");
@@ -98,9 +102,16 @@ public class FatiGO {
 		all.addAll(list2);	
 		logger.println("OK");
 		
+		logger.println("all.size: " + all.size());
+		
+		logger.println("l2.size: " + all.size());
+		
+		logger.println("list2_annotation.size: " + InfraredUtils.getAnnotations(dbConnector, list2, filter).size());
+		
 		// annotation
-		logger.print("getting annotations from infrared");
+		logger.print("getting annotations from infrared");		
 		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
+		logger.getLogWriter().flush();
 		logger.println("OK");
 		
 		// run test
@@ -137,7 +148,7 @@ public class FatiGO {
 		if(duplicatesMode==REMOVE_GENOME){
 			list1 = ListUtils.unique(list1);
 			List<String> ensemblList1 = InfraredUtils.toEnsemblId(dbConnector, list1);
-			for (String id:ensemblList1) {				
+			for (String id:ensemblList1) {
 				if(list2.contains(id)){
 					list2.remove(id);
 				}

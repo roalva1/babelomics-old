@@ -1,11 +1,14 @@
 package org.bioinfo.babelomics.methods.functional;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bioinfo.commons.log.Logger;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
@@ -20,8 +23,9 @@ public class InfraredUtils {
 
 	// get annotations from a filter
 	public static FeatureList<AnnotationItem> getAnnotations(DBConnector dbConnector, List<String> ids, FunctionalFilter filter) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException{
-		AnnotationDBManager annotationMng = new AnnotationDBManager(dbConnector);
-		return annotationMng.getAnnotation(ids, filter);
+		AnnotationDBManager annotationMng = new AnnotationDBManager(dbConnector);		
+		FeatureList<AnnotationItem> annots = annotationMng.getAnnotation(ids, filter);		
+		return annots;
 //		if(filter instanceof GOFilter){
 //			return annotationMng.getGOAnnotation(ids, (GOFilter) filter);
 //		} else if(filter instanceof KeggFilter){			
