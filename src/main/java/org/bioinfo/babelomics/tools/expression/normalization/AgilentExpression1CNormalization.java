@@ -33,7 +33,7 @@ public class AgilentExpression1CNormalization extends BabelomicsTool {
 
 		getOptions().addOption(OptionFactory.createOption("sample-names", "Sample names", false));
 		getOptions().addOption(OptionFactory.createOption("bg-correction", "Background correction: none, normexp, half, subtract, minimum, movingmin, edwards, rma. Default background correction: none", false));
-		getOptions().addOption(OptionFactory.createOption("ba-normalization", "Between arrays normalization: none, quantile, scale, vsn. Default between arrays normalization: scale", false));
+		getOptions().addOption(OptionFactory.createOption("ba-normalization", "Between arrays normalization: none, quantiles, scale, vsn. Default between arrays normalization: scale", false));
 		getOptions().addOption(OptionFactory.createOption("flags-no-fitted", "If this option is set then spots will not be used in the fitting of the parameters of the normalization steps", false, false));
 		getOptions().addOption(OptionFactory.createOption("flags-as-missing", "If this option is set then spots will have a missing (NA) normalized value and A-value as well", false, false));
 

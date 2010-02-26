@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.bioinfo.babelomics.methods.expression.differential.Limma;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
@@ -117,6 +118,8 @@ public class ClassComparison extends BabelomicsTool {
 		DoubleMatrix sample2 = dataset.getSubMatrixByColumns(cols);
 
 		try {
+			Dataset subDataset = dataset.getSubDataset(className, classValues);
+
 			TTest tTest = new TTest();
 			TestResultList<TTestResult> res = tTest.tTest(sample1, sample2);
 			
@@ -126,9 +129,9 @@ public class ClassComparison extends BabelomicsTool {
 			// generating heatmap
 			//
 			updateJobStatus("60", "generating heatmap");
-			int[] columnOrder = ListUtils.order(dataset.getVariables().getByName(className).getValues());
+			int[] columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
 			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
-			Canvas heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());
+			Canvas heatmap = DiffExpressionUtils.generateHeatmap(subDataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());
 			String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
 			try {
 				heatmap.save(heatmapFilename);
@@ -137,13 +140,13 @@ public class ClassComparison extends BabelomicsTool {
 			}
 			
 			updateJobStatus("80", "saving results");
-			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
+			DataFrame dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
 
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
 
-			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
+			dataFrame.setRowNames(ListUtils.ordered(subDataset.getFeatureNames(), rowOrder));
 
 			FeatureData featureData = new FeatureData(dataFrame);
 
@@ -156,7 +159,7 @@ public class ClassComparison extends BabelomicsTool {
 			file = new File(outdir + "/t_table.txt");
 			IOUtils.write(file, dataFrame.toString(true, true));
 			if ( file.exists() ) {
-				result.addOutputItem(new Item("ttable", file.getName(), "T-test output table", TYPE.FILE, StringUtils.toList("TABLE", ","), new HashMap<String, String>(2), "T-test output files"));											
+				result.addOutputItem(new Item("ttable", file.getName(), "T-test output table", TYPE.FILE, StringUtils.toList("TABLE,DIFF_EXPRESSION_TABLE", ","), new HashMap<String, String>(2), "T-test output files"));											
 			}
 			
 			if ( new File(heatmapFilename).exists() ) {
@@ -183,18 +186,21 @@ public class ClassComparison extends BabelomicsTool {
 		DoubleMatrix sample2 = dataset.getSubMatrixByColumns(cols);
 
 		try {
+			
+			Dataset subDataset = dataset.getSubDataset(className, classValues);
+
 			FoldChangeTest foldChange = new FoldChangeTest();
 			double[] logRes  = foldChange.logFoldChange(sample1, sample2);
 			double[] diffRes = foldChange.diffFoldChange(sample1, sample2);
 
 			updateJobStatus("80", "saving results");
 
-			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
+			DataFrame dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
 
 			dataFrame.addColumn("log", ArrayUtils.toStringList(logRes));
 			dataFrame.addColumn("diff", ArrayUtils.toStringList(diffRes));
 
-			dataFrame.setRowNames(dataset.getFeatureNames());
+			dataFrame.setRowNames(subDataset.getFeatureNames());
 
 			FeatureData featureData = new FeatureData(dataFrame);
 
@@ -207,7 +213,7 @@ public class ClassComparison extends BabelomicsTool {
 			file = new File(outdir + "/foldchange_table.txt");
 			IOUtils.write(file, dataFrame.toString(true, true));
 			if ( file.exists() ) {
-				result.addOutputItem(new Item("foldchangetable", file.getName(), "Fold-change output table", TYPE.FILE, StringUtils.toList("TABLE", ","), new HashMap<String, String>(2), "Fold-change output files"));											
+				result.addOutputItem(new Item("foldchangetable", file.getName(), "Fold-change output table", TYPE.FILE, StringUtils.toList("TABLE,FOLD_CHANGE_TABLE", ","), new HashMap<String, String>(2), "Fold-change output files"));											
 			}						
 			
 			//DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
@@ -242,6 +248,9 @@ public class ClassComparison extends BabelomicsTool {
 		}
 
 		try {
+			
+			Dataset subDataset = dataset.getSubDataset(className, classValues);
+			
 			AnovaTest anova = new AnovaTest(matrix, vars);			
 			TestResultList<AnovaTestResult> res = anova.compute();
 			
@@ -251,9 +260,9 @@ public class ClassComparison extends BabelomicsTool {
 			// generating heatmap
 			//
 			updateJobStatus("60", "generating heatmap");
-			int[] columnOrder = ListUtils.order(dataset.getVariables().getByName(className).getValues());
+			int[] columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
 			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
-			Canvas heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());
+			Canvas heatmap = DiffExpressionUtils.generateHeatmap(subDataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());
 			String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
 			try {
 				heatmap.save(heatmapFilename);
@@ -262,13 +271,13 @@ public class ClassComparison extends BabelomicsTool {
 			}
 			
 			updateJobStatus("80", "saving results");			
-			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
+			DataFrame dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
 
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
 
-			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
+			dataFrame.setRowNames(ListUtils.ordered(subDataset.getFeatureNames(), rowOrder));
 
 			FeatureData featureData = new FeatureData(dataFrame);
 
@@ -281,7 +290,7 @@ public class ClassComparison extends BabelomicsTool {
 			file = new File(outdir + "/anova_table.txt");
 			IOUtils.write(file, dataFrame.toString(true, true));
 			if ( file.exists() ) {
-				result.addOutputItem(new Item("anovatable", file.getName(), "Anova output table", TYPE.FILE, StringUtils.toList("TABLE", ","), new HashMap<String, String>(2), "Anova output files"));											
+				result.addOutputItem(new Item("anovatable", file.getName(), "Anova output table", TYPE.FILE, StringUtils.toList("TABLE,DIFF_EXPRESSION_TABLE", ","), new HashMap<String, String>(2), "Anova output files"));											
 			}
 			
 			if ( new File(heatmapFilename).exists() ) {
@@ -322,6 +331,8 @@ public class ClassComparison extends BabelomicsTool {
 		limma.setContrast(classValues);
 
 		try {
+			Dataset subDataset = dataset.getSubDataset(className, classValues);
+
 			TestResultList<LimmaTestResult> res = limma.compute();
 			
 			// apply multiple test correction according to input correction
@@ -330,9 +341,9 @@ public class ClassComparison extends BabelomicsTool {
 			// generating heatmap
 			//
 			updateJobStatus("60", "generating heatmap");
-			int[] columnOrder = ListUtils.order(dataset.getVariables().getByName(className).getValues());
+			int[] columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
 			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
-			Canvas heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());
+			Canvas heatmap = DiffExpressionUtils.generateHeatmap(subDataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());
 			String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
 			try {
 				heatmap.save(heatmapFilename);
@@ -341,14 +352,14 @@ public class ClassComparison extends BabelomicsTool {
 			}
 
 			updateJobStatus("80", "saving results");
-			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
+			DataFrame dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
 
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
 			//dataFrame.addColumn("lod", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getLods()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
 
-			dataFrame.setRowNames(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
+			dataFrame.setRowNames(ListUtils.ordered(subDataset.getFeatureNames(), rowOrder));
 
 			FeatureData featureData = new FeatureData(dataFrame);
 
@@ -361,7 +372,7 @@ public class ClassComparison extends BabelomicsTool {
 			file = new File(outdir + "/limma_table.txt");
 			IOUtils.write(file, dataFrame.toString(true, true));
 			if ( file.exists() ) {
-				result.addOutputItem(new Item("limmatable", file.getName(), "Limma output table", TYPE.FILE, StringUtils.toList("TABLE", ","), new HashMap<String, String>(2), "Lima output files"));											
+				result.addOutputItem(new Item("limmatable", file.getName(), "Limma output table", TYPE.FILE, StringUtils.toList("TABLE,DIFF_EXPRESSION_TABLE", ","), new HashMap<String, String>(2), "Lima output files"));											
 			}		
 			
 			if ( new File(heatmapFilename).exists() ) {

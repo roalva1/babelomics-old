@@ -108,9 +108,7 @@ public class Survival extends BabelomicsTool {
 			result.addOutputItem(new Item("cox_file", "cox.txt", "Cox output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Output files"));
 			
 			IOUtils.write(new File(getOutdir() + "/cox_table.txt"), dataFrame.toString(true, true));			
-			List<String> tags = new ArrayList<String>();
-			tags.add("TABLE");
-			result.addOutputItem(new Item("cox_table", "cox_table.txt", "Cox table", TYPE.FILE, tags, new HashMap<String, String>(2), "Output files"));
+			result.addOutputItem(new Item("cox_table", "cox_table.txt", "Cox table", TYPE.FILE, StringUtils.toList("TABLE,COX_TABLE", ","), new HashMap<String, String>(2), "Output files"));
 			
 			DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
 			

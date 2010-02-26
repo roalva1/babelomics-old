@@ -124,9 +124,7 @@ public class Correlation extends BabelomicsTool {
 
 			outFile = new File(getOutdir() + "/" + test + "_table.txt");
 			IOUtils.write(outFile, dataFrame.toString(true, true));			
-			List<String> tags = new ArrayList<String>();
-			tags.add("TABLE");
-			result.addOutputItem(new Item(test + "_table", outFile.getName(), test.toUpperCase() + " output table", TYPE.FILE, tags, new HashMap<String, String>(2), "Output files"));
+			result.addOutputItem(new Item(test + "_table", outFile.getName(), test.toUpperCase() + " output table", TYPE.FILE, StringUtils.toList("TABLE,CORRELATION_TABLE", ","), new HashMap<String, String>(2), "Output files"));
 			
 			DiffExpressionUtils.addOutputLists(dataFrame, test, "correlation", result, outdir);
 		} catch (Exception e) {
@@ -192,9 +190,7 @@ public class Correlation extends BabelomicsTool {
 
 			outFile = new File(getOutdir() + "/" + test + "_table.txt");
 			IOUtils.write(outFile, dataFrame.toString(true, true));			
-			List<String> tags = new ArrayList<String>();
-			tags.add("TABLE");
-			result.addOutputItem(new Item(test + "_table", outFile.getName(), test.toUpperCase() + " output table", TYPE.FILE, tags, new HashMap<String, String>(2), "Output files"));
+			result.addOutputItem(new Item(test + "_table", outFile.getName(), test.toUpperCase() + " output table", TYPE.FILE, StringUtils.toList("TABLE,REGRESSION_TABLE", ","), new HashMap<String, String>(2), "Output files"));
 
 			DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
 		
