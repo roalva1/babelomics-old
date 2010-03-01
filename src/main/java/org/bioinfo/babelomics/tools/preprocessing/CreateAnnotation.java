@@ -20,8 +20,13 @@ import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.dbsql.AnnotationDBManager;
 import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
 import org.bioinfo.infrared.funcannot.filter.Filter;
+import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
+import org.bioinfo.infrared.funcannot.filter.InterproFilter;
+import org.bioinfo.infrared.funcannot.filter.JasparFilter;
 import org.bioinfo.infrared.funcannot.filter.KeggFilter;
+import org.bioinfo.infrared.funcannot.filter.OregannoFilter;
+import org.bioinfo.infrared.funcannot.filter.ReactomeFilter;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 
@@ -42,17 +47,24 @@ public class CreateAnnotation extends BabelomicsTool {
 		addGOOptions("cc");
 		addGOOptions("mf");
 
-		// kegg
-		getOptions().addOption(OptionFactory.createOption("kegg", "Kegg database",false,false));
-		getOptions().addOption(OptionFactory.createOption("kegg-min-num-genes", "Kegg min number of genes",false));
-		getOptions().addOption(OptionFactory.createOption("kegg-max-num-genes", "Kegg max number of genes",false));
-		getOptions().addOption(OptionFactory.createOption("kegg-count-genes-from-genome", "computes the number of annotated genes from all genome, otherwise from you input list",false,false));
+		addGenericOptions("interpro");
+		addGenericOptions("kegg");
+		addGenericOptions("reactome");
+		addGenericOptions("biocarta");
+		addGenericOptions("jaspar");
+		addGenericOptions("oreganno");
 
-		// biocarta
-		getOptions().addOption(OptionFactory.createOption("biocarta", "Biocarta database",false,false));
-		getOptions().addOption(OptionFactory.createOption("biocarta-min-num-genes", "Biocarta min number of genes",false));
-		getOptions().addOption(OptionFactory.createOption("biocarta-max-num-genes", "Biocarta max number of genes",false));
-		getOptions().addOption(OptionFactory.createOption("biocarta-count-genes-from-genome", "computes the number of annotated genes from all genome, otherwise from you input list",false,false));
+//		// kegg
+//		getOptions().addOption(OptionFactory.createOption("kegg", "Kegg database",false,false));
+//		getOptions().addOption(OptionFactory.createOption("kegg-min-num-genes", "Kegg min number of genes",false));
+//		getOptions().addOption(OptionFactory.createOption("kegg-max-num-genes", "Kegg max number of genes",false));
+//		getOptions().addOption(OptionFactory.createOption("kegg-count-genes-from-genome", "computes the number of annotated genes from all genome, otherwise from you input list",false,false));
+//
+//		// biocarta
+//		getOptions().addOption(OptionFactory.createOption("biocarta", "Biocarta database",false,false));
+//		getOptions().addOption(OptionFactory.createOption("biocarta-min-num-genes", "Biocarta min number of genes",false));
+//		getOptions().addOption(OptionFactory.createOption("biocarta-max-num-genes", "Biocarta max number of genes",false));
+//		getOptions().addOption(OptionFactory.createOption("biocarta-count-genes-from-genome", "computes the number of annotated genes from all genome, otherwise from you input list",false,false));
 
 		// output format
 		getOptions().addOption(OptionFactory.createOption("output-format", "Output format: compact or extended. Default: compact", false));
@@ -74,6 +86,12 @@ public class CreateAnnotation extends BabelomicsTool {
 		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-keywords-logic", "GO " + namespaceTitle + ", keywords filter logic: all or any",false));
 	}
 
+	protected void addGenericOptions(String db){
+		getOptions().addOption(OptionFactory.createOption(db, db, false, false));
+		getOptions().addOption(OptionFactory.createOption(db + "-min-num-genes", db + " min number of genes filter",false));
+		getOptions().addOption(OptionFactory.createOption(db + "-max-num-genes", db + " max number of genes filter",false));
+		getOptions().addOption(OptionFactory.createOption(db + "-nannot-domain", db + " computes the number of annotated genes from all genome, otherwise from you input list",false,false));
+	}
 
 	@Override
 	protected void execute() {
@@ -124,16 +142,23 @@ public class CreateAnnotation extends BabelomicsTool {
 			if(commandLine.hasOption("go-mf")) {
 				parseGODb(commandLine,"mf");
 			}
-			// kegg
-			if(commandLine.hasOption("kegg")) {			
-				KeggFilter keggFilter = new KeggFilter(Integer.parseInt(commandLine.getOptionValue("kegg-min-num-genes","1")),Integer.parseInt(commandLine.getOptionValue("kegg-max-num-genes","500")));
-				filterList.add(keggFilter);
-			}
-			// biocarta
-			if(commandLine.hasOption("biocarta")) {
-				BiocartaFilter biocartaFilter = new BiocartaFilter(Integer.parseInt(commandLine.getOptionValue("biocarta-min-num-genes","1")),Integer.parseInt(commandLine.getOptionValue("biocarta-max-num-genes","500")));
-				filterList.add(biocartaFilter);
-			}
+//			// kegg
+//			if(commandLine.hasOption("kegg")) {			
+//				KeggFilter keggFilter = new KeggFilter(Integer.parseInt(commandLine.getOptionValue("kegg-min-num-genes","1")),Integer.parseInt(commandLine.getOptionValue("kegg-max-num-genes","500")));
+//				filterList.add(keggFilter);
+//			}
+//			// biocarta
+//			if(commandLine.hasOption("biocarta")) {
+//				BiocartaFilter biocartaFilter = new BiocartaFilter(Integer.parseInt(commandLine.getOptionValue("biocarta-min-num-genes","1")),Integer.parseInt(commandLine.getOptionValue("biocarta-max-num-genes","500")));
+//				filterList.add(biocartaFilter);
+//			}
+
+			parseGenericDb(commandLine,"interpro");
+			parseGenericDb(commandLine,"kegg");
+			parseGenericDb(commandLine,"reactome");		
+			parseGenericDb(commandLine,"biocarta");
+			parseGenericDb(commandLine,"jaspar");
+			parseGenericDb(commandLine,"oreganno");
 
 			String outputFormat = commandLine.getOptionValue("output-format", "compact");			
 
@@ -150,25 +175,25 @@ public class CreateAnnotation extends BabelomicsTool {
 				if ( filter instanceof GOFilter ) {
 					//al = af.getGOAnnotation(ids);
 					al = af.getGOAnnotation(ids, (GOFilter) filter);
-					System.out.println("GO Filter: " + ((GOFilter) filter).getNamespace());
+					//System.out.println("GO Filter: " + ((GOFilter) filter).getNamespace());
 					fileName = ((GOFilter) filter).getNamespace();
 					// ((GOFilter) filter).getNamespace()
 				} else if ( filter instanceof KeggFilter ) {
 					al = af.getKeggAnnotation(ids, (KeggFilter) filter);
-					System.out.println("Kegg Filter");
+					//System.out.println("Kegg Filter");
 					fileName = "kegg";
 					// ((GOFilter) filter).getNamespace()
 				} else if ( filter instanceof BiocartaFilter ) {
 					al = af.getBiocartaAnnotation(ids, (BiocartaFilter) filter);
-					System.out.println("Biocarta Filter");
+					//System.out.println("Biocarta Filter");
 					fileName = "biocarta";
 					// ((GOFilter) filter).getNamespace()
 				}
 				if ( al != null ) {
-					System.out.println("size of list : " + al.size() + ", saving in file: " + fileName);
+					//System.out.println("size of list : " + al.size() + ", saving in file: " + fileName);
 					if ( outputFormat.equalsIgnoreCase("extended") ) {
 						IOUtils.write(new File(outdir + "/" + fileName + ".txt"), al.toString());
-						System.out.println(al.toString());
+						//System.out.println(al.toString());
 					} else {
 						Map<String, List<String>> map = new HashMap<String, List<String>>();
 						for(int i=0 ; i<al.size() ; i++) {
@@ -182,7 +207,7 @@ public class CreateAnnotation extends BabelomicsTool {
 							sb.append(key).append("\t").append(ListUtils.toString(map.get(key), ",")).append("\n");
 						}
 						IOUtils.write(new File(outdir + "/" + fileName + ".txt"), sb.toString());
-						System.out.println(sb.toString());
+						//System.out.println(sb.toString());
 					}
 					
 					result.addOutputItem(new Item(fileName, fileName + ".txt", "Database name: filename", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Results"));					
@@ -226,6 +251,38 @@ public class CreateAnnotation extends BabelomicsTool {
 		return goFilter;
 	}
 
+	public void parseGenericDb(CommandLine cmdLine, String db){
+		if(commandLine.hasOption(db)) {
+			FunctionalFilter filter = null;
+			
+			if(db.equalsIgnoreCase("interpro")){
+				filter = new InterproFilter();		
+			}
+			if(db.equalsIgnoreCase("kegg")){
+				filter = new KeggFilter();						
+			}
+			if(db.equalsIgnoreCase("reactome")){
+				filter = new ReactomeFilter();						
+			}
+			if(db.equalsIgnoreCase("biocarta")){
+				filter = new BiocartaFilter();						
+			}
+			if(db.equalsIgnoreCase("jaspar")){
+				filter = new JasparFilter();						
+			}
+			if(db.equalsIgnoreCase("oreganno")){
+				filter = new OregannoFilter();						
+			}
+			if(filter!=null){
+				filter.setMinNumberGenes(Integer.parseInt(cmdLine.getOptionValue(db + "-min-num-genes","2")));	
+				filter.setMaxNumberGenes(Integer.parseInt(cmdLine.getOptionValue(db + "-max-num-genes","500")));		
+				if(cmdLine.getOptionValue(db + "-nannot-domain","genome").equals("genome")) filter.setGenomicNumberOfGenes(true); 
+				else filter.setGenomicNumberOfGenes(false);
+				filterList.add(filter);
+			}
+			
+		}
+	}
 
 	protected String getDBName(Filter filter){
 		String name = StringUtils.randomString();
