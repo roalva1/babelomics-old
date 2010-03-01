@@ -9,10 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
+import org.bioinfo.data.dataset.SampleVariable;
+import org.bioinfo.data.dataset.Variables;
 import org.bioinfo.data.list.DataFrame;
 import org.bioinfo.data.list.NamedArrayList;
 import org.bioinfo.data.list.exception.InvalidIndexException;
@@ -43,6 +46,8 @@ public class DiffExpressionUtils {
 		double offset, min, max, mean, deviation, standard;
 		//System.out.println("heatmap dimensions: (rowDimension, columnDimension) = (" + rowDimension + ", " + columnDimension + ")(min, max) = (" + min + ", " + max + ")");
 
+		
+		
 		Canvas canvas = new Canvas("");
 		canvas.setBorderWidth(0);
 		canvas.setBorderColor(Color.BLACK);
