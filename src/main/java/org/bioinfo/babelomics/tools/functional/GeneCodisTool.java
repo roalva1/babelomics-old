@@ -12,18 +12,18 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.genetics.Chromosome;
 
-import org.bioinfo.babelomics.methods.functional.FatiGO;
+
 import org.bioinfo.babelomics.methods.functional.GeneCodis;
-
-import org.bioinfo.commons.exec.Command;
-import org.bioinfo.commons.exec.SingleProcess;
+import org.bioinfo.babelomics.methods.functional.GeneCodis.analysisFactor;
+import org.bioinfo.babelomics.methods.functional.GeneCodis.correctionFactor;
+import org.bioinfo.babelomics.methods.functional.GeneCodis.testFactor;
 import org.bioinfo.commons.io.utils.IOUtils;
-
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
+import org.bioinfo.report.GenericReport.ImageFormat;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -43,11 +43,11 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 	
 	private List<Chromosome> chromosomes;
 	
-	private String support;   //Minimum number of genes required that have to be implicated in a rule to take it into account (default: 3).
-	private String supportRandom;//i . i support for random:  Min support taked into account when the algorithm is correcting p-values (usually the same than Support).
-	private int analysis;//  -a [1,2] Analysis. 1: Concurrence analysis, 2: Singular analysis
-	private int test;//-t- [1,2] statistical test, 0: Hypergeometric test (default), 1: Chi Square test
-	private int correction; // -s 0: none	any number < 0: FDR method	any number > 0: Number of permutations to correct p-values with permutations method
+	private int support;   //Minimum number of genes required that have to be implicated in a rule to take it into account (default: 3).
+	private int supportRandom;//i . i support for random:  Min support taked into account when the algorithm is correcting p-values (usually the same than Support).
+	private analysisFactor analysis;//  -a [1,2] Analysis. 1: Concurrence analysis, 2: Singular analysis
+	private testFactor test;//-t- [1,2] statistical test, 0: Hypergeometric test (default), 1: Chi Square test
+	private correctionFactor correction; // -s 0: none	any number < 0: FDR method	any number > 0: Number of permutations to correct p-values with permutations method
 
 	
 	@Override
@@ -97,22 +97,35 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		}
 		
 		//command parameters
-		support = commandLine.getOptionValue("support");  
-		supportRandom = commandLine.getOptionValue("support-for-random"); //i
-		analysis = (commandLine.getOptionValue("analysis")=="concurrence")?1:2; //  -a [1,2] Analysis:
-		test = ((commandLine.getOptionValue("hypergeometric")) != null? 0 : 1);//-t- [1,2]
-		correction = 0; 
+		support = Integer.parseInt(commandLine.getOptionValue("support"));  
+		supportRandom = Integer.parseInt(commandLine.getOptionValue("support-for-random")); //i
+		
+		analysis = (commandLine.getOptionValue("analysis")=="concurrence")?analysisFactor.concurrence:analysisFactor.singular; //  -a [1,2] Analysis:
+		
+			if (((commandLine.getOptionValue("hypergeometric")) != null) && ((commandLine.getOptionValue("chi-square")) != null)){
+				test = testFactor.both;
+			}else if((commandLine.getOptionValue("hypergeometric")) != null){
+				test = testFactor.hypergeometric;
+			}else if((commandLine.getOptionValue("chi-square")) != null){
+				test = testFactor.chiSquare;
+			} 
+			
+		
+		correction = correctionFactor.none; 
 		if (commandLine.getOptionValue("correction") == "fdr"){
-			correction=-1;
+			correction = correctionFactor.fdr;
+			
 		} else if (commandLine.getOptionValue("correction") == "permutation"){
-			correction=1;
+			correction = correctionFactor.permutation;
+		
 		}
 		
 		// extras
 		String duplicates = commandLine.getOptionValue("remove-duplicates", "never");
-		if(duplicates.equalsIgnoreCase("each")) duplicatesMode = FatiGO.REMOVE_EACH;
-		if(duplicates.equalsIgnoreCase("ref")) duplicatesMode = FatiGO.REMOVE_REF;
-		if(duplicates.equalsIgnoreCase("all")) duplicatesMode = FatiGO.REMOVE_ALL;		
+		if(duplicates.equalsIgnoreCase("each")) duplicatesMode = GeneCodis.REMOVE_EACH;
+		if(duplicates.equalsIgnoreCase("ref")) duplicatesMode = GeneCodis.REMOVE_REF;
+		if(duplicates.equalsIgnoreCase("all")) duplicatesMode = GeneCodis.REMOVE_ALL;		
+		if(duplicates.equalsIgnoreCase("never")) duplicatesMode = GeneCodis.REMOVE_NEVER;
 
 	}
 	
@@ -127,9 +140,8 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 			DBConnector dbConnector = new DBConnector(species, new File(babelomicsHomePath + "/conf/infrared.properties"));		
 			
 			// prepare params
-			logger.println("Starting 0...");
+		
 			prepare();
-			logger.println("Starting 1...");
 			GeneCodis genecodis = null;
 			String list2label = "List 2 (after duplicates managing)";
 			
@@ -137,77 +149,61 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 			
 			
 			// list 1			
-			System.err.println(list1.getDataFrame());
 			List<String> idList1 = list1.getDataFrame().getRowNames();//list1.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list1.getDataFrame().getColumn(0));
 			
 			// list 2
 			List<String> idList2 = null;
-//			if(list2!=null) {
-//				logger.println("Starting 3...");
-//				System.err.println(list2.getDataFrame());
-//				idList2 = list2.getDataFrame().getRowNames();//list2.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list2.getDataFrame().getColumn(0));
-//				genecodis = new GeneCodis(idList1, idList2, null, dbConnector, testMode, duplicatesMode);
-//				
-//			} else if(isRestOfGenome()) {
-//				logger.println("Starting 4...");
-//				duplicatesMode = GeneCodis.REMOVE_GENOME;
-//				genecodis = new GeneCodis(idList1, null, dbConnector);
-//				list2label = "Genome (after duplicates managing)";
-//			} else if(chromosomes!=null) {
-//				throw new ParseException("chromosomes comparison not yet implemented");
-//			} else {
-//				throw new ParseException("No comparison provided, use list2, genome or chromosomes options to set your comparison");				
-//			}
-//			logger.println("Starting 1...");
-//			// run genecodis
+			
 			if(filterList.size()==0 && !isYourAnnotations){
 				throw new ParseException("No biological database selected (eg. --go-bp)");
 			} else {
-				logger.println("filterList.size()::::::::"+filterList.size() + "........toString:........"+filterList.toString());
+				if(list2!=null)idList2 = list2.getDataFrame().getRowNames();
 				for(FunctionalFilter filter: filterList) {
-					logger.println("filter::::::::"+filter.getMaxNumberGenes());
 					doTest(idList1,idList2,filter,dbConnector);
 					}
+				
 				}
 			
 			}
 		catch (Exception e) {
-			
 		}
 		
 		
 	}
 	
-	private void doTest(List<String> idList1, List<String> idList2, FunctionalFilter filter, DBConnector dbConnector) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException{
-		File inputFile = new File(outdir + "/geneInputWellFormed");
+	private void doTest(List<String> idList1, List<String> idList2, FunctionalFilter filter, DBConnector dbConnector) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, IOException{
+		
+		// db attributes
+		String name = getDBName(filter);
+		String title = getDBTitle(filter);		
+		
+		//File inputFile = new File(outdir + "/"+name+"_WellFormedInput");
 		logger.println("Starting doing test...");
 		GeneCodis genecodis = null;
-		if(list2!=null) genecodis = new GeneCodis(idList1, idList2, filter, dbConnector, testMode, duplicatesMode);
-		else if(isRestOfGenome()) genecodis = new GeneCodis(idList1, filter, dbConnector);
+		if(list2!=null) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, idList2, filter, dbConnector, duplicatesMode, support, supportRandom,correction, test,analysis);
+		else if(isRestOfGenome()) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, filter, dbConnector, duplicatesMode, support, supportRandom, correction, test,analysis);
+                                                 
 		
 		//run run...
-		logger.println("run...........");
 		genecodis.run();
-		logger.println("test done...");
+
+		//save results
+		saveGenecodisResults(genecodis, name, title);
+	}
+	
+	
+	private void saveGenecodisResults(GeneCodis genecodis,String name,String title) throws IOException{
+		String fileName = name + ".txt";
+		String annotFileName = name + ".annot";
+		updateJobStatus("80", "saving results");
 		
-		try {
-			IOUtils.write(inputFile, genecodis.getResults());
+		//IOUtils.write(outdir + "/" +fileName, genecodis.getResults());
+		result.addOutputItem(new Item("genecodis_file", fileName, "Genecodis for "+name, TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE"), new HashMap<String, String>(2), "geneCodis data"));
 			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		File outputFile = new File(outdir + "/geneCodisOut");
-		String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/genecodis/genecodis_bin "+ inputFile.getAbsolutePath()+" "+ support +" -a" + analysis + " -i" + supportRandom +" -r"+genecodis.getrFactor()+ " -R"+genecodis.getRFactor() + " -s"+ correction + "-t" + test+ "-o "+outputFile.getAbsolutePath();
-		
-		Command cmd = new Command(cmdStr); 
-		SingleProcess sp = new SingleProcess(cmd);
-		sp.runSync();
-		updateJobStatus("90", "saving results");
-		if ( outputFile.exists() ) {
-			logger.println("exist...");
-			result.addOutputItem(new Item("genecodis_file", outputFile.getName(), "Genecodis file", TYPE.FILE, Arrays.asList("ANNOTATION"), new HashMap<String, String>(2), "geneCodis data"));
-		}	
+		// save annotation
+		IOUtils.write(outdir + "/" + annotFileName, genecodis.getAnnotations().toString());
+		result.addOutputItem(new Item("annot_" + name,annotFileName,"Annotations for " + title,Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
+					
 	}
 	
 }

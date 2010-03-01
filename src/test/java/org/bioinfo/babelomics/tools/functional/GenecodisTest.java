@@ -45,6 +45,8 @@ public class GenecodisTest {
 		
 		String []args = {"--tool", "genecodis" ,"--datalist", list1, "--list2", list2, "--kegg","kegg","--go-bp", "true", "--go-bp-min-level", "5", "--go-bp-max-level", "5", "--species", "hsa","--support", "3","--support-for-random", "3","--analysis", "concurrence","--hypergeometric","true","--correction","fdr", "-o", outdir};
 		
+		//String []args = {"--tool", "genecodis" ,"--datalist", list1,"--genome","true","--kegg","kegg","--go-bp", "true", "--go-bp-min-level", "5", "--go-bp-max-level", "5", "--species", "hsa","--support", "3","--support-for-random", "3","--analysis", "concurrence","--hypergeometric","true","--correction","fdr", "-o", outdir};
+		
 		try {
 			BabelomicsMain.main(args); 
 //			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));

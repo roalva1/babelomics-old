@@ -18,10 +18,11 @@ import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
 import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
-
-
+import org.bioinfo.infrared.funcannot.filter.InterproFilter;
+import org.bioinfo.infrared.funcannot.filter.JasparFilter;
 import org.bioinfo.infrared.funcannot.filter.KeggFilter;
-
+import org.bioinfo.infrared.funcannot.filter.OregannoFilter;
+import org.bioinfo.infrared.funcannot.filter.ReactomeFilter;
 import org.bioinfo.math.stats.inference.FisherExactTest;
 import org.bioinfo.tool.OptionFactory;
 
