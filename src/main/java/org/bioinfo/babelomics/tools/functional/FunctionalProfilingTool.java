@@ -129,6 +129,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		if(commandLine.hasOption("go-mf")) {
 			parseGODb(commandLine,"mf");
 		}
+
 //		// kegg
 //		if(commandLine.hasOption("kegg")) {			
 //			KeggFilter keggFilter = new KeggFilter(Integer.parseInt(commandLine.getOptionValue("kegg-min-num-genes","5")),Integer.parseInt(commandLine.getOptionValue("kegg-max-num-genes","500")));
@@ -146,6 +147,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		parseGenericDb(commandLine,"jaspar");
 		parseGenericDb(commandLine,"oreganno");
 		
+
 		
 		// species must be provided if any db is selected
 		if(commandLine.hasOption("go-bp") || commandLine.hasOption("go-mf") || commandLine.hasOption("go-cc") || commandLine.hasOption("kegg") || commandLine.hasOption("biocarta")){
@@ -209,29 +211,19 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		if(commandLine.hasOption(db)) {
 			FunctionalFilter filter = null;
 			
-			if(db.equalsIgnoreCase("interpro")){
-				filter = new InterproFilter();		
-			}
+		
 			if(db.equalsIgnoreCase("kegg")){
 				filter = new KeggFilter();						
 			}
-			if(db.equalsIgnoreCase("reactome")){
-				filter = new ReactomeFilter();						
-			}
+		
 			if(db.equalsIgnoreCase("biocarta")){
 				filter = new BiocartaFilter();						
 			}
-			if(db.equalsIgnoreCase("jaspar")){
-				filter = new JasparFilter();						
-			}
-			if(db.equalsIgnoreCase("oreganno")){
-				filter = new OregannoFilter();						
-			}
+		
 			if(filter!=null){
 				filter.setMinNumberGenes(Integer.parseInt(cmdLine.getOptionValue(db + "-min-num-genes","2")));	
 				filter.setMaxNumberGenes(Integer.parseInt(cmdLine.getOptionValue(db + "-max-num-genes","500")));		
-				if(cmdLine.getOptionValue(db + "-nannot-domain","genome").equals("genome")) filter.setGenomicNumberOfGenes(true); 
-				else filter.setGenomicNumberOfGenes(false);
+				
 				filterList.add(filter);
 			}
 			

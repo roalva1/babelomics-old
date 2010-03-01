@@ -153,7 +153,9 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				significant.add(TwoListFisherTestResult.header());
 				
 				// run fatigo's
+
 				for(FunctionalFilter filter: filterList) {
+
 					doFatigo(idList1,idList2,filter,dbConnector,significant);					
 				}				
 				if(isYourAnnotations){					
