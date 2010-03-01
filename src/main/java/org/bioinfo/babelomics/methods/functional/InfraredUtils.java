@@ -24,7 +24,7 @@ public class InfraredUtils {
 	// get annotations from a filter
 	public static FeatureList<AnnotationItem> getAnnotations(DBConnector dbConnector, List<String> ids, FunctionalFilter filter) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException{
 		AnnotationDBManager annotationMng = new AnnotationDBManager(dbConnector);		
-		FeatureList<AnnotationItem> annots = annotationMng.getAnnotation(ids, filter);		
+		FeatureList<AnnotationItem> annots = annotationMng.getAnnotation(ids, filter);
 		return annots;
 //		if(filter instanceof GOFilter){
 //			return annotationMng.getGOAnnotation(ids, (GOFilter) filter);

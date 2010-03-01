@@ -72,6 +72,8 @@ public class FatiScan {
 		
 		// id list
 		idList = rankedList.getDataFrame().getRowNames();//.getColumn(0);
+		System.err.println("idlist: " + idList.size());
+		//System.err.println("idlist: " + idList.subList(0, 20).toString());
 		// statistic		
 		statistic = ArrayUtils.toList(rankedList.getDataFrame().getColumnAsDoubleArray(0));
 		// order ranked list		
