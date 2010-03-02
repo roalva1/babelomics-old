@@ -194,7 +194,7 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		updateJobStatus("80", "saving results");
 		
 		//IOUtils.write(outdir + "/" +fileName, genecodis.getResults());
-		result.addOutputItem(new Item("genecodis_file", fileName, "Genecodis for "+name, TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE"), new HashMap<String, String>(2), "geneCodis data"));
+		result.addOutputItem(new Item("genecodis_file", fileName, "Genecodis for "+name, TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE"), new HashMap<String, String>(2), "Significant terms"));
 			
 		// save annotation
 		IOUtils.write(outdir + "/" + annotFileName, genecodis.getAnnotations().toString());
