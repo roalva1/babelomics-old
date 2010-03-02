@@ -3,7 +3,6 @@ package org.bioinfo.babelomics.tools.functional;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -11,8 +10,6 @@ import java.util.List;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.genetics.Chromosome;
-
-
 import org.bioinfo.babelomics.methods.functional.GeneCodis;
 import org.bioinfo.babelomics.methods.functional.GeneCodis.analysisFactor;
 import org.bioinfo.babelomics.methods.functional.GeneCodis.correctionFactor;
@@ -23,7 +20,6 @@ import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
-import org.bioinfo.report.GenericReport.ImageFormat;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
