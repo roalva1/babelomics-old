@@ -216,6 +216,15 @@ public class GeneCodis {
 		SingleProcess sp = new SingleProcess(cmd);
 		sp.runAsync();
 		sp.waitFor();
+		
+		try {
+			String content = IOUtils.toString(outputAbsolutPath);
+			IOUtils.write(outputAbsolutPath, "#" + content);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		///end_execution
 		System.err.println();
