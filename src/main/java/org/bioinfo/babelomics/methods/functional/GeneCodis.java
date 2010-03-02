@@ -154,6 +154,7 @@ public class GeneCodis {
 		String isRef;
 		Iterator<String> e = myHashAnnotation.keySet().iterator();
 			String key;
+			int autoNum = 0;
 			  while (e.hasNext()) {
 			     key = (String)e.next();
 			     //if id exist in my first hash list, fill 3er column with id of gene
@@ -161,7 +162,8 @@ public class GeneCodis {
 			     if (myHash.get(key) != null){
 			    	 isRef = (String) key;
 			    	 }
-			     allItems.add((String) key + "\t" + ListUtils.toString(myHashAnnotation.get(key), ",") + "\t\t" + isRef);
+			     allItems.add(autoNum + "\t" + ListUtils.toString(myHashAnnotation.get(key), ",") + "\t\t" + isRef);
+			     autoNum ++;
 			  }
 		setResults(allItems);
 //		System.err.println("allItems.size()---------"+allItems.size());
