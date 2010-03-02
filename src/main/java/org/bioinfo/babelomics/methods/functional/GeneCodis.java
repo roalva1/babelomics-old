@@ -154,6 +154,7 @@ public class GeneCodis {
 		String isRef;
 		Iterator<String> e = myHashAnnotation.keySet().iterator();
 			String key;
+			int autoNum = 0;
 			  while (e.hasNext()) {
 			     key = (String)e.next();
 			     //if id exist in my first hash list, fill 3er column with id of gene
@@ -161,7 +162,8 @@ public class GeneCodis {
 			     if (myHash.get(key) != null){
 			    	 isRef = (String) key;
 			    	 }
-			     allItems.add((String) key + "\t" + ListUtils.toString(myHashAnnotation.get(key), ",") + "\t\t" + isRef);
+			     allItems.add(autoNum + "\t" + ListUtils.toString(myHashAnnotation.get(key), ",") + "\t\t" + isRef);
+			     autoNum ++;
 			  }
 		setResults(allItems);
 //		System.err.println("allItems.size()---------"+allItems.size());
@@ -209,11 +211,20 @@ public class GeneCodis {
 		}
 	
 		String cmdStr = binPath +" "+" "+inputAbsolutPath +" "+ this.support+" "+ " -a" + ANALISIS + " -i" + this.supportRandom +" -r"+this.getrFactor()+ " -R"+this.getRFactor() + " -s"+ CORRECTION + " -t" + TEST+ " -o "+outputAbsolutPath;
-		System.err.println(cmdStr);
+		
 		Command cmd = new Command(cmdStr); 
 		SingleProcess sp = new SingleProcess(cmd);
 		sp.runAsync();
 		sp.waitFor();
+		
+		try {
+			String content = IOUtils.toString(outputAbsolutPath);
+			IOUtils.write(outputAbsolutPath, "#" + content);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		///end_execution
 		System.err.println();
