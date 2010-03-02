@@ -209,7 +209,7 @@ public class GeneCodis {
 		}
 	
 		String cmdStr = binPath +" "+" "+inputAbsolutPath +" "+ this.support+" "+ " -a" + ANALISIS + " -i" + this.supportRandom +" -r"+this.getrFactor()+ " -R"+this.getRFactor() + " -s"+ CORRECTION + " -t" + TEST+ " -o "+outputAbsolutPath;
-		System.err.println(cmdStr);
+		
 		Command cmd = new Command(cmdStr); 
 		SingleProcess sp = new SingleProcess(cmd);
 		sp.runAsync();
