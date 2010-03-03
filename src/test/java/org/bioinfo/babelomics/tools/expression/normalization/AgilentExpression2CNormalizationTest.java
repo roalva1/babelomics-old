@@ -49,7 +49,7 @@ public class AgilentExpression2CNormalizationTest {
 		new File(outDirName).mkdir();
 		String dataset = "/mnt/commons/test/biodata/example/GSE11968_RAW/agilent.zip";
 		
-		String []args = { "--tool", "agilent-expression-two-colors-normalization","--log-level", "2", "--compressed-file", dataset, "-o", outDirName, "--bg-correction", "normexp", "--wa-normalization", "loess", "--ba-normalization", "quantile"};
+		String []args = { "--tool", "agilent-expression-two-colors-normalization","--log-level", "2", "--compressed-file", dataset, "-o", outDirName, "--bg-correction", "normexp", "--wa-normalization", "loess", "--ba-normalization", "quantiles"};
 
 		System.out.println("command line parameters --> " + Arrays.toString(args));
 		try {

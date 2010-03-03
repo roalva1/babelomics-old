@@ -9,8 +9,11 @@ import java.util.List;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.FileUtils;
+import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
+import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.io.file.compress.CompressFactory;
 import org.bioinfo.io.file.compress.GenericCompressManager;
 import org.bioinfo.microarray.AgilentExpressionUtils;
@@ -103,24 +106,41 @@ public class GenePixExpression2CNormalization extends BabelomicsTool {
 			jobStatus.addStatusMessage("90", "saving normalization results");
 
 			File file;
-			List<String> tags = StringUtils.toList("data,datamatrix,expression", ",");
 
-			file = new File(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName()); 
-			if ( file.exists() ) {
-				result.addOutputItem(new Item("normalized", file.getName(), "Two-colors GenePix normalization ", TYPE.FILE, tags, new HashMap<String, String>(2), "Two-colors GenePix normalization files"));
-			} else {
-				printError("error two-colors genepix normalization", "error two-colors genepix normalization", "error two-colors genepix normalization");
+//			file = new File(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName()); 
+//			if ( file.exists() ) {
+//				result.addOutputItem(new Item("normalized", file.getName(), "Two-colors GenePix normalization ", TYPE.FILE, tags, new HashMap<String, String>(2), "Two-colors GenePix normalization files"));
+//			} else {
+//				printError("error two-colors genepix normalization", "error two-colors genepix normalization", "error two-colors genepix normalization");
+//			}			
+//			
+//			file = new File(outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName()); 
+//			if ( file.exists() ) {
+//				result.addOutputItem(new Item("normalized", file.getName(), "Feature data", TYPE.FILE, tags, new HashMap<String, String>(2), "Two-colors GenePix normalization files"));
+//			}
+
+			if ( new File(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName()).exists() && 
+				 new File(outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName()).exists() ) {
+				
+				file = new File(outdir + "/normalized_dataset.txt"); 			
+				AgilentExpressionUtils.createDataset(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName(), outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName(), 5, file.getAbsolutePath());
+				
+				if ( file.exists() ) {				
+					result.addOutputItem(new Item("normalized", file.getName(), "Normalized dataset ", TYPE.FILE, StringUtils.toList("data,datamatrix,expression", ","), new HashMap<String, String>(2), "Two-colors GenePix normalization files"));
+				}
+				
+				file = new File(outdir + "/normalized_dataset.featdata"); 			
+				if ( file.exists() ) {				
+					result.addOutputItem(new Item("normalized", file.getName(), "Feature data ", TYPE.FILE, StringUtils.toList("idlist", ","), new HashMap<String, String>(2), "Two-colors GenePix normalization files"));
+				}
 			}
-
-			file = new File(outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName()); 
-			if ( file.exists() ) {
-				result.addOutputItem(new Item("normalized", file.getName(), "Feature data", TYPE.FILE, tags, new HashMap<String, String>(2), "Two-colors GenePix normalization files"));
-			}
-
+			
+			
 			file = new File(outdir + "/" + AgilentExpressionUtils.getaValuesFileName()); 
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("avalues", file.getName(), "A-values", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Two-colors GenePix normalization files"));
 			}
+			
 		} catch (FileNotFoundException e) {
 			printError("filenotfoundexception_execute_genepixexpression2cnormalization", e.toString(), e.getMessage(), e);
 		} catch (IOException e) {
