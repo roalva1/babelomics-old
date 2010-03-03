@@ -2,6 +2,7 @@ package org.bioinfo.babelomics.methods.functional;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.bioinfo.commons.log.Logger;
@@ -16,7 +17,7 @@ import org.bioinfo.math.stats.inference.FisherExactTest;
 public class FatiGO {
 	
 	public static final int REMOVE_NEVER = 0;
-	public static final int REMOVE_EACH = 1;	
+	public static final int REMOVE_EACH = 1;
 	public static final int REMOVE_REF = 2;
 	public static final int REMOVE_GENOME = 3;
 	public static final int REMOVE_ALL = 4;
@@ -38,6 +39,17 @@ public class FatiGO {
 	List<TwoListFisherTestResult> results;	
 	FeatureList<AnnotationItem> annotations;
 
+	// summary
+	  // list 1
+	private double list1AnnotatedPercentage;
+	private int list1SizeBeforeDuplicates;
+	private int list1SizeAfterDuplicates;
+	  // list 2
+	private double list2AnnotatedPercentage;
+	private int list2SizeBeforeDuplicates;
+	private int list2SizeAfterDuplicates;
+	
+	
 	// Two list constructor
 	public FatiGO(List<String> list1, List<String> list2, FunctionalFilter filter, DBConnector dbConnector, int testMode, int duplicatesMode ) {
 		this.list1 = list1;
@@ -73,45 +85,48 @@ public class FatiGO {
 	// Your anntoations two list constructor
 	public FatiGO(List<String> list1, FeatureList<AnnotationItem> annotations) {
 		this.list1 = list1;
-		this.list2 = InfraredUtils.getGenome(dbConnector);
+		this.list2 = getAnnotationIds(annotations);
 		this.annotations = annotations;
 		this.testMode = FisherExactTest.GREATER;
-		this.duplicatesMode = REMOVE_GENOME;
+		this.duplicatesMode = REMOVE_REF;
 		this.isYourAnnotations = true;
 	}
 	
+	
+	private List<String> getAnnotationIds(FeatureList<AnnotationItem> annotations){
+		List<String> idList = new ArrayList<String>();
+		HashMap<String,Boolean> idHash = new HashMap<String,Boolean>();
+		for(AnnotationItem item: annotations){
+			if(!idHash.containsKey(item.getId())){
+				idList.add(item.getId());
+				idHash.put(item.getId(), true);
+			}			
+		}
+		return idList;
+	}
 	
 	public void run() throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException {
 				
 		if(logger==null) logger = new Logger("FatiGO");
 
 		logger.println("Starting FatiGO test...");
-		
-		logger.print("removing duplicates...");
-		// duplicates managing
-		logger.println("list1.size: " + list1.size());
-		logger.println("list2.size: " + list2.size());
-		removeDuplicates();
-		logger.println("list1.size: " + list1.size());
-		logger.println("list2.size: " + list2.size());
+				
+		// duplicates managing		
+		logger.print("removing duplicates...");		
+		removeDuplicates();		
 		logger.println("OK");
+				
 		
 		logger.print("preparing list union...");
 		List<String> all = new ArrayList<String>(list1.size()+list2.size());
 		all.addAll(list1);
 		all.addAll(list2);	
-		logger.println("OK");
 		
-		logger.println("all.size: " + all.size());
-		
-		logger.println("l2.size: " + all.size());
-		
-		logger.println("list2_annotation.size: " + InfraredUtils.getAnnotations(dbConnector, list2, filter).size());
+		//logger.println("list2_annotation.size: " + InfraredUtils.getAnnotations(dbConnector, list2, filter).size());
 		
 		// annotation
 		logger.print("getting annotations from infrared");		
-		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
-		logger.getLogWriter().flush();
+		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);		
 		logger.println("OK");
 		
 		// run test
@@ -131,6 +146,10 @@ public class FatiGO {
 	
 	
 	public void removeDuplicates(){
+		// before
+		list1SizeBeforeDuplicates = list1.size();
+		list2SizeBeforeDuplicates = list2.size();
+		
 		// each list
 		if(duplicatesMode!=REMOVE_NEVER){
 			list1 = ListUtils.unique(list1);
@@ -165,6 +184,10 @@ public class FatiGO {
 				}	
 			}
 		}
+		
+		// after
+		list1SizeAfterDuplicates = list1.size();
+		list2SizeAfterDuplicates = list2.size();
 	}
 	
 	public List<TwoListFisherTestResult> getSignificant(double threshold){
@@ -244,6 +267,92 @@ public class FatiGO {
 	public void setLogger(Logger logger) {
 		this.logger = logger;
 	}
+
+	/**
+	 * @return the list1AnnotatedPercentage
+	 */
+	public double getList1AnnotatedPercentage() {
+		return list1AnnotatedPercentage;
+	}
+
+	/**
+	 * @param list1AnnotatedPercentage the list1AnnotatedPercentage to set
+	 */
+	public void setList1AnnotatedPercentage(double list1AnnotatedPercentage) {
+		this.list1AnnotatedPercentage = list1AnnotatedPercentage;
+	}
+
+	/**
+	 * @return the list1SizeBeforeDuplicates
+	 */
+	public int getList1SizeBeforeDuplicates() {
+		return list1SizeBeforeDuplicates;
+	}
+
+	/**
+	 * @param list1SizeBeforeDuplicates the list1SizeBeforeDuplicates to set
+	 */
+	public void setList1SizeBeforeDuplicates(int list1SizeBeforeDuplicates) {
+		this.list1SizeBeforeDuplicates = list1SizeBeforeDuplicates;
+	}
+
+	/**
+	 * @return the list1SizeAfterDuplicates
+	 */
+	public int getList1SizeAfterDuplicates() {
+		return list1SizeAfterDuplicates;
+	}
+
+	/**
+	 * @param list1SizeAfterDuplicates the list1SizeAfterDuplicates to set
+	 */
+	public void setList1SizeAfterDuplicates(int list1SizeAfterDuplicates) {
+		this.list1SizeAfterDuplicates = list1SizeAfterDuplicates;
+	}
+
+	/**
+	 * @return the list2AnnotatedPercentage
+	 */
+	public double getList2AnnotatedPercentage() {
+		return list2AnnotatedPercentage;
+	}
+
+	/**
+	 * @param list2AnnotatedPercentage the list2AnnotatedPercentage to set
+	 */
+	public void setList2AnnotatedPercentage(double list2AnnotatedPercentage) {
+		this.list2AnnotatedPercentage = list2AnnotatedPercentage;
+	}
+
+	/**
+	 * @return the list2SizeBeforeDuplicates
+	 */
+	public int getList2SizeBeforeDuplicates() {
+		return list2SizeBeforeDuplicates;
+	}
+
+	/**
+	 * @param list2SizeBeforeDuplicates the list2SizeBeforeDuplicates to set
+	 */
+	public void setList2SizeBeforeDuplicates(int list2SizeBeforeDuplicates) {
+		this.list2SizeBeforeDuplicates = list2SizeBeforeDuplicates;
+	}
+
+	/**
+	 * @return the list2SizeAfterDuplicates
+	 */
+	public int getList2SizeAfterDuplicates() {
+		return list2SizeAfterDuplicates;
+	}
+
+	/**
+	 * @param list2SizeAfterDuplicates the list2SizeAfterDuplicates to set
+	 */
+	public void setList2SizeAfterDuplicates(int list2SizeAfterDuplicates) {
+		this.list2SizeAfterDuplicates = list2SizeAfterDuplicates;
+	}
+
+
 
 	
 }
