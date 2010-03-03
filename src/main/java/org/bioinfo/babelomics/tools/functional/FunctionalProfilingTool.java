@@ -62,22 +62,9 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		addGenericOptions("biocarta");
 		addGenericOptions("jaspar");
 		addGenericOptions("oreganno");
-		
-//		// kegg
-//		getOptions().addOption(OptionFactory.createOption("kegg", "Kegg database",false,false));
-//		getOptions().addOption(OptionFactory.createOption("kegg-min-num-genes", "Kegg min number of genes",false));
-//		getOptions().addOption(OptionFactory.createOption("kegg-max-num-genes", "Kegg max number of genes",false));
-//		getOptions().addOption(OptionFactory.createOption("kegg-count-genes-from-genome", "computes the number of annotated genes from all genome, otherwise from you input list",false,false));
-//		
-//		// biocarta
-//		getOptions().addOption(OptionFactory.createOption("biocarta", "Biocarta database",false,false));
-//		getOptions().addOption(OptionFactory.createOption("biocarta-min-num-genes", "Biocarta min number of genes",false));
-//		getOptions().addOption(OptionFactory.createOption("biocarta-max-num-genes", "Biocarta max number of genes",false));
-//		getOptions().addOption(OptionFactory.createOption("biocarta-count-genes-from-genome", "computes the number of annotated genes from all genome, otherwise from you input list",false,false));
-//
+
 		// your annotations
 		getOptions().addOption(OptionFactory.createOption("annotations", "Your own annotations",false,true));
-//		getOptions().addOption(OptionFactory.createOption("annotation-enrichment", "rest of databases will used to enrich your annotations",false,false));
 		
 	}
 
@@ -130,16 +117,6 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			parseGODb(commandLine,"mf");
 		}
 
-//		// kegg
-//		if(commandLine.hasOption("kegg")) {			
-//			KeggFilter keggFilter = new KeggFilter(Integer.parseInt(commandLine.getOptionValue("kegg-min-num-genes","5")),Integer.parseInt(commandLine.getOptionValue("kegg-max-num-genes","500")));
-//			filterList.add(keggFilter);
-//		}
-//		// biocarta
-//		if(commandLine.hasOption("biocarta")) {
-//			BiocartaFilter biocartaFilter = new BiocartaFilter(Integer.parseInt(commandLine.getOptionValue("biocarta-min-num-genes","5")),Integer.parseInt(commandLine.getOptionValue("biocarta-max-num-genes","500")));
-//			filterList.add(biocartaFilter);
-//		}
 		parseGenericDb(commandLine,"interpro");
 		parseGenericDb(commandLine,"kegg");
 		parseGenericDb(commandLine,"reactome");		
@@ -248,7 +225,27 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		} else if(filter instanceof KeggFilter) {
 			name = "kegg";
 		} else if(filter instanceof InterproFilter) {
-			name = "interPro";
+			name = "interpro";
+		} else if(filter instanceof ReactomeFilter) {
+			name = "reactome";
+		} else if(filter instanceof BiocartaFilter) {
+			name = "biocarta";
+		} else if(filter instanceof JasparFilter) {
+			name = "jaspar";
+		} else if(filter instanceof OregannoFilter) {
+			name = "oreganno";
+		}
+		return name;
+	}
+	
+	protected String getDBPrefix(Filter filter){
+		String name = StringUtils.randomString();
+		if(filter instanceof GOFilter) {		
+			name = "go";
+		} else if(filter instanceof KeggFilter) {
+			name = "kegg";
+		} else if(filter instanceof InterproFilter) {
+			name = "interpro";
 		} else if(filter instanceof ReactomeFilter) {
 			name = "reactome";
 		} else if(filter instanceof BiocartaFilter) {

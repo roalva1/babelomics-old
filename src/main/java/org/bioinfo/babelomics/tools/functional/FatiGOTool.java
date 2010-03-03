@@ -3,6 +3,8 @@ package org.bioinfo.babelomics.tools.functional;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,7 +33,7 @@ import org.bioinfo.tool.result.Item;
 public class FatiGOTool extends FunctionalProfilingTool{
 
 	public final static double DEFAULT_PVALUE_THRESHOLD = 0.05;
-	
+		
 	// list1
 	private FeatureData list1;
 	
@@ -42,7 +44,8 @@ public class FatiGOTool extends FunctionalProfilingTool{
 	// other capabilities
 	protected int duplicatesMode;
 	private StringBuilder duplicatesReport;
-		
+	private StringBuilder annotationReport;
+	private String list2label;
 	
 	public FatiGOTool() {
 		initOptions();
@@ -88,11 +91,12 @@ public class FatiGOTool extends FunctionalProfilingTool{
 //		}
 		
 		// extras
-		String duplicates = commandLine.getOptionValue("remove-duplicates", "never");
+		String duplicates = commandLine.getOptionValue("duplicates", "never");
+		System.err.println("los duplicates son: " + duplicates);
 		if(duplicates.equalsIgnoreCase("each")) duplicatesMode = FatiGO.REMOVE_EACH;
 		if(duplicates.equalsIgnoreCase("ref")) duplicatesMode = FatiGO.REMOVE_REF;
 		if(duplicates.equalsIgnoreCase("all")) duplicatesMode = FatiGO.REMOVE_ALL;
-		
+		System.err.println("los duplicates son: " + duplicatesMode);
 		// your annotations
 		if(isYourAnnotations){
 			
@@ -115,7 +119,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			prepare();			
 	
 			FatiGO fatigo = null;
-			String list2label = "List 2 (after duplicates managing)";
+			list2label = "List 2";
 			
 			// list 1			
 			System.err.println(list1.getDataFrame());
@@ -129,7 +133,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			} else if(isRestOfGenome()) {				
 				duplicatesMode = FatiGO.REMOVE_GENOME;
 				fatigo = new FatiGO(idList1, null, dbConnector);
-				list2label = "Genome (after duplicates managing)";
+				list2label = "Genome";
 			} else if(chromosomes!=null) {
 				throw new ParseException("chromosomes comparison not yet implemented");
 			} else {
@@ -146,7 +150,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			IOUtils.write(outdir + "/clean_list1.txt", ListUtils.toString(fatigo.getList1(),"\n"));
 			result.addOutputItem(new Item("clean_list1","clean_list1.txt","List 1 (after duplicates managing)",Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
 			IOUtils.write(outdir + "/clean_list2.txt", ListUtils.toString(fatigo.getList2(),"\n"));
-			result.addOutputItem(new Item("clean_list2","clean_list2.txt",list2label,Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
+			result.addOutputItem(new Item("clean_list2","clean_list2.txt",list2label + "(after duplicates managing)",Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
 			
 			
 			// run fatigo's
@@ -161,16 +165,21 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				result.addOutputItem(new Item("significant","significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE"),new HashMap<String,String>(),"Significant Results"));
 				significant.add(TwoListFisherTestResult.header());
 				
-				// run fatigo's
+				annotationReport = new StringBuilder();
+				annotationReport.append("#DB").append("\t").append("List1").append("\t").append(list2label).append("\n");
 				
+				// run fatigo's				
 				for(FunctionalFilter filter: filterList) {
 					fatigo = doFatigo(idList1,idList2,filter,dbConnector,significant);
+					addAnnotationReport(fatigo,getDBTitle(filter));
 				}				
 				if(isYourAnnotations){					
 					fatigo = doFatigoYourAnnotations(idList1, idList2, yourAnnotations, significant);
+					addAnnotationReport(fatigo,"Your annotations");
 				}
 				
-				addDuplicatesReport(fatigo);
+				saveDuplicatesReport(fatigo);
+				saveAnnotationsReport();
 				
 				// significant terms
 				IOUtils.write(outdir + "/significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significant,"\n"));
@@ -185,6 +194,20 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		
 	}
 
+	private void addAnnotationReport(FatiGO fatigo, String dbName){
+		DecimalFormat formatter = new DecimalFormat("#######.##");
+		double list1Percentage = ((double)(fatigo.getList1AnnotatedCounter())/(double)fatigo.getList1SizeBeforeDuplicates())*100.0;
+		double list2Percentage = ((double)(fatigo.getList2AnnotatedCounter())/(double)fatigo.getList2SizeBeforeDuplicates())*100.0;
+		String list1Message = fatigo.getList1AnnotatedCounter() + " of " + fatigo.getList1SizeAfterDuplicates() + " (" + formatter.format(list1Percentage) + "%, an average of " + formatter.format(fatigo.getList1MeanAnnotationsPerId()) + " per id)";
+		String list2Message = fatigo.getList2AnnotatedCounter() + " of " + fatigo.getList2SizeAfterDuplicates() + " (" + formatter.format(list2Percentage) +"%, an average of " + formatter.format(fatigo.getList2MeanAnnotationsPerId()) + " per id)";
+		annotationReport.append(dbName).append("\t").append(list1Message).append("\t").append(list2Message).append("\n");
+	}
+	private void saveAnnotationsReport() throws IOException{
+		IOUtils.write(outdir + "/annotations_per_db.txt", annotationReport.toString());
+		result.getOutputItems().add(1,new Item("annotations_per_db","annotations_per_db.txt","Id annotations per DB",Item.TYPE.FILE,Arrays.asList("TABLE","SUMMARY_TABLE"),new HashMap<String,String>(),"Summary"));
+	}
+	
+	
 	private void addInputParams(){
 		// species
 		addInputParam("species", "Species", species);
@@ -207,19 +230,25 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		result.addOutputItem(new Item(id,value,label,Item.TYPE.MESSAGE,Arrays.asList("INPUT_PARAM"),new HashMap<String,String>(),"Input params"));
 	}
 	
-	private void addDuplicatesReport(FatiGO fatigo) throws IOException{
+	private void saveDuplicatesReport(FatiGO fatigo) throws IOException{
+		DecimalFormat formatter = new DecimalFormat("##.##");
+		// list 1
+		int list1Duplicates = fatigo.getList1SizeBeforeDuplicates()-fatigo.getList1SizeAfterDuplicates();
+		double list1DuplicatesPercentage = (double)(list1Duplicates)/(double)fatigo.getList1SizeBeforeDuplicates();
+		String list1DuplicatesMessage = list1Duplicates + " of " + fatigo.getList1SizeBeforeDuplicates() + " (" + formatter.format(list1DuplicatesPercentage) + "%)";
+		// list 2
+		int list2Duplicates = fatigo.getList2SizeBeforeDuplicates()-fatigo.getList2SizeAfterDuplicates();
+		double list2DuplicatesPercentage = (double)(list2Duplicates)/(double)fatigo.getList2SizeBeforeDuplicates();
+		String list2DuplicatesMessage = list2Duplicates + " of " + fatigo.getList2SizeBeforeDuplicates() + " (" + formatter.format(list2DuplicatesPercentage) + "%)";
+		// report
 		duplicatesReport = new StringBuilder();
-		duplicatesReport.append("#Detail").append("\t").append("Total").append("\n");
-		duplicatesReport.append("Removed duplicates in list 1").append("\t").append(fatigo.getList1SizeBeforeDuplicates()-fatigo.getList1SizeAfterDuplicates() + " of " + fatigo.getList1SizeBeforeDuplicates()).append("\n");
-		duplicatesReport.append("Removed duplicates in list 2").append("\t").append(fatigo.getList2SizeBeforeDuplicates()-fatigo.getList2SizeAfterDuplicates() + " of " + fatigo.getList2SizeBeforeDuplicates()).append("\n");
+		duplicatesReport.append("#Detail").append("\t").append("List 1").append("\t").append(list2label).append("\n");		
+		duplicatesReport.append("Number of duplicates").append("\t").append(list1DuplicatesMessage).append("\t").append(list2DuplicatesMessage).append("\n");
+		duplicatesReport.append("Number of finally used ids").append("\t").append(fatigo.getList1SizeAfterDuplicates()).append("\t").append(fatigo.getList2SizeAfterDuplicates()).append("\n");		
 		IOUtils.write(outdir + "/duplicates.txt", duplicatesReport.toString());
-		result.addOutputItem(new Item("duplicates","duplicates.txt","Duplicates management",Item.TYPE.FILE,Arrays.asList("TABLE","SUMMARY_TABLE"),new HashMap<String,String>(),"Summary"));		
+		result.getOutputItems().add(1,new Item("duplicates","duplicates.txt","Duplicates management",Item.TYPE.FILE,Arrays.asList("TABLE","SUMMARY_TABLE"),new HashMap<String,String>(),"Summary"));		
 	}
-	
-	private void addSummary(){
 		
-	}
-	
 	private FatiGO doFatigo(List<String> idList1, List<String> idList2,FunctionalFilter filter,DBConnector dbConnector, List<String> significant) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException{
 		
 		// db attributes

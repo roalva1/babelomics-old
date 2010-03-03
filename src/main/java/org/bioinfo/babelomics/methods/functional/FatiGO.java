@@ -3,6 +3,7 @@ package org.bioinfo.babelomics.methods.functional;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.bioinfo.commons.log.Logger;
@@ -41,11 +42,13 @@ public class FatiGO {
 
 	// summary
 	  // list 1
-	private double list1AnnotatedPercentage;
+	private int list1AnnotatedCounter;
+	private double list1MeanAnnotationsPerId;
 	private int list1SizeBeforeDuplicates;
 	private int list1SizeAfterDuplicates;
 	  // list 2
-	private double list2AnnotatedPercentage;
+	private int list2AnnotatedCounter;
+	private double list2MeanAnnotationsPerId;
 	private int list2SizeBeforeDuplicates;
 	private int list2SizeAfterDuplicates;
 	
@@ -126,8 +129,10 @@ public class FatiGO {
 		
 		// annotation
 		logger.print("getting annotations from infrared");		
-		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);		
+		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);	
 		logger.println("OK");
+		
+		computeAnnotateds();
 		
 		// run test
 		fisher = new TwoListFisherTest();
@@ -188,6 +193,64 @@ public class FatiGO {
 		// after
 		list1SizeAfterDuplicates = list1.size();
 		list2SizeAfterDuplicates = list2.size();
+	}
+	
+	private void computeAnnotateds(){
+		// list 1
+		HashMap<String,Integer> list1Annotations = new HashMap<String, Integer>();		
+		for(String id: list1){
+			list1Annotations.put(id, 0);			
+		}
+		// list 1
+		HashMap<String,Integer> list2Annotations = new HashMap<String, Integer>();		
+		for(String id: list2){
+			list2Annotations.put(id, 0);
+		}
+		// run annotations
+		int count;
+		for(AnnotationItem annot: annotations){
+			String id = annot.getId();			
+			if(list1Annotations.containsKey(id)){				
+				count = list1Annotations.get(id);
+				//System.err.print("vale " + count);
+				count++;
+				list1Annotations.put(id,count);
+				//System.err.println(" y lo paso a " + count + " " + list1Annotations.get(id));
+			}
+			if(list2Annotations.containsKey(id)){
+				count = list2Annotations.get(id);
+				count++;
+				list2Annotations.put(id,count);
+			}
+		}
+		// counts
+		  // list 1
+		Iterator<String> it1 = list1Annotations.keySet().iterator();
+		list1AnnotatedCounter = 0;
+		int list1Total = 0;
+		String id;
+		while(it1.hasNext()){
+			id = it1.next();
+			count = list1Annotations.get(id);			
+			if(count>0) {
+				list1AnnotatedCounter++;
+			}
+			list1Total++;
+		}
+		list1MeanAnnotationsPerId = (double)list1Total/(double)list1SizeAfterDuplicates;
+		  // list 2
+		Iterator<String> it2 = list2Annotations.keySet().iterator();
+		list2AnnotatedCounter = 0;
+		int list2Total = 0;
+		while(it2.hasNext()){
+			id = it2.next();
+			count = list2Annotations.get(id);			
+			if(count>0) {
+				list2AnnotatedCounter++;
+			}
+			list2Total++;
+		}
+		list2MeanAnnotationsPerId = (double)list2Total/(double)list2SizeAfterDuplicates;
 	}
 	
 	public List<TwoListFisherTestResult> getSignificant(double threshold){
@@ -268,19 +331,6 @@ public class FatiGO {
 		this.logger = logger;
 	}
 
-	/**
-	 * @return the list1AnnotatedPercentage
-	 */
-	public double getList1AnnotatedPercentage() {
-		return list1AnnotatedPercentage;
-	}
-
-	/**
-	 * @param list1AnnotatedPercentage the list1AnnotatedPercentage to set
-	 */
-	public void setList1AnnotatedPercentage(double list1AnnotatedPercentage) {
-		this.list1AnnotatedPercentage = list1AnnotatedPercentage;
-	}
 
 	/**
 	 * @return the list1SizeBeforeDuplicates
@@ -311,20 +361,6 @@ public class FatiGO {
 	}
 
 	/**
-	 * @return the list2AnnotatedPercentage
-	 */
-	public double getList2AnnotatedPercentage() {
-		return list2AnnotatedPercentage;
-	}
-
-	/**
-	 * @param list2AnnotatedPercentage the list2AnnotatedPercentage to set
-	 */
-	public void setList2AnnotatedPercentage(double list2AnnotatedPercentage) {
-		this.list2AnnotatedPercentage = list2AnnotatedPercentage;
-	}
-
-	/**
 	 * @return the list2SizeBeforeDuplicates
 	 */
 	public int getList2SizeBeforeDuplicates() {
@@ -352,6 +388,62 @@ public class FatiGO {
 		this.list2SizeAfterDuplicates = list2SizeAfterDuplicates;
 	}
 
+	/**
+	 * @return the list1AnnotatedCounter
+	 */
+	public int getList1AnnotatedCounter() {
+		return list1AnnotatedCounter;
+	}
+
+	/**
+	 * @param list1AnnotatedCounter the list1AnnotatedCounter to set
+	 */
+	public void setList1AnnotatedCounter(int list1AnnotatedCounter) {
+		this.list1AnnotatedCounter = list1AnnotatedCounter;
+	}
+
+
+	/**
+	 * @return the list2AnnotatedCounter
+	 */
+	public int getList2AnnotatedCounter() {
+		return list2AnnotatedCounter;
+	}
+
+	/**
+	 * @param list2AnnotatedCounter the list2AnnotatedCounter to set
+	 */
+	public void setList2AnnotatedCounter(int list2AnnotatedCounter) {
+		this.list2AnnotatedCounter = list2AnnotatedCounter;
+	}
+
+	/**
+	 * @return the list1MeanAnnotationsPerId
+	 */
+	public double getList1MeanAnnotationsPerId() {
+		return list1MeanAnnotationsPerId;
+	}
+
+	/**
+	 * @param list1MeanAnnotationsPerId the list1MeanAnnotationsPerId to set
+	 */
+	public void setList1MeanAnnotationsPerId(double list1MeanAnnotationsPerId) {
+		this.list1MeanAnnotationsPerId = list1MeanAnnotationsPerId;
+	}
+
+	/**
+	 * @return the list2MeanAnnotationsPerId
+	 */
+	public double getList2MeanAnnotationsPerId() {
+		return list2MeanAnnotationsPerId;
+	}
+
+	/**
+	 * @param list2MeanAnnotationsPerId the list2MeanAnnotationsPerId to set
+	 */
+	public void setList2MeanAnnotationsPerId(double list2MeanAnnotationsPerId) {
+		this.list2MeanAnnotationsPerId = list2MeanAnnotationsPerId;
+	}
 
 
 	
