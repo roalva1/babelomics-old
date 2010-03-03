@@ -103,18 +103,34 @@ public class AgilentExpression2CNormalization extends BabelomicsTool {
 			jobStatus.addStatusMessage("90", "saving normalization results");
 
 			File file;
-			List<String> tags = StringUtils.toList("data,datamatrix,expression", ",");
+//			List<String> tags = StringUtils.toList("data,datamatrix,expression", ",");
+//
+//			file = new File(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName()); 
+//			if ( file.exists() ) {
+//				result.addOutputItem(new Item("normalized", file.getName(), "Two-colors agilent normalization ", TYPE.FILE, tags, new HashMap<String, String>(2), "Two-colors agilent normalization files"));
+//			} else {
+//				printError("error two-colors agilent normalization", "error two-colors agilent normalization", "error two-colors agilent normalization");
+//			}
+//
+//			file = new File(outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName()); 
+//			if ( file.exists() ) {
+//				result.addOutputItem(new Item("normalized", file.getName(), "Feature data", TYPE.FILE, tags, new HashMap<String, String>(2), "Two-colors agilent normalization files"));
+//			}
 
-			file = new File(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName()); 
-			if ( file.exists() ) {
-				result.addOutputItem(new Item("normalized", file.getName(), "Two-colors agilent normalization ", TYPE.FILE, tags, new HashMap<String, String>(2), "Two-colors agilent normalization files"));
-			} else {
-				printError("error two-colors agilent normalization", "error two-colors agilent normalization", "error two-colors agilent normalization");
-			}
+			if ( new File(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName()).exists() && 
+					new File(outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName()).exists() ) {
 
-			file = new File(outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName()); 
-			if ( file.exists() ) {
-				result.addOutputItem(new Item("normalized", file.getName(), "Feature data", TYPE.FILE, tags, new HashMap<String, String>(2), "Two-colors agilent normalization files"));
+				file = new File(outdir + "/normalized_dataset.txt"); 			
+				AgilentExpressionUtils.createDataset(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName(), outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName(), 8, file.getAbsolutePath());
+
+				if ( file.exists() ) {				
+					result.addOutputItem(new Item("normalized", file.getName(), "Normalized dataset ", TYPE.FILE, StringUtils.toList("data,datamatrix,expression", ","), new HashMap<String, String>(2), "Two-colors Agilent normalization files"));
+				}
+
+				file = new File(outdir + "/normalized_dataset.featdata"); 			
+				if ( file.exists() ) {				
+					result.addOutputItem(new Item("normalized", file.getName(), "Feature data ", TYPE.FILE, StringUtils.toList("idlist", ","), new HashMap<String, String>(2), "Two-colors Agilent normalization files"));
+				}
 			}
 
 			file = new File(outdir + "/" + AgilentExpressionUtils.getaValuesFileName()); 
