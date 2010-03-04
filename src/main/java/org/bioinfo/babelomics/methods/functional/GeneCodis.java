@@ -1,9 +1,10 @@
 package org.bioinfo.babelomics.methods.functional;
 
-import java.io.File;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -13,13 +14,14 @@ import java.util.Map;
 import org.bioinfo.commons.exec.Command;
 import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.log.Logger;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
-import org.bioinfo.math.stats.inference.FisherExactTest;
+
 
 public class GeneCodis {
 
@@ -31,10 +33,22 @@ public class GeneCodis {
 	public static final int REMOVE_ALL = 4;
 	
 	
-	public enum correctionFactor{fdr, permutation, none};
-	public enum testFactor{hypergeometric,chiSquare,both};
-	public enum analysisFactor{concurrence,singular};
-
+	public enum correctionFactor{
+		fdr, 
+		permutation, 
+		none
+		};
+		
+	public enum testFactor{
+		hypergeometric,
+		chiSquare,
+		both
+		};
+		
+	public enum analysisFactor{
+		concurrence,
+		singular
+		};
 	
 	// input params
 	private List<String> list1;
@@ -47,6 +61,7 @@ public class GeneCodis {
 	private int RFactor; //my list
 	private int rFactor;//referenced list
 	private String binPath;
+	private Logger logger;
 	// test
 	
 	// results	
@@ -60,11 +75,26 @@ public class GeneCodis {
 	private correctionFactor correction;
 	private testFactor test;
 	
+	// summary
+	  // list 1
+	private int list1AnnotatedCounter;
+	private double list1MeanAnnotationsPerId;
+	private int list1SizeBeforeDuplicates;
+	private int list1SizeAfterDuplicates;
+	  // list 2
+	private int list2AnnotatedCounter;
+	private double list2MeanAnnotationsPerId;
+	private int list2SizeBeforeDuplicates;
+	private int list2SizeAfterDuplicates;
 	
+	//sig terms
+	
+	private int significantTerms = -1;
 
 //two list
 	
-	public GeneCodis(String binPath,String outdir,String name, List<String> list1, List<String> list2, FunctionalFilter filter, DBConnector dbConnector,int duplicatesMode, int support,int supportRandom, correctionFactor correction, testFactor test, analysisFactor analysis) {		
+	public GeneCodis(String binPath,String outdir,String name, List<String> list1, List<String> list2, FunctionalFilter filter, DBConnector dbConnector,int duplicatesMode, int support,int supportRandom, correctionFactor correction, testFactor test, analysisFactor analysis) {
+	
 		this.filter = filter;
 		this.list1 = list1;
 		this.list2 = list2;
@@ -83,6 +113,30 @@ public class GeneCodis {
 		this.setrFactor(list2.size());
 	}
 
+	
+	
+	// Your annotations two list constructor
+	public GeneCodis(String binPath, String outdir, String name,List<String> list1, List<String> list2,	FeatureList<AnnotationItem> yourAnnotations,DBConnector dbConnector, int duplicatesMode, int support,int supportRandom, correctionFactor correction, testFactor test,analysisFactor analysis) {
+		this.list1 = list1;
+		this.list2 = list2;
+		//this.filter = filter;
+		this.dbConnector = dbConnector;
+		this.duplicatesMode = duplicatesMode;
+		this.isYourAnnotations = true;
+		this.binPath = binPath;
+		this.outdir= outdir;
+		this.name=name;
+		this.support= support;
+		this.supportRandom = supportRandom;
+		this.correction = correction;
+		this.test=test;
+		this.analysis=analysis;
+		this.setRFactor(list1.size());
+		this.setrFactor(list2.size());
+		System.err.println("list2---------------"+list2.size());
+		
+	}
+	
 	//one list agains genome
 	public GeneCodis(String binPath,String outdir,String name, List<String> list1, FunctionalFilter filter, DBConnector dbConnector, int duplicatesMode, int support, int supportRandom, correctionFactor correction, testFactor test, analysisFactor analysis) {
 		this.list1 = list1;
@@ -104,41 +158,70 @@ public class GeneCodis {
 		System.err.println("list2---------------"+list2.size());
 	}
 	
-	// Your anntoations two list constructor
-	public GeneCodis(List<String> list1, FeatureList<AnnotationItem> annotations) {
-		this.list1 = list1;
-		this.list2 = InfraredUtils.getGenome(dbConnector);
-		this.annotations = annotations;
-		this.duplicatesMode = REMOVE_GENOME;
-		this.isYourAnnotations = true;
-	}
 	
 
+	public GeneCodis(String binPath, String outdir, String name,List<String> list1, FeatureList<AnnotationItem> yourAnnotations, DBConnector dbConnector, int duplicatesMode, int support,int supportRandom, correctionFactor correction, testFactor test,analysisFactor analysis) {
+		this.list1 = list1;
+		this.list2 = getAnnotationIds(yourAnnotations);
+		//this.filter = filter;
+		this.dbConnector = dbConnector;
+		this.duplicatesMode = duplicatesMode;
+		this.isYourAnnotations = true;
+		this.binPath = binPath;
+		this.outdir= outdir;
+		this.name=name;
+		this.support= support;
+		this.supportRandom = supportRandom;
+		this.correction = correction;
+		this.test=test;
+		this.analysis=analysis;
+		this.setRFactor(list1.size());
+		
+		System.err.println("list2---------------"+list2.size());
+	}
+	
+	private List<String> getAnnotationIds(FeatureList<AnnotationItem> annotations){
+		List<String> idList = new ArrayList<String>();
+		HashMap<String,Boolean> idHash = new HashMap<String,Boolean>();
+		for(AnnotationItem item: annotations){
+			if(!idHash.containsKey(item.getId())){
+				idList.add(item.getId());
+				idHash.put(item.getId(), true);
+			}			
+		}
+		return idList;
+	}
+
 	public void run() throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException {
+		if(logger==null) logger = new Logger("geneCodis");
+		logger.print("removing duplicates...");		
+		removeDuplicates();
+		logger.println("OK");
 		
-		//commander final list to be filled with genes and annot in compact mode
-		System.err.println("00");
-		List<String> allItems = new ArrayList<String>(list1.size()+list2.size());
-		
+
+		logger.print("preparing list union...");
 		List<String> all = new ArrayList<String>(list1.size()+list2.size());
 		all.addAll(this.list1);
 		all.addAll(this.list2);
-		// duplicates managing
-		removeDuplicates();
-		//fill my hash list idgenes elements
+		logger.println("OK");
+		
+		
 		Hashtable<String, Boolean> myHash  = new Hashtable<String, Boolean>();		
 		for (int i=0; i< list1.size(); i++){
 			myHash.put(list1.get(i), true);
 		}
 		
-		// fill annotation expanded
-		if(!isYourAnnotations) {
-			this.annotations = InfraredUtils.getAnnotations(this.dbConnector, all, this.filter);
-//			System.err.println("this.filter--------------"+this.filter.getMaxNumberGenes());
-//			System.err.println("all.size()--------------"+all.size());
-		}
-//		System.err.println("this.dbConnector.toString()-------------"+this.dbConnector.toString());
-//		System.err.println("this.annotations.size()---------------"+this.annotations.size());
+		
+		// annotation
+		logger.print("getting annotations from infrared");		
+		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);	
+		logger.println("OK");
+		
+		
+		logger.println("computeAnnotateds()");
+		computeAnnotateds();
+		logger.println("OK");
+		
 		//create annot hash
 		Map<String, List<String>> myHashAnnotation  = new LinkedHashMap<String, List<String>>();
 		
@@ -149,8 +232,10 @@ public class GeneCodis {
 			}
 			myHashAnnotation.get(annotations.get(i).getId()).add(annotations.get(i).getFunctionalTermId());
 		}
+		
+		List<String> itemsContent = new ArrayList<String>(list1.size()+list2.size());
 
-		//fill commander final list
+		logger.print("preparing file for genecodis call...");
 		String isRef;
 		Iterator<String> e = myHashAnnotation.keySet().iterator();
 			String key;
@@ -162,14 +247,15 @@ public class GeneCodis {
 			     if (myHash.get(key) != null){
 			    	 isRef = (String) key;
 			    	 }
-			     allItems.add(autoNum + "\t" + ListUtils.toString(myHashAnnotation.get(key), ",") + "\t\t" + isRef);
+			     itemsContent.add(autoNum + "\t" + ListUtils.toString(myHashAnnotation.get(key), ",") + "\t\t" + isRef);
 			     autoNum ++;
 			  }
-		setResults(allItems);
-//		System.err.println("allItems.size()---------"+allItems.size());
+		setResults(itemsContent);
 		
+		logger.println("------------doSingleProcess");
 		doSingleProcess(this.binPath ,this.outdir+ "/"+name+"_WellFormedInput", outdir + "/"+ name+ ".txt");
 		
+		logger.println("-------------OK");
 	}
 	
 	public void doSingleProcess(String binPath, String inputAbsolutPath, String outputAbsolutPath){		
@@ -217,9 +303,11 @@ public class GeneCodis {
 		sp.runAsync();
 		sp.waitFor();
 		
+		//adding tag in header
 		try {
 			String content = IOUtils.toString(outputAbsolutPath);
 			IOUtils.write(outputAbsolutPath, "#" + content);
+			setSignificantTerms(IOUtils.countLines(outputAbsolutPath)-1);
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -238,7 +326,14 @@ public class GeneCodis {
 	}
 	
 	public void removeDuplicates(){
+		// before
+		list1SizeBeforeDuplicates = list1.size();
+		list2SizeBeforeDuplicates = list2.size();
+		
 		// each list
+		
+		System.err.println("--------------duplicatesMode---------------"+duplicatesMode);
+		
 		if(duplicatesMode!=REMOVE_NEVER){
 			list1 = ListUtils.unique(list1);
 			list2 = ListUtils.unique(list2);
@@ -255,7 +350,7 @@ public class GeneCodis {
 		if(duplicatesMode==REMOVE_GENOME){
 			list1 = ListUtils.unique(list1);
 			List<String> ensemblList1 = InfraredUtils.toEnsemblId(dbConnector, list1);
-			for (String id:ensemblList1) {				
+			for (String id:ensemblList1) {
 				if(list2.contains(id)){
 					list2.remove(id);
 				}
@@ -272,8 +367,70 @@ public class GeneCodis {
 				}	
 			}
 		}
+		
+		// after
+		list1SizeAfterDuplicates = list1.size();
+		list2SizeAfterDuplicates = list2.size();
 	}
 	
+	
+	private void computeAnnotateds(){
+		// list 1
+		HashMap<String,Integer> list1Annotations = new HashMap<String, Integer>();		
+		for(String id: list1){
+			list1Annotations.put(id, 0);			
+		}
+		// list 1
+		HashMap<String,Integer> list2Annotations = new HashMap<String, Integer>();		
+		for(String id: list2){
+			list2Annotations.put(id, 0);
+		}
+		// run annotations
+		int count;
+		for(AnnotationItem annot: annotations){
+			String id = annot.getId();			
+			if(list1Annotations.containsKey(id)){				
+				count = list1Annotations.get(id);
+				//System.err.print("vale " + count);
+				count++;
+				list1Annotations.put(id,count);
+				//System.err.println(" y lo paso a " + count + " " + list1Annotations.get(id));
+			}
+			if(list2Annotations.containsKey(id)){
+				count = list2Annotations.get(id);
+				count++;
+				list2Annotations.put(id,count);
+			}
+		}
+		// counts
+		  // list 1
+		Iterator<String> it1 = list1Annotations.keySet().iterator();
+		list1AnnotatedCounter = 0;
+		int list1Total = 0;
+		String id;
+		while(it1.hasNext()){
+			id = it1.next();
+			count = list1Annotations.get(id);			
+			if(count>0) {
+				list1AnnotatedCounter++;
+			}
+			list1Total++;
+		}
+		list1MeanAnnotationsPerId = (double)list1Total/(double)list1SizeAfterDuplicates;
+		  // list 2
+		Iterator<String> it2 = list2Annotations.keySet().iterator();
+		list2AnnotatedCounter = 0;
+		int list2Total = 0;
+		while(it2.hasNext()){
+			id = it2.next();
+			count = list2Annotations.get(id);			
+			if(count>0) {
+				list2AnnotatedCounter++;
+			}
+			list2Total++;
+		}
+		list2MeanAnnotationsPerId = (double)list2Total/(double)list2SizeAfterDuplicates;
+	}
 	
 	/**
 	 * @return the annotations
@@ -349,5 +506,129 @@ public class GeneCodis {
 	public int getrFactor() {
 		return rFactor;
 	}
-	
+
+	/**
+	 * @return the list1SizeBeforeDuplicates
+	 */
+	public int getList1SizeBeforeDuplicates() {
+		return list1SizeBeforeDuplicates;
+	}
+
+	/**
+	 * @param list1SizeBeforeDuplicates the list1SizeBeforeDuplicates to set
+	 */
+	public void setList1SizeBeforeDuplicates(int list1SizeBeforeDuplicates) {
+		this.list1SizeBeforeDuplicates = list1SizeBeforeDuplicates;
+	}
+
+	/**
+	 * @return the list1SizeAfterDuplicates
+	 */
+	public int getList1SizeAfterDuplicates() {
+		return list1SizeAfterDuplicates;
+	}
+
+	/**
+	 * @param list1SizeAfterDuplicates the list1SizeAfterDuplicates to set
+	 */
+	public void setList1SizeAfterDuplicates(int list1SizeAfterDuplicates) {
+		this.list1SizeAfterDuplicates = list1SizeAfterDuplicates;
+	}
+
+	/**
+	 * @return the list2SizeBeforeDuplicates
+	 */
+	public int getList2SizeBeforeDuplicates() {
+		return list2SizeBeforeDuplicates;
+	}
+
+	/**
+	 * @param list2SizeBeforeDuplicates the list2SizeBeforeDuplicates to set
+	 */
+	public void setList2SizeBeforeDuplicates(int list2SizeBeforeDuplicates) {
+		this.list2SizeBeforeDuplicates = list2SizeBeforeDuplicates;
+	}
+
+	/**
+	 * @return the list2SizeAfterDuplicates
+	 */
+	public int getList2SizeAfterDuplicates() {
+		return list2SizeAfterDuplicates;
+	}
+
+	/**
+	 * @param list2SizeAfterDuplicates the list2SizeAfterDuplicates to set
+	 */
+	public void setList2SizeAfterDuplicates(int list2SizeAfterDuplicates) {
+		this.list2SizeAfterDuplicates = list2SizeAfterDuplicates;
+	}
+
+	/**
+	 * @return the list1AnnotatedCounter
+	 */
+	public int getList1AnnotatedCounter() {
+		return list1AnnotatedCounter;
+	}
+
+	/**
+	 * @param list1AnnotatedCounter the list1AnnotatedCounter to set
+	 */
+	public void setList1AnnotatedCounter(int list1AnnotatedCounter) {
+		this.list1AnnotatedCounter = list1AnnotatedCounter;
+	}
+
+
+	/**
+	 * @return the list2AnnotatedCounter
+	 */
+	public int getList2AnnotatedCounter() {
+		return list2AnnotatedCounter;
+	}
+
+	/**
+	 * @param list2AnnotatedCounter the list2AnnotatedCounter to set
+	 */
+	public void setList2AnnotatedCounter(int list2AnnotatedCounter) {
+		this.list2AnnotatedCounter = list2AnnotatedCounter;
+	}
+
+	/**
+	 * @return the list1MeanAnnotationsPerId
+	 */
+	public double getList1MeanAnnotationsPerId() {
+		return list1MeanAnnotationsPerId;
+	}
+
+	/**
+	 * @param list1MeanAnnotationsPerId the list1MeanAnnotationsPerId to set
+	 */
+	public void setList1MeanAnnotationsPerId(double list1MeanAnnotationsPerId) {
+		this.list1MeanAnnotationsPerId = list1MeanAnnotationsPerId;
+	}
+
+	/**
+	 * @return the list2MeanAnnotationsPerId
+	 */
+	public double getList2MeanAnnotationsPerId() {
+		return list2MeanAnnotationsPerId;
+	}
+
+	/**
+	 * @param list2MeanAnnotationsPerId the list2MeanAnnotationsPerId to set
+	 */
+	public void setList2MeanAnnotationsPerId(double list2MeanAnnotationsPerId) {
+		this.list2MeanAnnotationsPerId = list2MeanAnnotationsPerId;
+	}
+
+
+
+	public void setSignificantTerms(int significantTerms) {
+		this.significantTerms = significantTerms;
+	}
+
+
+
+	public int getSignificantTerms() {
+		return significantTerms;
+	}	
 }

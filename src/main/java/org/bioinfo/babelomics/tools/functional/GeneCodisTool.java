@@ -3,6 +3,8 @@ package org.bioinfo.babelomics.tools.functional;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -10,16 +12,22 @@ import java.util.List;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.genetics.Chromosome;
+import org.bioinfo.babelomics.methods.functional.FatiGO;
 import org.bioinfo.babelomics.methods.functional.GeneCodis;
+import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.babelomics.methods.functional.GeneCodis.analysisFactor;
 import org.bioinfo.babelomics.methods.functional.GeneCodis.correctionFactor;
 import org.bioinfo.babelomics.methods.functional.GeneCodis.testFactor;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
+import org.bioinfo.infrared.common.feature.FeatureList;
+import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
+import org.bioinfo.math.stats.inference.FisherExactTest;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -35,9 +43,11 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 	
 	// other capabilities
 	protected int duplicatesMode;
+	private StringBuilder duplicatesReport;
+	private StringBuilder annotationReport;
+	private String list2label;
 	
-	
-	private List<Chromosome> chromosomes;
+	//private List<Chromosome> chromosomes;
 	
 	private int support;   //Minimum number of genes required that have to be implicated in a rule to take it into account (default: 3).
 	private int supportRandom;//i . i support for random:  Min support taked into account when the algorithm is correcting p-values (usually the same than Support).
@@ -50,7 +60,6 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 	public void initOptions() {
 		// parent options
 		super.initOptions();
-		
 		
 		options.addOption(OptionFactory.createOption("datalist", "the ranked list"));
 		options.addOption(OptionFactory.createOption("support", "Minimum number of genes",true));
@@ -117,7 +126,7 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		}
 		
 		// extras
-		String duplicates = commandLine.getOptionValue("remove-duplicates", "never");
+		String duplicates = commandLine.getOptionValue("duplicates", "never");
 		if(duplicates.equalsIgnoreCase("each")) duplicatesMode = GeneCodis.REMOVE_EACH;
 		if(duplicates.equalsIgnoreCase("ref")) duplicatesMode = GeneCodis.REMOVE_REF;
 		if(duplicates.equalsIgnoreCase("all")) duplicatesMode = GeneCodis.REMOVE_ALL;		
@@ -138,8 +147,9 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 			// prepare params
 		
 			prepare();
+			
 			GeneCodis genecodis = null;
-			String list2label = "List 2 (after duplicates managing)";
+			list2label = "List 2";
 			
 			jobStatus.addStatusMessage("" + ("40"), "preparing Genecodis execution");
 			
@@ -149,44 +159,174 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 			
 			// list 2
 			List<String> idList2 = null;
-			
+			addInputParams();
 			if(filterList.size()==0 && !isYourAnnotations){
 				throw new ParseException("No biological database selected (eg. --go-bp)");
 			} else {
 				if(list2!=null)idList2 = list2.getDataFrame().getRowNames();
+				annotationReport = new StringBuilder();
+				annotationReport.append("#DB").append("\t").append("List1").append("\t").append(list2label).append("\n");
+				// run genecodis				
 				for(FunctionalFilter filter: filterList) {
-					doTest(idList1,idList2,filter,dbConnector);
-					}
+					genecodis = doTest(idList1,idList2,filter,dbConnector);
+				}				
+				if(isYourAnnotations){		
+					genecodis = doTest(idList1,idList2,yourAnnotations,dbConnector);
+				}
+				
+				logger.println("Starting saveDuplicatesReport(genecodis);...");
+				saveDuplicatesReport(genecodis);
+				logger.println("OK...");
+				saveAnnotationsReport();
 				
 				}
 			
 			}
 		catch (Exception e) {
 		}
-		
-		
 	}
 	
-	private void doTest(List<String> idList1, List<String> idList2, FunctionalFilter filter, DBConnector dbConnector) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, IOException{
+	
+	private GeneCodis doTest(List<String> idList1, List<String> idList2,	FeatureList<AnnotationItem> yourAnnotations, DBConnector dbConnector) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, IOException {
+		GeneCodis genecodis = null;
+		// db attributes
+		String name = "your_annotations";
+		String title = "Your annotations";
 		
+		//File inputFile = new File(outdir + "/"+name+"_WellFormedInput");
+		logger.println("Starting doing test your_annotations...");
+		
+		if(list2!=null) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, idList2, yourAnnotations, dbConnector, duplicatesMode, support, supportRandom,correction, test,analysis);
+		else if(isRestOfGenome()) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, yourAnnotations, dbConnector, duplicatesMode, support, supportRandom, correction, test,analysis);
+                                                 
+		runAndSave(genecodis, name, title);
+		
+		logger.println("addAnnotationReport...");
+		addAnnotationReport(genecodis,"Your annotations");
+		return genecodis;
+	}
+
+
+	private GeneCodis doTest(List<String> idList1, List<String> idList2, FunctionalFilter filter, DBConnector dbConnector) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, IOException{
+		GeneCodis genecodis = null;
 		// db attributes
 		String name = getDBName(filter);
 		String title = getDBTitle(filter);		
 		
 		//File inputFile = new File(outdir + "/"+name+"_WellFormedInput");
-		logger.println("Starting doing test...");
-		GeneCodis genecodis = null;
+		logger.println("Starting doing test 2 list and filter...");
+		
 		if(list2!=null) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, idList2, filter, dbConnector, duplicatesMode, support, supportRandom,correction, test,analysis);
 		else if(isRestOfGenome()) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, filter, dbConnector, duplicatesMode, support, supportRandom, correction, test,analysis);
-                                                 
 		
-		//run run...
-		genecodis.run();
-
-		//save results
-		saveGenecodisResults(genecodis, name, title);
+		runAndSave(genecodis, name, title);
+		
+		logger.println("addAnnotationReport...");
+		addAnnotationReport(genecodis,title);
+		
+		return genecodis;
 	}
 	
+	private void runAndSave(GeneCodis genecodis, String name, String title) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, IOException{
+		
+		logger.println("doing test...");
+		//run run...
+		genecodis.run();
+		logger.println("doing test OK...");
+		//save results
+		
+		logger.println("saveGenecodisResults...");
+		saveGenecodisResults(genecodis, name, title);
+		logger.println("OK...");
+	}
+	
+	private void addAnnotationReport(GeneCodis genecodis, String dbName){
+		logger.println("doing addAnnotationReport...");
+		DecimalFormat formatter = new DecimalFormat("#######.##");
+		double list1Percentage = ((double)(genecodis.getList1AnnotatedCounter())/(double)genecodis.getList1SizeBeforeDuplicates())*100.0;
+		double list2Percentage = ((double)(genecodis.getList2AnnotatedCounter())/(double)genecodis.getList2SizeBeforeDuplicates())*100.0;
+		String list1Message = genecodis.getList1AnnotatedCounter() + " of " + genecodis.getList1SizeAfterDuplicates() + " (" + formatter.format(list1Percentage) + "%, an average of " + formatter.format(genecodis.getList1MeanAnnotationsPerId()) + " per id)";
+		String list2Message = genecodis.getList2AnnotatedCounter() + " of " + genecodis.getList2SizeAfterDuplicates() + " (" + formatter.format(list2Percentage) +"%, an average of " + formatter.format(genecodis.getList2MeanAnnotationsPerId()) + " per id)";
+		annotationReport.append(dbName).append("\t").append(list1Message).append("\t").append(list2Message).append("\n");
+		logger.println("ok...");
+	}
+	
+	private void saveAnnotationsReport() throws IOException{
+		IOUtils.write(outdir + "/annotations_per_db.txt", annotationReport.toString());
+		result.getOutputItems().add(1,new Item("annotations_per_db","annotations_per_db.txt","Id annotations per DB",Item.TYPE.FILE,Arrays.asList("TABLE","SUMMARY_TABLE"),new HashMap<String,String>(),"Summary"));
+	}
+	
+	private void addInputParams(){
+		// species
+		logger.println("addInputParams for species........" + species);
+		addInputParam("species", "Species", species);
+		logger.println("ok");
+		// duplicates
+		
+		HashMap<Integer,String> duplicates = new HashMap<Integer, String>();
+		
+		duplicates.put(FatiGO.REMOVE_NEVER, "Never remove");
+		duplicates.put(FatiGO.REMOVE_EACH, "Remove separately on each list");
+		duplicates.put(FatiGO.REMOVE_REF, "Remove list 1 ids from list 2 (complementary list)");
+		duplicates.put(FatiGO.REMOVE_GENOME, "Remove list 1 ids from genome");
+		duplicates.put(FatiGO.REMOVE_ALL, "Remove all duplicates (owned and shared duplicates)");
+		logger.println("addInputParams duplicates........" + duplicates.get(duplicatesMode));
+		addInputParam("duplicates", "Duplicates management", duplicates.get(duplicatesMode));
+		// others params laterality
+		logger.println("addInputParams support........" + String.valueOf(support));
+		addInputParam("support", "Minimum number of genes", String.valueOf(support));
+		logger.println("addInputParams supportRandom........" + String.valueOf(supportRandom));
+		addInputParam("supportRandom", "Minimum number of genes for correcting p-values", String.valueOf(supportRandom));
+		logger.println("addInputParams analysis........" + analysis.toString());
+		addInputParam("analysis", "Analysis", analysis.toString());
+		logger.println("addInputParams test........" + test.toString());
+		addInputParam("test", "Statistical test", test.toString());
+		logger.println("addInputParams correction........" + correction.toString());
+		addInputParam("correction", "Correction", correction.toString());
+	}	
+	private void addInputParam(String id, String label, String value){
+		result.addOutputItem(new Item(id,value,label,Item.TYPE.MESSAGE,Arrays.asList("INPUT_PARAM"),new HashMap<String,String>(),"Input params"));
+	}
+	
+	private void saveDuplicatesReport(GeneCodis genecodis) throws IOException{
+		logger.println("saveDuplicatesReport1........" );
+		DecimalFormat formatter = new DecimalFormat("##.##");
+		logger.println("ok........" );
+		// list 1
+		
+		logger.println("genecodis.getList1SizeBeforeDuplicates()........" +genecodis.getList1SizeBeforeDuplicates());
+		
+		logger.println("genecodis.getList1SizeAfterDuplicates()........" +genecodis.getList1SizeAfterDuplicates());
+		
+		int list1Duplicates = genecodis.getList1SizeBeforeDuplicates()-genecodis.getList1SizeAfterDuplicates();
+		logger.println("saveDuplicatesReport2........" );
+		double list1DuplicatesPercentage = (double)(list1Duplicates)/(double)genecodis.getList1SizeBeforeDuplicates();
+		logger.println("saveDuplicatesReport3........" );
+		String list1DuplicatesMessage = list1Duplicates + " of " + genecodis.getList1SizeBeforeDuplicates() + " (" + formatter.format(list1DuplicatesPercentage) + "%)";
+		logger.println("saveDuplicatesReport4......." );
+		// list 2
+		logger.println("saveDuplicatesReport5........" );
+		int list2Duplicates = genecodis.getList2SizeBeforeDuplicates()-genecodis.getList2SizeAfterDuplicates();
+		logger.println("saveDuplicatesReport6........" );
+		double list2DuplicatesPercentage = (double)(list2Duplicates)/(double)genecodis.getList2SizeBeforeDuplicates();
+		logger.println("saveDuplicatesReport7........" );
+		String list2DuplicatesMessage = list2Duplicates + " of " + genecodis.getList2SizeBeforeDuplicates() + " (" + formatter.format(list2DuplicatesPercentage) + "%)";
+		logger.println("saveDuplicatesReport8........" );
+		// report
+		logger.println("saveDuplicatesReport9........" );
+		duplicatesReport = new StringBuilder();
+		logger.println("saveDuplicatesReport10........" );
+		duplicatesReport.append("#Detail").append("\t").append("List 1").append("\t").append(list2label).append("\n");
+		logger.println("saveDuplicatesReport11........" );
+		duplicatesReport.append("Number of duplicates").append("\t").append(list1DuplicatesMessage).append("\t").append(list2DuplicatesMessage).append("\n");
+		logger.println("saveDuplicatesReport12........" );
+		duplicatesReport.append("Number of finally used ids").append("\t").append(genecodis.getList1SizeAfterDuplicates()).append("\t").append(genecodis.getList2SizeAfterDuplicates()).append("\n");
+		logger.println("saveDuplicatesReport13........" );
+		IOUtils.write(outdir + "/duplicates.txt", duplicatesReport.toString());
+		logger.println("saveDuplicatesReport14........" );
+		result.addOutputItem(new Item("duplicates","duplicates.txt","Duplicates management",Item.TYPE.FILE,Arrays.asList("TABLE","SUMMARY_TABLE"),new HashMap<String,String>(),"Summary"));
+		logger.println("saveDuplicatesReport15........" );
+	}
 	
 	private void saveGenecodisResults(GeneCodis genecodis,String name,String title) throws IOException{
 		String fileName = name + ".txt";
@@ -194,8 +334,22 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		updateJobStatus("80", "saving results");
 		
 		//IOUtils.write(outdir + "/" +fileName, genecodis.getResults());
-		result.addOutputItem(new Item("genecodis_file", fileName, "Genecodis for "+name, TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE"), new HashMap<String, String>(2), "Significant terms"));
+		
+		if (genecodis.getSignificantTerms()>0){
+		result.addOutputItem(new Item(name+"_genecodis_file", fileName, "Genecodis for "+name, TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE"), new HashMap<String, String>(2), "Significant terms"));
+		}else if (genecodis.getSignificantTerms()==0){
+			result.addOutputItem(new Item(name+"_genecodis_file","no significant terms found","Genecodis for "+name,Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant terms"));
 			
+			
+		}
+		
+		else if (genecodis.getSignificantTerms()==-1){
+			result.addOutputItem(new Item(name+"_genecodis_file","Error running tool","Genecodis for "+name,Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant terms"));
+			
+			
+		}
+	
+		
 		// save annotation
 		IOUtils.write(outdir + "/" + annotFileName, genecodis.getAnnotations().toString());
 		result.addOutputItem(new Item("annot_" + name,annotFileName,"Annotations for " + title,Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
