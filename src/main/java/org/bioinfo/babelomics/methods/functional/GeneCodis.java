@@ -89,7 +89,7 @@ public class GeneCodis {
 	
 	//sig terms
 	
-	private int significantTerms = 0;
+	private int significantTerms = -1;
 
 //two list
 	

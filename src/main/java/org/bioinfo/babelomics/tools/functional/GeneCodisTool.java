@@ -337,8 +337,14 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		
 		if (genecodis.getSignificantTerms()>0){
 		result.addOutputItem(new Item(name+"_genecodis_file", fileName, "Genecodis for "+name, TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE"), new HashMap<String, String>(2), "Significant terms"));
-		}else{
+		}else if (genecodis.getSignificantTerms()==0){
 			result.addOutputItem(new Item(name+"_genecodis_file","no significant terms found","Genecodis for "+name,Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant terms"));
+			
+			
+		}
+		
+		else if (genecodis.getSignificantTerms()==-1){
+			result.addOutputItem(new Item(name+"_genecodis_file","Error running tool","Genecodis for "+name,Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant terms"));
 			
 			
 		}
