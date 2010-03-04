@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.FileUtils;
+import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.io.file.compress.CompressFactory;
@@ -119,10 +120,16 @@ public class AgilentExpression1CNormalization extends BabelomicsTool {
 				new File(outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName()).exists() ) {
 
 				file = new File(outdir + "/normalized_dataset.txt"); 			
-				AgilentExpressionUtils.createDataset(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName(), outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName(), 2, file.getAbsolutePath());
+				AgilentExpressionUtils.createDataset(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName(), outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName(), 1, file.getAbsolutePath());
 
-				if ( file.exists() ) {				
-					result.addOutputItem(new Item("normalized", file.getName(), "Normalized dataset ", TYPE.FILE, StringUtils.toList("data,datamatrix,expression", ","), new HashMap<String, String>(2), "One-color Agilent normalization files"));
+				if ( file.exists() ) {
+					String tags = "data,datamatrix,expression";
+					File redirectionFile = new File(outdir + "/normalized.redirection");
+					NormalizationUtils.createPreprocessingRedirectionFile(redirectionFile, file);
+					if ( redirectionFile.exists() ) {
+						tags = tags + ",redirection(" + redirectionFile.getName() + ":Send to Preprocessing tool...)";
+					}
+					result.addOutputItem(new Item("normalized", file.getName(), "Normalized dataset ", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "One-color Agilent normalization files"));						
 				}
 
 				file = new File(outdir + "/normalized_dataset.featdata"); 			

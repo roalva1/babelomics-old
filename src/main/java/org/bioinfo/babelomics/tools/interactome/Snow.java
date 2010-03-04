@@ -99,21 +99,21 @@ public class Snow extends BabelomicsTool {
 			System.err.println("BET: " + config.getProperty("INTERACTOME.BETWEENNESS.PVALUE"));
 			// interactome images
 			//
-			title = (config == null) ? "" : "p-value = " + config.getProperty("INTERACTOME.BETWEENNESS.PVALUE") + ", side = " + config.getProperty("INTERACTOME.BETWEENNESS.PVALUE");  
+			title = (config == null) ? "" : "p-value = " + config.getProperty("INTERACTOME.BETWEENNESS.PVALUE") + ", side = " + config.getProperty("INTERACTOME.BETWEENNESS.SIDE");  
 			addResultImage("interactome_betweenness_image", "Interactome betweenness : " + title, "Interactome images", "interactome_betweenness.png", baseDir);
-			title = (config == null) ? "" : "p-value = " + config.getProperty("INTERACTOME.COEFFICIENT.PVALUE") + ", side = " + config.getProperty("INTERACTOME.COEFFICIENT.PVALUE");  
-			addResultImage("interactome_coefficient_image", "Interactome coefficient image (png format)", "Interactome images", "interactome_coefficient.png", baseDir);
-			title = (config == null) ? "" : "p-value = " + config.getProperty("INTERACTOME.CONNECTIONS.PVALUE") + ", side = " + config.getProperty("INTERACTOME.CONNECTIONS.PVALUE");  
-			addResultImage("interactome_connections_image", "Interactome connections image (png format)", "Interactome images", "interactome_connections.png", baseDir);
+			title = (config == null) ? "" : "p-value = " + config.getProperty("INTERACTOME.COEFFICIENT.PVALUE") + ", side = " + config.getProperty("INTERACTOME.COEFFICIENT.SIDE");  
+			addResultImage("interactome_coefficient_image", "Interactome coefficient : " + title, "Interactome images", "interactome_coefficient.png", baseDir);
+			title = (config == null) ? "" : "p-value = " + config.getProperty("INTERACTOME.CONNECTIONS.PVALUE") + ", side = " + config.getProperty("INTERACTOME.CONNECTIONS.SIDE");  
+			addResultImage("interactome_connections_image", "Interactome connections : " + title, "Interactome images", "interactome_connections.png", baseDir);
 
 			// network images
 			//
-			title = (config == null) ? "" : "p-value = " + config.getProperty("NETWORK.BETWEENNESS.PVALUE") + ", side = " + config.getProperty("NETWORK.BETWEENNESS.PVALUE");  
-			addResultImage("network_betweenness_image", "Network betweenness image (png format)", "Network images", "network_betweenness.png", baseDir);
-			title = (config == null) ? "" : "p-value = " + config.getProperty("NETWORK.COEFFICIENT.PVALUE") + ", side = " + config.getProperty("NETWORK.COEFFICIENT.PVALUE");  
-			addResultImage("network_coefficient_image", "Network coefficient image (png format)", "Network images", "network_coefficient.png", baseDir);
-			title = (config == null) ? "" : "p-value = " + config.getProperty("NETWORK.CONNECTIONS.PVALUE") + ", side = " + config.getProperty("NETWORK.CONNECTIONS.PVALUE");  
-			addResultImage("network_connections_image", "Network connections image (png format)", "Network images", "network_connections.png", baseDir);
+			title = (config == null) ? "" : "p-value = " + config.getProperty("NETWORK.BETWEENNESS.PVALUE") + ", side = " + config.getProperty("NETWORK.BETWEENNESS.SIDE");  
+			addResultImage("network_betweenness_image", "Network betweenness : " + title, "Network images", "network_betweenness.png", baseDir);
+			title = (config == null) ? "" : "p-value = " + config.getProperty("NETWORK.COEFFICIENT.PVALUE") + ", side = " + config.getProperty("NETWORK.COEFFICIENT.SIDE");  
+			addResultImage("network_coefficient_image", "Network coefficient : " + title, "Network images", "network_coefficient.png", baseDir);
+			title = (config == null) ? "" : "p-value = " + config.getProperty("NETWORK.CONNECTIONS.PVALUE") + ", side = " + config.getProperty("NETWORK.CONNECTIONS.SIDE");  
+			addResultImage("network_connections_image", "Network connections : " + title, "Network images", "network_connections.png", baseDir);
 
 			// list #1 files
 			//

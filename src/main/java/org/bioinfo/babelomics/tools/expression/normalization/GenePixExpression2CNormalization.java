@@ -126,7 +126,13 @@ public class GenePixExpression2CNormalization extends BabelomicsTool {
 				AgilentExpressionUtils.createDataset(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName(), outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName(), 5, file.getAbsolutePath());
 				
 				if ( file.exists() ) {				
-					result.addOutputItem(new Item("normalized", file.getName(), "Normalized dataset ", TYPE.FILE, StringUtils.toList("data,datamatrix,expression", ","), new HashMap<String, String>(2), "Two-colors GenePix normalization files"));
+					String tags = "data,datamatrix,expression";
+					File redirectionFile = new File(outdir + "/normalized.redirection");
+					NormalizationUtils.createPreprocessingRedirectionFile(redirectionFile, file);
+					if ( redirectionFile.exists() ) {
+						tags = tags + ",redirection(" + redirectionFile.getName() + ":Send to Preprocessing tool...)";
+					}
+					result.addOutputItem(new Item("normalized", file.getName(), "Normalized dataset ", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Two-colors GenePix normalization files"));
 				}
 				
 				file = new File(outdir + "/normalized_dataset.featdata"); 			
