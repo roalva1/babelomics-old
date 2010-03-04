@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
-import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,13 +16,11 @@ import org.bioinfo.babelomics.methods.functional.FatiGO;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
-import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
-import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.stats.inference.FisherExactTest;
@@ -91,8 +88,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 //		}
 		
 		// extras
-		String duplicates = commandLine.getOptionValue("duplicates", "never");
-		System.err.println("los duplicates son: " + duplicates);
+		String duplicates = commandLine.getOptionValue("duplicates", "never");		
 		if(duplicates.equalsIgnoreCase("each")) duplicatesMode = FatiGO.REMOVE_EACH;
 		if(duplicates.equalsIgnoreCase("ref")) duplicatesMode = FatiGO.REMOVE_REF;
 		if(duplicates.equalsIgnoreCase("all")) duplicatesMode = FatiGO.REMOVE_ALL;
@@ -252,10 +248,11 @@ public class FatiGOTool extends FunctionalProfilingTool{
 	private FatiGO doFatigo(List<String> idList1, List<String> idList2,FunctionalFilter filter,DBConnector dbConnector, List<String> significant) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException{
 		
 		// db attributes
-		String name = getDBName(filter);
-		String title = getDBTitle(filter);					
+		FunctionalDbDescriptor filterInfo= new FunctionalDbDescriptor(filter);
+//		String name = getDBName(filter);
+//		String title = getDBTitle(filter);
 				
-		logger.println(title + "...");
+		logger.println(filterInfo.getTitle() + "...");
 
 		// init test
 		FatiGO fatigo = null;
@@ -268,7 +265,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		fatigo.run();
 		
 		// save results
-		saveFatigoResults(fatigo,name,title);
+		saveFatigoResults(fatigo,filterInfo);
 		
 		// acum significant values
 		significant.addAll(testResultToStringList(fatigo.getSignificant(DEFAULT_PVALUE_THRESHOLD),false));
@@ -283,10 +280,11 @@ public class FatiGOTool extends FunctionalProfilingTool{
 	private FatiGO doFatigoYourAnnotations(List<String> idList1, List<String> idList2,FeatureList<AnnotationItem> yourAnnotations, List<String> significant) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException{
 		
 		// db attributes
-		String name = "your_annotations";
-		String title = "Your annotations";					
+		FunctionalDbDescriptor filterInfo = new FunctionalDbDescriptor("your_annotation","Your annotations", "your_annotations","Your annotations");
+//		String name = "your_annotations";
+//		String title = "Your annotations";					
 				
-		logger.println(title + "...");
+		logger.println(filterInfo.getTitle() + "...");
 
 		// init test
 		FatiGO fatigo = null;
@@ -298,7 +296,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		fatigo.run();
 		
 		// save results
-		saveFatigoResults(fatigo,name,title);
+		saveFatigoResults(fatigo,filterInfo);
 	
 		// acum significant values
 		significant.addAll(testResultToStringList(fatigo.getSignificant(DEFAULT_PVALUE_THRESHOLD),false));
@@ -309,19 +307,20 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		return fatigo;
 	}
 		
-	private void saveFatigoResults(FatiGO fatigo,String name,String title) throws IOException{
+	private void saveFatigoResults(FatiGO fatigo, FunctionalDbDescriptor filterInfo) throws IOException{
 		
-		String fileName = name + ".txt";
-		String annotFileName = name + ".annot";
+		String fileName = filterInfo.getName() + ".txt";
+		String annotFileName = filterInfo.getName() + ".annot";
 		
 		// save statistic results					
 		List<String> testResultOutput = testResultToStringList(fatigo.getResults());
 		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
-		result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",name.toUpperCase() + "_TERM"),new HashMap<String,String>(),"Database tests"));
+		result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Database tests"));
+		result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Database tests"));
 						
 		// save annotation
 		IOUtils.write(outdir + "/" + annotFileName, fatigo.getAnnotations().toString());
-		result.addOutputItem(new Item("annot_" + name,annotFileName,"Annotations for " + title,Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
+		result.addOutputItem(new Item("annot_" + filterInfo.getName(),annotFileName,"Annotations for " + filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
 				
 	}
 	

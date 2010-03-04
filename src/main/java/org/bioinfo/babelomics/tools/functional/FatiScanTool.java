@@ -14,7 +14,6 @@ import org.bioinfo.babelomics.methods.functional.FatiScan;
 import org.bioinfo.babelomics.methods.functional.GeneSetAnalysisTestResult;
 import org.bioinfo.babelomics.methods.functional.LogisticScan;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTest;
-import org.bioinfo.babelomics.methods.functional.graph.FatiScanGraph;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
@@ -22,7 +21,6 @@ import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
-import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.tool.OptionFactory;
@@ -159,11 +157,11 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 					result.getOutputItems().add(0, new Item("significant","significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE"),new HashMap<String,String>(),"Significant Results"));
 					IOUtils.write(outdir + "/significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significantOutput,"\n"));
 					
-					// FatiScan graph
-					if(method==Method.FatiScan){
-						FatiScanGraph.fatiScanGraph(significants,"Significant terms graph for all databases",outdir + "/significant_graph.png");
-						result.addOutputItem(new Item("graph_alldbs","significant_graph.png","Significant term graph",Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Significant results (all databases together)"));
-					}
+//					// FatiScan graph
+//					if(method==Method.FatiScan){
+//						FatiScanGraph.fatiScanGraph(significants,"Significant terms graph for all databases",outdir + "/significant_graph.png");
+//						result.addOutputItem(new Item("graph_alldbs","significant_graph.png","Significant term graph",Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Significant results (all databases together)"));
+//					}
 					
 				} else {
 					result.addOutputItem(new Item("graph_alldbs","No significant terms found","Significant term graph",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant results (all databases together)"));
@@ -269,21 +267,21 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		List<String> testResultOutput = FatiScanResultToStringList(fatiscan.getResults());
 		
 		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
-		result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE"),new HashMap<String,String>(),"Database tests"));
+		result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE",name.toUpperCase() + "_TERM"),new HashMap<String,String>(),"Database tests"));
 						
 		// save annotation
 		IOUtils.write(outdir + "/" + annotFileName, fatiscan.getAnnotations().toString());
 		result.addOutputItem(new Item("annot_" + name,annotFileName,"Annotations for " + title,Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
 		
 		// save graph
-		List<GeneSetAnalysisTestResult> significants = fatiscan.getSignificant();
-		if(significants!=null && significants.size()>0){
-			String graphFileName = name + "_graph.png"; 
-			FatiScanGraph.fatiScanGraph(significants,"Significant terms graph for " + title,outdir + "/" +  graphFileName);			
-			result.addOutputItem(new Item("graph_" + name,graphFileName,"Significant terms graph for " + title,Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Database tests"));
-		} else {
-			result.addOutputItem(new Item("graph_" + name,"No significant terms found","Significant terms graph for " + title,Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Database tests"));
-		}
+//		List<GeneSetAnalysisTestResult> significants = fatiscan.getSignificant();
+//		if(significants!=null && significants.size()>0){
+//			String graphFileName = name + "_graph.png"; 
+//			FatiScanGraph.fatiScanGraph(significants,"Significant terms graph for " + title,outdir + "/" +  graphFileName);			
+//			result.addOutputItem(new Item("graph_" + name,graphFileName,"Significant terms graph for " + title,Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Database tests"));
+//		} else {
+//			result.addOutputItem(new Item("graph_" + name,"No significant terms found","Significant terms graph for " + title,Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Database tests"));
+//		}
 		
 	}
 	

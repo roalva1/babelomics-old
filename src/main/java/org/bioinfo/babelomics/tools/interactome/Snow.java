@@ -96,7 +96,7 @@ public class Snow extends BabelomicsTool {
 
 			String title;
 			Config config = new Config(outdir + "/output.properties");
-			
+			System.err.println("BET: " + config.getProperty("INTERACTOME.BETWEENNESS.PVALUE"));
 			// interactome images
 			//
 			title = (config == null) ? "" : "p-value = " + config.getProperty("INTERACTOME.BETWEENNESS.PVALUE") + ", side = " + config.getProperty("INTERACTOME.BETWEENNESS.PVALUE");  
