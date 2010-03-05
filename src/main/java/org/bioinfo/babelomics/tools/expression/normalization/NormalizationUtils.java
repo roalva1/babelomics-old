@@ -13,16 +13,17 @@ public class NormalizationUtils {
 		List<String> redirectionInputs = new ArrayList<String>();
 		redirectionInputs.add("tool=preprocessing");
 		redirectionInputs.add("jobname=preprocessing");
-		redirectionInputs.add("job_description=redirected from job $JOB_NAME");
-		redirectionInputs.add("dataset=" + fileToRedirect.getName() + "(from job $JOB_NAME)::::$JOB_FOLDER/" + fileToRedirect.getName());
-		redirectionInputs.add("merge-replicates=mean");
-		redirectionInputs.add("impute-missing=mean");
+		redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
+		redirectionInputs.add("dataset_databox=" + fileToRedirect.getName() + " (from job $JOB_NAME)");
+		redirectionInputs.add("dataset=$JOB_FOLDER/" + fileToRedirect.getName());
+		redirectionInputs.add("dataset_wum_data=true");
+		redirectionInputs.add("merge_replicates=mean");
+		redirectionInputs.add("impute_missing=mean");
 		try {
 			IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 }
