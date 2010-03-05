@@ -16,6 +16,7 @@ import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.data.dataset.SampleVariable;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
@@ -306,16 +307,116 @@ public class Preprocessing extends BabelomicsTool {
 		try {
 			File file = new File(this.getOutdir() + "/preprocessed.txt");
 			dataset.save(file);
-			List<String> tags = StringUtils.toList("data,datamatrix,expression", ",");
-			result.addOutputItem(new Item("prepocessed_file", file.getName(), "Preprocessed file", TYPE.FILE, tags, new HashMap<String, String>(2), "Preprocessed data"));
 			
 			
+			if ( file.exists() ) {				
+				String tags = "DATA,DATAMATRIX,EXPRESSION";
+				
+				
+				File redirectionFile = new File(outdir + "/clustering.redirection");
+				createClusteringRedirectionFile(redirectionFile, file);
+				if ( redirectionFile.exists() ) {
+					tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Clustering tool...)";
+				}
+				
+				if (dataset.getVariables() != null && dataset.getVariables().size() > 0 ) {
+					redirectionFile = new File(outdir + "/classcomparison.redirection");
+					createClassComparisonRedirectionFile(redirectionFile, file);
+					if ( redirectionFile.exists() ) {
+						tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Class-comparison tool...)";
+					}
+					
+					redirectionFile = new File(outdir + "/correlation.redirection");
+					createCorrelationRedirectionFile(redirectionFile, file);
+					if ( redirectionFile.exists() ) {
+						tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Correlation tool...)";
+					}
+					
+					redirectionFile = new File(outdir + "/classprediction.redirection");
+					createClassPredictionRedirectionFile(redirectionFile, file);
+					if ( redirectionFile.exists() ) {
+						tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Class-prediction tool...)";
+					}
+				}
+				
+				result.addOutputItem(new Item("prepocessed_file", file.getName(), "Preprocessed file", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Preprocessed data"));
+			}
 		} catch (IOException e) {
 			abort("ioexception_savingresults_execute_preprocessing", "error saving output file", e.toString(), StringUtils.getStackTrace(e));
 		}		
 	}
 
 
+	private void createClusteringRedirectionFile(File redirectionFile, File fileToRedirect) {
+		List<String> redirectionInputs = new ArrayList<String>();
+		redirectionInputs.add("tool=clustering");
+		redirectionInputs.add("jobname=clustering");
+		redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
+		redirectionInputs.add("dataset_databox=" + fileToRedirect.getName() + " (from job $JOB_NAME)");
+		redirectionInputs.add("dataset=$JOB_FOLDER/" + fileToRedirect.getName());
+		redirectionInputs.add("dataset_wum_data=true");
+		redirectionInputs.add("method=upgma");
+		redirectionInputs.add("distance=euclidean");
+		try {
+			IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private void createClassComparisonRedirectionFile(File redirectionFile, File fileToRedirect) {
+		List<String> redirectionInputs = new ArrayList<String>();
+		redirectionInputs.add("tool=class-comparison");
+		redirectionInputs.add("jobname=class-comparison");
+		redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
+		redirectionInputs.add("dataset_databox=" + fileToRedirect.getName() + " (from job $JOB_NAME)");
+		redirectionInputs.add("dataset=$JOB_FOLDER/" + fileToRedirect.getName());
+		redirectionInputs.add("dataset_wum_data=true");
+		redirectionInputs.add("correction=fdr");
+		try {
+			IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private void createCorrelationRedirectionFile(File redirectionFile, File fileToRedirect) {
+		List<String> redirectionInputs = new ArrayList<String>();
+		redirectionInputs.add("tool=correlation");
+		redirectionInputs.add("jobname=correlation");
+		redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
+		redirectionInputs.add("dataset_databox=" + fileToRedirect.getName() + " (from job $JOB_NAME)");
+		redirectionInputs.add("dataset=$JOB_FOLDER/" + fileToRedirect.getName());
+		redirectionInputs.add("dataset_wum_data=true");
+		redirectionInputs.add("test=pearson");
+		redirectionInputs.add("correction=fdr");
+		try {
+			IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private void createClassPredictionRedirectionFile(File redirectionFile, File fileToRedirect) {
+		List<String> redirectionInputs = new ArrayList<String>();
+		redirectionInputs.add("tool=class-prediction");
+		redirectionInputs.add("jobname=class-prediction");
+		redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
+		redirectionInputs.add("dataset_databox=" + fileToRedirect.getName() + " (from job $JOB_NAME)");
+		redirectionInputs.add("dataset=$JOB_FOLDER/" + fileToRedirect.getName());
+		redirectionInputs.add("dataset_wum_data=true");
+		redirectionInputs.add("svm=svm");
+		try {
+			IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * 
 	 * @param dataset
