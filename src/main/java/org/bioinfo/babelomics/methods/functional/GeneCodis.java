@@ -414,7 +414,7 @@ public class GeneCodis {
 			if(count>0) {
 				list1AnnotatedCounter++;
 			}
-			list1Total++;
+			list1Total+=count;
 		}
 		list1MeanAnnotationsPerId = (double)list1Total/(double)list1SizeAfterDuplicates;
 		  // list 2
@@ -427,7 +427,7 @@ public class GeneCodis {
 			if(count>0) {
 				list2AnnotatedCounter++;
 			}
-			list2Total++;
+			list2Total+=count;
 		}
 		list2MeanAnnotationsPerId = (double)list2Total/(double)list2SizeAfterDuplicates;
 	}

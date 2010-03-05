@@ -194,8 +194,8 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		DecimalFormat formatter = new DecimalFormat("#######.##");
 		double list1Percentage = ((double)(fatigo.getList1AnnotatedCounter())/(double)fatigo.getList1SizeBeforeDuplicates())*100.0;
 		double list2Percentage = ((double)(fatigo.getList2AnnotatedCounter())/(double)fatigo.getList2SizeBeforeDuplicates())*100.0;
-		String list1Message = fatigo.getList1AnnotatedCounter() + " of " + fatigo.getList1SizeAfterDuplicates() + " (" + formatter.format(list1Percentage) + "%, " + formatter.format(fatigo.getList1MeanAnnotationsPerId()) + " per id)";
-		String list2Message = fatigo.getList2AnnotatedCounter() + " of " + fatigo.getList2SizeAfterDuplicates() + " (" + formatter.format(list2Percentage) +"%, " + formatter.format(fatigo.getList2MeanAnnotationsPerId()) + " per id)";
+		String list1Message = fatigo.getList1AnnotatedCounter() + " of " + fatigo.getList1SizeAfterDuplicates() + " (" + formatter.format(list1Percentage) + "%) " + formatter.format(fatigo.getList1MeanAnnotationsPerId()) + " annotations/id";
+		String list2Message = fatigo.getList2AnnotatedCounter() + " of " + fatigo.getList2SizeAfterDuplicates() + " (" + formatter.format(list2Percentage) +"%) " + formatter.format(fatigo.getList2MeanAnnotationsPerId()) + " annotations/id";
 		annotationReport.append(dbName).append("\t").append(list1Message).append("\t").append(list2Message).append("\n");
 	}
 	private void saveAnnotationsReport() throws IOException{

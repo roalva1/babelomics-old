@@ -245,8 +245,8 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		DecimalFormat formatter = new DecimalFormat("#######.##");
 		double list1Percentage = ((double)(genecodis.getList1AnnotatedCounter())/(double)genecodis.getList1SizeBeforeDuplicates())*100.0;
 		double list2Percentage = ((double)(genecodis.getList2AnnotatedCounter())/(double)genecodis.getList2SizeBeforeDuplicates())*100.0;
-		String list1Message = genecodis.getList1AnnotatedCounter() + " of " + genecodis.getList1SizeAfterDuplicates() + " (" + formatter.format(list1Percentage) + "%, an average of " + formatter.format(genecodis.getList1MeanAnnotationsPerId()) + " per id)";
-		String list2Message = genecodis.getList2AnnotatedCounter() + " of " + genecodis.getList2SizeAfterDuplicates() + " (" + formatter.format(list2Percentage) +"%, an average of " + formatter.format(genecodis.getList2MeanAnnotationsPerId()) + " per id)";
+		String list1Message = genecodis.getList1AnnotatedCounter() + " of " + genecodis.getList1SizeAfterDuplicates() + " (" + formatter.format(list1Percentage) + "%) " + formatter.format(genecodis.getList1MeanAnnotationsPerId()) + " annotations/id";
+		String list2Message = genecodis.getList2AnnotatedCounter() + " of " + genecodis.getList2SizeAfterDuplicates() + " (" + formatter.format(list2Percentage) +"%) " + formatter.format(genecodis.getList2MeanAnnotationsPerId()) + " annotations/id";
 		annotationReport.append(dbName).append("\t").append(list1Message).append("\t").append(list2Message).append("\n");
 		logger.println("ok...");
 	}
