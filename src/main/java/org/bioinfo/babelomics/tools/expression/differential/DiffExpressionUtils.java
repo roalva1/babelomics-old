@@ -195,22 +195,90 @@ public class DiffExpressionUtils {
 	public static void addOutputLists(DataFrame dataFrame, String test, String colName, Result result, String outDir) throws IOException, InvalidIndexException {	
 		// preparing ranked list
 		//
+		String tags;
+		File redirectionFile;
 		File rankedListFile = new File(outDir + "/" + test + "_ranked_list.txt");
 		DiffExpressionUtils.generateRankedList(dataFrame.getRowNames(), dataFrame.getColumn(colName), colName, rankedListFile);
 		if ( rankedListFile.exists() ) {
-			result.addOutputItem(new Item(test + "_ranked_list_file", rankedListFile.getName(), test.toUpperCase() + " ranked list", TYPE.FILE, StringUtils.toList("DATA,RANKED", ","), new HashMap<String, String>(2), "Output lists for profiling analysis"));
-		}
+			redirectionFile = new File(outDir + "/fatiscan.redirection");
+			createFatiScanRedirectionFile(redirectionFile, rankedListFile);
+			if ( redirectionFile.exists() ) {
+//				tags = "DATA,RANKED,REDIRECTION(" + redirectionFile.getName() + ":Send to FatiScan tool...)";
+//				result.addOutputItem(new Item(test + "_ranked_list_file", rankedListFile.getName(), "Send ranked list to FatiScan tool", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
+				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiScan tool...)";
+				result.addOutputItem(new Item(test + "_fatiscan", "", "Send ranked list to FatiScan tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
+			}
+		}				
 		
 		// preparing significant list (top and bottom)
 		//
 		File topListFile = new File(outDir + "/" + test + "_top_list.txt");
 		File bottomListFile = new File(outDir + "/" + test + "_bottom_list.txt");			
 		DiffExpressionUtils.generateSignificantLists(dataFrame.getRowNames(), dataFrame.getColumn("adj. p-value"), 0.005, topListFile, bottomListFile);
-		if ( topListFile.exists() ) {
-			result.addOutputItem(new Item(test + "_top_list_file", topListFile.getName(), test.toUpperCase() + " top list", TYPE.FILE, StringUtils.toList("DATA,IDLIST", ","), new HashMap<String, String>(2), "Output lists for profiling analysis"));
-		}
-		if ( bottomListFile.exists() ) {
-			result.addOutputItem(new Item(test + "_bottom_list_file", bottomListFile.getName(), test.toUpperCase() + " bottom list", TYPE.FILE, StringUtils.toList("DATA,IDLIST", ","), new HashMap<String, String>(2), "Output lists for profiling analysis"));
+		if ( topListFile.exists() || bottomListFile.exists() ) {
+			redirectionFile = new File(outDir + "/fatigo.redirection");
+			createFatiGORedirectionFile(redirectionFile, topListFile, bottomListFile);
+			if ( redirectionFile.exists() ) {
+				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
+				result.addOutputItem(new Item(test + "_fatigo", "", "Send significative results to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
+			}
 		}
 	}
+	
+	public static void createFatiScanRedirectionFile(File redirectionFile, File rankedListFile) {
+		List<String> redirectionInputs = new ArrayList<String>();
+		redirectionInputs.add("tool=fatiscan");
+		redirectionInputs.add("jobname=fatiscan");
+		redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
+		redirectionInputs.add("ranked_list_databox=" + rankedListFile.getName() + " (from job $JOB_NAME)");
+		redirectionInputs.add("ranked_list=$JOB_FOLDER/" + rankedListFile.getName());
+		redirectionInputs.add("ranked_list_wum_data=true");
+		redirectionInputs.add("method=fatiscan");
+		try {
+			IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	}
+	
+	public static void createFatiGORedirectionFile(File redirectionFile, File topListFile, File bottomListFile) {
+		
+		List<String> redirectionInputs = new ArrayList<String>();
+
+		if ( topListFile.exists() && bottomListFile.exists() ) {
+			redirectionInputs.add("comparison=list2list");
+			
+			redirectionInputs.add("list1_wum_data=true");
+			redirectionInputs.add("list1_databox=" + topListFile.getName() + " (top list from job $JOB_NAME)");
+			redirectionInputs.add("list1=$JOB_FOLDER/" + topListFile.getName());
+			
+			redirectionInputs.add("list2_wum_data=true");
+			redirectionInputs.add("list2_databox=" + bottomListFile.getName() + " (bottom list from job $JOB_NAME)");
+			redirectionInputs.add("list2=$JOB_FOLDER/" + bottomListFile.getName());
+		} else if ( topListFile.exists() ) {
+			redirectionInputs.add("comparison=list2genome");
+			
+			redirectionInputs.add("list1_wum_data=true");
+			redirectionInputs.add("list1_databox=" + topListFile.getName() + " (top list from job $JOB_NAME)");
+			redirectionInputs.add("list1=$JOB_FOLDER/" + topListFile.getName());
+		} else if ( bottomListFile.exists() ) {
+			redirectionInputs.add("comparison=list2genome");
+			
+			redirectionInputs.add("list1_wum_data=true");
+			redirectionInputs.add("list1_databox=" + bottomListFile.getName() + " (top list from job $JOB_NAME)");
+			redirectionInputs.add("list1=$JOB_FOLDER/" + bottomListFile.getName());
+		}		
+		
+		redirectionInputs.add("tool=fatigo");
+		redirectionInputs.add("jobname=fatigo");
+		redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
+		try {
+			IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	}
+
 }
