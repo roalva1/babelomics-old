@@ -192,14 +192,14 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		// db attributes
 		String name = "your_annotations";
 		String title = "Your annotations";
-		
+		FunctionalDbDescriptor filterInfo = new FunctionalDbDescriptor("your_annotation","Your annotations", "your_annotations","Your annotations");
 		//File inputFile = new File(outdir + "/"+name+"_WellFormedInput");
 		logger.println("Starting doing test your_annotations...");
 		
 		if(list2!=null) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, idList2, yourAnnotations, dbConnector, duplicatesMode, support, supportRandom,correction, test,analysis);
 		else if(isRestOfGenome()) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, yourAnnotations, dbConnector, duplicatesMode, support, supportRandom, correction, test,analysis);
                                                  
-		runAndSave(genecodis, name, title);
+		runAndSave(genecodis, name, title, filterInfo);
 		
 		logger.println("addAnnotationReport...");
 		addAnnotationReport(genecodis,"Your annotations");
@@ -212,14 +212,14 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		// db attributes
 		String name = getDBName(filter);
 		String title = getDBTitle(filter);		
-		
+		FunctionalDbDescriptor filterInfo= new FunctionalDbDescriptor(filter);
 		//File inputFile = new File(outdir + "/"+name+"_WellFormedInput");
 		logger.println("Starting doing test 2 list and filter...");
 		
 		if(list2!=null) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, idList2, filter, dbConnector, duplicatesMode, support, supportRandom,correction, test,analysis);
 		else if(isRestOfGenome()) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, filter, dbConnector, duplicatesMode, support, supportRandom, correction, test,analysis);
 		
-		runAndSave(genecodis, name, title);
+		runAndSave(genecodis, name, title,filterInfo);
 		
 		logger.println("addAnnotationReport...");
 		addAnnotationReport(genecodis,title);
@@ -227,7 +227,7 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		return genecodis;
 	}
 	
-	private void runAndSave(GeneCodis genecodis, String name, String title) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, IOException{
+	private void runAndSave(GeneCodis genecodis, String name, String title,FunctionalDbDescriptor filterInfo) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, IOException{
 		
 		logger.println("doing test...");
 		//run run...
@@ -236,7 +236,7 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		//save results
 		
 		logger.println("saveGenecodisResults...");
-		saveGenecodisResults(genecodis, name, title);
+		saveGenecodisResults(genecodis, name, title, filterInfo);
 		logger.println("OK...");
 	}
 	
@@ -328,7 +328,7 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		logger.println("saveDuplicatesReport15........" );
 	}
 	
-	private void saveGenecodisResults(GeneCodis genecodis,String name,String title) throws IOException{
+	private void saveGenecodisResults(GeneCodis genecodis,String name,String title, FunctionalDbDescriptor filterInfo) throws IOException{
 		String fileName = name + ".txt";
 		String annotFileName = name + ".annot";
 		updateJobStatus("80", "saving results");
@@ -337,6 +337,7 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		
 		if (genecodis.getSignificantTerms()>0){
 		result.addOutputItem(new Item(name+"_genecodis_file", fileName, "Genecodis for "+name, TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE"), new HashMap<String, String>(2), "Significant terms"));
+		result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Significant terms"));
 		}else if (genecodis.getSignificantTerms()==0){
 			result.addOutputItem(new Item(name+"_genecodis_file","no significant terms found","Genecodis for "+name,Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant terms"));
 			
