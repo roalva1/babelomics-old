@@ -183,7 +183,7 @@ public class Clustering extends BabelomicsTool {
 				ClusteringUtils.saveImageTree(matrix, nwGenes, nwSamples, imgFilename);
 				imgFile = new File(imgFilename);
 				if ( imgFile.exists() ) {
-					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " heatmap image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Cluster image"));					
+					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " heatmap image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Cluster images"));					
 				} else {
 					printError("execute" + method + "_clustering", "error saving clustering image", "error saving clustering image");					
 				}
