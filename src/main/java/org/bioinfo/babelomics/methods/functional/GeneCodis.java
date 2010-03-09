@@ -70,7 +70,6 @@ public class GeneCodis {
 	private String outdir;
 	private String name;
 	private int support = 3;
-	private analysisFactor analysis;
 	private int supportRandom = 3;
 	private correctionFactor correction;
 	private testFactor test;
@@ -93,7 +92,7 @@ public class GeneCodis {
 
 //two list
 	
-	public GeneCodis(String binPath,String outdir,String name, List<String> list1, List<String> list2, FunctionalFilter filter, DBConnector dbConnector,int duplicatesMode, int support,int supportRandom, correctionFactor correction, testFactor test, analysisFactor analysis) {
+	public GeneCodis(String binPath,String outdir,String name, List<String> list1, List<String> list2, FunctionalFilter filter, DBConnector dbConnector,int duplicatesMode, int support,int supportRandom, correctionFactor correction, testFactor test) {
 	
 		this.filter = filter;
 		this.list1 = list1;
@@ -108,7 +107,6 @@ public class GeneCodis {
 		this.supportRandom = supportRandom;
 		this.correction = correction;
 		this.test=test;
-		this.analysis=analysis;
 		this.setRFactor(list1.size());
 		this.setrFactor(list2.size());
 	}
@@ -116,7 +114,7 @@ public class GeneCodis {
 	
 	
 	// Your annotations two list constructor
-	public GeneCodis(String binPath, String outdir, String name,List<String> list1, List<String> list2,	FeatureList<AnnotationItem> yourAnnotations,DBConnector dbConnector, int duplicatesMode, int support,int supportRandom, correctionFactor correction, testFactor test,analysisFactor analysis) {
+	public GeneCodis(String binPath, String outdir, String name,List<String> list1, List<String> list2,	FeatureList<AnnotationItem> yourAnnotations,DBConnector dbConnector, int duplicatesMode, int support,int supportRandom, correctionFactor correction, testFactor test) {
 		this.list1 = list1;
 		this.list2 = list2;
 		//this.filter = filter;
@@ -130,7 +128,6 @@ public class GeneCodis {
 		this.supportRandom = supportRandom;
 		this.correction = correction;
 		this.test=test;
-		this.analysis=analysis;
 		this.setRFactor(list1.size());
 		this.setrFactor(list2.size());
 		System.err.println("list2---------------"+list2.size());
@@ -138,7 +135,7 @@ public class GeneCodis {
 	}
 	
 	//one list agains genome
-	public GeneCodis(String binPath,String outdir,String name, List<String> list1, FunctionalFilter filter, DBConnector dbConnector, int duplicatesMode, int support, int supportRandom, correctionFactor correction, testFactor test, analysisFactor analysis) {
+	public GeneCodis(String binPath,String outdir,String name, List<String> list1, FunctionalFilter filter, DBConnector dbConnector, int duplicatesMode, int support, int supportRandom, correctionFactor correction, testFactor test) {
 		this.list1 = list1;
 		this.list2 = InfraredUtils.getGenome(dbConnector);
 		this.filter = filter;
@@ -152,7 +149,6 @@ public class GeneCodis {
 		this.supportRandom = supportRandom;
 		this.correction = correction;
 		this.test=test;
-		this.analysis=analysis;
 		this.setRFactor(list1.size());
 		this.setrFactor(list2.size());
 		System.err.println("list2---------------"+list2.size());
@@ -160,7 +156,7 @@ public class GeneCodis {
 	
 	
 
-	public GeneCodis(String binPath, String outdir, String name,List<String> list1, FeatureList<AnnotationItem> yourAnnotations, DBConnector dbConnector, int duplicatesMode, int support,int supportRandom, correctionFactor correction, testFactor test,analysisFactor analysis) {
+	public GeneCodis(String binPath, String outdir, String name,List<String> list1, FeatureList<AnnotationItem> yourAnnotations, DBConnector dbConnector, int duplicatesMode, int support,int supportRandom, correctionFactor correction, testFactor test) {
 		this.list1 = list1;
 		this.list2 = getAnnotationIds(yourAnnotations);
 		//this.filter = filter;
@@ -174,7 +170,7 @@ public class GeneCodis {
 		this.supportRandom = supportRandom;
 		this.correction = correction;
 		this.test=test;
-		this.analysis=analysis;
+		
 		this.setRFactor(list1.size());
 		
 		System.err.println("list2---------------"+list2.size());
@@ -252,13 +248,16 @@ public class GeneCodis {
 			  }
 		setResults(itemsContent);
 		
-		logger.println("------------doSingleProcess");
-		doSingleProcess(this.binPath ,this.outdir+ "/"+name+"_WellFormedInput", outdir + "/"+ name+ ".txt");
+		logger.println("------------doSingleProcess for sing analisis");
+		doSingleProcess(this.binPath ,this.outdir+ "/"+name+"_WellFormedInput",analysisFactor.singular, outdir + "/"+ name+ "_singular.txt");
+		
+		logger.println("------------doSingleProcess for cong analisis");
+		doSingleProcess(this.binPath ,this.outdir+ "/"+name+"_WellFormedInput",analysisFactor.concurrence, outdir + "/"+ name+ "_concurrence.txt");
 		
 		logger.println("-------------OK");
 	}
 	
-	public void doSingleProcess(String binPath, String inputAbsolutPath, String outputAbsolutPath){		
+	public void doSingleProcess(String binPath, String inputAbsolutPath, analysisFactor analysis, String outputAbsolutPath){		
 		
 		try {
 			IOUtils.write(this.outdir+ "/"+name+"_WellFormedInput", getResults());
@@ -271,7 +270,7 @@ public class GeneCodis {
 		int TEST= 1;
 		
 		//ANALISIS
-		switch(this.analysis){
+		switch(analysis){
 		case concurrence:  ANALISIS= 1;break;
 		case singular : ANALISIS = 2;break;
 		default:
