@@ -44,6 +44,8 @@ public class FatiGOTool extends FunctionalProfilingTool{
 	private StringBuilder annotationReport;
 	private String list2label;
 	
+	List<String> significantDbs;
+	
 	public FatiGOTool() {
 		initOptions();
 	}
@@ -91,8 +93,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		String duplicates = commandLine.getOptionValue("duplicates", "never");		
 		if(duplicates.equalsIgnoreCase("each")) duplicatesMode = FatiGO.REMOVE_EACH;
 		if(duplicates.equalsIgnoreCase("ref")) duplicatesMode = FatiGO.REMOVE_REF;
-		if(duplicates.equalsIgnoreCase("all")) duplicatesMode = FatiGO.REMOVE_ALL;
-		System.err.println("los duplicates son: " + duplicatesMode);
+		if(duplicates.equalsIgnoreCase("all")) duplicatesMode = FatiGO.REMOVE_ALL;		
 		// your annotations
 		if(isYourAnnotations){
 			
@@ -156,11 +157,8 @@ public class FatiGOTool extends FunctionalProfilingTool{
 
 				// significant terms
 				List<String> significant = new ArrayList<String>();
-				
-				// Significant results must appear after than complete tables!!
-				result.addOutputItem(new Item("significant","significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE"),new HashMap<String,String>(),"Significant Results"));
-				significant.add(TwoListFisherTestResult.header());
-				
+				significantDbs = new ArrayList<String>();
+		
 				annotationReport = new StringBuilder();
 				annotationReport.append("#DB").append("\t").append("List1").append("\t").append(list2label).append("\n");
 				
@@ -177,7 +175,9 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				saveDuplicatesReport(fatigo);
 				saveAnnotationsReport();
 				
-				// significant terms
+				// significant terms				
+				result.getOutputItems().add(3, new Item("significant","significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",ListUtils.toString(significantDbs,",")),new HashMap<String,String>(),"Significant Results"));
+				significant.add(TwoListFisherTestResult.header());
 				IOUtils.write(outdir + "/significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significant,"\n"));
 				
 			}
@@ -269,6 +269,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		
 		// acum significant values
 		significant.addAll(testResultToStringList(fatigo.getSignificant(DEFAULT_PVALUE_THRESHOLD),false));
+		significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
 
 		//logger.println("...end of " + title);
 		logger.println("...finished");
@@ -300,6 +301,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 	
 		// acum significant values
 		significant.addAll(testResultToStringList(fatigo.getSignificant(DEFAULT_PVALUE_THRESHOLD),false));
+		significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
 		
 		//logger.println("...end of " + title);
 		logger.println("...finished");

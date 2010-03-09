@@ -125,9 +125,9 @@ public class GoGraphViewerTool  extends BabelomicsTool{
 		result.addOutputItem(new Item("imageJpgsmall", PREFIX + "_graphimagesmall.jpg", "Graph as JPG image (low resolution)", Item.TYPE.IMAGE, "Images"));
 		result.addOutputItem(new Item("imageJpg", PREFIX + "_graphimage.jpg", "Graph as JPG image (high resolution)", Item.TYPE.FILE, "Images"));
 		result.addOutputItem(new Item("imagePng", PREFIX + "_graphimage.png", "Graph as PNG", Item.TYPE.FILE, "Images"));
-		result.addOutputItem(new Item("imageSVG", PREFIX + "_graphimage.svg", "Graph as SVG", Item.TYPE.FILE, "Images"));
+		result.addOutputItem(new Item("imageSVG", PREFIX + "_graphimage.svg", "Graph as SVG", Item.TYPE.FILE, Arrays.asList("GO_GRAPH_VIZ_JNLP"), new HashMap<String, String>(), "Images"));
 		// jnlp link
-		result.addOutputItem(new Item("jnlplink",config.get("JNLP_DOWNLOADER_HOST_NAME")+"b2g.jnlp", "Link to interactive GoGraphViz applicacion (open with Java-Web-Start)", Item.TYPE.LINK, Arrays.asList("INCLUDE_REFS"), new HashMap<String, String>(),"Images"));
+		//result.addOutputItem(new Item("jnlplink",config.get("JNLP_DOWNLOADER_HOST_NAME")+"b2g.jnlp", "Link to interactive GoGraphViz applicacion (open with Java-Web-Start)", Item.TYPE.LINK, Arrays.asList("INCLUDE_REFS"), new HashMap<String, String>(),"Images"));
 		// graph as text		
 		result.addOutputItem(new Item("graphTxt", PREFIX + "_graph.txt", "Graph as textual representation",  Item.TYPE.FILE, "Graph as text"));
 	}

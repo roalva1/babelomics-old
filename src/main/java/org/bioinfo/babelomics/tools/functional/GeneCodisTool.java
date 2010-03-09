@@ -105,22 +105,22 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		support = Integer.parseInt(commandLine.getOptionValue("support"));  
 		supportRandom = Integer.parseInt(commandLine.getOptionValue("support-for-random")); //i
 		
-		analysis = (commandLine.getOptionValue("analysis")=="concurrence")?analysisFactor.concurrence:analysisFactor.singular; //  -a [1,2] Analysis:
+		analysis = (commandLine.getOptionValue("analysis").equalsIgnoreCase("concurrence"))?analysisFactor.concurrence:analysisFactor.singular; //  -a [1,2] Analysis:
 		
-			if (((commandLine.getOptionValue("hypergeometric")) != null) && ((commandLine.getOptionValue("chi-square")) != null)){
+		test = testFactor.hypergeometric;		
+		if(commandLine.hasOption("chi-square")){
+			if (commandLine.hasOption("hypergeometric")){
 				test = testFactor.both;
-			}else if((commandLine.getOptionValue("hypergeometric")) != null){
-				test = testFactor.hypergeometric;
-			}else if((commandLine.getOptionValue("chi-square")) != null){
+			} else {
 				test = testFactor.chiSquare;
-			} 
-			
-		
+			}
+		} 
+				
 		correction = correctionFactor.none; 
-		if (commandLine.getOptionValue("correction") == "fdr"){
+		if (commandLine.getOptionValue("correction").equalsIgnoreCase("fdr")){
 			correction = correctionFactor.fdr;
 			
-		} else if (commandLine.getOptionValue("correction") == "permutation"){
+		} else if (commandLine.getOptionValue("correction").equalsIgnoreCase("permutation")){
 			correction = correctionFactor.permutation;
 		
 		}
