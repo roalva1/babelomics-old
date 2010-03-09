@@ -51,7 +51,7 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 	
 	private int support;   //Minimum number of genes required that have to be implicated in a rule to take it into account (default: 3).
 	private int supportRandom;//i . i support for random:  Min support taked into account when the algorithm is correcting p-values (usually the same than Support).
-	private analysisFactor analysis;//  -a [1,2] Analysis. 1: Concurrence analysis, 2: Singular analysis
+	
 	private testFactor test;//-t- [1,2] statistical test, 0: Hypergeometric test (default), 1: Chi Square test
 	private correctionFactor correction; // -s 0: none	any number < 0: FDR method	any number > 0: Number of permutations to correct p-values with permutations method
 
@@ -64,7 +64,6 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		options.addOption(OptionFactory.createOption("datalist", "the ranked list"));
 		options.addOption(OptionFactory.createOption("support", "Minimum number of genes",true));
 		options.addOption(OptionFactory.createOption("support-for-random", "Minimum number of genes for correcting p-values",true));
-		options.addOption(OptionFactory.createOption("analysis", "singular_analysis or concurrence analysis",true));
 		options.addOption(OptionFactory.createOption("hypergeometric", "",false));
 		options.addOption(OptionFactory.createOption("chi-square", "",false));
 		options.addOption(OptionFactory.createOption("correction", "default correction",true));
@@ -105,8 +104,6 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		support = Integer.parseInt(commandLine.getOptionValue("support"));  
 		supportRandom = Integer.parseInt(commandLine.getOptionValue("support-for-random")); //i
 		
-		analysis = (commandLine.getOptionValue("analysis").equalsIgnoreCase("concurrence"))?analysisFactor.concurrence:analysisFactor.singular; //  -a [1,2] Analysis:
-		
 		test = testFactor.hypergeometric;		
 		if(commandLine.hasOption("chi-square")){
 			if (commandLine.hasOption("hypergeometric")){
@@ -117,10 +114,10 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		} 
 				
 		correction = correctionFactor.none; 
-		if (commandLine.getOptionValue("correction").equalsIgnoreCase("fdr")){
+		if (commandLine.getOptionValue("correction").equalsIgnoreCase("correction_fdr")){
 			correction = correctionFactor.fdr;
 			
-		} else if (commandLine.getOptionValue("correction").equalsIgnoreCase("permutation")){
+		} else if (commandLine.getOptionValue("correction").equalsIgnoreCase("correction_permutation")){
 			correction = correctionFactor.permutation;
 		
 		}
@@ -196,8 +193,8 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		//File inputFile = new File(outdir + "/"+name+"_WellFormedInput");
 		logger.println("Starting doing test your_annotations...");
 		
-		if(list2!=null) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, idList2, yourAnnotations, dbConnector, duplicatesMode, support, supportRandom,correction, test,analysis);
-		else if(isRestOfGenome()) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, yourAnnotations, dbConnector, duplicatesMode, support, supportRandom, correction, test,analysis);
+		if(list2!=null) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, idList2, yourAnnotations, dbConnector, duplicatesMode, support, supportRandom,correction, test);
+		else if(isRestOfGenome()) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, yourAnnotations, dbConnector, duplicatesMode, support, supportRandom, correction, test);
                                                  
 		runAndSave(genecodis, name, title, filterInfo);
 		
@@ -216,8 +213,8 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		//File inputFile = new File(outdir + "/"+name+"_WellFormedInput");
 		logger.println("Starting doing test 2 list and filter...");
 		
-		if(list2!=null) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, idList2, filter, dbConnector, duplicatesMode, support, supportRandom,correction, test,analysis);
-		else if(isRestOfGenome()) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, filter, dbConnector, duplicatesMode, support, supportRandom, correction, test,analysis);
+		if(list2!=null) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, idList2, filter, dbConnector, duplicatesMode, support, supportRandom,correction, test);
+		else if(isRestOfGenome()) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, filter, dbConnector, duplicatesMode, support, supportRandom, correction, test);
 		
 		runAndSave(genecodis, name, title,filterInfo);
 		
@@ -277,8 +274,6 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		addInputParam("support", "Minimum number of genes", String.valueOf(support));
 		logger.println("addInputParams supportRandom........" + String.valueOf(supportRandom));
 		addInputParam("supportRandom", "Minimum number of genes for correcting p-values", String.valueOf(supportRandom));
-		logger.println("addInputParams analysis........" + analysis.toString());
-		addInputParam("analysis", "Analysis", analysis.toString());
 		logger.println("addInputParams test........" + test.toString());
 		addInputParam("test", "Statistical test", test.toString());
 		logger.println("addInputParams correction........" + correction.toString());
@@ -336,16 +331,21 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		//IOUtils.write(outdir + "/" +fileName, genecodis.getResults());
 		
 		if (genecodis.getSignificantTerms()>0){
-		result.addOutputItem(new Item(name+"_genecodis_file", fileName, "Genecodis for "+name, TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE"), new HashMap<String, String>(2), "Significant terms"));
-		result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Significant terms"));
+			String correctionParam = (correction== correctionFactor.none)?"CORRECTEDNONE":"CORRECTED";
+				result.addOutputItem(new Item(name+ "_concurrence.txt", name+ "_concurrence.txt", "Co-ocurrence annotations results", TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE_"+test.toString().toUpperCase()+"_"+correctionParam), new HashMap<String, String>(2), "Co-ocurrence annotations results"));
+				result.addOutputItem(new Item(name+ "_singular.txt", name+ "_singular.txt", "Singular annotations results", TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE_"+test.toString().toUpperCase()+"_"+correctionParam), new HashMap<String, String>(2), "Singular annotations results"));
+			
+			
+		result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Co-ocurrence annotations results"));
+		result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Singular annotations results"));
 		}else if (genecodis.getSignificantTerms()==0){
-			result.addOutputItem(new Item(name+"_genecodis_file","no significant terms found","Genecodis for "+name,Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant terms"));
+			result.addOutputItem(new Item(name+"_genecodis_file","no significant terms found","Annotations results ",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotations results"));
 			
 			
 		}
 		
 		else if (genecodis.getSignificantTerms()==-1){
-			result.addOutputItem(new Item(name+"_genecodis_file","Error running tool","Genecodis for "+name,Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant terms"));
+			result.addOutputItem(new Item(name+"_genecodis_file","Error running tool","Annotations results "+name,Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant terms"));
 			
 			
 		}
