@@ -24,6 +24,8 @@ import org.bioinfo.tool.result.Item.TYPE;
 
 public class Survival extends BabelomicsTool {
 
+	private double pValue = 0.05;
+	
 	public Survival() {
 	}
 
@@ -82,12 +84,12 @@ public class Survival extends BabelomicsTool {
 		// generating heatmap
 		//
 		updateJobStatus("60", "generating heatmap");
-		Canvas heatmap = DiffExpressionUtils.generateHeatmap(dataset, timeClass, columnOrder, rowOrder, "coeff.", res.getCoefs(), "adj. p-value", res.getAdjPValues());
-		String heatmapFilename = getOutdir() + "/cox_heatmap.png";
+		Canvas heatmap = null, sigHeatmap = null;
 		try {
-			heatmap.save(heatmapFilename);
-		} catch (IOException e) {
-			printError("ioexception_cox_cox", "error generating heatmap", e.toString(), e);
+			heatmap = DiffExpressionUtils.generateHeatmap(dataset, timeClass, columnOrder, rowOrder, "coeff.", res.getCoefs(), "adj. p-value", res.getAdjPValues());
+			sigHeatmap = DiffExpressionUtils.generateSigHeatmap(dataset, timeClass, columnOrder, "coeff.", res.getCoefs(), "adj. p-value", res.getAdjPValues(), pValue);
+		} catch (Exception e) {
+			printError("ioexception_executesurvival_survival", "error generating heatmaps for " + test + " test", e.toString(), e);
 		}
 
 		// saving data
@@ -116,8 +118,28 @@ public class Survival extends BabelomicsTool {
 			printError("ioexception_cox_cox", "error saving results", e.toString(), e);
 		}
 
-		if ( new File(heatmapFilename).exists() ) {
-			result.addOutputItem(new Item("cox_heatmap", "cox_heatmap.png", "Cox heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
+		String sigHeatmapFilename = getOutdir() + "/" + test + "_heatmap_significative.png";
+		if ( sigHeatmap == null ) {
+			result.addOutputItem(new Item(test + "_heatmap_significative", "None significative terms", test.toUpperCase() + " heatmap with significative terms (p-value = " + pValue + ")", TYPE.TEXT, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap images"));
+		} else {
+			try {
+				sigHeatmap.save(sigHeatmapFilename);
+				if ( new File(sigHeatmapFilename).exists() ) {
+					result.addOutputItem(new Item(test + "_heatmap_significative", test + "_heatmap_significative.png", test.toUpperCase() + " heatmap with significative terms (p-value = " + pValue + ")", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap images"));
+				}
+			} catch (IOException e) {
+				printError("ioexception_executet_classcomparison", "error generating heatmap", e.toString(), e);
+			}
+		}
+
+		String heatmapFilename = getOutdir() + "/cox_heatmap.png";
+		try {
+			heatmap.save(heatmapFilename);
+			if ( new File(heatmapFilename).exists() ) {
+				result.addOutputItem(new Item("cox_heatmap", "cox_heatmap.png", "Cox heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
+			}
+		} catch (IOException e) {
+			printError("ioexception_cox_cox", "error generating heatmap", e.toString(), e);
 		}
 	}
 }

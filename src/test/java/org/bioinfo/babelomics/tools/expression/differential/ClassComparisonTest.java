@@ -12,6 +12,7 @@ public class ClassComparisonTest {
 	public void notest() {
 	}
 
+	@Test
 	public void Test() {
 		String dataset = "/mnt/commons/test/biodata/example/twoclasses100.txt";
 		String outdir = "/tmp/ClassComparisonTest";
@@ -27,6 +28,7 @@ public class ClassComparisonTest {
 		}		
 	}
 
+	@Test
 	public void Test1() {
 	    
 		String dataset = "/mnt/commons/test/biodata/example/twoclasses100.txt";
@@ -60,6 +62,7 @@ public class ClassComparisonTest {
 		}		
 	}
 
+	@Test
 	public void Test3() {
 	    
 		String dataset = "/mnt/commons/test/biodata/example/twoclasses100.txt";
@@ -76,6 +79,7 @@ public class ClassComparisonTest {
 		}		
 	}
 		
+	@Test
 	public void Test4() {
 	    
 		String dataset = "/mnt/commons/test/biodata/example/multiclasses.txt";
@@ -92,6 +96,7 @@ public class ClassComparisonTest {
 		}		
 	}
 
+	@Test
 	public void Test5() {
 	    
 		String dataset = "/mnt/commons/test/biodata/example/multiclasses.txt";
