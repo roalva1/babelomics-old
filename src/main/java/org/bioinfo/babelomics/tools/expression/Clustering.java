@@ -14,6 +14,8 @@ import org.bioinfo.babelomics.methods.expression.clustering.Sota;
 import org.bioinfo.babelomics.methods.expression.clustering.Upgma;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ArrayUtils;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.tree.multiway.MultipleTree;
@@ -168,23 +170,23 @@ public class Clustering extends BabelomicsTool {
 					printError("execute" + method + "_clustering", "error saving gene clustering image", "error saving gene clustering image");										
 				}
 
-//				String imgFilename = this.getOutdir() + "/" + method + ".png";
-//				
-//				int rowOrder[] = getOrder(nwGenes.getLabels(), dataset.getFeatureNames());
-//				int columnOrder[] = getOrder(nwSamples.getLabels(), dataset.getSampleNames());
-//				
-////				System.out.println("row order = \n" + Arrays.toString(rowOrder));
-////				System.out.println("column order = \n" + Arrays.toString(columnOrder));
-////				System.out.println("nw samples labels = " + ListUtils.toString(nwSamples.getLabels(), ",") + "\ndataset sample names = " + ListUtils.toString(dataset.getSampleNames(), ","));
-//				DoubleMatrix matrix = orderMatrix(dataset.getDoubleMatrix(), rowOrder, columnOrder);
-//				
-//				ClusteringUtils.saveImageTree(matrix, nwGenes, nwSamples, imgFilename);
-//				File imgFile = new File(imgFilename);
-//				if ( imgFile.exists() ) {
-//					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " clustering image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Clusters image"));					
-//				} else {
-//					printError("execute" + method + "_clustering", "error saving clustering image", "error saving clustering image");					
-//				}
+				imgFilename = this.getOutdir() + "/" + method + ".png";
+				
+				int rowOrder[] = getOrder(nwGenes.getLabels(), dataset.getFeatureNames());
+				int columnOrder[] = getOrder(nwSamples.getLabels(), dataset.getSampleNames());
+				
+				System.out.println("row order = \n" + ArrayUtils.toString(rowOrder));
+				System.out.println("column order = \n" + ArrayUtils.toString(columnOrder));
+				System.out.println("nw samples labels = " + ListUtils.toString(nwSamples.getLabels(), ",") + "\ndataset sample names = " + ListUtils.toString(dataset.getSampleNames(), ","));
+				DoubleMatrix matrix = orderMatrix(dataset.getDoubleMatrix(), rowOrder, columnOrder);
+				
+				ClusteringUtils.saveImageTree(matrix, nwGenes, nwSamples, imgFilename);
+				imgFile = new File(imgFilename);
+				if ( imgFile.exists() ) {
+					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " heatmap image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Cluster image"));					
+				} else {
+					printError("execute" + method + "_clustering", "error saving clustering image", "error saving clustering image");					
+				}
 			} catch (IOException e) {
 				printError("ioexception_execute" + method + "_clustering", "error saving clustering image", e.toString(), StringUtils.getStackTrace(e));
 			}
@@ -227,6 +229,8 @@ public class Clustering extends BabelomicsTool {
 		int order[] = new int[src.size()];
 		int i=0;
 		for(String name: src) {
+			name = name.trim();
+			System.out.println("getOrder, name = (" + name + ")");
 			order[i++] = dest.indexOf(name);
 		}
 		return order;
