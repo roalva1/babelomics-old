@@ -334,20 +334,17 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 			String correctionParam = (correction== correctionFactor.none)?"CORRECTEDNONE":"CORRECTED";
 				result.addOutputItem(new Item(name+ "_concurrence.txt", name+ "_concurrence.txt", "Co-ocurrence annotations results", TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE_"+test.toString().toUpperCase()+"_"+correctionParam), new HashMap<String, String>(2), "Co-ocurrence annotations results"));
 				result.addOutputItem(new Item(name+ "_singular.txt", name+ "_singular.txt", "Singular annotations results", TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE_"+test.toString().toUpperCase()+"_"+correctionParam), new HashMap<String, String>(2), "Singular annotations results"));
-			
-			
+				
+//		result.addOutputItem(new Item(filterInfo.getName() + "_leyenda","TS = Number of annotated genes in the reference list (Total number of genes in the reference list);S = Number of annotated genes in the input list (Total number of genes in the input list);Hyp = Hypergeometric pValue; Hyp* = Corrected hypergeometric pValue ","",Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Co-ocurrence annotations results"));
+//		result.addOutputItem(new Item(filterInfo.getName() + "_leyenda","TS = Number of annotated genes in the reference list (Total number of genes in the reference list);S = Number of annotated genes in the input list (Total number of genes in the input list);Hyp = Hypergeometric pValue; Hyp* = Corrected hypergeometric pValue ","",Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Singular annotations results"));
 		result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Co-ocurrence annotations results"));
 		result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Singular annotations results"));
+
 		}else if (genecodis.getSignificantTerms()==0){
 			result.addOutputItem(new Item(name+"_genecodis_file","no significant terms found","Annotations results ",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotations results"));
-			
-			
-		}
-		
+		}		
 		else if (genecodis.getSignificantTerms()==-1){
 			result.addOutputItem(new Item(name+"_genecodis_file","Error running tool","Annotations results "+name,Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant terms"));
-			
-			
 		}
 	
 		
