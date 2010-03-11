@@ -25,7 +25,8 @@ public class ClusteringTest {
 
 	@Test
 	public void Test() {
-		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
+		//String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
+		String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
 		String outdir = "/tmp/ClusteringTest";
 		new File(outdir).mkdir();
 

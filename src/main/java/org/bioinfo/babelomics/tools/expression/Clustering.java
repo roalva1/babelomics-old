@@ -175,9 +175,9 @@ public class Clustering extends BabelomicsTool {
 				int rowOrder[] = getOrder(nwGenes.getLabels(), dataset.getFeatureNames());
 				int columnOrder[] = getOrder(nwSamples.getLabels(), dataset.getSampleNames());
 				
-				System.out.println("row order = \n" + ArrayUtils.toString(rowOrder));
-				System.out.println("column order = \n" + ArrayUtils.toString(columnOrder));
-				System.out.println("nw samples labels = " + ListUtils.toString(nwSamples.getLabels(), ",") + "\ndataset sample names = " + ListUtils.toString(dataset.getSampleNames(), ","));
+//				System.out.println("row order = \n" + ArrayUtils.toString(rowOrder));
+//				System.out.println("column order = \n" + ArrayUtils.toString(columnOrder));
+//				System.out.println("nw samples labels = " + ListUtils.toString(nwSamples.getLabels(), ",") + "\ndataset sample names = " + ListUtils.toString(dataset.getSampleNames(), ","));
 				DoubleMatrix matrix = orderMatrix(dataset.getDoubleMatrix(), rowOrder, columnOrder);
 				
 				ClusteringUtils.saveImageTree(matrix, nwGenes, nwSamples, imgFilename);
@@ -230,7 +230,7 @@ public class Clustering extends BabelomicsTool {
 		int i=0;
 		for(String name: src) {
 			name = name.trim();
-			System.out.println("getOrder, name = (" + name + ")");
+			//System.out.println("getOrder, name = (" + name + ")");
 			order[i++] = dest.indexOf(name);
 		}
 		return order;
