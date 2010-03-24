@@ -167,22 +167,36 @@ public class ClusteringUtils {
 		System.out.println("sizes from trees: rows = " + rowDimension + ", cols = " + columnDimension);
 		System.out.println("sizes from matrix: rows = " + matrix.getRowDimension() + ", cols = " + matrix.getColumnDimension());
 
+		System.out.println("width grid = " + (columnDimension * cellSide));
+		System.out.println("height grid = " + (rowDimension * cellSide));
+
+		System.out.println("division (width / hTree.getNumberOfLeaves) = " + (1.0 * columnDimension * cellSide) / (1.0 * hTree.getNumberOfLeaves()));
+
 		//		NewickPanel newickHPanel = new NewickPanel("", hTree.getNumberOfLeaves() * cellSide, 
 		//													   hTree.getNumberOfLevels() * cellSide, 
 		//													   rowLabelsWidth + (vTree.getNumberOfLevels() * cellSide), 
 		//													   0);
-		NewickPanel newickHPanel = new NewickPanel("", rowLabelsWidth + (vTree.getNumberOfLevels() * cellSide), 0, 
-													hTree.getNumberOfLeaves() * cellSide, 
-													hTree.getNumberOfLevels() * cellSide);
 
+		int hPanelX = rowLabelsWidth + (vTree.getNumberOfLevels() * cellSide);
+		int hPanelY = 0;
+		int hPanelWidth = columnDimension * cellSide + 10; 
+		int hPanelHeight = hTree.getNumberOfLevels() * cellSide;
+
+		System.out.println("hpanel (x, y) = (" + hPanelX + ", " + hPanelY + ")");
+		System.out.println("hpanel (width, height) = (" + hPanelWidth + ", " + hPanelHeight + ")");
+		System.out.println("hpanel (levels, leaves) = (" + (hTree.getNumberOfLevels()) + ", " + (hTree.getNumberOfLeaves()) + ")");
+		
+
+		NewickPanel newickHPanel = new NewickPanel("", hPanelX, hPanelY, hPanelWidth, hPanelHeight);
+		
 		newickHPanel.setNewick(hTree);
-		//		newickHPanel.setLevelSeparation(cellSide);
-		//		newickHPanel.setLeafSeparation(cellSide);
+				newickHPanel.setLevelSeparation(cellSide);
+				newickHPanel.setLeafSeparation(cellSide);
 		newickHPanel.setShowLabels(false);
 		newickHPanel.setVertical(false);
 
 		
-		NewickPanel newickVPanel = new NewickPanel("", 0, colLabelsWidth,
+		NewickPanel newickVPanel = new NewickPanel("", 0, colLabelsWidth + (hTree.getNumberOfLevels() * cellSide),
 													vTree.getNumberOfLevels() * cellSide, 
 													(rowDimension * cellSide) + colLabelsWidth); //vTree.getNumberOfLeaves() * cellSide);
 
@@ -197,7 +211,9 @@ public class ClusteringUtils {
 		//												vTree.getNumberOfLevels() * cellSide, 
 		//												newickHPanel.getHeight());
 
-		GridPanel gridPanel = new GridPanel("", vTree.getNumberOfLevels() * cellSide, 0, 
+		GridPanel gridPanel = new GridPanel("", 
+				vTree.getNumberOfLevels() * cellSide, 
+				hTree.getNumberOfLevels() * cellSide, 
 				(columnDimension * cellSide) + rowLabelsWidth + infoWidth, 
 				(rowDimension * cellSide) + colLabelsWidth);
 
@@ -242,7 +258,7 @@ public class ClusteringUtils {
 		canvas.setBorderColor(Color.BLACK);
 		canvas.setBackGroundColor(Color.WHITE);
 
-		int canvasHeight = gridPanel.getHeight() + (cellSide * 2);
+		int canvasHeight = gridPanel.getHeight() + newickHPanel.getHeight() + (cellSide * 2);
 		int canvasWidth = gridPanel.getWidth() + newickVPanel.getWidth() + (cellSide * 2);
 		System.out.println("canvas height = " + canvasHeight);
 		System.out.println("canvas width  = " + canvasWidth);
