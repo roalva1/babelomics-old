@@ -11,9 +11,9 @@ import java.util.List;
 import org.apache.commons.cli.OptionGroup;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.chart.XYLineChart;
+import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
-import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.mlpr.classifier.GenericClassifier;
@@ -21,9 +21,9 @@ import org.bioinfo.mlpr.classifier.Knn;
 import org.bioinfo.mlpr.classifier.RForest;
 import org.bioinfo.mlpr.classifier.Svm;
 import org.bioinfo.mlpr.evaluation.result.EvaluationResult;
-import org.bioinfo.mlpr.utils.InstanceBuilder;
 import org.bioinfo.mlpr.utils.InstancesBuilder;
 import org.bioinfo.tool.OptionFactory;
+import org.bioinfo.tool.exception.InvalidParemeterException;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 
@@ -41,6 +41,34 @@ public class Predictor extends BabelomicsTool {
 		initOptions();
 	}
 
+	
+//	public static void main(String[] args) throws IOException{
+	//de iris.arff a iris.dataset
+//		List<String> lines = IOUtils.readLines("/home/jose/code/bioinfo-installer/babelomics/example/iris.txt");
+//		int ncols = lines.get(0).split(",").length;
+//		List<List<String>> cells = new ArrayList<List<String>>();		
+//		for(String line: lines){
+//			cells.add(new ArrayList<String>(StringUtils.toList(line,",")));
+//			//System.err.println(line);
+//		}
+//		System.err.print("#VARIABLE	myclass	CATEGORICAL{Iris-setosa,Iris-versicolor,Iris-virginica}	VALUES{");
+//		for(int i=0; i<cells.size(); i++){
+//			System.err.print(cells.get(i).get(ncols-1));
+//			if(i<(cells.size()-1)) System.err.print(",");
+//		}
+//		System.err.println("}");
+//		for(int j=(ncols-2); j>=0; j--){
+//			for(int i=0; i<cells.size(); i++){
+//				System.err.print(cells.get(i).get(j));
+//				if(i<(cells.size()-1)) System.err.print("\t");
+//			}
+//			System.err.println();
+//		}
+//	}
+//	
+	
+	
+	
 	@Override
 	public void initOptions() {
 		// data
@@ -49,7 +77,7 @@ public class Predictor extends BabelomicsTool {
 		
 		// class attribute
 		options.addOption(OptionFactory.createOption("class", "corresponding class attribute in the dataset",false,true));
-		options.addOption(OptionFactory.createOption("class-file", "class variable file",false));
+		options.addOption(OptionFactory.createOption("class-file", "class variable file",false,true));
 		
 		// sample and feature filters
 		options.addOption(OptionFactory.createOption("sample-filter", "Sample filter", false));
@@ -114,22 +142,37 @@ public class Predictor extends BabelomicsTool {
 				
 				// data set loading 
 				if(commandLine.hasOption("dataset-arff")){
-					instances = InstancesBuilder.getInstancesFromArrfFile(datasetFile,"sample_name");					
+					instances = InstancesBuilder.getInstancesFromArrfFile(datasetFile,"sample_name");
 					instances.setClassIndex(instances.numAttributes()-1);
-				} else {
-					String className = commandLine.getOptionValue("class");
+				} else {					
+					// convert Dataset to Instances format (data is trasposed!!)
 					Dataset dataset = new Dataset(datasetFile, true);
 					List<List<String>> data = new ArrayList<List<String>>(dataset.getColumnDimension());
 					for(int i = 0 ; i<dataset.getColumnDimension() ; i++) {
 						data.add(ArrayUtils.toStringList(dataset.getDoubleMatrix().getColumn(i)));
 					}
-					System.out.println("0,0 = " + data.get(0).get(0));
-					System.out.println("variables value = " + ListUtils.toString(dataset.getVariables().getByName(className).getValues()));
-
-					//instances = InstanceBuilder.getInstancesFromData(data, dataset.getFeatureNames(), dataset.getSampleNames(), dataset.getVariables().getByName(className).getValues());
-					instances = InstancesBuilder.getInstancesFromDataList(data, dataset.getFeatureNames(), dataset.getSampleNames(), dataset.getVariables().getByName(className).getValues());
-					//System.err.println("la clase 0:" + className + " " + instances.attribute("class").index() + " " + instances.numAttributes() + "  " + instances.attribute(997).name());
-					//Attribute classAttr = instances.attribute(className);
+					// class values
+					List<String> classValues = null;
+					if(commandLine.hasOption("class-file")){
+						String classFileName = commandLine.getOptionValue("class-file");
+						FileUtils.checkFile(classFileName);
+						classValues =  StringUtils.toList(IOUtils.toString(classFileName));
+					} else {
+						if(commandLine.hasOption("class")){
+							String className = commandLine.getOptionValue("class");
+							if(dataset.getVariables()!=null && dataset.getVariables().getByName(className)!=null && dataset.getVariables().getByName(className).getValues()!=null){
+								classValues = dataset.getVariables().getByName(className).getValues();	
+							} else {
+								throw new Exception("class not found in dataset");
+							}							
+						} else {
+							throw new Exception("class or class-file is not defined"); 
+						}
+					}
+					System.err.println("class values: " + classValues);
+					// create instances
+					instances = InstancesBuilder.getInstancesFromDataList(data, dataset.getFeatureNames(), dataset.getSampleNames(), classValues);
+					// define class attribute
 					Attribute classAttr = instances.attribute("class");
 					instances.setClassIndex(classAttr.index());
 					
@@ -201,8 +244,7 @@ public class Predictor extends BabelomicsTool {
 		
 		int best = classifier.getEvaluationResultList().getBestAreaUnderRocIndex();
 		String name = classifier.getClassifierName();
-		
-		
+				
 		try {
 			IOUtils.write(new File(outdir + "/" + name + ".txt"), "Best AUC classification\n\nParameters: " + classifier.getParamList().get(best) + "\n\n" + classifier.getEvaluationResultList().getBestAreaUnderRoc().toString());			
 			result.addOutputItem(new Item(name + "_result_file", name + ".txt", name + " result file", TYPE.FILE,name + " results",""));

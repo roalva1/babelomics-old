@@ -36,6 +36,8 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 	private int outputFormat;
 	private int order;
 	
+	private List<String> significantDbs;
+	
 	public FatiScanTool(){
 		initOptions();
 	}
@@ -94,6 +96,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 			
 			// update status
 			jobStatus.addStatusMessage("10", "Preparing data");
+			significantDbs = new ArrayList<String>();
 			
 			// infrared connector			
 			DBConnector dbConnector = new DBConnector(species, new File(babelomicsHomePath + "/conf/infrared.properties"));		
@@ -153,8 +156,8 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				// significant terms				
 				if(significants!=null && significants.size()>0){
 					
-					// Significant results must appear after than complete tables!!
-					result.getOutputItems().add(0, new Item("significant","significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE"),new HashMap<String,String>(),"Significant Results"));
+					// Significant results must appear after than complete tables!!					
+					result.getOutputItems().add(1, new Item("significant","significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE",ListUtils.toString(significantDbs,",")),new HashMap<String,String>(),"Significant Results"));
 					IOUtils.write(outdir + "/significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significantOutput,"\n"));
 					
 //					// FatiScan graph
@@ -164,7 +167,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 //					}
 					
 				} else {
-					result.addOutputItem(new Item("graph_alldbs","No significant terms found","Significant term graph",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant results (all databases together)"));
+					result.getOutputItems().add(1,new Item("graph_alldbs","No significant terms found","Significant term graph",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant results (all databases together)"));
 				}		
 			}
 					
@@ -187,10 +190,11 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 	private void doTest(FeatureData rankedList,FunctionalFilter filter,DBConnector dbConnector, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidIndexException{
 		
 		// db attributes
-		String name = getDBName(filter);
-		String title = getDBTitle(filter);					
+		FunctionalDbDescriptor filterInfo = new FunctionalDbDescriptor(filter);
+//		String name = getDBName(filter);
+//		String title = getDBTitle(filter);
 				
-		logger.info(title + "...\n");
+		logger.info(filterInfo.getTitle() + "...\n");
 
 		if(method==Method.Logistic){
 			// init test
@@ -198,9 +202,10 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 			// run
 			logistic.run();
 			// save results
-			saveLogisticScanResults(logistic,name,title);
+			saveLogisticScanResults(logistic,filterInfo);
 			// acum significant values
 			significant.addAll(logistic.getSignificant());
+			significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
 		} else {
 			// init test
 			FatiScan fatiscan = new FatiScan(rankedList,filter,dbConnector,numberOfPartitions,testMode,outputFormat,order);		
@@ -208,37 +213,35 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 			try{
 				fatiscan.run();
 				// save results
-				saveFatiScanResults(fatiscan,name,title);
+				saveFatiScanResults(fatiscan,filterInfo);
 				// acum significant values
 				significant.addAll(fatiscan.getSignificant());
+				significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
 			} catch (EmptyAnnotationException ene){
-				result.addOutputItem(new Item("annot_" + name,"No annotation was found for " + name + " ids","Annotations for " + title,Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
+				result.addOutputItem(new Item("annot_" + filterInfo.getName(),"No annotation was found for " + filterInfo.getTitle() + " ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
 			}
-
 		}
-				
-
 		
-		logger.info("...end of " + title);
+		logger.info("...end of " + filterInfo.getTitle());
 		
 	}
 	
 	private void doYourAnnotationsTest(FeatureData rankedList, FeatureList<AnnotationItem> annotations, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidIndexException{
 		
 		// db attributes
-		String name = "your_annotations";
-		String title = "Your annotations";		
+		FunctionalDbDescriptor filterInfo = new FunctionalDbDescriptor("your_annotation","Your annotations", "your_annotations","Your annotations");
 		
-		logger.info(title + "...\n");
+		logger.info(filterInfo.getTitle() + "...\n");
 		if(method==Method.Logistic){
 			// init test
 			LogisticScan logistic = new LogisticScan(rankedList, annotations,order);		
 			// run
 			logistic.run();				
 			// save results
-			saveLogisticScanResults(logistic,name,title);
+			saveLogisticScanResults(logistic,filterInfo);
 			// acum significant values
 			significant.addAll(logistic.getSignificant());
+			significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
 		} else {
 			// init test
 			FatiScan fatiscan = new FatiScan(rankedList, annotations,numberOfPartitions,testMode,outputFormat,order);		
@@ -246,32 +249,33 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 			try{
 				fatiscan.run();				
 				// save results
-				saveFatiScanResults(fatiscan,name,title);		
+				saveFatiScanResults(fatiscan,filterInfo);		
 				// acum significant values
 				significant.addAll(fatiscan.getSignificant());
+				significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
 			} catch (EmptyAnnotationException ene){
-				result.addOutputItem(new Item("annot_" + name,"No annotation was found for " + name + " ids","Annotations for " + title,Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
+				result.addOutputItem(new Item("annot_" + filterInfo.getName(),"No annotation was found for " + filterInfo.getTitle() + " ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
 			}
 		}
 		
-		logger.info("...end of " + title);
+		logger.info("...end of " + filterInfo.getTitle());
 		
 	}
 	
-	private void saveFatiScanResults(FatiScan fatiscan, String name, String title) throws IOException{
+	private void saveFatiScanResults(FatiScan fatiscan, FunctionalDbDescriptor fiterInfo) throws IOException{
 		
-		String fileName = name + ".txt";
-		String annotFileName = name + ".annot";
+		String fileName = fiterInfo.getName() + ".txt";
+		String annotFileName = fiterInfo.getName() + ".annot";
 		
 		// save statistic results					
 		List<String> testResultOutput = FatiScanResultToStringList(fatiscan.getResults());
 		
 		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
-		result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE",name.toUpperCase() + "_TERM"),new HashMap<String,String>(),"Database tests"));
+		result.addOutputItem(new Item(fiterInfo.getName(),fileName,fiterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE",fiterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Database tests"));
 						
 		// save annotation
 		IOUtils.write(outdir + "/" + annotFileName, fatiscan.getAnnotations().toString());
-		result.addOutputItem(new Item("annot_" + name,annotFileName,"Annotations for " + title,Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
+		result.addOutputItem(new Item("annot_" + fiterInfo.getName(),annotFileName,"Annotations for " + fiterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
 		
 		// save graph
 //		List<GeneSetAnalysisTestResult> significants = fatiscan.getSignificant();
@@ -285,20 +289,20 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		
 	}
 	
-	private void saveLogisticScanResults(LogisticScan logistic, String name, String title) throws IOException{
+	private void saveLogisticScanResults(LogisticScan logistic, FunctionalDbDescriptor fiterInfo) throws IOException{
 		
-		String fileName = name + ".txt";
-		String annotFileName = name + ".annot";
+		String fileName = fiterInfo.getName() + ".txt";
+		String annotFileName = fiterInfo.getName() + ".annot";
 		
 		// save statistic results					
 		List<String> testResultOutput = LogisticResultToStringList(logistic.getResults());
 		
 		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
-		result.addOutputItem(new Item(name,fileName,title,Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE"),new HashMap<String,String>(),"Database tests"));
+		result.addOutputItem(new Item(fiterInfo.getName(),fileName,fiterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE",fiterInfo.getPrefix().toUpperCase()),new HashMap<String,String>(),"Database tests"));
 						
 		// save annotation
 		IOUtils.write(outdir + "/" + annotFileName, logistic.getAnnotations().toString());
-		result.addOutputItem(new Item("annot_" + name,annotFileName,"Annotations for " + title,Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
+		result.addOutputItem(new Item("annot_" + fiterInfo.getName(),annotFileName,"Annotations for " + fiterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
 		
 //		// save graph
 //		List<GeneSetAnalysisTestResult> significants = logistic.getSignificant();

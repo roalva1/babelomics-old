@@ -44,7 +44,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 	private StringBuilder annotationReport;
 	private String list2label;
 	
-	List<String> significantDbs;
+	private List<String> significantDbs;
 	
 	public FatiGOTool() {
 		initOptions();
@@ -176,7 +176,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				saveAnnotationsReport();
 				
 				// significant terms				
-				result.getOutputItems().add(3, new Item("significant","significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",ListUtils.toString(significantDbs,",")),new HashMap<String,String>(),"Significant Results"));
+				result.getOutputItems().add(4, new Item("significant","significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",ListUtils.toString(significantDbs,",")),new HashMap<String,String>(),"Significant Results"));
 				significant.add(TwoListFisherTestResult.header());
 				IOUtils.write(outdir + "/significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significant,"\n"));
 				
