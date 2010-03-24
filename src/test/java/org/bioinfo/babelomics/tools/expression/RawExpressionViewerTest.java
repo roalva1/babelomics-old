@@ -19,6 +19,7 @@ public class RawExpressionViewerTest {
 	public void tearDown() throws Exception {
 	}
 
+	@Test
 	public void Test() {
 		String dataset = "/mnt/commons/test/biodata/example/onecolor_agilent_expression.zip";
 		String outdir = "/tmp/RawExpressionViewerTest";
@@ -27,9 +28,10 @@ public class RawExpressionViewerTest {
 		int channels = 1;
 		String technology = "agilent";
 		
-		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
+		//String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
+		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "agilent,one-channel"};
 
-		System.out.println("----- " + technology + " " + channels + " color ----------------> " + Arrays.toString(args));
+		System.out.println("--------------------> " + Arrays.toString(args));
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -38,6 +40,7 @@ public class RawExpressionViewerTest {
 		}
 	}	
 
+	@Test
 	public void Test1() {
 		String dataset = "/mnt/commons/test/biodata/example/twocolor_agilent_expression.zip";
 		String outdir = "/tmp/RawExpressionViewerTest1";
@@ -46,9 +49,10 @@ public class RawExpressionViewerTest {
 		int channels = 2;
 		String technology = "agilent";
 		
-		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
+		//String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
+		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "agilent,two-channels"};
 
-		System.out.println("----- " + technology + " " + channels + " color ----------------> " + Arrays.toString(args));
+		System.out.println("--------------------> " + Arrays.toString(args));
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -57,6 +61,7 @@ public class RawExpressionViewerTest {
 		}
 	}	
 
+	@Test
 	public void Test2() {
 		String dataset = "/mnt/commons/test/biodata/example/onecolor_genepix_expression.zip";
 		String outdir = "/tmp/RawExpressionViewerTest2";
@@ -65,9 +70,10 @@ public class RawExpressionViewerTest {
 		int channels = 1;
 		String technology = "genepix";
 		
-		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
+		//String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
+		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "genepix,one-channel"};
 
-		System.out.println("----- " + technology + " " + channels + " color ----------------> " + Arrays.toString(args));
+		System.out.println("---------------------> " + Arrays.toString(args));
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -85,9 +91,10 @@ public class RawExpressionViewerTest {
 		int channels = 2;
 		String technology = "genepix";
 		
-		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
+		//String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
+		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "genepix,two-channels"};
 
-		System.out.println("----- " + technology + " " + channels + " color ----------------> " + Arrays.toString(args));
+		System.out.println("--------------------> " + Arrays.toString(args));
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -95,4 +102,22 @@ public class RawExpressionViewerTest {
 			e.printStackTrace();
 		}
 	}	
+
+	@Test
+	public void Test4() {
+		String dataset = "/mnt/commons/test/biodata/example/cel.zip";
+		String outdir = "/tmp/RawExpressionViewerTest4";
+		new File(outdir).mkdir();
+
+		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "affymetrix"};
+
+		System.out.println("--------------------> " + Arrays.toString(args));
+		
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}	
+
 }
