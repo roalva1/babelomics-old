@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.bioinfo.babelomics.methods.expression.differential.Limma;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.collections.exceptions.InvalidColumnIndexException;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;

@@ -304,11 +304,11 @@ public class Predictor extends BabelomicsTool {
 		int best = svm.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
 		EvaluationResult bestRMSE = svm.getEvaluationResultList().get(best);
 		logger.println("Beset RMSE classification");
-		logger.println("Cost: " + svm.getNumCostArray()[best]);
+		logger.println("Cost: " + svm.getCostValues()[best]);
 		logger.println(bestRMSE.toString());
 
 		try {
-			IOUtils.write(new File(outdir + "/svm.txt"), "Best RMSE classification\n\nCost: " + svm.getNumCostArray()[best] + "\n\n" + bestRMSE.toString());
+			IOUtils.write(new File(outdir + "/svm.txt"), "Best RMSE classification\n\nCost: " + svm.getCostValues()[best] + "\n\n" + bestRMSE.toString());
 			result.addOutputItem(new Item("svm_result_file", "svm.txt", "SVM result file", TYPE.FILE));
 		} catch (IOException e) {
 			printError("ioexception_executesvm_predictor", "Error saving SVM results", "Error saving SVM results");
