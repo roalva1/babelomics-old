@@ -54,7 +54,7 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 	
 	private testFactor test;//-t- [1,2] statistical test, 0: Hypergeometric test (default), 1: Chi Square test
 	private correctionFactor correction; // -s 0: none	any number < 0: FDR method	any number > 0: Number of permutations to correct p-values with permutations method
-
+	List<String> significantDbs;
 	
 	@Override
 	public void initOptions() {
@@ -160,6 +160,7 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 			if(filterList.size()==0 && !isYourAnnotations){
 				throw new ParseException("No biological database selected (eg. --go-bp)");
 			} else {
+				significantDbs = new ArrayList<String>();
 				if(list2!=null)idList2 = list2.getDataFrame().getRowNames();
 				annotationReport = new StringBuilder();
 				annotationReport.append("#DB").append("\t").append("List1").append("\t").append(list2label).append("\n");
@@ -199,6 +200,7 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		runAndSave(genecodis, name, title, filterInfo);
 		
 		logger.println("addAnnotationReport...");
+		significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
 		addAnnotationReport(genecodis,"Your annotations");
 		return genecodis;
 	}
@@ -218,6 +220,7 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		
 		runAndSave(genecodis, name, title,filterInfo);
 		
+		significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
 		logger.println("addAnnotationReport...");
 		addAnnotationReport(genecodis,title);
 		
@@ -332,8 +335,9 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		
 		if (genecodis.getSignificantTerms()>0){
 			String correctionParam = (correction== correctionFactor.none)?"CORRECTEDNONE":"CORRECTED";
-				result.addOutputItem(new Item(name+ "_concurrence.txt", name+ "_concurrence.txt", "Co-ocurrence annotations results", TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE_"+test.toString().toUpperCase()+"_"+correctionParam), new HashMap<String, String>(2), "Co-ocurrence annotations results"));
-				result.addOutputItem(new Item(name+ "_singular.txt", name+ "_singular.txt", "Singular annotations results", TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE_"+test.toString().toUpperCase()+"_"+correctionParam), new HashMap<String, String>(2), "Singular annotations results"));
+			
+				result.addOutputItem(new Item(name+ "_concurrence.txt", name+ "_concurrence.txt", "Co-ocurrence annotations results", TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE_"+test.toString().toUpperCase()+"_"+correctionParam,filterInfo.getPrefix().toUpperCase() + "_TERM"), new HashMap<String, String>(), "Co-ocurrence annotations results"));
+				result.addOutputItem(new Item(name+ "_singular.txt", name+ "_singular.txt", "Singular annotations results", TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE_"+test.toString().toUpperCase()+"_"+correctionParam,filterInfo.getPrefix().toUpperCase() + "_TERM"), new HashMap<String, String>(), "Singular annotations results"));
 				
 //		result.addOutputItem(new Item(filterInfo.getName() + "_leyenda","TS = Number of annotated genes in the reference list (Total number of genes in the reference list);S = Number of annotated genes in the input list (Total number of genes in the input list);Hyp = Hypergeometric pValue; Hyp* = Corrected hypergeometric pValue ","",Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Co-ocurrence annotations results"));
 //		result.addOutputItem(new Item(filterInfo.getName() + "_leyenda","TS = Number of annotated genes in the reference list (Total number of genes in the reference list);S = Number of annotated genes in the input list (Total number of genes in the input list);Hyp = Hypergeometric pValue; Hyp* = Corrected hypergeometric pValue ","",Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Singular annotations results"));
