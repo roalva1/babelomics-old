@@ -20,6 +20,7 @@ import org.bioinfo.mlpr.classifier.GenericClassifier;
 import org.bioinfo.mlpr.classifier.Knn;
 import org.bioinfo.mlpr.classifier.RForest;
 import org.bioinfo.mlpr.classifier.Svm;
+import org.bioinfo.mlpr.evaluation.KFoldCrossValidation;
 import org.bioinfo.mlpr.evaluation.result.EvaluationResult;
 import org.bioinfo.mlpr.utils.InstancesBuilder;
 import org.bioinfo.tool.OptionFactory;
@@ -86,33 +87,40 @@ public class Predictor extends BabelomicsTool {
 		// classifiers algorithms
 		OptionGroup classifiers = new OptionGroup();
 		classifiers.setRequired(false);
+		
+			// Evaluation
+			options.addOption(OptionFactory.createOption("cross-validation", "Perform cross validation analysis",false,false));			
+			options.addOption(OptionFactory.createOption("cross-validation-folds", "Number of folds in cross validation evaluation",false,true));
+			options.addOption(OptionFactory.createOption("validation-repeats", "Number of repeat each randomization",false,true));
+			options.addOption(OptionFactory.createOption("feature-selection", "Number of repeat each randomization",false,false));
 
-		// KNN
-		classifiers.addOption(OptionFactory.createOption("knn", "Classify dataset with a KNN classifier",false,false));
-		options.addOption(OptionFactory.createOption("knn-tune", "Perform automated number of neighbors tunning",false,false));
-		options.addOption(OptionFactory.createOption("knn-neighbors", "Knn number of neighbors (5 by default)", false, true));
-		
-		// SVM
-		classifiers.addOption(OptionFactory.createOption("svm", "Classify dataset with a SVM classifier", false,false));
-		options.addOption(OptionFactory.createOption("svm-tune", "Perform automated parameter tunning",false,false));
-		options.addOption(OptionFactory.createOption("svm-cost", "----", false));
-		
-		// Random forest
-		classifiers.addOption(OptionFactory.createOption("random-forest", "Classify dataset with a Random Forest classifier", false,false));
-		options.addOption(OptionFactory.createOption("random-forest-tune", "Perform automated number of tree tunning",false,false));
-		options.addOption(OptionFactory.createOption("random-forest-trees", "Number of trees", false));
-		
-		// DLDA
-		classifiers.addOption(OptionFactory.createOption("dlda", "Classify dataset with a DLDA classifier", false,false));
-		options.addOption(OptionFactory.createOption("dlda-tune", "Perform automated parameter tunning",false,false));
-		
-		// SOM
-		classifiers.addOption(OptionFactory.createOption("som", "Classify dataset with a SOM classifier", false,false));
-		options.addOption(OptionFactory.createOption("som-tune", "Perform automated parameter tunning",false,false));
-		
-		// PAM
-		classifiers.addOption(OptionFactory.createOption("pam", "Classify dataset with a PAM classifier", false,false));
-		options.addOption(OptionFactory.createOption("pam-tune", "Perform automated parameter tunning",false,false));		
+			// KNN
+			classifiers.addOption(OptionFactory.createOption("knn", "Classify dataset with a KNN classifier",false,false));
+			options.addOption(OptionFactory.createOption("knn-tune", "Perform automated number of neighbors tunning",false,false));
+			options.addOption(OptionFactory.createOption("knn-neighbors", "Knn number of neighbors (5 by default)", false, true));
+			
+			// SVM
+			classifiers.addOption(OptionFactory.createOption("svm", "Classify dataset with a SVM classifier", false,false));
+			options.addOption(OptionFactory.createOption("svm-tune", "Perform automated parameter tunning",false,false));
+			options.addOption(OptionFactory.createOption("svm-cost", "----", false));
+			
+			// Random forest
+			classifiers.addOption(OptionFactory.createOption("random-forest", "Classify dataset with a Random Forest classifier", false,false));
+			options.addOption(OptionFactory.createOption("random-forest-tune", "Perform automated number of tree tunning",false,false));
+			options.addOption(OptionFactory.createOption("random-forest-trees", "Number of trees", false));
+			
+			// DLDA
+			classifiers.addOption(OptionFactory.createOption("dlda", "Classify dataset with a DLDA classifier", false,false));
+			options.addOption(OptionFactory.createOption("dlda-tune", "Perform automated parameter tunning",false,false));
+			
+			// SOM
+			classifiers.addOption(OptionFactory.createOption("som", "Classify dataset with a SOM classifier", false,false));
+			options.addOption(OptionFactory.createOption("som-tune", "Perform automated parameter tunning",false,false));
+			
+			// PAM
+			classifiers.addOption(OptionFactory.createOption("pam", "Classify dataset with a PAM classifier", false,false));
+			options.addOption(OptionFactory.createOption("pam-tune", "Perform automated parameter tunning",false,false));
+			
 		options.addOptionGroup(classifiers);
 
 		// feature selection (gene selection), and other options
@@ -208,7 +216,7 @@ public class Predictor extends BabelomicsTool {
 	}
 
 
-	private void executeKnn(Instances instances) {
+	private void executeKnn(Instances instances) throws Exception {
 		
 		// update status
 		updateStatus(progressCurrent,"executing KNN classifier");
@@ -221,6 +229,14 @@ public class Predictor extends BabelomicsTool {
 			knn.setTuneParameters(true);
 		} else {
 			if(commandLine.hasOption("knn-neighbors")) knn.setKnn(Integer.parseInt(commandLine.getOptionValue("knn-neighbors")));						
+		}
+		// validation
+		if(commandLine.hasOption("cross-validation")) {
+			int repeats = Integer.parseInt(commandLine.getOptionValue("validation-repeats", "10"));
+			int folds = Integer.parseInt(commandLine.getOptionValue("cross-validation-folds", "5"));
+			boolean featureSelection = commandLine.hasOption("feature-selection")?true:false;
+			knn.setClassifierEvaluation(new KFoldCrossValidation(repeats,folds,featureSelection));
+			logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", feature-selection = " + featureSelection + ")");			
 		}
 		
 		// train
@@ -286,7 +302,7 @@ public class Predictor extends BabelomicsTool {
 		combinedTable.append(classifier.getSortedResultsTable(numberOfBestSelectedClassifications));
 	}
 	
-	private void executeSvm(Instances instances) {
+	private void executeSvm(Instances instances) throws Exception {
 		
 		// update status
 		updateStatus(progressCurrent,"executing SVM classifier");
@@ -319,7 +335,7 @@ public class Predictor extends BabelomicsTool {
 		saveClassifierResults(svm);
 	}
 
-	private void executeRandomForest(Instances instances) {
+	private void executeRandomForest(Instances instances) throws Exception {
 		
 		// update status
 		updateStatus(progressCurrent,"executing Random Forest classifier");

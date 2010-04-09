@@ -216,12 +216,12 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		duplicates.put(FatiGO.REMOVE_ALL, "Remove all duplicates (owned and shared duplicates)");
 		addInputParam("duplicates", "Duplicates management", duplicates.get(duplicatesMode));
 		// fisher laterality
-		HashMap<Integer,String> fisher = new HashMap<Integer, String>();		
+		HashMap<Integer,String> fisher = new HashMap<Integer, String>();
 		fisher.put(FisherExactTest.GREATER, "Over represented terms in list 1");
 		fisher.put(FisherExactTest.LESS, "Over represented terms in list 2");
 		fisher.put(FisherExactTest.TWO_SIDED, "Two tailed");
 		addInputParam("fisher", "Fisher exact test", fisher.get(testMode));
-	}	
+	}
 	private void addInputParam(String id, String label, String value){
 		result.addOutputItem(new Item(id,value,label,Item.TYPE.MESSAGE,Arrays.asList("INPUT_PARAM"),new HashMap<String,String>(),"Input params"));
 	}
