@@ -20,7 +20,7 @@ import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.io.file.compress.CompressFactory;
 import org.bioinfo.io.file.compress.GenericCompressManager;
 import org.bioinfo.math.exception.InvalidParameterException;
-import org.bioinfo.microarray.AffymetrixExpresionUtils;
+import org.bioinfo.microarray.AffymetrixExpressionUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -108,7 +108,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 			if ( celConvert ) {			
 				jobStatus.addStatusMessage("40", "converting CEL to GCOS text file format");
 
-				AffymetrixExpresionUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", celFiles.getAbsolutePath(), tmpDir.getAbsolutePath());
+				AffymetrixExpressionUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", celFiles.getAbsolutePath(), tmpDir.getAbsolutePath());
 
 				File[] rawFiles = FileUtils.listFiles(tmpDir, ".+.CEL", true);
 				rawFilenames = ArrayUtils.toStringList(rawFiles);
@@ -150,7 +150,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 				if ( calls ) analysis.add("pm-mm,mas5-detect.calls=1.pairs=1");
 				if ( plier ) analysis.add("plier-mm");
 
-				AffymetrixExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, config.getProperty("BABELOMICS_DATA_HOME") + chipInfo.get("cdf"), celFiles.getAbsolutePath(), outdir);
+				AffymetrixExpressionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, config.getProperty("BABELOMICS_DATA_HOME") + chipInfo.get("cdf"), celFiles.getAbsolutePath(), outdir);
 
 			} else {
 
@@ -158,7 +158,7 @@ public class AffyExpressionNormalization extends BabelomicsTool {
 				if ( calls ) analysis.add("dabg");
 				if ( plier ) analysis.add("plier-gcbg");
 
-				AffymetrixExpresionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, config.getProperty("BABELOMICS_DATA_HOME") + chipInfo.get("cdf"), celFiles.getAbsolutePath(), outdir);
+				AffymetrixExpressionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, config.getProperty("BABELOMICS_DATA_HOME") + chipInfo.get("cdf"), celFiles.getAbsolutePath(), outdir);
 			}
 
 			//		System.err.println("cmd output: " + sp.getRunnableProcess().getOutput());

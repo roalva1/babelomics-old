@@ -29,7 +29,7 @@ import org.bioinfo.tool.result.Item;
 public class FatiScanTool  extends FunctionalProfilingTool{
 		
 	// list1
-	private enum Method {FatiScan,Logistic};	
+	private enum Method {FatiScan, Logistic};	
 	private Method method;
 	private FeatureData rankedList;
 	private int numberOfPartitions;

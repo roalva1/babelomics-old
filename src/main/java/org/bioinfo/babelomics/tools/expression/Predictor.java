@@ -235,7 +235,7 @@ public class Predictor extends BabelomicsTool {
 			int repeats = Integer.parseInt(commandLine.getOptionValue("validation-repeats", "10"));
 			int folds = Integer.parseInt(commandLine.getOptionValue("cross-validation-folds", "5"));
 			boolean featureSelection = commandLine.hasOption("feature-selection")?true:false;
-			knn.setClassifierEvaluation(new KFoldCrossValidation(repeats,folds,featureSelection));
+			knn.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds, featureSelection));
 			logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", feature-selection = " + featureSelection + ")");			
 		}
 		
