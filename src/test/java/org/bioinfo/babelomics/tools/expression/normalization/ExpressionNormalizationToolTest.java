@@ -1,0 +1,127 @@
+package org.bioinfo.babelomics.tools.expression.normalization;
+
+
+import static org.junit.Assert.fail;
+
+import java.io.File;
+import java.util.Arrays;
+
+import org.bioinfo.babelomics.BabelomicsMain;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class ExpressionNormalizationToolTest {
+
+	@Before
+	public void setUp() throws Exception {
+	}
+
+	@After
+	public void tearDown() throws Exception {
+	}
+
+	
+	public void Test1() {
+		String outDirName = "/tmp/GenePixExpression1CNormalizationTest";
+		new File(outDirName).mkdir();
+		String dataset = "/mnt/commons/test/biodata/example/onecolor_genepix_expression.zip";
+		String tags = "genepix,one-channel";
+		
+		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", tags, "-o", outDirName, "--bg-correction", "normexp", "--ba-normalization", "quantiles"};
+
+		System.out.println("command line parameters --> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}		
+	
+	public void Test2() {
+		String outDirName = "/tmp/GenePixExpression2CNormalizationTest";
+		new File(outDirName).mkdir();
+		String dataset = "/mnt/commons/test/biodata/example/twocolor_genepix_expression.zip";
+		String tags = "genepix,two-channels";
+		
+		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", tags, "-o", outDirName, "--bg-correction", "normexp", "--ba-normalization", "scale", "--wa-normalization", "loess"};
+
+		System.out.println("command line parameters --> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}		
+
+	public void Test3() {
+		String outDirName = "/tmp/AgilentExpression1CNormalizationTest";
+		new File(outDirName).mkdir();
+		String dataset = "/mnt/commons/test/biodata/example/agilent_one_color_expression.zip";
+		String tags = "agilent,one-channel";
+		
+		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", tags, "-o", outDirName, "--bg-correction", "none", "--ba-normalization", "quantiles"};
+
+		System.out.println("command line parameters --> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}	
+
+	public void Test4() {
+		String outDirName = "/tmp/AgilentExpression2CNormalizationTest2";
+		new File(outDirName).mkdir();
+		String dataset = "/mnt/commons/test/biodata/example/GSE11968_RAW/agilent.zip";
+		String tags = "agilent,two-channels";
+		
+		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", tags, "-o", outDirName, "--bg-correction", "normexp", "--wa-normalization", "loess", "--ba-normalization", "quantiles"};
+
+		System.out.println("command line parameters --> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}	
+	
+	public void Test5() {
+		String dataset = "/mnt/commons/test/biodata/example/cel.zip";
+		String outdir = "/tmp/AffyExpressionNormalizationTest";
+		new File(outdir).mkdir();
+		
+		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", "affymetrix,one-channel", "-o", outdir, "--rma", "--plier", "--calls"};
+
+		System.out.println("executing ----------------> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}	
+
+	@Test
+	public void Test6() {
+		String dataset = "/mnt/commons/test/biodata/example/CEL.tar.gz";
+		String outdir = "/tmp/AffyExpressionNormalizationTest1";
+		new File(outdir).mkdir();
+		
+		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", "affymetrix,one-channel", "-o", outdir, "--rma", "--plier", "--calls"};
+
+		System.out.println("command ling parameters --> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}	
+
+
+}
