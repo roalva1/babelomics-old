@@ -21,7 +21,6 @@ public class ExpressionNormalizationToolTest {
 	public void tearDown() throws Exception {
 	}
 
-	
 	public void Test1() {
 		String outDirName = "/tmp/GenePixExpression1CNormalizationTest";
 		new File(outDirName).mkdir();
@@ -106,7 +105,6 @@ public class ExpressionNormalizationToolTest {
 		}
 	}	
 
-	@Test
 	public void Test6() {
 		String dataset = "/mnt/commons/test/biodata/example/CEL.tar.gz";
 		String outdir = "/tmp/AffyExpressionNormalizationTest1";
@@ -123,5 +121,37 @@ public class ExpressionNormalizationToolTest {
 		}
 	}	
 
+	public void Test7() {
+		String dataset = "/mnt/commons/test/biodata/example/cels_in_subdir.tar.gz";
+		String outdir = "/tmp/AffyExpressionNormalizationTest7";
+		new File(outdir).mkdir();
+		
+		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", "affymetrix,one-channel", "-o", outdir, "--rma", "--plier", "--calls"};
+
+		System.out.println("command ling parameters --> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}	
+
+	@Test
+	public void Test8() {
+		String dataset = "/mnt/commons/test/biodata/example/cels_in_subdir.zip";
+		String outdir = "/tmp/AffyExpressionNormalizationTest8";
+		new File(outdir).mkdir();
+		
+		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", "affymetrix,one-channel", "-o", outdir, "--rma", "--plier", "--calls"};
+
+		System.out.println("command ling parameters --> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}	
 
 }

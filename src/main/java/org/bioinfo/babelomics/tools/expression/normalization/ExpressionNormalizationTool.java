@@ -135,20 +135,20 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		} else {
 			// getting raw files from directory
 			//
-
 			tmpDir = new File(rawDirName); 
-			File[] rawFiles = FileUtils.listFiles(new File(rawDirName), "affy".equalsIgnoreCase(technology) ? ".+.CEL" : ".+");
-			rawFileNames = new ArrayList<String>(rawFiles.length);
-			for(File file: rawFiles) {
-				rawFileNames.add(file.getAbsolutePath());
-			}
+		}
+		
+		File[] rawFiles = FileUtils.listFiles(tmpDir, "affy".equalsIgnoreCase(technology) ? ".+.cel" : ".+", true);
+		rawFileNames = new ArrayList<String>(rawFiles.length);
+		for(File file: rawFiles) {
+			rawFileNames.add(file.getAbsolutePath());
 		}
 
 		// sanity check
 		//
 		if ( rawFileNames == null || rawFileNames.size() == 0 ) {
 			abort("missingrawfiles_execute_expressionnormalization", "missing raw files", "missing raw files", "missing raw files");
-		}
+		}		
 	}
 
 	/**
@@ -266,21 +266,29 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		IOUtils.write(celFiles, "cel_files\n" + ListUtils.toString(rawFileNames, "\n"));
 
 		System.out.println("raw files = " + ListUtils.toString(rawFileNames, "\n"));
-
+		
 		// converting to CEL text
 		//
 		if ( celConvert ) {			
 			jobStatus.addStatusMessage("40", "converting CEL to GCOS text file format");
 
-			AffymetrixExpresionUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", celFiles.getAbsolutePath(), tmpDir.getAbsolutePath());
-
-			File[] rawFiles = FileUtils.listFiles(tmpDir, ".+.CEL", true);
+			File convertDir = new File(tmpDir.getAbsolutePath() + "/convert");
+			convertDir.mkdir();
+			AffymetrixExpresionUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", celFiles.getAbsolutePath(), convertDir.getAbsolutePath());
+			File[] rawFiles = FileUtils.listFiles(convertDir, ".+.CEL", true);
 			rawFileNames = ArrayUtils.toStringList(rawFiles);
-			System.out.println("-----------> raw file names = " + ListUtils.toString(rawFileNames, ","));
-
+			//System.out.println("-----------> converting to gcos text file format, raw file names = " + ListUtils.toString(rawFileNames, ","));
 			IOUtils.write(celFiles, "cel_files\n" + ListUtils.toString(rawFileNames, "\n"));
-		}		
 
+//			AffymetrixExpresionUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", celFiles.getAbsolutePath(), tmpDir.getAbsolutePath());
+//
+//			File[] rawFiles = FileUtils.listFiles(tmpDir, ".+.CEL", true);
+//			rawFileNames = ArrayUtils.toStringList(rawFiles);
+//			System.out.println("-----------> converting to gcos text file format, raw file names = " + ListUtils.toString(rawFileNames, ","));
+//
+//			IOUtils.write(celFiles, "cel_files\n" + ListUtils.toString(rawFileNames, "\n"));
+		}		
+		
 		//Config config = new Config();
 		config.append(new File(System.getenv("BABELOMICS_HOME") + "/conf/apt.conf"));
 		String chipName = getChipName(rawFileNames, config.getKeys());
@@ -295,6 +303,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 
 		System.out.println(" chip info = " + chipInfo.toString());
 
+		
 		String chipType = chipInfo.get("type");
 		if ( chipType == null ) {
 			abort("exception_execute_affynormalization", "could not find out the chip type", "could not find out the chip type", "could not find out the chip type");			
@@ -401,9 +410,12 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		List<String> lines = null;
 		List<String> results = new ArrayList<String>(rawFilenames.size());
 
-		System.out.println("----------> getChipName, chip names = " + ListUtils.toString(chipNames, ", "));
-
+		//System.out.println("----------> getChipName, chip names = " + ListUtils.toString(chipNames, ", "));
+		
 		for(int i=0 ; i<rawFilenames.size() ; i++) {
+			
+			//System.out.println("----------> getChipName, file name = " + rawFilenames.get(i));
+			
 			results.add(i, null);
 			lines = IOUtils.head(new File(rawFilenames.get(i)), 20);
 			for(String chipName: chipNames) {
@@ -418,6 +430,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			}
 		}
 
+		//System.out.println("***** results = " + ListUtils.toString(results));
 		String chipName = results.get(0);
 		for (int i=0 ; i<rawFilenames.size() ; i++) {
 			if ( ! chipName.equalsIgnoreCase(results.get(i)) ) {
