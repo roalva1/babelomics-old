@@ -45,7 +45,7 @@ public class IDConverter extends BabelomicsTool {
 		getOptions().addOption(OptionFactory.createOption("clone-based_(vega)", "Clone-based (Vega)", false, false));
 		getOptions().addOption(OptionFactory.createOption("codelink", "GE Healthcare/Amersham Codelink WGA", false, false));
 		getOptions().addOption(OptionFactory.createOption("embl", "EMBL", false, false));
-		getOptions().addOption(OptionFactory.createOption("ensembl_gene", "Ensembl gene", false, false));
+		getOptions().addOption(OptionFactory.createOption("ensembl-gene", "Ensembl gene", false, false));
 		getOptions().addOption(OptionFactory.createOption("ensembl_protein", "Ensembl protein", false, false));
 		getOptions().addOption(OptionFactory.createOption("ensembl_transcript", "Ensembl transcript", false, false));
 		getOptions().addOption(OptionFactory.createOption("ensembl_transcript_having_same_cds", "Ensembl transcript having same CDS", false, false));
@@ -134,7 +134,7 @@ public class IDConverter extends BabelomicsTool {
 		if ( commandLine.hasOption("clone-based_(vega)") ) dbNames.add("clone-based_(vega)");
 		if ( commandLine.hasOption("codelink") ) dbNames.add("codelink");
 		if ( commandLine.hasOption("embl") ) dbNames.add("embl");
-		if ( commandLine.hasOption("ensembl_gene") ) dbNames.add("ensembl_gene");
+		if ( commandLine.hasOption("ensembl-gene") ) dbNames.add("ensembl_gene");
 		if ( commandLine.hasOption("ensembl_protein") ) dbNames.add("ensembl_protein");
 		if ( commandLine.hasOption("ensembl_transcript") ) dbNames.add("ensembl_transcript");
 		if ( commandLine.hasOption("ensembl_transcript_having_same_cds") ) dbNames.add("ensembl_transcript_having_same_cds");
@@ -200,9 +200,9 @@ public class IDConverter extends BabelomicsTool {
 				for(int i=0 ; i<list.size() ; i++) {
 					line.delete(0, line.length());
 					line.append(ids.get(i));
-					System.out.println("Converting " + ids.get(i));
+					//System.out.println("Converting " + ids.get(i));
 					for(String key: MapUtils.getKeys(list.get(i))) {
-						System.out.print("to " + key + " ---> ");
+						//System.out.print("to " + key + " ---> ");
 						outIds.clear();
 						for(XRef xref: list.get(i).get(key)) {
 							outIds.add(xref.getId());
