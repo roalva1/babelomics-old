@@ -46,7 +46,7 @@ public class ClassComparison extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
 		options.addOption(OptionFactory.createOption("class-name", "class"));
 		options.addOption(OptionFactory.createOption("class-values", "value"));
-		options.addOption(OptionFactory.createOption("test", "test"));
+		options.addOption(OptionFactory.createOption("test", "test: t, limma, anova, fold_change"));
 		options.addOption(OptionFactory.createOption("correction", "Multiple-test correction: fdr, bh, by, bonferroni, hochberg, hold"));
 		//options.addOption(OptionFactory.createOption("batch", "class class variable"));
 	}
@@ -98,7 +98,7 @@ public class ClassComparison extends BabelomicsTool {
 			} else {
 				abort("testmismatched_execute_classcomparison", "test " + test + " not supported for " + classValues.size() + "-class test", "test " + test + " not supported for " + classValues.size() + "-class test", "test " + test + " not supported for " + classValues.size() + "-class test");								
 			}
-		} else if ( "fold-change".equalsIgnoreCase(test) ) {
+		} else if ( "fold_change".equalsIgnoreCase(test) ) {
 			if ( classValues.size() == 2 ) {
 				executeFoldChange();
 			} else {
