@@ -25,7 +25,7 @@ public class IDConverterTest {
 		String outdir = "/tmp/IDConverterTest";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "id-converter","--log-level", "2", "--species", "hsa", "--list", "AATK,BIRC7,PARM1,kkkkkk", "--go", "--entrezgene", "--interpro", "-o", outdir};
+		String []args = { "--tool", "id-converter","--log-level", "2", "--species", "hsa", "--list", "AATK,BIRC7,PARM1,kkkkkk", "--db-names", "go,entrezgene,interpro", "-o", outdir};
 
 		System.out.println("ID Converter Test, args : " + Arrays.toString(args));
 		try {
@@ -36,7 +36,6 @@ public class IDConverterTest {
 		}
 	}	
 
-	@Test
 	public void Test1() {
 		//String dataset = "/mnt/commons/test/biodata/example/genes.txt";
 		String dataset = "/mnt/commons/test/tools/tmt/list2_liver.txt";

@@ -54,21 +54,30 @@ public class ClassComparison extends BabelomicsTool {
 	@Override
 	public void execute() {
 
+		List<String> values = null;
+		
 		// reading dataset
 		//
 		dataset = initDataset(new File(commandLine.getOptionValue("dataset")));
 
 		test = commandLine.getOptionValue("test", null);
 		className = commandLine.getOptionValue("class-name", null);
-		classValues = (commandLine.hasOption("class-values") ? StringUtils.toList(commandLine.getOptionValue("class-values", null), ",") : null);
+		values = (commandLine.hasOption("class-values") ? StringUtils.toList(commandLine.getOptionValue("class-values", null), ",") : null);
 		correction = commandLine.getOptionValue("correction", "fdr");
 
-		if ( classValues == null ) {
-			classValues = ListUtils.unique(dataset.getVariables().getByName(className).getValues());
+		if ( values == null ) {
+			values = ListUtils.unique(dataset.getVariables().getByName(className).getValues());
 		} else {
-			classValues = ListUtils.unique(classValues);
-			if ( classValues == null ) {
+			values = ListUtils.unique(values);
+			if ( values == null ) {
 				abort("classvaluesmissing_execute_classcomparison", "class values missing", "class values missing", "class values missing");				
+			}
+		}
+		
+		classValues = new ArrayList<String>();
+		for(String val: values) {
+			if ( val != null && val.trim().length() > 0 ) {
+				classValues.add(val.trim());		
 			}
 		}
 

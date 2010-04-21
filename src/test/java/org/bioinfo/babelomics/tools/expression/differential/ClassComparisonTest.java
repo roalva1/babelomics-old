@@ -12,7 +12,6 @@ public class ClassComparisonTest {
 	public void notest() {
 	}
 
-	@Test
 	public void Test() {
 		String dataset = "/mnt/commons/test/biodata/example/twoclasses100.txt";
 		String outdir = "/tmp/ClassComparisonTest";
@@ -28,7 +27,6 @@ public class ClassComparisonTest {
 		}		
 	}
 
-	@Test
 	public void Test1() {
 	    
 		String dataset = "/mnt/commons/test/biodata/example/twoclasses100.txt";
@@ -53,7 +51,7 @@ public class ClassComparisonTest {
 		new File(outdir).mkdir();
 
 		System.out.println("----- two classes - ttest ------");
-		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "t", "--class-name", "class", "--class-values", "basal,luminal", "--correction", "hochberg"};
+		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "t", "--class-name", "class", "--class-values", "basal,luminal,", "--correction", "hochberg"};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -62,7 +60,6 @@ public class ClassComparisonTest {
 		}		
 	}
 
-	@Test
 	public void Test3() {
 	    
 		String dataset = "/mnt/commons/test/biodata/example/twoclasses100.txt";
@@ -79,7 +76,6 @@ public class ClassComparisonTest {
 		}		
 	}
 		
-	@Test
 	public void Test4() {
 	    
 		String dataset = "/mnt/commons/test/biodata/example/multiclasses.txt";
@@ -96,7 +92,6 @@ public class ClassComparisonTest {
 		}		
 	}
 
-	@Test
 	public void Test5() {
 	    
 		String dataset = "/mnt/commons/test/biodata/example/multiclasses.txt";
@@ -113,7 +108,6 @@ public class ClassComparisonTest {
 		}		
 	}
 	
-	@Test
 	public void Test6() {
 	    
 		String dataset = "/mnt/commons/test/biodata/example/multiclasses.txt";
