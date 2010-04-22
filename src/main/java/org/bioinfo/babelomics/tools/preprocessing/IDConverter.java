@@ -231,7 +231,9 @@ public class IDConverter extends BabelomicsTool {
 				for(String key: MapUtils.getKeys(idsMap)) {
 					fileName = key + ".txt";
 					IOUtils.write(new File(outdir + "/" + fileName), idsMap.get(key));					
-					result.addOutputItem(new Item(key + " IDs", fileName, "ID conversion", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Results per file"));
+					//result.addOutputItem(new Item(key + " IDs", fileName, "ID conversion", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Results per file"));
+					
+					result.addOutputItem(new Item(key + "_table", fileName, "ID conversion table", Item.TYPE.FILE, StringUtils.toList("TABLE,IDCONVERTER_TABLE", ","), new HashMap<String, String>(), "ID conversion tables"));
 				}
 			}
 		} catch (Exception e) {

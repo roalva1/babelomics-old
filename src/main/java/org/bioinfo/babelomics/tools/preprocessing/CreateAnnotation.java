@@ -39,7 +39,7 @@ public class CreateAnnotation extends FunctionalProfilingTool {
 	FeatureData list = null;
 	List<String> ids = null;
 	boolean allGenome;
-	String outputFormat;
+	//String outputFormat;
 
 	public CreateAnnotation() {
 		initOptions();
@@ -54,7 +54,7 @@ public class CreateAnnotation extends FunctionalProfilingTool {
 		getOptions().addOption(OptionFactory.createOption("all-genome", "All genome",false));
 
 		// output format
-		getOptions().addOption(OptionFactory.createOption("output-format", "Output format: compact or extended. Default: compact", false));
+		//getOptions().addOption(OptionFactory.createOption("output-format", "Output format: compact or extended. Default: compact", false));
 	}
 
 	@Override
@@ -77,7 +77,7 @@ public class CreateAnnotation extends FunctionalProfilingTool {
 			ids = StringUtils.toList(inputIds, ",");
 		}
 
-		outputFormat = commandLine.getOptionValue("output-format", "compact");			
+		//outputFormat = commandLine.getOptionValue("output-format", "compact");			
 		
 	}
 
@@ -118,10 +118,11 @@ public class CreateAnnotation extends FunctionalProfilingTool {
 					//System.out.println("----> db name = " + name);				
 					//System.out.println("size of annotations : " + al.size());
 					
-					if ( outputFormat.equalsIgnoreCase("extended") ) {
-						IOUtils.write(new File(outdir + "/" + name + ".txt"), al.toString());
+					//if ( outputFormat.equalsIgnoreCase("extended") ) {
+						IOUtils.write(new File(outdir + "/" + name + "_extended.txt"), al.toString());
+						result.addOutputItem(new Item(name, name + "_extended.txt", getDBTitle(filter) + " annotation (extended format): ", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Extended output"));					
 						//System.out.println(al.toString());
-					} else {
+					//} else {
 						Map<String, List<String>> map = new HashMap<String, List<String>>();
 						for(int i=0 ; i<al.size() ; i++) {
 							if ( ! map.containsKey(al.get(i).getId()) ) {
@@ -134,10 +135,12 @@ public class CreateAnnotation extends FunctionalProfilingTool {
 							sb.append(key).append("\t").append(ListUtils.toString(map.get(key), ",")).append("\n");
 						}
 						IOUtils.write(new File(outdir + "/" + name + ".txt"), sb.toString());
-						//System.out.println(sb.toString());
-					}
+						result.addOutputItem(new Item(name + "_table", name + ".txt", getDBTitle(filter) + " annotation table", Item.TYPE.FILE, StringUtils.toList("TABLE,IDCONVERTER_TABLE", ","), new HashMap<String, String>(), "Annotation tables"));
 
-					result.addOutputItem(new Item(name, name + ".txt", getDBTitle(filter) + " annotation: ", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Results"));					
+						//System.out.println(sb.toString());
+					//}
+
+					//result.addOutputItem(new Item(name, name + ".txt", getDBTitle(filter) + " annotation: ", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Results"));					
 				}
 			}
 		} catch (Exception e) {
