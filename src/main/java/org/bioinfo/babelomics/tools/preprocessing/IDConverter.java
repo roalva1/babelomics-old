@@ -31,6 +31,7 @@ public class IDConverter extends BabelomicsTool {
 		getOptions().addOption(OptionFactory.createOption("list", "IDs to convert separated by commas", false));
 
 		getOptions().addOption(OptionFactory.createOption("db-names", "DB names to convert", false));
+		getOptions().addOption(OptionFactory.createOption("output-format", "Output format: compact or extended. Default: compact", false));
 		
 //		getOptions().addOption(OptionFactory.createOption("affy_focus", "Affymx Microarray Focus", false, false)); 
 //		getOptions().addOption(OptionFactory.createOption("affy_hcg110", "Affymx Microarray HCG110", false, false)); 
@@ -120,6 +121,8 @@ public class IDConverter extends BabelomicsTool {
 		if ( commandLine.hasOption("db-names") ) {
 			dbNames = StringUtils.toList(commandLine.getOptionValue("db-names"), ","); 
 		}
+
+		String outputFormat = commandLine.getOptionValue("output-format", "compact");			
 
 //		if ( commandLine.hasOption("go") ) dbNames.add("go");
 //		if ( commandLine.hasOption("entrezgene") ) dbNames.add("entrezgene");
@@ -228,12 +231,34 @@ public class IDConverter extends BabelomicsTool {
 				IOUtils.write(new File(outdir + "/" + fileName), alls);
 				result.addOutputItem(new Item("All IDs", fileName, "ID conversion", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Results in a single file"));
 				
+				String[] arr;
 				for(String key: MapUtils.getKeys(idsMap)) {
+										
 					fileName = key + ".txt";
-					IOUtils.write(new File(outdir + "/" + fileName), idsMap.get(key));					
+										
+					if ( outputFormat.equalsIgnoreCase("extended") ) {
+						List<String> items = null;
+						List<String> lines = new ArrayList<String>();
+						lines.add(idsMap.get(key).get(0));
+						for(int i=1 ; i<idsMap.get(key).size() ; i++) {
+							arr = idsMap.get(key).get(i).split("\t");
+							if ( arr.length > 1 ) {
+								items = StringUtils.toList(arr[1], ",");
+								for(String item: items) {
+									lines.add(arr[0] + "\t" + item);
+								}
+							} else {
+								lines.add(arr[0] + "\t");
+							}
+						}
+						IOUtils.write(new File(outdir + "/" + fileName), ListUtils.toString(lines, "\n"));
+					} else {
+						IOUtils.write(new File(outdir + "/" + fileName), idsMap.get(key));											
+					}
+
 					//result.addOutputItem(new Item(key + " IDs", fileName, "ID conversion", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Results per file"));
 					
-					result.addOutputItem(new Item(key + "_table", fileName, "ID conversion table", Item.TYPE.FILE, StringUtils.toList("TABLE,IDCONVERTER_TABLE", ","), new HashMap<String, String>(), "ID conversion tables"));
+					result.addOutputItem(new Item(key, fileName, "ID conversion table", Item.TYPE.FILE, StringUtils.toList("TABLE,IDCONVERTER_TABLE", ","), new HashMap<String, String>(), "ID conversion tables"));
 				}
 			}
 		} catch (Exception e) {
