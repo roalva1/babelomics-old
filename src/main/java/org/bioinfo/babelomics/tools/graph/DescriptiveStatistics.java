@@ -47,7 +47,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		//options.addOption(OptionFactory.createOption("histogramboxplot", "",false,false));
 		
 		options.addOption(OptionFactory.createOption("class", "",false,true));
-		options.addOption(OptionFactory.createOption("title", "",true,true,' '));
+		options.addOption(OptionFactory.createOption("title", "",false,true,' '));
 		options.addOption(OptionFactory.createOption("width", "",false,true));
 		options.addOption(OptionFactory.createOption("height", "",false,true));
 	}
