@@ -44,10 +44,9 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("histogram", "",false));
 		options.addOption(OptionFactory.createOption("boxplot", "",false));
 		options.addOption(OptionFactory.createOption("pcaplot", "",false));
-		//options.addOption(OptionFactory.createOption("histogramboxplot", "",false,false));
-		
+		//options.addOption(OptionFactory.createOption("histogramboxplot", "",false,false));		
 		options.addOption(OptionFactory.createOption("class", "",false,true));
-		options.addOption(OptionFactory.createOption("title", "",true,true,' '));
+		options.addOption(OptionFactory.createOption("title", "",false,true,' '));
 		options.addOption(OptionFactory.createOption("width", "",false,true));
 		options.addOption(OptionFactory.createOption("height", "",false,true));
 	}
@@ -62,7 +61,8 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		axeTitle = commandLine.getOptionValue("title", "");
 		axeTitle = axeTitle.replaceAll("_____", " ");
 		//axeTitle = ArrayUtils.toString(commandLine.getOptionValues("title")," ");
-		System.err.println("axeTitle---------------"+axeTitle+" -------commandLine.getOptionValues----------"+commandLine.getOptionValues("title").length);
+		
+		//System.err.println("axeTitle---------------"+axeTitle+" -------commandLine.getOptionValues----------"+commandLine.getOptionValues("title").length);
 		if(commandLine.getOptionValue("histogram",null)!=null){
 			BoxPlotChart bp = (commandLine.getOptionValue("boxplot", null) != null) ? new BoxPlotChart("Box-plot","", axeTitle):null;
 			HistogramChart hc = new HistogramChart("Histogram chart", axeTitle, "frec");

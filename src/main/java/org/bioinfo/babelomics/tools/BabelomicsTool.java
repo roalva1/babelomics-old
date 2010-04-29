@@ -18,13 +18,13 @@ public abstract class BabelomicsTool extends GenericBioTool {
 	
 	
 	public BabelomicsTool() {
-		babelomicsHomePath = System.getenv("BABELOMICS_HOME");
-		
-		try {
-			this.appendConfig(new File(babelomicsHomePath + "/conf/babelomics.properties"));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		babelomicsHomePath = System.getenv("BABELOMICS_HOME");
+//		
+//		try {
+//			this.appendConfig(new File(babelomicsHomePath + "/conf/babelomics.properties"));
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		
 		initCommonsOptions();
 		initOptions();
@@ -34,6 +34,7 @@ public abstract class BabelomicsTool extends GenericBioTool {
 	
 	private void initCommonsOptions() {
 		getOptions().addOption(OptionFactory.createOption("tool", "to", "tool name", true));
+		getOptions().addOption(OptionFactory.createOption("home", "home", "babelomics home path", true));
 		getOptions().addOption(OptionFactory.createOption("species", "The specie of the ids", false));
 	}
 
@@ -56,6 +57,13 @@ public abstract class BabelomicsTool extends GenericBioTool {
 		// must be in commandLine, just in case we initialize...
 		this.toolName = commandLine.getOptionValue("tool", "");
 		this.species = commandLine.getOptionValue("species", "unknown");
+		
+		babelomicsHomePath = commandLine.getOptionValue("home", "");
+		try {
+			this.appendConfig(new File(babelomicsHomePath + "/conf/babelomics.properties"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		// default report in PDF is requiered in Babelomics
 //		if(!commandLine.hasOption("report")) {
 //			logger.debug("Adding PDF report option");
