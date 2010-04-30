@@ -18,8 +18,8 @@ import org.bioinfo.math.data.DoubleMatrix;
 
 public class Som extends Cluster {
 
-	public Som(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String distance) {
-		super(matrix, rowNames, colNames, distance);
+	public Som(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String distance, String home) {
+		super(matrix, rowNames, colNames, distance, home);
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class Som extends Cluster {
 		IOUtils.write(inputFile, lines);
 
 
-		String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/clustering/cluster3 -f " + inputFile.getAbsolutePath() + " -g " + getDistance(distance) + " -s -x " + dimension + " -y " + dimension;
+		String cmdStr = home + "/bin/clustering/cluster3 -f " + inputFile.getAbsolutePath() + " -g " + getDistance(distance) + " -s -x " + dimension + " -y " + dimension;
 		System.out.println("clustering command SOM: " + cmdStr);		
 
 		Command cmd = new Command(cmdStr); 

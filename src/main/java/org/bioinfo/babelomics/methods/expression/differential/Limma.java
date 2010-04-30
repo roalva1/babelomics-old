@@ -50,7 +50,6 @@ public class Limma {
 			throw new InvalidParameterException("limma contrast parameter missing");			
 		}
 
-		//outputFilename = File.createTempFile("tmp", ".out", new File(System.getenv("BABELOMICS_HOME") + "/tmp")).getAbsolutePath();
 		outputFilename = File.createTempFile("tmp", ".out").getAbsolutePath();
 		
 		List<String> env = new ArrayList<String>();

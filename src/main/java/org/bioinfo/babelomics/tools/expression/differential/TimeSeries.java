@@ -79,7 +79,7 @@ public class TimeSeries extends BabelomicsTool {
 			abort("ioexception_execute_masigpro", "error writting intermediate file", e.toString(), StringUtils.getStackTrace(e));
 		}
 		
-		maSigPro masigpro = new maSigPro(System.getenv("BABELOMICS_HOME") + "/bin/masigpro/masigpro.R");
+		maSigPro masigpro = new maSigPro(babelomicsHomePath + "/bin/masigpro/masigpro.R");
 		masigpro.setInputFilename(inputFile.getAbsolutePath());
 		masigpro.setOutdir(outdir);
 		

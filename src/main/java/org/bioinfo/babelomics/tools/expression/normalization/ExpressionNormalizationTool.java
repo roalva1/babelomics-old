@@ -178,8 +178,8 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		boolean flagsNotFitted = commandLine.hasOption("flags-not-fitted");
 		boolean flagsAsMissing = commandLine.hasOption("flags-as-missing");
 
-		String readingScript = System.getenv("BABELOMICS_HOME") + "/bin/normalizexp/" + (nbChannels == 1 ? "onecolor" : "twocolor");
-		String normalizationScript = System.getenv("BABELOMICS_HOME") + "/bin/normalizexp/" + (nbChannels == 1 ? "onecolor" : "twocolor");
+		String readingScript = babelomicsHomePath + "/bin/normalizexp/" + (nbChannels == 1 ? "onecolor" : "twocolor");
+		String normalizationScript = babelomicsHomePath + "/bin/normalizexp/" + (nbChannels == 1 ? "onecolor" : "twocolor");
 
 		if ( "genepix".equalsIgnoreCase(technology) ) {
 			readingScript += "_genepix_reading.r";
@@ -247,7 +247,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 	 */
 	private void affyNormalization() throws IOException, InvalidParameterException, InvalidIndexException {
 
-		String aptBinPath = System.getenv("BABELOMICS_HOME") + "/bin/apt";
+		String aptBinPath = babelomicsHomePath + "/bin/apt";
 
 		boolean celConvert = !commandLine.hasOption("no-cel-convert");
 		boolean rma = commandLine.hasOption("rma");
@@ -290,7 +290,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		}		
 		
 		//Config config = new Config();
-		config.append(new File(System.getenv("BABELOMICS_HOME") + "/conf/apt.conf"));
+		config.append(new File(babelomicsHomePath + "/conf/apt.conf"));
 		String chipName = getChipName(rawFileNames, config.getKeys());
 
 		if ( chipName == null ) {

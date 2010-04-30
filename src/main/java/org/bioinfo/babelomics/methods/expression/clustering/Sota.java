@@ -15,8 +15,8 @@ import org.bioinfo.math.data.DoubleMatrix;
 
 public class Sota extends Cluster {
 
-	public Sota(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String distance) {
-		super(matrix, rowNames, colNames, distance);
+	public Sota(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String distance, String home) {
+		super(matrix, rowNames, colNames, distance, home);
 	}
 	
 	@Override
@@ -35,7 +35,7 @@ public class Sota extends Cluster {
 		}
 		IOUtils.write(inputFile, lines);
 		
-		String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/clustering/sota " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath() + " " + distance + " -newick";
+		String cmdStr = home + "/bin/clustering/sota " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath() + " " + distance + " -newick";
 		System.out.println("clustering command SOTA: " + cmdStr);
 		Command cmd = new Command(cmdStr); 
 		SingleProcess sp = new SingleProcess(cmd);

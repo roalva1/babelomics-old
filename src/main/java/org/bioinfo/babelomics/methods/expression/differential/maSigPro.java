@@ -33,7 +33,6 @@ public class maSigPro {
 		env.add("main=");
 		env.add("outdir=" + outdir);
 
-		//Command cmd = new Command("/usr/local/R-2.9.2/bin/R CMD BATCH --no-save --no-restore " + System.getenv("BABELOMICS_HOME") + "/bin/masigpro/masigpro.R " + outdir + "/r.log", env);
 		Command cmd = new Command("R CMD BATCH --no-save --no-restore " + maSigProBinPath + " " + outdir + "/r.log", env);
 		SingleProcess sp = new SingleProcess(cmd);
 		sp.runSync();

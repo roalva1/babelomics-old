@@ -39,7 +39,7 @@ public class BabelomicsMain {
 		
 		try {
 
-			CommandLine commandLine = parser.parse(options,args);
+			CommandLine commandLine = parser.parse(options, args, true);
 			toolName =  commandLine.getOptionValue("tool");
 			if(toolName == null) {
 				System.out.println("No [--tool] option has been provided!");
@@ -69,14 +69,26 @@ public class BabelomicsMain {
 		} catch (ParseException e) {
 			logger.println(e.getMessage());
 			logger.println("");
-			tool.printUsage("./babelomics.sh");
-			tool.abort("parseexception_main_babelomics", "ParseException from Main in command line parse", e.toString(), StringUtils.getStackTrace(e));
+			if ( tool != null ) {
+				tool.printUsage("./babelomics.sh");
+				tool.abort("parseexception_main_babelomics", "ParseException from Main in command line parse", e.toString(), StringUtils.getStackTrace(e));
+			} else {
+				printUsage();
+			}
 		} catch (IOException e) {
-			tool.printUsage("./babelomics.sh");	
-			tool.abort("ioexception_main_babelomics", "IOException from Main in command line parse", e.toString(), StringUtils.getStackTrace(e));
+			if ( tool != null ) {
+				tool.printUsage("./babelomics.sh");	
+				tool.abort("ioexception_main_babelomics", "IOException from Main in command line parse", e.toString(), StringUtils.getStackTrace(e));
+			} else {
+				printUsage();
+			}
 		} catch (Exception e) {
-			tool.printUsage("./babelomics.sh");	
-			tool.abort("exception_main_babelomics", "Exception from Main", e.toString(), StringUtils.getStackTrace(e));
+			if ( tool != null ) {
+				tool.printUsage("./babelomics.sh");	
+				tool.abort("exception_main_babelomics", "Exception from Main", e.toString(), StringUtils.getStackTrace(e));
+			} else {
+				printUsage();
+			}
 		}
 	}
 
