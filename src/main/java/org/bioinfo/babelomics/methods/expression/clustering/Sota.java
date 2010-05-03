@@ -35,7 +35,7 @@ public class Sota extends Cluster {
 		}
 		IOUtils.write(inputFile, lines);
 		
-		String cmdStr = home + "/bin/clustering/sota " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath() + " " + distance + " -newick";
+		String cmdStr = home + "/bin/clustering/sota " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath() + " "  + (distance.equalsIgnoreCase("pearson") ? "correlation" : distance) + " -newick";
 		System.out.println("clustering command SOTA: " + cmdStr);
 		Command cmd = new Command(cmdStr); 
 		SingleProcess sp = new SingleProcess(cmd);
