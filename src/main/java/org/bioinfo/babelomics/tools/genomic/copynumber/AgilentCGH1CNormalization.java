@@ -13,7 +13,7 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.io.file.compress.CompressFactory;
 import org.bioinfo.io.file.compress.GenericCompressManager;
-import org.bioinfo.microarray.AgilentExpressionUtils;
+import org.bioinfo.microarray.ExpressionUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -94,7 +94,7 @@ public class AgilentCGH1CNormalization extends BabelomicsTool {
 			//
 			jobStatus.addStatusMessage("50", "normalizing data");
 
-			AgilentExpressionUtils.OneColorNormalization(babelomicsHomePath + "/bin/normalizexp/onecolor_agilent_reading.r", babelomicsHomePath + "/bin/normalizexp/onecolor_agilent_normalizing.r", rawFileNames, (sampleNames != null ? StringUtils.toList(sampleNames, ","): getSamples(rawFileNames)), bgCorrection, baNormalization, flagsNotFitted, flagsAsMissing, outdir);
+			ExpressionUtils.OneColorNormalization(babelomicsHomePath + "/bin/normalizexp/onecolor_agilent_reading.r", babelomicsHomePath + "/bin/normalizexp/onecolor_agilent_normalizing.r", rawFileNames, (sampleNames != null ? StringUtils.toList(sampleNames, ","): getSamples(rawFileNames)), bgCorrection, baNormalization, flagsNotFitted, flagsAsMissing, outdir);
 
 			// saving normalization results
 			//
@@ -103,19 +103,19 @@ public class AgilentCGH1CNormalization extends BabelomicsTool {
 			File file;
 			List<String> tags = StringUtils.toList("data,datamatrix,expression", ",");
 
-			file = new File(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName()); 
+			file = new File(outdir + "/" + ExpressionUtils.getNormalizedFileName()); 
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("normalized", file.getName(), "One-color agilent normalization ", TYPE.FILE, tags, new HashMap<String, String>(2), "One-color agilent normalization files"));
 			} else {
 				printError("error one-color agilent normalization", "error one-color agilent normalization", "error one-color agilent normalization");
 			}
 
-			file = new File(outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName()); 
+			file = new File(outdir + "/" + ExpressionUtils.getFeatureDataFileName()); 
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("normalized", file.getName(), "Feature data", TYPE.FILE, tags, new HashMap<String, String>(2), "One-color agilent normalization files"));
 			}
 			
-			file = new File(outdir + "/" + AgilentExpressionUtils.getaValuesFileName()); 
+			file = new File(outdir + "/" + ExpressionUtils.getaValuesFileName()); 
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("avalues", file.getName(), "A-values", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "One-color agilent normalization files"));
 			}
