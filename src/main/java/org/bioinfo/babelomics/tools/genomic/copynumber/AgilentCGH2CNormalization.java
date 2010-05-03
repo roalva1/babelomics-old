@@ -13,7 +13,7 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.io.file.compress.CompressFactory;
 import org.bioinfo.io.file.compress.GenericCompressManager;
-import org.bioinfo.microarray.AgilentExpressionUtils;
+import org.bioinfo.microarray.ExpressionUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -96,7 +96,7 @@ public class AgilentCGH2CNormalization extends BabelomicsTool {
 			//
 			jobStatus.addStatusMessage("50", "normalizing data");
 
-			AgilentExpressionUtils.TwoColorsNormalization(babelomicsHomePath + "/bin/normalizexp/twocolor_agilent_reading.r", babelomicsHomePath + "/bin/normalizexp/twocolor_agilent_normalizing.r", rawFileNames, (sampleNames != null ? StringUtils.toList(sampleNames, ","): getSamples(rawFileNames)), bgCorrection, waNormalization, baNormalization, flagsNotFitted, flagsAsMissing, outdir);
+			ExpressionUtils.TwoColorsNormalization(babelomicsHomePath + "/bin/normalizexp/twocolor_agilent_reading.r", babelomicsHomePath + "/bin/normalizexp/twocolor_agilent_normalizing.r", rawFileNames, (sampleNames != null ? StringUtils.toList(sampleNames, ","): getSamples(rawFileNames)), bgCorrection, waNormalization, baNormalization, flagsNotFitted, flagsAsMissing, outdir);
 
 			// saving normalization results
 			//
@@ -105,19 +105,19 @@ public class AgilentCGH2CNormalization extends BabelomicsTool {
 			File file;
 			List<String> tags = StringUtils.toList("data,datamatrix,expression", ",");
 
-			file = new File(outdir + "/" + AgilentExpressionUtils.getNormalizedFileName()); 
+			file = new File(outdir + "/" + ExpressionUtils.getNormalizedFileName()); 
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("normalized", file.getName(), "Two-colors agilent normalization ", TYPE.FILE, tags, new HashMap<String, String>(2), "Two-colors agilent normalization files"));
 			} else {
 				printError("error two-colors agilent normalization", "error two-colors agilent normalization", "error two-colors agilent normalization");
 			}
 
-			file = new File(outdir + "/" + AgilentExpressionUtils.getFeatureDataFileName()); 
+			file = new File(outdir + "/" + ExpressionUtils.getFeatureDataFileName()); 
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("feature_data", file.getName(), "Feature data", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Two-colors agilent normalization files"));
 			}
 
-			file = new File(outdir + "/" + AgilentExpressionUtils.getaValuesFileName()); 
+			file = new File(outdir + "/" + ExpressionUtils.getaValuesFileName()); 
 			if ( file.exists() ) {
 				result.addOutputItem(new Item("avalues", file.getName(), "A-values", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Two-colors agilent normalization files"));
 			}
