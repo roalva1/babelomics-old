@@ -29,7 +29,7 @@ public class PredictorTest {
 		String dataset = "/mnt/commons/test/biodata/example/predictor_input.txt";
 		String outdir = "/tmp/";
 		
-		String []args = { "--tool", "predictor","--log-level", "2", "--dataset", dataset, "-o", outdir, "--knn", "--knn-tune", "--svm", "--svm-tune", "--random-forest", "--random-forest-tune", "--class", "class"};
+		String []args = { "--tool", "predictor","--log-level", "2", "--dataset", dataset, "-o", outdir, "--knn", "--knn-tune", "--svm", "--svm-tune", "--random-forest", "--random-forest-tune", "--class", "class", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("----------------> " + Arrays.toString(args));
 		try {

@@ -29,7 +29,7 @@ public class RawExpressionViewerTest {
 		String technology = "agilent";
 		
 		//String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
-		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "agilent,one-channel"};
+		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "agilent,one-channel", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("--------------------> " + Arrays.toString(args));
 		
@@ -50,7 +50,7 @@ public class RawExpressionViewerTest {
 		String technology = "agilent";
 		
 		//String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
-		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "agilent,two-channels"};
+		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "agilent,two-channels", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("--------------------> " + Arrays.toString(args));
 		
@@ -71,7 +71,7 @@ public class RawExpressionViewerTest {
 		String technology = "genepix";
 		
 		//String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
-		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "genepix,one-channel"};
+		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "genepix,one-channel", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("---------------------> " + Arrays.toString(args));
 		
@@ -92,7 +92,7 @@ public class RawExpressionViewerTest {
 		String technology = "genepix";
 		
 		//String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
-		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "genepix,two-channels"};
+		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "genepix,two-channels", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("--------------------> " + Arrays.toString(args));
 		
@@ -109,7 +109,7 @@ public class RawExpressionViewerTest {
 		String outdir = "/tmp/RawExpressionViewerTest4";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "affymetrix"};
+		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "affymetrix", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("--------------------> " + Arrays.toString(args));
 		

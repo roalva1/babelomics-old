@@ -16,7 +16,7 @@ public class TimeSeriesTest {
 		new File(outdir).mkdir();
 		
 		System.out.println("----- time series test : masigpro ------");
-		String []args = {"--tool", "time-dosage-series", "--dataset", dataset, "-o", outdir, "--test", "masigpro", "--contin-class", "contin", "--test", "masigpro", "--series-class", "series", "--degree", "2"};
+		String []args = {"--tool", "time-dosage-series", "--dataset", dataset, "-o", outdir, "--test", "masigpro", "--contin-class", "contin", "--test", "masigpro", "--series-class", "series", "--degree", "2", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 

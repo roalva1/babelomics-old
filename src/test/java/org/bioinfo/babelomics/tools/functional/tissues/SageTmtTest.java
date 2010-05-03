@@ -35,7 +35,7 @@ public class SageTmtTest {
 		//String []args = {"--tool", "tmt-sage", "--list1", list1,  "--list2", list2, "-o", outdir, "--species", "human", "--tissues", "brain", "--histologies", "normal,cancer", "--tag-type", "long", "--min-tags", "5000", "--perc-null-libraries", "80", "perc-null-genes", "80"};
 		//String []args = {"--tool", "tmt-sage", "--list1", list1,  "--list2", list2, "-o", outdir, "--species", "human", "--tissues", "brain", "--histologies", "cancer", "--tag-type", "long", "--min-tags", "5000", "--perc-null-libraries", "80", "perc-null-genes", "80"};
 		//String []args = {"--tool", "tmt-sage", "--list1", list1,  "--list2", list2, "-o", outdir, "--species", "human", "--tissues", "alltissues", "--histologies", "cancer", "--tag-type", "long", "--min-tags", "5000", "--perc-null-libraries", "80", "perc-null-genes", "80"};
-		String []args = {"--tool", "tmt-sage", "--list1", list1,  "--list2", list2, "-o", outdir, "--species", "human", "--tissues", "brain,liver", "--histologies", "cancer", "--tag-type", "long", "--min-tags", "5000", "--perc-null-libraries", "80", "--perc-null-genes", "90"};
+		String []args = {"--tool", "tmt-sage", "--list1", list1,  "--list2", list2, "-o", outdir, "--species", "human", "--tissues", "brain,liver", "--histologies", "cancer", "--tag-type", "long", "--min-tags", "5000", "--perc-null-libraries", "80", "--perc-null-genes", "90", "--home", System.getenv("BABELOMICS_HOME")};
 		
 
 		

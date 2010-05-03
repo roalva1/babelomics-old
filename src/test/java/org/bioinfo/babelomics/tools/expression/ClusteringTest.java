@@ -30,7 +30,7 @@ public class ClusteringTest {
 		String outdir = "/tmp/ClusteringTest";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "upgma", "--distance", "euclidean"};
+		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "upgma", "--distance", "euclidean", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("----- clustering : UPGMA ----------------> " + Arrays.toString(args));
 		
@@ -46,7 +46,7 @@ public class ClusteringTest {
 		String outdir = "/tmp/ClusteringTest1";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "sota", "--distance", "euclidean"};
+		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "sota", "--distance", "euclidean", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("----- clustering : SOTA ----------------> " + Arrays.toString(args));
 		
@@ -62,7 +62,7 @@ public class ClusteringTest {
 		String outdir = "/tmp/ClusteringTest2";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "som", "--distance", "euclidean"};
+		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "som", "--distance", "euclidean", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("----- clustering : SOM ----------------> " + Arrays.toString(args));
 		
@@ -78,7 +78,7 @@ public class ClusteringTest {
 		String outdir = "/tmp/ClusteringTest3";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "kmeans", "--distance", "euclidean", "--kvalue", "4"};
+		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "kmeans", "--distance", "euclidean", "--kvalue", "4", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("----- clustering : KMEANS ----------------> " + Arrays.toString(args));
 		

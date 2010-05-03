@@ -18,7 +18,7 @@ public class ClassComparisonTest {
 		new File(outdir).mkdir();
 
 		System.out.println("----- one class - limma ------");
-		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "limma", "--class-name", "class", "--class-values", "luminal", "--correction", "fdr"};
+		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "limma", "--class-name", "class", "--class-values", "luminal", "--correction", "fdr", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -34,7 +34,7 @@ public class ClassComparisonTest {
 		new File(outdir).mkdir();
 
 		System.out.println("----- two classes - limma ------");
-		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "limma", "--class-name", "class", "--class-values", "basal,luminal", "--correction", "bonferroni"};
+		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "limma", "--class-name", "class", "--class-values", "basal,luminal", "--correction", "bonferroni", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -51,7 +51,7 @@ public class ClassComparisonTest {
 		new File(outdir).mkdir();
 
 		System.out.println("----- two classes - ttest ------");
-		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "t", "--class-name", "class", "--class-values", "basal,luminal,", "--correction", "hochberg"};
+		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "t", "--class-name", "class", "--class-values", "basal,luminal,", "--correction", "hochberg", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -67,7 +67,7 @@ public class ClassComparisonTest {
 		new File(outdir).mkdir();
 
 		System.out.println("----- two classes - fold change ------");
-		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "fold-change", "--class-name", "class", "--class-values", "basal,luminal", "--correction", "holm"};
+		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "fold-change", "--class-name", "class", "--class-values", "basal,luminal", "--correction", "holm", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -83,7 +83,7 @@ public class ClassComparisonTest {
 		new File(outdir).mkdir();
 
 		System.out.println("----- multi classes - limma ------");
-		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "limma", "--class-name", "indep", "--class-values", "1,3,5,7,9", "--correction", "by"};
+		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "limma", "--class-name", "indep", "--class-values", "1,3,5,7,9", "--correction", "by", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -99,7 +99,7 @@ public class ClassComparisonTest {
 		new File(outdir).mkdir();
 
 		System.out.println("----- multi classes - anova ------");
-		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "anova", "--class-name", "indep", "--class-values", "1,3,5,7,9", "--correction", "and now what?"};
+		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "anova", "--class-name", "indep", "--class-values", "1,3,5,7,9", "--correction", "and now what?", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -115,7 +115,7 @@ public class ClassComparisonTest {
 		new File(outdir).mkdir();
 
 		System.out.println("----- two classes - ttest ------");
-		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "t", "--class-name", "indep", "--class-values", "3,9", "--correction", "by"};
+		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "t", "--class-name", "indep", "--class-values", "3,9", "--correction", "by", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 

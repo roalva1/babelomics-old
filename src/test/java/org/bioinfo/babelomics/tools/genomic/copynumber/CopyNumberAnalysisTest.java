@@ -8,7 +8,7 @@ import org.junit.Test;
 
 public class CopyNumberAnalysisTest {
 	
-	@Test
+
 	public void test() {
 		String outDirName = "/tmp/CopyNumberAnalysisTest";
 		new File(outDirName).mkdir();
@@ -17,7 +17,7 @@ public class CopyNumberAnalysisTest {
 		// the feature data file name is = dataset + ".featdata"
 		
 		System.out.println("----- copynumberanalysis dnacopy ------");
-		String []args = {"--tool", "copy-number", "--normalized-file", dataset, "-o", outDirName, "--segmentation-method", "dnacopy", "--cgh-mcr", "--gap-allowed", "400"};
+		String []args = {"--tool", "copy-number", "--normalized-file", dataset, "-o", outDirName, "--segmentation-method", "dnacopy", "--cgh-mcr", "--gap-allowed", "400", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -26,7 +26,7 @@ public class CopyNumberAnalysisTest {
 		}		
 	}
 
-	@Test
+
 	public void test1() {	
 		String outDirName = "/tmp/CopyNumberAnalysisTest1";
 		new File(outDirName).mkdir();
@@ -35,7 +35,7 @@ public class CopyNumberAnalysisTest {
 		// the feature data file name is = dataset + ".featdata"
 		
 		System.out.println("----- copynumberanalysis glad ------");
-		String []args = {"--tool", "copy-number", "--normalized-file", dataset, "-o", outDirName, "--segmentation-method", "glad", "--cgh-mcr", "--gap-allowed", "400"};
+		String []args = {"--tool", "copy-number", "--normalized-file", dataset, "-o", outDirName, "--segmentation-method", "glad", "--cgh-mcr", "--gap-allowed", "400", "--home", System.getenv("BABELOMICS_HOME")};
 		//String []args = {"-tool", "copy-number", "-normalized-file", "/mnt/commons/test/biodata/example/cgh/agilent/segmentation/data1000.txt", "-o", "/tmp/copynumber-glad", "-segmentation-method", "glad", "-cgh-mcr", "-gap-allowed", "400"};
 		
 		try {

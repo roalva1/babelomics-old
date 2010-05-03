@@ -22,7 +22,7 @@ public class FatiScanTest {
 
 	public void Test1() {
 		////
-		String []args = {"-list", "/mnt/commons/test/biodata/example/fatiscan_input.txt", "-o", "/tmp", "--go-bp-db", "true", "--go-bp-min-level", "5", "--go-bp-max-level", "12", "--nb-partitions", "4"};
+		String []args = {"-list", "/mnt/commons/test/biodata/example/fatiscan_input.txt", "-o", "/tmp", "--go-bp-db", "true", "--go-bp-min-level", "5", "--go-bp-max-level", "12", "--nb-partitions", "4", "--home", System.getenv("BABELOMICS_HOME")};
 
 //		try {
 //			FatiScanOld fatiscan = new FatiScanOld();

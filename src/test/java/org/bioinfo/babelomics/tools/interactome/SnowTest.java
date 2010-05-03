@@ -40,7 +40,7 @@ public class SnowTest {
 		String outdir = "/tmp/SnowTest1";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "snow","--log-level", "2", "--list1", list1, "-o", outdir};
+		String []args = { "--tool", "snow","--log-level", "2", "--list1", list1, "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("executing ----------------> " + Arrays.toString(args));
 		try {
