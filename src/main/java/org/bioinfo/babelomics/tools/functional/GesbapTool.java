@@ -23,10 +23,10 @@ public class GesbapTool extends FunctionalProfilingTool {
 		OptionGroup inputaData = new OptionGroup();
 		inputaData.setRequired(true);
 		inputaData.addOption(OptionFactory.createOption("snp-file", "Tab file with two columns: SNP id and statistic", false, true));
-		inputaData.addOption(OptionFactory.createOption("gene-file", "Two columns file with Gene name and statistics", false, true));
-		inputaData.addOption(OptionFactory.createOption("ped-file", "PED file path", false));
-		inputaData.addOption(OptionFactory.createOption("map-file", "MAP file path", false));
-		inputaData.addOption(OptionFactory.createOption("zip-file", "ZIP file containing PED and MAP files", false));
+		inputaData.addOption(OptionFactory.createOption("plink-assoc-file", "Plink association output (assoc, fisher, tdt, linera, logistic)", false, true));
+//		inputaData.addOption(OptionFactory.createOption("ped-file", "PED file path", false));
+//		inputaData.addOption(OptionFactory.createOption("map-file", "MAP file path", false));
+//		inputaData.addOption(OptionFactory.createOption("zip-file", "ZIP file containing PED and MAP files", false));
 		options.addOptionGroup(inputaData);
 		
 		options.addOption(OptionFactory.createOption("method", "Gene set analysis method values: fatiscan, logistic, default value fatiscan", false, true));
@@ -34,16 +34,21 @@ public class GesbapTool extends FunctionalProfilingTool {
 		options.addOption(OptionFactory.createOption("output-format", "Values: short (just most significant partition) or long (term results for all partitions), by deafult 'short'", false, true));
 	}
 
-
-
 	@Override
 	protected void execute() {
 		try {
 			// update status
 			jobStatus.addStatusMessage("10", "Preparing data");
 			
+			// parse options form parent CLI
 			prepare();
 			
+			// parse command line specific options
+			if(options.hasOption("snp-file")) {
+				
+			}else {
+				
+			}
 			
 			
 		} catch (IOException e) {
