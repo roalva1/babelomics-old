@@ -10,6 +10,7 @@ import org.bioinfo.tool.OptionFactory;
 public class GesbapTool extends FunctionalProfilingTool {
 
 	
+	
 	public GesbapTool() {
 		
 	}
@@ -47,19 +48,30 @@ public class GesbapTool extends FunctionalProfilingTool {
 			if(options.hasOption("snp-file")) {
 				
 			}else {
-				
+				if(options.hasOption("plink-assoc-file")) {
+					
+				}else {
+					printError("gesbaptool_execute", "Error in GeSBAP tool", "No valid input data provided");
+				}
 			}
 			
 			
 		} catch (IOException e) {
 			e.printStackTrace();
+			printError("gesbaptool_execute", "Error in GeSBAP tool", "An error ocurred during GeSBAP execution", e);
 		} catch (ParseException e) {
 			e.printStackTrace();
+			printError("gesbaptool_execute", "Error in GeSBAP tool", "An error ocurred during GeSBAP execution", e);
 		} catch (InvalidIndexException e) {
 			e.printStackTrace();
+			printError("gesbaptool_execute", "Error in GeSBAP tool", "An error ocurred during GeSBAP execution", e);
 		} catch (Exception e) {
 			e.printStackTrace();
+			printError("gesbaptool_execute", "Error in GeSBAP tool", "An error ocurred during GeSBAP execution", e);
 		}
 	}
 
+	private void createSnpFileFromPlinkAssocOutput() {
+		
+	}
 }
