@@ -14,7 +14,7 @@ import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.io.file.compress.CompressFactory;
 import org.bioinfo.io.file.compress.GenericCompressManager;
 import org.bioinfo.microarray.AffymetrixExpressionUtils;
-import org.bioinfo.microarray.AgilentExpressionUtils;
+import org.bioinfo.microarray.ExpressionUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -166,7 +166,7 @@ public class RawExpressionViewer extends BabelomicsTool {
 
 			// indir=input/ files=array1.gpr,array2.gpr samplenames=array1,array2 outfile=genepix_onecolor_rawdata.RData R CMD BATCH --no-save --no-restore ~/appl/bioinfo-installer/babelomics/bin/normalizexp/onecolor_genepix_reading.r reading.Rout
 			//
-			AgilentExpressionUtils.createRawDataRObject(readingBinPath, rawFileNames, getSamples(rawFileNames), rawDataRObjectFile.getAbsolutePath(), "raw_data.Rout", outdir);			
+			ExpressionUtils.createRawDataRObject(readingBinPath, rawFileNames, getSamples(rawFileNames), rawDataRObjectFile.getAbsolutePath(), "raw_data.Rout", outdir);			
 			if ( ! rawDataRObjectFile.exists() ) {
 				abort("errorcreatingreadingrobject_execute_rawexpressionviewer", "impossible to create R object from your raw files", "impossible to create R object from your raw files", "impossible to create R object from your raw files");				
 			}
@@ -174,7 +174,7 @@ public class RawExpressionViewer extends BabelomicsTool {
 			if ( "affy".equalsIgnoreCase(technology) ) {
 				AffymetrixExpressionUtils.getRawValues(getRawValuesBinPath, rawDataRObjectFile.getAbsolutePath(), fFile.getName(), "get_raw_values.Rout", outdir);
 			} else {
-				AgilentExpressionUtils.getRawValues(getRawValuesBinPath, rawDataRObjectFile.getAbsolutePath(), values, "get_raw_values.Rout", outdir);
+				ExpressionUtils.getRawValues(getRawValuesBinPath, rawDataRObjectFile.getAbsolutePath(), values, "get_raw_values.Rout", outdir);
 			}
 
 			// intensity plots
@@ -185,27 +185,27 @@ public class RawExpressionViewer extends BabelomicsTool {
 			} else {
 				if ( featuresFile.exists() ) {
 					if ( fFile.exists() ) {
-						AgilentExpressionUtils.createIntensityPlot(intensityPlotBinPath, fFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "fg_", "fg_intensity_plot.Rout", outdir);
+						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, fFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "fg_", "fg_intensity_plot.Rout", outdir);
 						addOutputItems(outdir, "fg_", "png", "fg_intensity_image", "Foreground intensity image");					
 					}
 
 					if ( bFile.exists() ) {
-						AgilentExpressionUtils.createIntensityPlot(intensityPlotBinPath, bFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "bg_", "bg_intensity_plot.Rout", outdir);
+						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, bFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "bg_", "bg_intensity_plot.Rout", outdir);
 						addOutputItems(outdir, "bg_", "png", "bg_intensity_image", "Background intensity image");					
 					}
 
 					if ( mFile.exists() ) {
-						AgilentExpressionUtils.createIntensityPlot(intensityPlotBinPath, mFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "m_", "m_intensity_plot.Rout", outdir);
+						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, mFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "m_", "m_intensity_plot.Rout", outdir);
 						addOutputItems(outdir, "m_", "png", "m_intensity_image", "M-values intensity image");					
 					}
 
 					if ( gFile.exists() ) {
-						AgilentExpressionUtils.createIntensityPlot(intensityPlotBinPath, gFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "g_", "g_intensity_plot.Rout", outdir);
+						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, gFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "g_", "g_intensity_plot.Rout", outdir);
 						addOutputItems(outdir, "g_", "png", "g_intensity_image", "Green-values intensity image");					
 					}
 
 					if ( rFile.exists() ) {
-						AgilentExpressionUtils.createIntensityPlot(intensityPlotBinPath, gFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "r_", "r_intensity_plot.Rout", outdir);
+						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, gFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "r_", "r_intensity_plot.Rout", outdir);
 						addOutputItems(outdir, "r_", "png", "r_intensity_image", "Red-values intensity image");					
 					}
 				}
@@ -215,11 +215,11 @@ public class RawExpressionViewer extends BabelomicsTool {
 			//
 			if ( nbChannels == 1 ) {
 				if ( fFile.exists() ) {
-					AgilentExpressionUtils.createMAPlot(maPlotBinPath, fFile.getAbsolutePath(), "MA_", "ma_plot.Rout", outdir);
+					ExpressionUtils.createMAPlot(maPlotBinPath, fFile.getAbsolutePath(), "MA_", "ma_plot.Rout", outdir);
 				}
 			} else {
 				if ( mFile.exists() && aFile.exists() ) {
-					AgilentExpressionUtils.createMAPlot(maPlotBinPath, mFile.getAbsolutePath(), aFile.getAbsolutePath(), "MA_", "ma_plot.Rout", outdir);
+					ExpressionUtils.createMAPlot(maPlotBinPath, mFile.getAbsolutePath(), aFile.getAbsolutePath(), "MA_", "ma_plot.Rout", outdir);
 				}
 			}
 			if ( "affy".equalsIgnoreCase(technology) ) {
