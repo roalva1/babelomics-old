@@ -26,11 +26,12 @@ public class ClusteringTest {
 	@Test
 	public void Test() {
 		//String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
-		String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
+		//String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
+		String dataset = "/mnt/commons/test/biodata/example/merged_normalized_data.txt";
 		String outdir = "/tmp/ClusteringTest";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "upgma", "--distance", "euclidean", "--home", System.getenv("BABELOMICS_HOME")};
+		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "upgma", "--distance", "pearson", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("----- clustering : UPGMA ----------------> " + Arrays.toString(args));
 		
