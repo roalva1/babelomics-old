@@ -15,7 +15,7 @@ public class CorrelationTest {
 		new File(outdir).mkdir();
 		
 		System.out.println("-----   correlation : pearson ------");
-		String []args = {"--tool", "correlation", "--dataset", dataset, "-o", outdir, "--test", "pearson", "--class", "indep", "--correction", "fdr"};
+		String []args = {"--tool", "correlation", "--dataset", dataset, "-o", outdir, "--test", "pearson", "--class", "indep", "--correction", "fdr", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -31,7 +31,7 @@ public class CorrelationTest {
 		new File(outdir).mkdir();
 
 		System.out.println("-----  correlation : spearman ------");
-		String []args = {"--tool", "correlation", "--dataset", dataset, "-o", outdir, "--test", "spearman", "--class", "indep", "--correction", "holm"};
+		String []args = {"--tool", "correlation", "--dataset", dataset, "-o", outdir, "--test", "spearman", "--class", "indep", "--correction", "holm", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -47,7 +47,7 @@ public class CorrelationTest {
 		new File(outdir).mkdir();
 
 		System.out.println("-----  correlation : regression  ------");
-		String []args = {"--tool", "correlation", "--dataset", dataset, "-o", outdir, "--test", "regression", "--class", "indep", "--correction", "bonferroni"};
+		String []args = {"--tool", "correlation", "--dataset", dataset, "-o", outdir, "--test", "regression", "--class", "indep", "--correction", "bonferroni", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 

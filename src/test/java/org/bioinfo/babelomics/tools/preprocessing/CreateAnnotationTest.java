@@ -24,7 +24,7 @@ public class CreateAnnotationTest {
 		String outdir = "/tmp/CreateAnnotationTest1";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "create-annotation","--log-level", "2", "--species", "hsa", "--all-genome", "true", "--go-cc", "--go-bp", "--go-mf", "-o", outdir};
+		String []args = { "--tool", "create-annotation","--log-level", "2", "--species", "hsa", "--all-genome", "true", "--go-cc", "--go-bp", "--go-mf", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("CreateAnnotationTest1, args : " + Arrays.toString(args));
 		try {
@@ -39,7 +39,7 @@ public class CreateAnnotationTest {
 		String outdir = "/tmp/CreateAnnotationTest2";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "create-annotation","--log-level", "2", "--species", "hsa", "--list", "AATK,BIRC7,PARM1", "--interpro", "interpro", "--kegg", "kegg", "--jaspar", "jaspar", "--output-format", "extended", "-o", outdir};
+		String []args = { "--tool", "create-annotation","--log-level", "2", "--species", "hsa", "--list", "AATK,BIRC7,PARM1", "--interpro", "interpro", "--kegg", "kegg", "--jaspar", "jaspar", "--output-format", "extended", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("CreateAnnotationTest2, args : " + Arrays.toString(args));
 
@@ -55,7 +55,7 @@ public class CreateAnnotationTest {
 		String outdir = "/tmp/CreateAnnotationTest3";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "create-annotation","--log-level", "2", "--species", "hsa", "--list", "AATK,BIRC7,PARM1,kkkkkk", "--go-bp", "--kegg", "--go-cc", "--output-format", "compact", "-o", outdir};
+		String []args = { "--tool", "create-annotation","--log-level", "2", "--species", "hsa", "--list", "AATK,BIRC7,PARM1,kkkkkk", "--go-bp", "--kegg", "--go-cc", "--output-format", "compact", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("CreateAnnotationTest3, args : " + Arrays.toString(args));
 

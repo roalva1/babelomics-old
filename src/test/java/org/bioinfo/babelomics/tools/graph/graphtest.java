@@ -35,7 +35,7 @@ public class graphtest {
 		//String dataset = "/mnt/commons/test/biodata/newick1.nw";
 		String outdir = "/tmp/histogram";
 		new File(outdir).mkdir();
-		String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"--boxplot","true","--histogram","true", "-o", outdir};
+		String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"--boxplot","true","--histogram","true", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
 		//String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"-tree","true", "-o", outdir};
 
 		System.out.println("----------------> " + args.toString());
@@ -59,7 +59,7 @@ public class graphtest {
 			//String dataset = "/mnt/commons/test/biodata/newick1.nw";
 			String outdir = "/tmp/pcaPlot";
 			new File(outdir).mkdir();
-			String []args = { "--tool", "pca-plot","--log-level", "2", "--datalist", dataset,"--pcaplot","true", "-o", outdir};
+			String []args = { "--tool", "pca-plot","--log-level", "2", "--datalist", dataset,"--pcaplot","true", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
 			//String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"-tree","true", "-o", outdir};
 
 			System.out.println("----------------> " + args.toString());

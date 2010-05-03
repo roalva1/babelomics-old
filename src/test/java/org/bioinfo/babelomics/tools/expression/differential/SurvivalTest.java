@@ -15,7 +15,7 @@ public class SurvivalTest {
 		new File(outdir).mkdir();
 		
 		System.out.println("----- survival : cox ------");
-		String []args = {"--tool", "survival", "--dataset", dataset, "-o", outdir, "--test", "cox", "--time-class", "time", "--censored-class", "censored", "--correction", "fdr"};
+		String []args = {"--tool", "survival", "--dataset", dataset, "-o", outdir, "--test", "cox", "--time-class", "time", "--censored-class", "censored", "--correction", "fdr", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 

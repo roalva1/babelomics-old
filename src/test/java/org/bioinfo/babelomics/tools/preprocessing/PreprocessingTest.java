@@ -31,7 +31,7 @@ public class PreprocessingTest {
 		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
 		String outdir = "/tmp/PreprocessingTest";
 		new File(outdir).mkdir();
-		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir,"--merge-replicates", "mean", "--logarithm-base", "2", "--impute-missing", "zero", "--filter-missing", "90"};
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir,"--merge-replicates", "mean", "--logarithm-base", "2", "--impute-missing", "zero", "--filter-missing", "90", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("----------------> " + Arrays.toString(args));
 		
@@ -50,7 +50,7 @@ public class PreprocessingTest {
 		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
 		String outdir = "/tmp/PreprocessingTest1";
 		new File(outdir).mkdir();
-		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--impute-missing", "zero"};
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--impute-missing", "zero", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("----------------> " + Arrays.toString(args));
 		
@@ -72,7 +72,7 @@ public class PreprocessingTest {
 		String outdir = "/tmp/PreprocessingTest2";
 		new File(outdir).mkdir();
 		String filename = "/mnt/commons/test/biodata/example/known_genes.txt";
-		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--gene-file-filter", filename};
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--gene-file-filter", filename, "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("----------------> " + Arrays.toString(args));
 		
@@ -91,7 +91,7 @@ public class PreprocessingTest {
 		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
 		String outdir = "/tmp/PreprocessingTest3";
 		new File(outdir).mkdir();
-		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--impute-missing", "knn", "--kvalue", "3"};
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--impute-missing", "knn", "--kvalue", "3", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("----------------> " + Arrays.toString(args));
 		

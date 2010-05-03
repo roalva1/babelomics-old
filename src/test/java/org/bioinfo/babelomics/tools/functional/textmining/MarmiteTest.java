@@ -32,7 +32,7 @@ public class MarmiteTest {
 
 		System.out.println("----- marmite test  ------");
 //		String []args = {"-tool", "marmite", "-list1", "/mnt/commons/test/tools/marmite/marmite1.txt",  "-list2", "/mnt/commons/test/tools/marmite/marmite2.txt", "-o", "/mnt/commons/test/tools/marmite/out/", "-bioentity-name", "diseases", "-bioentity-score-filter", "5"};
-		String []args = {"--tool", "marmite", "--list1", list1,  "--list2", list2, "-o", outdir, "-bioentity-name", "diseases", "-bioentity-score-filter", "5"};
+		String []args = {"--tool", "marmite", "--list1", list1,  "--list2", list2, "-o", outdir, "-bioentity-name", "diseases", "-bioentity-score-filter", "5", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 
