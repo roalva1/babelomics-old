@@ -120,6 +120,7 @@ public class CreateAnnotation extends FunctionalProfilingTool {
 					
 					if ( outputFormat.equalsIgnoreCase("extended") ) {
 						IOUtils.write(new File(outdir + "/" + name + ".txt"), al.toString());
+						//result.addOutputItem(new Item(name, name + "_extended.txt", getDBTitle(filter) + " annotation (extended format): ", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Extended output"));					
 						//System.out.println(al.toString());
 					} else {
 						Map<String, List<String>> map = new HashMap<String, List<String>>();
@@ -134,10 +135,12 @@ public class CreateAnnotation extends FunctionalProfilingTool {
 							sb.append(key).append("\t").append(ListUtils.toString(map.get(key), ",")).append("\n");
 						}
 						IOUtils.write(new File(outdir + "/" + name + ".txt"), sb.toString());
+
 						//System.out.println(sb.toString());
 					}
 
-					result.addOutputItem(new Item(name, name + ".txt", getDBTitle(filter) + " annotation: ", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Results"));					
+					result.addOutputItem(new Item(name, name + ".txt", getDBTitle(filter) + " annotation table", Item.TYPE.FILE, StringUtils.toList("TABLE,ANNOTATION_TABLE", ","), new HashMap<String, String>(), "Annotation tables"));
+					//result.addOutputItem(new Item(name, name + ".txt", getDBTitle(filter) + " annotation: ", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Results"));					
 				}
 			}
 		} catch (Exception e) {

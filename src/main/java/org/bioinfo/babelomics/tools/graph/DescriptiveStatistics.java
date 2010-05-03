@@ -14,6 +14,7 @@ import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.babelomics.utils.RCommand;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.chart.HistogramChart;
+import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.format.io.exception.InvalidFileFormatException;
@@ -30,6 +31,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 	Dataset dataset;
 	String test;
 	String className;
+	String axeTitle;
 	List<String> values;
 	List<Double> doubleVars;
 	String correction;
@@ -42,8 +44,9 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("histogram", "",false));
 		options.addOption(OptionFactory.createOption("boxplot", "",false));
 		options.addOption(OptionFactory.createOption("pcaplot", "",false));
-		//options.addOption(OptionFactory.createOption("histogramboxplot", "",false,false));
+		//options.addOption(OptionFactory.createOption("histogramboxplot", "",false,false));		
 		options.addOption(OptionFactory.createOption("class", "",false,true));
+		options.addOption(OptionFactory.createOption("title", "",false,true,' '));
 		options.addOption(OptionFactory.createOption("width", "",false,true));
 		options.addOption(OptionFactory.createOption("height", "",false,true));
 	}
@@ -54,11 +57,15 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		
 		updateJobStatus("10", "init execution");
 		dataset = null;
-		className = commandLine.getOptionValue("class", null);
+		className = commandLine.getOptionValue("class", null);		
+		axeTitle = commandLine.getOptionValue("title", "");
+		axeTitle = axeTitle.replaceAll("_____", " ");
+		//axeTitle = ArrayUtils.toString(commandLine.getOptionValues("title")," ");
 		
+		//System.err.println("axeTitle---------------"+axeTitle+" -------commandLine.getOptionValues----------"+commandLine.getOptionValues("title").length);
 		if(commandLine.getOptionValue("histogram",null)!=null){
-			BoxPlotChart bp = (commandLine.getOptionValue("boxplot", null) != null) ? new BoxPlotChart("Box-plot", "", ""):null;
-			HistogramChart hc = new HistogramChart("Histogram chart", "label", "frec");
+			BoxPlotChart bp = (commandLine.getOptionValue("boxplot", null) != null) ? new BoxPlotChart("Box-plot","", axeTitle):null;
+			HistogramChart hc = new HistogramChart("Histogram chart", axeTitle, "frec");
 			preloadSeries(hc,bp);
 			finishGraph(hc, bp);
 		}
@@ -133,6 +140,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		try {
 			if (className!=null){
 				dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
+				
 				values = dataset.getVariables().getByName(className).getLabels();
 				for (String str: values){
 					int[] colIndexByVariableValue = dataset.getColumnIndexesByVariableValue(className, str);
@@ -145,7 +153,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 			}
 			else{
 				dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
-				addSeries(dataset.getDoubleMatrix(),hc,bp, "");
+				addSeries(dataset.getDoubleMatrix(),hc,bp, null);
 			}
 			
 		} catch (IOException e4) {
@@ -155,12 +163,15 @@ public class DescriptiveStatistics extends BabelomicsTool {
 	}
 
 
-	private void addSeries(DoubleMatrix matrixByVal, HistogramChart hc, BoxPlotChart bp, String str) {
+	private void addSeries(DoubleMatrix matrixByVal, HistogramChart hc, BoxPlotChart bp, String label) {
+		String title = label==null?"":label;
 		if (hc != null){
-			hc.addSeries(matrixByVal.getColumn(0),str);
+			hc.addSeries(matrixByVal.getColumn(0),title);
+			if(label==null) hc.removeLegend();			
 		}
 		if(bp != null ){
-			bp.addSeries(matrixByVal.getColumn(0),str, "");
+			bp.addSeries(matrixByVal.getColumn(0),title, "");
+			if(label==null) bp.removeLegend();
 		}
 	}
 	

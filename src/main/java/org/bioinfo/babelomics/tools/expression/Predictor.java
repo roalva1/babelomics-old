@@ -38,7 +38,7 @@ public class Predictor extends BabelomicsTool {
 	private StringBuilder combinedTable;
 	private int numberOfBestSelectedClassifications = 5;
 	
-	public Predictor() {
+	public Predictor() {		
 		initOptions();
 	}
 

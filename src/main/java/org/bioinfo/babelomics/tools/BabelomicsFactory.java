@@ -8,11 +8,7 @@ import org.bioinfo.babelomics.tools.expression.differential.ClassComparison;
 import org.bioinfo.babelomics.tools.expression.differential.Correlation;
 import org.bioinfo.babelomics.tools.expression.differential.Survival;
 import org.bioinfo.babelomics.tools.expression.differential.TimeSeries;
-import org.bioinfo.babelomics.tools.expression.normalization.AffyExpressionNormalization;
-import org.bioinfo.babelomics.tools.expression.normalization.AgilentExpression1CNormalization;
-import org.bioinfo.babelomics.tools.expression.normalization.AgilentExpression2CNormalization;
-import org.bioinfo.babelomics.tools.expression.normalization.GenePixExpression1CNormalization;
-import org.bioinfo.babelomics.tools.expression.normalization.GenePixExpression2CNormalization;
+import org.bioinfo.babelomics.tools.expression.normalization.ExpressionNormalizationTool;
 import org.bioinfo.babelomics.tools.functional.Blast2GoTool;
 import org.bioinfo.babelomics.tools.functional.FatiGOTool;
 import org.bioinfo.babelomics.tools.functional.FatiScanTool;
@@ -44,6 +40,10 @@ public class BabelomicsFactory {
 		 * *****	Preprocessing, normalization and annotation tools	*************************************
 		 * **************************************************************************************************
 		 */
+		if(toolName.equalsIgnoreCase("expression-normalization")) {
+			return new ExpressionNormalizationTool();
+		}
+
 		if(toolName.equalsIgnoreCase("raw-expression-viewer")) {
 			return new RawExpressionViewer();
 		}
@@ -52,26 +52,6 @@ public class BabelomicsFactory {
 			return new AffyGenotypePreprocessing();
 		}
 		
-		if(toolName.equalsIgnoreCase("affy-expression-normalization")) {
-			return new AffyExpressionNormalization();
-		}
-		
-		if(toolName.equalsIgnoreCase("agilent-expression-one-color-normalization")) {
-			return new AgilentExpression1CNormalization();
-		}
-
-		if(toolName.equalsIgnoreCase("agilent-expression-two-colors-normalization")) {
-			return new AgilentExpression2CNormalization();
-		}
-		
-		if(toolName.equalsIgnoreCase("genepix-expression-one-color-normalization")) {
-			return new GenePixExpression1CNormalization();
-		}
-
-		if(toolName.equalsIgnoreCase("genepix-expression-two-colors-normalization")) {
-			return new GenePixExpression2CNormalization();
-		}
-
 		if(toolName.equalsIgnoreCase("agilent-cgh-one-color-normalization")) {
 			return new AgilentCGH1CNormalization();
 		}

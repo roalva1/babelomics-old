@@ -30,11 +30,12 @@ public class graphtest {
 	public void Test1() {
 		//String dataset = "/mnt/commons/test/fatiscanmini2.txt";
 		
-		String dataset = "/mnt/commons/test/biodata/example/dataset_example4.txt";
+		String dataset = "/opt/babelomics/example/fatiscan_diabetesAffy.txt";
+		//String dataset = "/mnt/commons/test/biodata/example/dataset_example4.txt";
 		//String dataset = "/mnt/commons/test/biodata/newick1.nw";
 		String outdir = "/tmp/histogram";
 		new File(outdir).mkdir();
-		String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"--class", "sex","--boxplot","true","--histogram","true", "-o", outdir};
+		String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"--boxplot","true","--histogram","true", "-o", outdir};
 		//String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"-tree","true", "-o", outdir};
 
 		System.out.println("----------------> " + args.toString());

@@ -182,11 +182,16 @@ public class FatiGO {
 		if(duplicatesMode==REMOVE_ALL){
 			list1 = ListUtils.unique(list1);
 			list2 = ListUtils.unique(list2);
+			ArrayList<String> toRemove = new ArrayList<String>();
 			for (String id:list1) {
 				if(list2.contains(id)) {
-					list1.remove(id);
+					//list1.remove(id);
+					toRemove.add(id);			
 					list2.remove(id);
-				}	
+				}
+			}
+			for (String item:toRemove) {
+				list1.remove(item);
 			}
 		}
 		

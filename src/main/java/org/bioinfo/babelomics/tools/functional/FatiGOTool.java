@@ -268,8 +268,10 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		saveFatigoResults(fatigo,filterInfo);
 		
 		// acum significant values
-		significant.addAll(testResultToStringList(fatigo.getSignificant(DEFAULT_PVALUE_THRESHOLD),false));
-		significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
+		if(fatigo.getResults()!=null){
+			significant.addAll(testResultToStringList(fatigo.getSignificant(DEFAULT_PVALUE_THRESHOLD),false));
+			significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
+		}
 
 		//logger.println("...end of " + title);
 		logger.println("...finished");
@@ -300,8 +302,10 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		saveFatigoResults(fatigo,filterInfo);
 	
 		// acum significant values
-		significant.addAll(testResultToStringList(fatigo.getSignificant(DEFAULT_PVALUE_THRESHOLD),false));
-		significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
+		if(fatigo.getResults()!=null){
+			significant.addAll(testResultToStringList(fatigo.getSignificant(DEFAULT_PVALUE_THRESHOLD),false));
+			significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
+		}
 		
 		//logger.println("...end of " + title);
 		logger.println("...finished");
@@ -314,16 +318,21 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		String fileName = filterInfo.getName() + ".txt";
 		String annotFileName = filterInfo.getName() + ".annot";
 		
-		// save statistic results					
-		List<String> testResultOutput = testResultToStringList(fatigo.getResults());
-		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
-		result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Database tests"));
-		result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Database tests"));
-						
-		// save annotation
-		IOUtils.write(outdir + "/" + annotFileName, fatigo.getAnnotations().toString());
-		result.addOutputItem(new Item("annot_" + filterInfo.getName(),annotFileName,"Annotations for " + filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
-				
+		// save statistic resultss		
+		if(fatigo.getResults()!=null){
+			List<String> testResultOutput = testResultToStringList(fatigo.getResults());
+			IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
+			result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Database tests"));
+			result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Database tests"));	
+		}		
+		System.err.println("fatigo.getAnnotations():" + fatigo.getAnnotations().size());
+		if(fatigo.getAnnotations()!=null && fatigo.getAnnotations().size()>0){				
+			// save annotation
+			IOUtils.write(outdir + "/" + annotFileName, fatigo.getAnnotations().toString());
+			result.addOutputItem(new Item("annot_" + filterInfo.getName(),annotFileName,"Annotations for " + filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
+		} else {
+			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"no annotations found for input ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
+		}
 	}
 	
 }

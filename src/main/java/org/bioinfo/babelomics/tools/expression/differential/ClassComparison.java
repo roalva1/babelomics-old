@@ -46,7 +46,7 @@ public class ClassComparison extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
 		options.addOption(OptionFactory.createOption("class-name", "class"));
 		options.addOption(OptionFactory.createOption("class-values", "value"));
-		options.addOption(OptionFactory.createOption("test", "test"));
+		options.addOption(OptionFactory.createOption("test", "test: t, limma, anova, fold_change"));
 		options.addOption(OptionFactory.createOption("correction", "Multiple-test correction: fdr, bh, by, bonferroni, hochberg, hold"));
 		//options.addOption(OptionFactory.createOption("batch", "class class variable"));
 	}
@@ -54,21 +54,30 @@ public class ClassComparison extends BabelomicsTool {
 	@Override
 	public void execute() {
 
+		List<String> values = null;
+		
 		// reading dataset
 		//
 		dataset = initDataset(new File(commandLine.getOptionValue("dataset")));
 
 		test = commandLine.getOptionValue("test", null);
 		className = commandLine.getOptionValue("class-name", null);
-		classValues = (commandLine.hasOption("class-values") ? StringUtils.toList(commandLine.getOptionValue("class-values", null), ",") : null);
+		values = (commandLine.hasOption("class-values") ? StringUtils.toList(commandLine.getOptionValue("class-values", null), ",") : null);
 		correction = commandLine.getOptionValue("correction", "fdr");
 
-		if ( classValues == null ) {
-			classValues = ListUtils.unique(dataset.getVariables().getByName(className).getValues());
+		if ( values == null ) {
+			values = ListUtils.unique(dataset.getVariables().getByName(className).getValues());
 		} else {
-			classValues = ListUtils.unique(classValues);
-			if ( classValues == null ) {
+			values = ListUtils.unique(values);
+			if ( values == null ) {
 				abort("classvaluesmissing_execute_classcomparison", "class values missing", "class values missing", "class values missing");				
+			}
+		}
+		
+		classValues = new ArrayList<String>();
+		for(String val: values) {
+			if ( val != null && val.trim().length() > 0 ) {
+				classValues.add(val.trim());		
 			}
 		}
 
@@ -89,7 +98,7 @@ public class ClassComparison extends BabelomicsTool {
 			} else {
 				abort("testmismatched_execute_classcomparison", "test " + test + " not supported for " + classValues.size() + "-class test", "test " + test + " not supported for " + classValues.size() + "-class test", "test " + test + " not supported for " + classValues.size() + "-class test");								
 			}
-		} else if ( "fold-change".equalsIgnoreCase(test) ) {
+		} else if ( "fold_change".equalsIgnoreCase(test) ) {
 			if ( classValues.size() == 2 ) {
 				executeFoldChange();
 			} else {
