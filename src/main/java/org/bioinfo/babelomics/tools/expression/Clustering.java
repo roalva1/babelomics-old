@@ -209,16 +209,16 @@ public class Clustering extends BabelomicsTool {
 
 		
 		if ( "sota".equalsIgnoreCase(method) ) {
-			Sota sota = new Sota(matrix, rowNames, colNames, distance);
+			Sota sota = new Sota(matrix, rowNames, colNames, distance, babelomicsHomePath);
 			tree = sota.run();
 		} else if ( "som".equalsIgnoreCase(method) ) {
-			Som som = new Som(matrix, rowNames, colNames, distance);
+			Som som = new Som(matrix, rowNames, colNames, distance, babelomicsHomePath);
 			tree = som.run();
 		} else if ( "upgma".equalsIgnoreCase(method) ) {
-			Upgma upgma = new Upgma(matrix, rowNames, colNames, distance);
+			Upgma upgma = new Upgma(matrix, rowNames, colNames, distance, babelomicsHomePath);
 			tree = upgma.run();
 		} else if ( "kmeans".equalsIgnoreCase(method) ) {
-			Kmeans kmeans = new Kmeans(matrix, rowNames, colNames, distance, kvalue);
+			Kmeans kmeans = new Kmeans(matrix, rowNames, colNames, distance, kvalue, babelomicsHomePath);
 			tree = kmeans.run();			
 		}
 		return tree;

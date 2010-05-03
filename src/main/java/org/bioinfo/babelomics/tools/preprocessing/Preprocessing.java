@@ -432,7 +432,7 @@ public class Preprocessing extends BabelomicsTool {
 			if ( new File(wd).isDirectory() || FileUtils.createDirectory(wd) ) {
 				dataset.save(inputFile);
 				
-				String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/KNNimpute -K=" + kvalue + " " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath();
+				String cmdStr = babelomicsHomePath + "/bin/KNNimpute -K=" + kvalue + " " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath();
 				Command cmd = new Command(cmdStr); 
 				SingleProcess sp = new SingleProcess(cmd);
 				sp.runSync();

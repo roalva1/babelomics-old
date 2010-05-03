@@ -94,7 +94,7 @@ public class AgilentCGH1CNormalization extends BabelomicsTool {
 			//
 			jobStatus.addStatusMessage("50", "normalizing data");
 
-			AgilentExpressionUtils.OneColorNormalization(System.getenv("BABELOMICS_HOME") + "/bin/normalizexp/onecolor_agilent_reading.r", System.getenv("BABELOMICS_HOME") + "/bin/normalizexp/onecolor_agilent_normalizing.r", rawFileNames, (sampleNames != null ? StringUtils.toList(sampleNames, ","): getSamples(rawFileNames)), bgCorrection, baNormalization, flagsNotFitted, flagsAsMissing, outdir);
+			AgilentExpressionUtils.OneColorNormalization(babelomicsHomePath + "/bin/normalizexp/onecolor_agilent_reading.r", babelomicsHomePath + "/bin/normalizexp/onecolor_agilent_normalizing.r", rawFileNames, (sampleNames != null ? StringUtils.toList(sampleNames, ","): getSamples(rawFileNames)), bgCorrection, baNormalization, flagsNotFitted, flagsAsMissing, outdir);
 
 			// saving normalization results
 			//

@@ -144,14 +144,14 @@ public class RawExpressionViewer extends BabelomicsTool {
 
 			String readingBinPath, getRawValuesBinPath, intensityPlotBinPath, maPlotBinPath;
 			if ( "affy".equalsIgnoreCase(technology) ) {
-				readingBinPath = System.getenv("BABELOMICS_HOME") + "/bin/normalizexp/" + technology.toLowerCase() + "_reading.r";
-				getRawValuesBinPath = System.getenv("BABELOMICS_HOME") + "/bin/normalizexp/" + technology.toLowerCase() + "_get_raw_values.r";
+				readingBinPath = babelomicsHomePath + "/bin/normalizexp/" + technology.toLowerCase() + "_reading.r";
+				getRawValuesBinPath = babelomicsHomePath + "/bin/normalizexp/" + technology.toLowerCase() + "_get_raw_values.r";
 			} else {
-				readingBinPath = System.getenv("BABELOMICS_HOME") + "/bin/normalizexp/" + (nbChannels == 1 ? "onecolor" : "twocolor") + "_" + technology.toLowerCase() + "_reading.r";
-				getRawValuesBinPath = System.getenv("BABELOMICS_HOME") + "/bin/normalizexp/" + (nbChannels == 1 ? "onecolor" : "twocolor") + "_" + technology.toLowerCase() + "_get_raw_values.r";
+				readingBinPath = babelomicsHomePath + "/bin/normalizexp/" + (nbChannels == 1 ? "onecolor" : "twocolor") + "_" + technology.toLowerCase() + "_reading.r";
+				getRawValuesBinPath = babelomicsHomePath + "/bin/normalizexp/" + (nbChannels == 1 ? "onecolor" : "twocolor") + "_" + technology.toLowerCase() + "_get_raw_values.r";
 			}
-			intensityPlotBinPath = System.getenv("BABELOMICS_HOME") + "/bin/plots/plot_image_" + technology.toLowerCase() + ".r";
-			maPlotBinPath = System.getenv("BABELOMICS_HOME") + "/bin/plots/plotMA_from_" + (nbChannels == 1 ? "single_matrix" : "MA_matrices") + ".r";
+			intensityPlotBinPath = babelomicsHomePath + "/bin/plots/plot_image_" + technology.toLowerCase() + ".r";
+			maPlotBinPath = babelomicsHomePath + "/bin/plots/plotMA_from_" + (nbChannels == 1 ? "single_matrix" : "MA_matrices") + ".r";
 
 			List<String> values = (nbChannels == 1) ? StringUtils.toList("F,B,features", ",") : StringUtils.toList("M,A,G,R,features", ",");
 

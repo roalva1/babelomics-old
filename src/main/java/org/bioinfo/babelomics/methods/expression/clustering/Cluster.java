@@ -11,12 +11,14 @@ public abstract class Cluster {
 	protected List<String> rowNames;
 	protected List<String> colNames;
 	protected String distance;
+	protected String home;
 
-	public Cluster(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String distance) {
+	public Cluster(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String distance, String home) {
 		this.matrix = matrix;
 		this.rowNames = rowNames;
 		this.colNames = colNames;
 		this.distance = distance;
+		this.home = home;
 	}
 
 	public abstract MultipleTree run() throws Exception;

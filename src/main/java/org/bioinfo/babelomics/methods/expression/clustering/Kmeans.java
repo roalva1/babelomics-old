@@ -19,8 +19,8 @@ import org.bioinfo.math.data.DoubleMatrix;
 public class Kmeans extends Cluster {
 	private int kvalue;
 	
-	public Kmeans(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String distance, int kvalue) {
-		super(matrix, rowNames, colNames, distance);
+	public Kmeans(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String distance, int kvalue, String home) {
+		super(matrix, rowNames, colNames, distance, home);
 		this.kvalue = kvalue;
 	}
 
@@ -44,7 +44,7 @@ public class Kmeans extends Cluster {
 		}
 		IOUtils.write(inputFile, lines);
 		
-		String cmdStr = System.getenv("BABELOMICS_HOME") + "/bin/clustering/cluster3 -f " + inputFile.getAbsolutePath() + " -g " + getDistance(distance) + " -k " + kvalue;
+		String cmdStr = home + "/bin/clustering/cluster3 -f " + inputFile.getAbsolutePath() + " -g " + getDistance(distance) + " -k " + kvalue;
 		System.out.println("clustering command KMEANS: " + cmdStr);		
 		
 		Command cmd = new Command(cmdStr); 

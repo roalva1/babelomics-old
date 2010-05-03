@@ -57,7 +57,7 @@ public class Snow extends BabelomicsTool {
 
 	private void executeSnow(String interactome, String idNature, int interactionsNumber, File f1, File f2, File interactionsFile, boolean checkInteractions) {
 		SnowTest snowTest = null;
-		String snowBinPath = System.getenv("BABELOMICS_HOME") + "/bin/snow/snow.pl";		
+		String snowBinPath = babelomicsHomePath + "/bin/snow/snow.pl";		
 		System.out.println("Snow.java:executeSnow, snowBinPath = " + snowBinPath);
 
 		// create the snow test object according to the parameters
