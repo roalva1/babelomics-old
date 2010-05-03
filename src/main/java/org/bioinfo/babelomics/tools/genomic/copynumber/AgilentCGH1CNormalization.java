@@ -13,7 +13,6 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.io.file.compress.CompressFactory;
 import org.bioinfo.io.file.compress.GenericCompressManager;
-import org.bioinfo.microarray.AgilentExpressionUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
