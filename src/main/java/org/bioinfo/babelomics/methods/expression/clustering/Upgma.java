@@ -41,6 +41,10 @@ public class Upgma extends Cluster {
 		SingleProcess sp = new SingleProcess(cmd);
 		sp.runSync();
 
+		System.out.println(sp.getRunnableProcess().getError());
+		System.out.println(sp.getRunnableProcess().getException());
+		System.out.println(sp.getRunnableProcess().getOutput());
+		
 		if ( outputFile.exists() && outputFile.getTotalSpace() > 0 ) {
 			nw = new NewickParser().parse(IOUtils.toString(outputFile));
 		} else {
