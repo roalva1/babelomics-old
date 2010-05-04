@@ -437,7 +437,7 @@ public class Preprocessing extends BabelomicsTool {
 				SingleProcess sp = new SingleProcess(cmd);
 				sp.runSync();
 				
-				//System.out.println("cmd = " + cmdStr);				
+				System.out.println("cmd = " + cmdStr);				
 				if ( outputFile.exists() ) {
 					List<String> values;
 					List<String> lines = IOUtils.grep(outputFile, "[^#].+");
@@ -454,7 +454,7 @@ public class Preprocessing extends BabelomicsTool {
 		} catch (IOException e) {
 			newDataset = null;
 		}
-		FileUtils.deleteDirectory(new File(wd));
+		//FileUtils.deleteDirectory(new File(wd));
 		return newDataset;
 	}
 }

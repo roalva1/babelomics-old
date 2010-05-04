@@ -66,7 +66,6 @@ public class PreprocessingTest {
 	}	
 
 
-	@Test
 	public void Test2() {
 		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
 		String outdir = "/tmp/PreprocessingTest2";
@@ -87,8 +86,10 @@ public class PreprocessingTest {
 		}
 	}	
 
+	@Test
 	public void Test3() {
-		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
+		//String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
+		String dataset = "/mnt/commons/test/biodata/example/datamatrix_with_nan.txt";
 		String outdir = "/tmp/PreprocessingTest3";
 		new File(outdir).mkdir();
 		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir, "--impute-missing", "knn", "--kvalue", "3", "--home", System.getenv("BABELOMICS_HOME")};
