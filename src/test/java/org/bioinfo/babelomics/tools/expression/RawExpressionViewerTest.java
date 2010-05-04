@@ -24,9 +24,6 @@ public class RawExpressionViewerTest {
 		String dataset = "/mnt/commons/test/biodata/example/onecolor_agilent_expression.zip";
 		String outdir = "/tmp/RawExpressionViewerTest";
 		new File(outdir).mkdir();
-
-		int channels = 1;
-		String technology = "agilent";
 		
 		//String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
 		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "agilent,one-channel", "--home", System.getenv("BABELOMICS_HOME")};
@@ -45,9 +42,6 @@ public class RawExpressionViewerTest {
 		String dataset = "/mnt/commons/test/biodata/example/twocolor_agilent_expression.zip";
 		String outdir = "/tmp/RawExpressionViewerTest1";
 		new File(outdir).mkdir();
-
-		int channels = 2;
-		String technology = "agilent";
 		
 		//String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
 		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "agilent,two-channels", "--home", System.getenv("BABELOMICS_HOME")};
@@ -66,9 +60,6 @@ public class RawExpressionViewerTest {
 		String dataset = "/mnt/commons/test/biodata/example/onecolor_genepix_expression.zip";
 		String outdir = "/tmp/RawExpressionViewerTest2";
 		new File(outdir).mkdir();
-
-		int channels = 1;
-		String technology = "genepix";
 		
 		//String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
 		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "genepix,one-channel", "--home", System.getenv("BABELOMICS_HOME")};
@@ -87,9 +78,6 @@ public class RawExpressionViewerTest {
 		String dataset = "/mnt/commons/test/biodata/example/twocolor_genepix_expression.zip";
 		String outdir = "/tmp/RawExpressionViewerTest3";
 		new File(outdir).mkdir();
-
-		int channels = 2;
-		String technology = "genepix";
 		
 		//String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--technology", technology, "--channels", ""+channels};
 		String []args = { "--tool", "raw-expression-viewer","--log-level", "2", "--compressed-file", dataset, "-o", outdir, "--compressed-file-tags", "genepix,two-channels", "--home", System.getenv("BABELOMICS_HOME")};
