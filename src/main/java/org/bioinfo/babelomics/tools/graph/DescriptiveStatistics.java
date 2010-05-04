@@ -84,7 +84,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		else if(commandLine.hasOption("pcaplot")){
 			
 				try {
-					doPcaPlot(babelomicsHomePath + "/bin/pcaplot/pcaplot.r");
+					doPcaPlot(babelomicsHomePath + "/bin/plots/pcaplot.r");
 				} catch (InvalidParameterException e) {
 					e.printStackTrace();
 				} catch (Exception e) {
