@@ -158,4 +158,21 @@ public class ExpressionNormalizationToolTest {
 		}
 	}	
 
+	@Test
+	public void Test9() {
+		String dataset = "/mnt/commons/test/affy/GSE10245_RAW.tar";
+		String outdir = "/tmp/AffyExpressionNormalizationTest9";
+		new File(outdir).mkdir();
+		
+		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", "affymetrix,one-channel", "-o", outdir, "--rma", "--plier", "--calls", "--home", System.getenv("BABELOMICS_HOME")};
+
+		System.out.println("command ling parameters --> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}	
+	
 }
