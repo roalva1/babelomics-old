@@ -83,10 +83,14 @@ public class TwoListFisherTest extends FunctionalTest {
 		if(terms!= null && terms.size()>0){			
 			IntegerMatrix fisherCounts = new IntegerMatrix(terms.size(), 4);
 			for(int i=0 ; i<terms.size() ; i++) {				
+//				fisherCounts.set(i, 0, map1.get(terms.get(i)));
+//				fisherCounts.set(i, 1, map2.get(terms.get(i)));
+//				fisherCounts.set(i, 2, list1.size()-map1.get(terms.get(i)));
+//				fisherCounts.set(i, 3, list2.size()-map2.get(terms.get(i)));			
 				fisherCounts.set(i, 0, map1.get(terms.get(i)));
-				fisherCounts.set(i, 1, map2.get(terms.get(i)));
-				fisherCounts.set(i, 2, list1.size()-map1.get(terms.get(i)));
-				fisherCounts.set(i, 3, list2.size()-map2.get(terms.get(i)));				
+				fisherCounts.set(i, 1, list1.size()-map1.get(terms.get(i)));
+				fisherCounts.set(i, 2, map2.get(terms.get(i)));
+				fisherCounts.set(i, 3, list2.size()-map2.get(terms.get(i)));
 			}			
 			TestResultList<FisherTestResult> testResult = new FisherExactTest().fisherTest(fisherCounts, testMode);
 						
