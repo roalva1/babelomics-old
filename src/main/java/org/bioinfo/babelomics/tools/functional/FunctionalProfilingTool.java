@@ -97,7 +97,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		setSpecies(commandLine.getOptionValue("species","hsa"));
 		
 		// fisher test
-		String testMode = commandLine.getOptionValue("test-mode", "two-tailed");
+		String testMode = commandLine.getOptionValue("fisher", "two-tailed");
 		if(testMode.equals("less")) setTestMode(FisherExactTest.LESS);
 		if(testMode.equals("greater")) setTestMode(FisherExactTest.GREATER);
 		if(testMode.equals("two-tailed")) setTestMode(FisherExactTest.TWO_SIDED);

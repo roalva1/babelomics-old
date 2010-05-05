@@ -1,6 +1,7 @@
 package org.bioinfo.babelomics.methods.functional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,11 +96,31 @@ public class TwoListFisherTest extends FunctionalTest {
 			TestResultList<FisherTestResult> testResult = new FisherExactTest().fisherTest(fisherCounts, testMode);
 						
 			// p-value adjustment
+//			System.err.println("antes");
+//			System.err.println(Arrays.toString(testResult.getPValues()));
+//			System.err.println();
+//			System.err.println();
+//			System.err.println(Arrays.toString(testResult.getAdjPValues()));
 			MultipleTestCorrection.BHCorrection(testResult);
+			
+			System.err.println("***************");
+			double[] pvalues = testResult.getPValues();
+			System.err.println(Arrays.toString(pvalues));
+			System.err.println();
+			System.err.println();
+			double[] adjPvalues = MultipleTestCorrection.BHCorrection(pvalues);
+			System.err.println(Arrays.toString(adjPvalues));
+			System.err.println("***************");
+			
+//			System.err.println("despues");
+//			System.err.println(Arrays.toString(testResult.getPValues()));
+//			System.err.println();
+//			System.err.println();
+//			System.err.println(Arrays.toString(testResult.getAdjPValues()));
 			
 			results = new ArrayList<TwoListFisherTestResult>(testResult.size());
 			for(int i=0; i<testResult.size(); i++){
-				results.add(new TwoListFisherTestResult(terms.get(i),fisherCounts.get(i,0),fisherCounts.get(i,2),fisherCounts.get(i,1),fisherCounts.get(i,3),list1Positives.get(terms.get(i)),list2Positives.get(terms.get(i)),testResult.get(i).getPValue(),testResult.get(i).getAdjPValue()));
+				results.add(new TwoListFisherTestResult(terms.get(i),fisherCounts.get(i,0),fisherCounts.get(i,1),fisherCounts.get(i,2),fisherCounts.get(i,3),list1Positives.get(terms.get(i)),list2Positives.get(terms.get(i)),testResult.get(i).getPValue(),testResult.get(i).getAdjPValue()));
 			}
 			
 		} else {
