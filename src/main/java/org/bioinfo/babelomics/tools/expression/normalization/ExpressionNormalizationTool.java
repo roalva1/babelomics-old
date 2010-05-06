@@ -323,15 +323,20 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			if ( calls ) analysis.add("pm-mm,mas5-detect.calls=1.pairs=1");
 			if ( plier ) analysis.add("plier-mm");
 
-			AffymetrixExpressionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, config.getProperty("BABELOMICS_DATA_HOME") + chipInfo.get("cdf"), celFiles.getAbsolutePath(), outdir);
-
+			String cdfFile = config.getProperty("BABELOMICS_DATA_HOME") + chipInfo.get("cdf");
+			AffymetrixExpressionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, cdfFile, celFiles.getAbsolutePath(), outdir);
 		} else {
 
 			if ( rma ) analysis.add("rma");
 			if ( calls ) analysis.add("dabg");
 			if ( plier ) analysis.add("plier-gcbg");
 
-			AffymetrixExpressionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, config.getProperty("BABELOMICS_DATA_HOME") + chipInfo.get("cdf"), celFiles.getAbsolutePath(), outdir);
+			String clfFile = config.getProperty("BABELOMICS_DATA_HOME") + chipInfo.get("clf");
+			String pgfFile = config.getProperty("BABELOMICS_DATA_HOME") + chipInfo.get("pgf");
+			String bgpFile = config.getProperty("BABELOMICS_DATA_HOME") + chipInfo.get("bgp");
+			String qccFile = config.getProperty("BABELOMICS_DATA_HOME") + chipInfo.get("qcc");
+			String mpsFile =  config.getProperty("BABELOMICS_DATA_HOME") + chipInfo.get("mps");
+			AffymetrixExpressionUtils.aptProbesetSummarize(aptBinPath + "/apt-probeset-summarize", analysis, clfFile, pgfFile, bgpFile, qccFile, mpsFile, celFiles.getAbsolutePath(), outdir);
 		}
 
 		//		System.err.println("cmd output: " + sp.getRunnableProcess().getOutput());
@@ -407,8 +412,10 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 	 * @throws Exception
 	 */
 	private String getChipName(List<String> rawFilenames, List<String> chipNames) throws InvalidParameterException, IOException {
+		String chipName = null;
 		List<String> lines = null;
-		List<String> results = new ArrayList<String>(rawFilenames.size());
+		List<String> foundChips = new ArrayList<String>();
+		List<List<String>> results = new ArrayList<List<String>>(rawFilenames.size());
 
 		//System.out.println("----------> getChipName, chip names = " + ListUtils.toString(chipNames, ", "));
 		
@@ -416,28 +423,44 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			
 			//System.out.println("----------> getChipName, file name = " + rawFilenames.get(i));
 			
-			results.add(i, null);
+			results.add(i, new ArrayList<String>());
 			lines = IOUtils.head(new File(rawFilenames.get(i)), 20);
-			for(String chipName: chipNames) {
+			for(String name: chipNames) {
 				for(String line: lines) {
-					if ( line.contains(chipName) ) {
-						System.out.println("found " + chipName + " in file " + rawFilenames.get(i));
-						results.add(i, chipName);
-						break;
+					if ( line.contains(name) ) {
+						System.out.println("found " + name + " in file " + rawFilenames.get(i));
+						results.get(i).add(name);
+						foundChips.add(name);
 					}
 				}
-				if ( results.get(i) != null ) break;
+				//if ( results.get(i) != null ) break;
+			}
+		}
+		
+		if ( foundChips.size() == 0 ) {
+			throw new InvalidParameterException("array type not supported");
+		}
+
+			
+		int maxLength = 0;
+		for(int i=0 ; i<foundChips.size() ; i++) {
+			if ( foundChips.get(i).length() > maxLength ) {
+				maxLength = foundChips.get(i).length();
+				chipName = foundChips.get(i);
 			}
 		}
 
 		//System.out.println("***** results = " + ListUtils.toString(results));
-		String chipName = results.get(0);
+		//chipName = results.get(0);
+		List<String> errors = new ArrayList<String>();
 		for (int i=0 ; i<rawFilenames.size() ; i++) {
-			if ( ! chipName.equalsIgnoreCase(results.get(i)) ) {
-				String msg = "mismatch CEL files corresponding to different chips.\n";
-				for(int j=0 ; j<rawFilenames.size() ; j++) {
-					msg = msg + "Raw file '" + new File(rawFilenames.get(j)).getName() + "' is a '" + results.get(j) + "' array\n";
-				}
+			if ( ! results.get(i).contains(chipName) ) {
+				String msg = "mismatch CEL files corresponding to different chips, please, check your cel files.\n";
+//				for(int j=0 ; j<rawFilenames.size() ; j++) {
+//					if ( ! results.get(i).contains(chipName) ) {
+//						msg = msg + "Raw file '" + new File(rawFilenames.get(j)).getName() + "' is a '" + results.get(j) + "' array\n";
+//					}
+//				}
 				throw new InvalidParameterException(msg);
 			}
 		}
