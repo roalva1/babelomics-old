@@ -185,13 +185,21 @@ public class RawExpressionViewer extends BabelomicsTool {
 			//
 			if ( "affy".equalsIgnoreCase(technology) ) {
 				AffymetrixExpressionUtils.createIntensityPlot(intensityPlotBinPath, rawDataRObjectFile.getAbsolutePath(), "intensity_", "intensity_plot.Rout", outdir);
-				addOutputItems(outdir, "intensity_", "png", "intensity_image", "Intensity image");					
+				addOutputItems(outdir, "intensity_", "png", "intensity_image", "Intensity image");
+				
+				if ( fFile.exists() ) {
+					ExpressionUtils.createIntensityPlot(intensityPlotBinPath, fFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "fg_", "fg_intensity_plot.Rout", outdir);
+					addOutputItems(outdir, "fg_", "png", "fg_intensity_image", "Foreground intensity image");
+					
+					saveBoxPlot(fFile, "Foreground box-plot", "fgboxplot", "Box-plots");				
+				}
 			} else {
 				if ( featuresFile.exists() ) {
 					if ( fFile.exists() ) {
 						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, fFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "fg_", "fg_intensity_plot.Rout", outdir);
 						addOutputItems(outdir, "fg_", "png", "fg_intensity_image", "Foreground intensity image");
 						
+						System.out.println("---------------------------> box plot for file : " + fFile.getAbsolutePath());
 						saveBoxPlot(fFile, "Foreground box-plot", "fgboxplot", "Box-plots");				
 					}
 
@@ -268,7 +276,6 @@ public class RawExpressionViewer extends BabelomicsTool {
 	}
 
 	public void saveBoxPlot(File file, String title, String resultId, String group) throws IOException, InvalidIndexException {
-		System.out.println("----> saving " + file.getAbsolutePath() + " in a box plot !!!!");
 		File imgFile = new File(file.getAbsolutePath().replace(".txt", "_boxplot.png"));
 		Dataset dataset = new Dataset(file, true);
 		BoxPlotChart bpc = new BoxPlotChart(title, "", "");

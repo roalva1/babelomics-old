@@ -19,7 +19,6 @@ public class RawExpressionViewerTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
 	public void Test() {
 		String dataset = "/mnt/commons/test/biodata/example/onecolor_agilent_expression.zip";
 		String outdir = "/tmp/RawExpressionViewerTest";
@@ -37,7 +36,6 @@ public class RawExpressionViewerTest {
 		}
 	}	
 
-	@Test
 	public void Test1() {
 		String dataset = "/mnt/commons/test/biodata/example/twocolor_agilent_expression.zip";
 		String outdir = "/tmp/RawExpressionViewerTest1";
@@ -55,7 +53,6 @@ public class RawExpressionViewerTest {
 		}
 	}	
 
-	@Test
 	public void Test2() {
 		String dataset = "/mnt/commons/test/biodata/example/onecolor_genepix_expression.zip";
 		String outdir = "/tmp/RawExpressionViewerTest2";
@@ -73,7 +70,6 @@ public class RawExpressionViewerTest {
 		}
 	}	
 
-	@Test
 	public void Test3() {
 		String dataset = "/mnt/commons/test/biodata/example/twocolor_genepix_expression.zip";
 		String outdir = "/tmp/RawExpressionViewerTest3";
