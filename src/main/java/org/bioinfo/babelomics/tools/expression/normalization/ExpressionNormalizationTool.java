@@ -309,7 +309,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			abort("exception_execute_affynormalization", "could not find out the chip type", "could not find out the chip type", "could not find out the chip type");			
 		}
 
-		if ( !"3-prime".equalsIgnoreCase(chipType) && !"whole-transcript".equalsIgnoreCase(chipType) ) {
+		if ( !"3-prime".equalsIgnoreCase(chipType) && !"wt".equalsIgnoreCase(chipType) ) {
 			abort("exception_execute_affynormalization", "array type (" + chipType + ") not supported", "array type (" + chipType + ") not supported", "array type (" + chipType + ") not supported");			
 		}
 		// normalizing data
