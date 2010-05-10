@@ -169,7 +169,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		}
 	}
 
-	private void normalization() throws IOException {
+	private void normalization() throws IOException, InvalidIndexException {
 		
 		String sampleNames = commandLine.getOptionValue("sample-names", null);
 		String bgCorrection = commandLine.getOptionValue("bg-correction", "minimum");
@@ -194,11 +194,14 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		// normalizing data
 		//
 		jobStatus.addStatusMessage("50", "normalizing data");
-
+		String maPlotBinPath = "";
+		
 		if ( nbChannels == 1 ) {
-			ExpressionUtils.OneColorNormalization(readingScript, normalizationScript, rawFileNames, (sampleNames != null ? StringUtils.toList(sampleNames, ","): getSamples(rawFileNames)), bgCorrection, baNormalization, flagsNotFitted, flagsAsMissing, outdir);			
+			ExpressionUtils.OneColorNormalization(readingScript, normalizationScript, rawFileNames, (sampleNames != null ? StringUtils.toList(sampleNames, ","): getSamples(rawFileNames)), bgCorrection, baNormalization, flagsNotFitted, flagsAsMissing, outdir);
+			maPlotBinPath = babelomicsHomePath + "/bin/plots/plotMA_from_single_matrix.r";
 		} else if ( nbChannels == 2 ){
 			ExpressionUtils.TwoColorsNormalization(readingScript, normalizationScript, rawFileNames, (sampleNames != null ? StringUtils.toList(sampleNames, ","): getSamples(rawFileNames)), bgCorrection, waNormalization, baNormalization, flagsNotFitted, flagsAsMissing, outdir);			
+			maPlotBinPath = babelomicsHomePath + "/bin/plots/plotMA_from_MA_matrices.r";
 		} else {
 			abort("invalidchannels_execute_expressionnormalization", "invalid number of channels (" + nbChannels + ")", "invalid number of channels (" + nbChannels + ")", "invalid number of channels (" + nbChannels + ")");			
 		}
@@ -208,7 +211,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		jobStatus.addStatusMessage("90", "saving normalization results");
 
 
-		File file = null;
+		File file;
 		if ( new File(outdir + "/" + ExpressionUtils.getNormalizedFileName()).exists() && 
 			 new File(outdir + "/" + ExpressionUtils.getFeatureDataFileName()).exists() ) {
 
@@ -223,11 +226,12 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 					tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Preprocessing tool...)";
 				}
 				result.addOutputItem(new Item("normalized", file.getName(), "Normalized dataset ", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Two-colors GenePix normalization files"));
+				saveBoxPlot(file, "Box-plot", "boxplot", "Box-plots");				
 			}
 
 			file = new File(outdir + "/normalized_dataset.featdata"); 			
 			if ( file.exists() ) {				
-				result.addOutputItem(new Item("normalized", file.getName(), "Feature data ", TYPE.FILE, StringUtils.toList("idlist", ","), new HashMap<String, String>(2), "Two-colors GenePix normalization files"));
+				result.addOutputItem(new Item("normalized", file.getName(), "Feature data ", TYPE.FILE, StringUtils.toList("idlist", ","), new HashMap<String, String>(2), "Two-colors GenePix normalization files"));				
 			}
 		}
 
@@ -236,8 +240,30 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		if ( file.exists() ) {
 			result.addOutputItem(new Item("avalues", file.getName(), "A-values", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Two-colors GenePix normalization files"));
 		}
+		
+		if ( nbChannels == 1 ) {
+			ExpressionUtils.createMAPlot(maPlotBinPath, outdir + "/" + ExpressionUtils.getNormalizedFileName(), "MA_", "ma_plot.Rout", outdir);
+			addOutputItemImgs(outdir, "MA_", "png", "ma_plot", "MA plot");				
+		} else if ( nbChannels == 2 ) {
+			ExpressionUtils.createMAPlot(maPlotBinPath, outdir + "/" + ExpressionUtils.getNormalizedFileName(), outdir + "/" + ExpressionUtils.getaValuesFileName(), "MA_", "ma_plot.Rout", outdir);
+			addOutputItemImgs(outdir, "MA_", "png", "ma_plot", "MA plot");				
+		}
 	}
 
+	
+	private void addOutputItemImgs(String dir, String prefix, String suffix, String id, String groupName) {
+		String sampleName;
+		String pattern = prefix + ".*" + suffix;
+		File [] files = FileUtils.listFiles(new File(dir), pattern);
+
+		System.out.println("addOutputItems...");
+		for (int i=0 ; i<files.length ; i++) {
+			System.out.println("file " + i + " -> " + files[i].getName());
+			
+			sampleName = files[i].getName().replace(prefix, "").replace(".png", "");
+			result.addOutputItem(new Item(id + "_" + i, files[i].getName(), groupName + " for " + sampleName, TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), groupName));
+		}
+	}
 
 	/**
 	 * 
@@ -349,18 +375,29 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		File file;
 		List<String> tags = StringUtils.toList("data,datamatrix,expression", ",");
 
+		
+		String maPlotBinPath = babelomicsHomePath + "/bin/plots/plotMA_from_single_matrix.r";
+
 		file = new File(outdir + "/rma.summary.txt"); 
 		if ( file.exists() ) {
 			IOUtils.write(file, cleanLines(IOUtils.readLines(file)));
+
+			ExpressionUtils.createMAPlot(maPlotBinPath, file.getAbsolutePath(), "MA_RMA_", "ma_plot.Rout", outdir);
+			addOutputItemImgs(outdir, "MA_RMA_", "png", "ma_plot", "MA plot (rma)");							
+
 			saveAsDataset(file);
 
 			result.addOutputItem(new Item("rma.summary", file.getName(), "Summary ", TYPE.FILE, tags, new HashMap<String, String>(2), "RMA analysis"));
-			saveBoxPlot(file, "RMA box-plot", "rmaimg", "RMA analysis");				
+			saveBoxPlot(file, "RMA box-plot", "rmaimg", "RMA analysis");
 		}
 
 		file = new File(outdir + "/plier-mm.summary.txt"); 
 		if ( file.exists() ) {
 			IOUtils.write(file, cleanLines(IOUtils.readLines(file)));
+
+			ExpressionUtils.createMAPlot(maPlotBinPath, file.getAbsolutePath(), "MA_PLIER_MM_", "ma_plot.Rout", outdir);
+			addOutputItemImgs(outdir, "MA_PLIER_MM", "png", "ma_plot", "MA plot (plier mm)");							
+
 			saveAsDataset(file);
 
 			result.addOutputItem(new Item("plier-mm.summary", file.getName(), "MM summary ", TYPE.FILE, tags, new HashMap<String, String>(2), "Plier analysis"));								
@@ -370,10 +407,14 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		file = new File(outdir + "/plier-gcbg.summary.txt"); 
 		if ( file.exists() ) {
 			IOUtils.write(file, cleanLines(IOUtils.readLines(file)));
+
+			ExpressionUtils.createMAPlot(maPlotBinPath, file.getAbsolutePath(), "MA_PLIER_GCBG_", "ma_plot.Rout", outdir);
+			addOutputItemImgs(outdir, "MA_PLIER_GCBG_", "png", "ma_plot", "MA plot (plier gcbg)");							
+
 			saveAsDataset(file);
 
 			result.addOutputItem(new Item("plier-gcbg.summary", file.getName(), "GCBG summary ", TYPE.FILE, tags, new HashMap<String, String>(2), "Plier analysis"));								
-			saveBoxPlot(file, "Plier GCBG box-plot", "plierimg", "Plier analysis");				
+			saveBoxPlot(file, "Plier GCBG box-plot", "plierimg", "Plier analysis");			
 		}
 
 		file = new File(outdir + "/pm-mm.mas5-detect.summary.txt"); 
@@ -382,7 +423,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			saveAsDataset(file);
 
 			result.addOutputItem(new Item("pm-mm.summary", file.getName(), "PM-MM summary ", TYPE.FILE, tags, new HashMap<String, String>(2), "Present-absent calls"));								
-			saveBoxPlot(file, "PM-MM box-plot", "pmmmimg", "Present-absent calls");				
+			//saveBoxPlot(file, "PM-MM box-plot", "pmmmimg", "Present-absent calls");				
 		}
 
 		file = new File(outdir + "/pm-mm.mas5-detect.calls.txt"); 
@@ -397,8 +438,13 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			saveAsDataset(file);
 
 			result.addOutputItem(new Item("dabg.summary", file.getName(), "DABG summary ", TYPE.FILE, tags, new HashMap<String, String>(2), "Present-absent calls"));								
-			saveBoxPlot(file, "DABG box-plot", "dabgimg", "Present-absent calls");				
+			//saveBoxPlot(file, "DABG box-plot", "dabgimg", "Present-absent calls");				
 		}
+		
+//		String maPlotBinPath = babelomicsHomePath + "/bin/plots/plotMA_from_single_matrix.r";
+//		ExpressionUtils.createMAPlot(maPlotBinPath, ExpressionUtils.getNormalizedFileName(), "MA_", "ma_plot.Rout", outdir);
+//		addOutputItemImgs(outdir, "MA_", "png", "ma_plot", "MA plot");				
+
 	}
 	
 	
