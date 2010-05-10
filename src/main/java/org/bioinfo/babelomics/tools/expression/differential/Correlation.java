@@ -150,7 +150,7 @@ public class Correlation extends BabelomicsTool {
 		try {
 			heatmap.save(heatmapFilename);
 			if ( new File(heatmapFilename).exists() ) {
-				result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
+				result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
 			}
 		} catch (IOException e) {
 			printError("ioexception_executecorrelation_correlation", "error generating heatmap", e.toString(), e);
