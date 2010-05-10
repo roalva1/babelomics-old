@@ -124,7 +124,7 @@ public class TimeSeries extends BabelomicsTool {
 		
 		
 		// visualization
-		outFiles = FileUtils.listFiles(outDirFile, ".*heatmap.*");
+		outFiles = FileUtils.listFiles(outDirFile, ".*heatmap\\.png");
 		for (File f: outFiles) {
 			result.addOutputItem(new Item("heatmapimg", f.getName(),  "'" + getCleanName(f) + "' heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap plot"));			
 		}
@@ -132,7 +132,7 @@ public class TimeSeries extends BabelomicsTool {
 		for (File f: outFiles) {
 			result.addOutputItem(new Item("groupimg", f.getName(), "'" + getCleanName(f) + "' group", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Group plot"));			
 		}
-		outFiles = FileUtils.listFiles(outDirFile, ".*heatmap.*");
+		outFiles = FileUtils.listFiles(outDirFile, ".*Profiles\\.png");
 		for (File f: outFiles) {
 			result.addOutputItem(new Item("profileimg", f.getName(), "'" + getCleanName(f) + "' profile", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Profiles plot"));			
 		}				
