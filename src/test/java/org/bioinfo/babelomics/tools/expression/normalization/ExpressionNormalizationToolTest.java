@@ -94,6 +94,7 @@ public class ExpressionNormalizationToolTest {
 		}
 	}	
 	
+	@Test
 	public void Test5() {
 		String dataset = "/mnt/commons/test/biodata/example/cel.zip";
 		String outdir = "/tmp/AffyExpressionNormalizationTest";
@@ -158,7 +159,6 @@ public class ExpressionNormalizationToolTest {
 		}
 	}	
 
-	@Test
 	public void Test9() {
 		String dataset = "/mnt/commons/test/affy/GSE10245_RAW.tar";
 		String outdir = "/tmp/AffyExpressionNormalizationTest9";
