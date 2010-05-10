@@ -204,18 +204,9 @@ public class Predictor extends BabelomicsTool {
 		} else {
 			if(commandLine.hasOption("knn-neighbors")) knn.setKnn(Integer.parseInt(commandLine.getOptionValue("knn-neighbors")));						
 		}
+		
 		// validation
-		if(commandLine.hasOption("cross-validation")) {
-			int repeats = Integer.parseInt(commandLine.getOptionValue("validation-repeats", "10"));
-			int folds = Integer.parseInt(commandLine.getOptionValue("cross-validation-folds", "5"));
-			if(commandLine.hasOption("feature-selection")){
-				knn.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds,new CfsFeatureSelector()));
-				logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", feature-selection = " + commandLine.getOptionValue("feature-selection") + ")");
-			} else {
-				knn.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds));
-				logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", no feature selection");
-			}						
-		}
+		setValidation(knn);
 		
 		// train
 		knn.train(instances);
@@ -234,7 +225,75 @@ public class Predictor extends BabelomicsTool {
 	}
 	
 	
-	private void saveClassifierResults(GenericClassifier classifier){
+	private void executeSvm(Instances instances) throws Exception {
+		
+		// update status
+		updateStatus(progressCurrent,"executing SVM classifier");
+		
+		// init classifier
+		Svm svm = new Svm();
+		// init params
+		if(commandLine.hasOption("svm-tune")) svm.setTuneParameters(true);
+		else {
+			if(commandLine.hasOption("svm-cost")) svm.setCost(Integer.parseInt(commandLine.getOptionValue("svm-cost")));						
+		}
+		
+		// validation
+		setValidation(svm);
+				
+		// train
+		svm.train(instances);
+		// results
+		int best = svm.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
+		EvaluationResult bestRMSE = svm.getEvaluationResultList().get(best);
+		logger.println("Beset RMSE classification");
+		logger.println("Cost: " + svm.getCostValues()[best]);
+		logger.println(bestRMSE.toString());
+
+		try {
+			IOUtils.write(new File(outdir + "/svm.txt"), "Best RMSE classification\n\nCost: " + svm.getCostValues()[best] + "\n\n" + bestRMSE.toString());
+			result.addOutputItem(new Item("svm_result_file", "svm.txt", "SVM result file", TYPE.FILE));
+		} catch (IOException e) {
+			printError("ioexception_executesvm_predictor", "Error saving SVM results", "Error saving SVM results");
+		}
+		// ??????
+		
+		// save results
+		saveClassifierResults(svm);
+	}
+
+	private void executeRandomForest(Instances instances) throws Exception {
+		
+		// update status
+		updateStatus(progressCurrent,"executing Random Forest classifier");
+
+		// init classifier
+		RForest randomForest = new RForest();
+		
+		// init params
+		if(commandLine.hasOption("random-forest-tune")) randomForest.setTuneParameters(true);
+		else {
+			if(commandLine.hasOption("random-forest-trees")) randomForest.setNumTrees(Integer.parseInt(commandLine.getOptionValue("random-forest-trees")));						
+		}
+		
+		// validation
+		setValidation(randomForest);
+		
+		// train
+		randomForest.train(instances);
+		
+		// results
+		int best = randomForest.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
+		EvaluationResult bestRMSE = randomForest.getEvaluationResultList().get(best);
+		logger.println("Best RMSE classification");
+		logger.println("Number of trees: " + randomForest.getNumTreesArray()[best]);
+		logger.println(bestRMSE.toString());
+
+		saveClassifierResults(randomForest);
+		
+	}
+
+private void saveClassifierResults(GenericClassifier classifier){
 		
 		int best = classifier.getEvaluationResultList().getBestAreaUnderRocIndex();
 		String name = classifier.getClassifierName();
@@ -280,64 +339,22 @@ public class Predictor extends BabelomicsTool {
 		combinedTable.append(classifier.getSortedResultsTable(numberOfBestSelectedClassifications));
 	}
 	
-	private void executeSvm(Instances instances) throws Exception {
-		
-		// update status
-		updateStatus(progressCurrent,"executing SVM classifier");
-		
-		// init classifier
-		Svm svm = new Svm();
-		// init params
-		if(commandLine.hasOption("svm-tune")) svm.setTuneParameters(true);
-		else {
-			if(commandLine.hasOption("svm-cost")) svm.setCost(Integer.parseInt(commandLine.getOptionValue("svm-cost")));						
-		}
-		// train
-		svm.train(instances);
-		// results
-		int best = svm.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
-		EvaluationResult bestRMSE = svm.getEvaluationResultList().get(best);
-		logger.println("Beset RMSE classification");
-		logger.println("Cost: " + svm.getCostValues()[best]);
-		logger.println(bestRMSE.toString());
 
-		try {
-			IOUtils.write(new File(outdir + "/svm.txt"), "Best RMSE classification\n\nCost: " + svm.getCostValues()[best] + "\n\n" + bestRMSE.toString());
-			result.addOutputItem(new Item("svm_result_file", "svm.txt", "SVM result file", TYPE.FILE));
-		} catch (IOException e) {
-			printError("ioexception_executesvm_predictor", "Error saving SVM results", "Error saving SVM results");
+	private void setValidation(GenericClassifier classifier){
+		// validation
+		if(commandLine.hasOption("cross-validation")) {
+			int repeats = Integer.parseInt(commandLine.getOptionValue("validation-repeats", "10"));
+			int folds = Integer.parseInt(commandLine.getOptionValue("cross-validation-folds", "5"));
+			if(commandLine.hasOption("feature-selection")){
+				classifier.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds,new CfsFeatureSelector()));
+				logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", feature-selection = " + commandLine.getOptionValue("feature-selection") + ")");
+			} else {
+				classifier.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds));
+				logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", no feature selection");
+			}						
 		}
-		// ??????
-		
-		// save results
-		saveClassifierResults(svm);
 	}
-
-	private void executeRandomForest(Instances instances) throws Exception {
-		
-		// update status
-		updateStatus(progressCurrent,"executing Random Forest classifier");
-
-		// init classifier
-		RForest randomForest = new RForest();
-		// init params
-		if(commandLine.hasOption("random-forest-tune")) randomForest.setTuneParameters(true);
-		else {
-			if(commandLine.hasOption("random-forest-trees")) randomForest.setNumTrees(Integer.parseInt(commandLine.getOptionValue("random-forest-trees")));						
-		}
-		// train
-		randomForest.train(instances);
-		// results
-		int best = randomForest.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
-		EvaluationResult bestRMSE = randomForest.getEvaluationResultList().get(best);
-		logger.println("Best RMSE classification");
-		logger.println("Number of trees: " + randomForest.getNumTreesArray()[best]);
-		logger.println(bestRMSE.toString());
-
-		saveClassifierResults(randomForest);
-		
-	}
-
+	
 	private void executeDlda(Instances instances) {		
 		printError("executeDlda_predictor", "DLDA is not implemented yet", "DLDA is not implemented yet");
 	}
