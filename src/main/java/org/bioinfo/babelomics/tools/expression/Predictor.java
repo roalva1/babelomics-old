@@ -92,7 +92,7 @@ public class Predictor extends BabelomicsTool {
 			options.addOption(OptionFactory.createOption("cross-validation", "Perform cross validation analysis",false,false));			
 			options.addOption(OptionFactory.createOption("cross-validation-folds", "Number of folds in cross validation evaluation",false,true));
 			options.addOption(OptionFactory.createOption("validation-repeats", "Number of repeat each randomization",false,true));
-			options.addOption(OptionFactory.createOption("feature-selection", "Number of repeat each randomization",false,false));
+			options.addOption(OptionFactory.createOption("feature-selection", "Feature selection",false,true));			
 
 			// KNN
 			classifiers.addOption(OptionFactory.createOption("knn", "Classify dataset with a KNN classifier",false,false));
@@ -124,7 +124,7 @@ public class Predictor extends BabelomicsTool {
 		options.addOptionGroup(classifiers);
 
 		// feature selection (gene selection), and other options
-		options.addOption(OptionFactory.createOption("gene-selection", "the gene selection, valid values: f-ratio, wilcoxon", false));
+//		options.addOption(OptionFactory.createOption("gene-selection", "the gene selection, valid values: f-ratio, wilcoxon", false));
 		//options.addOption(OptionFactory.createOption("trainning-size", "number of genes to use in trainning separated by commas, default:2,5,10,20,35,50", false));		
 
 	}
@@ -152,7 +152,7 @@ public class Predictor extends BabelomicsTool {
 				if(commandLine.hasOption("dataset-arff")){
 					instances = InstancesBuilder.getInstancesFromArrfFile(datasetFile,"sample_name");
 					instances.setClassIndex(instances.numAttributes()-1);
-				} else {					
+				} else {
 					// convert Dataset to Instances format (data is trasposed!!)
 					Dataset dataset = new Dataset(datasetFile, true);
 					List<List<String>> data = new ArrayList<List<String>>(dataset.getColumnDimension());
@@ -195,9 +195,9 @@ public class Predictor extends BabelomicsTool {
 			if(commandLine.hasOption("svm")) executeSvm(instances);
 			if(commandLine.hasOption("knn")) executeKnn(instances);
 			if(commandLine.hasOption("random-forest")) executeRandomForest(instances);
-			if(commandLine.hasOption("dlda")) executeDlda(instances);
-			if(commandLine.hasOption("som")) executeSom(instances);
-			if(commandLine.hasOption("pam")) executePam(instances);
+//			if(commandLine.hasOption("dlda")) executeDlda(instances);
+//			if(commandLine.hasOption("som")) executeSom(instances);
+//			if(commandLine.hasOption("pam")) executePam(instances);
 
 			
 		} catch (Exception e) {

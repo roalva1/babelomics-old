@@ -103,14 +103,14 @@ public class TwoListFisherTest extends FunctionalTest {
 //			System.err.println(Arrays.toString(testResult.getAdjPValues()));
 			MultipleTestCorrection.BHCorrection(testResult);
 			
-			System.err.println("***************");
-			double[] pvalues = testResult.getPValues();
-			System.err.println(Arrays.toString(pvalues));
-			System.err.println();
-			System.err.println();
-			double[] adjPvalues = MultipleTestCorrection.BHCorrection(pvalues);
-			System.err.println(Arrays.toString(adjPvalues));
-			System.err.println("***************");
+//			System.err.println("***************");
+//			double[] pvalues = testResult.getPValues();
+//			System.err.println(Arrays.toString(pvalues));
+//			System.err.println();
+//			System.err.println();
+//			double[] adjPvalues = MultipleTestCorrection.BHCorrection(pvalues);
+//			System.err.println(Arrays.toString(adjPvalues));
+//			System.err.println("***************");
 			
 //			System.err.println("despues");
 //			System.err.println(Arrays.toString(testResult.getPValues()));
