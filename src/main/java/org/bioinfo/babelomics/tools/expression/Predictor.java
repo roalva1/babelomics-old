@@ -16,6 +16,7 @@ import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.mlpr.classifier.CfsFeatureSelector;
 import org.bioinfo.mlpr.classifier.GenericClassifier;
 import org.bioinfo.mlpr.classifier.Knn;
 import org.bioinfo.mlpr.classifier.RForest;
@@ -42,34 +43,7 @@ public class Predictor extends BabelomicsTool {
 		initOptions();
 	}
 
-	
-//	public static void main(String[] args) throws IOException{
-	//de iris.arff a iris.dataset
-//		List<String> lines = IOUtils.readLines("/home/jose/code/bioinfo-installer/babelomics/example/iris.txt");
-//		int ncols = lines.get(0).split(",").length;
-//		List<List<String>> cells = new ArrayList<List<String>>();		
-//		for(String line: lines){
-//			cells.add(new ArrayList<String>(StringUtils.toList(line,",")));
-//			//System.err.println(line);
-//		}
-//		System.err.print("#VARIABLE	myclass	CATEGORICAL{Iris-setosa,Iris-versicolor,Iris-virginica}	VALUES{");
-//		for(int i=0; i<cells.size(); i++){
-//			System.err.print(cells.get(i).get(ncols-1));
-//			if(i<(cells.size()-1)) System.err.print(",");
-//		}
-//		System.err.println("}");
-//		for(int j=(ncols-2); j>=0; j--){
-//			for(int i=0; i<cells.size(); i++){
-//				System.err.print(cells.get(i).get(j));
-//				if(i<(cells.size()-1)) System.err.print("\t");
-//			}
-//			System.err.println();
-//		}
-//	}
-//	
-	
-	
-	
+
 	@Override
 	public void initOptions() {
 		// data
@@ -109,17 +83,17 @@ public class Predictor extends BabelomicsTool {
 			options.addOption(OptionFactory.createOption("random-forest-tune", "Perform automated number of tree tunning",false,false));
 			options.addOption(OptionFactory.createOption("random-forest-trees", "Number of trees", false));
 			
-			// DLDA
-			classifiers.addOption(OptionFactory.createOption("dlda", "Classify dataset with a DLDA classifier", false,false));
-			options.addOption(OptionFactory.createOption("dlda-tune", "Perform automated parameter tunning",false,false));
-			
-			// SOM
-			classifiers.addOption(OptionFactory.createOption("som", "Classify dataset with a SOM classifier", false,false));
-			options.addOption(OptionFactory.createOption("som-tune", "Perform automated parameter tunning",false,false));
-			
-			// PAM
-			classifiers.addOption(OptionFactory.createOption("pam", "Classify dataset with a PAM classifier", false,false));
-			options.addOption(OptionFactory.createOption("pam-tune", "Perform automated parameter tunning",false,false));
+//			// DLDA
+//			classifiers.addOption(OptionFactory.createOption("dlda", "Classify dataset with a DLDA classifier", false,false));
+//			options.addOption(OptionFactory.createOption("dlda-tune", "Perform automated parameter tunning",false,false));
+//			
+//			// SOM
+//			classifiers.addOption(OptionFactory.createOption("som", "Classify dataset with a SOM classifier", false,false));
+//			options.addOption(OptionFactory.createOption("som-tune", "Perform automated parameter tunning",false,false));
+//			
+//			// PAM
+//			classifiers.addOption(OptionFactory.createOption("pam", "Classify dataset with a PAM classifier", false,false));
+//			options.addOption(OptionFactory.createOption("pam-tune", "Perform automated parameter tunning",false,false));
 			
 		options.addOptionGroup(classifiers);
 
@@ -234,9 +208,13 @@ public class Predictor extends BabelomicsTool {
 		if(commandLine.hasOption("cross-validation")) {
 			int repeats = Integer.parseInt(commandLine.getOptionValue("validation-repeats", "10"));
 			int folds = Integer.parseInt(commandLine.getOptionValue("cross-validation-folds", "5"));
-			boolean featureSelection = commandLine.hasOption("feature-selection")?true:false;
-			knn.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds, featureSelection));
-			logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", feature-selection = " + featureSelection + ")");			
+			if(commandLine.hasOption("feature-selection")){
+				knn.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds,new CfsFeatureSelector()));
+				logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", feature-selection = " + commandLine.getOptionValue("feature-selection") + ")");
+			} else {
+				knn.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds));
+				logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", no feature selection");
+			}						
 		}
 		
 		// train
