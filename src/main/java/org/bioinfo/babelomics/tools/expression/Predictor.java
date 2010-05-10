@@ -138,7 +138,7 @@ public class Predictor extends BabelomicsTool {
 					if(commandLine.hasOption("class-file")){
 						String classFileName = commandLine.getOptionValue("class-file");
 						FileUtils.checkFile(classFileName);
-						classValues =  StringUtils.toList(IOUtils.toString(classFileName));
+						classValues = StringUtils.toList(IOUtils.toString(classFileName));
 					} else {
 						if(commandLine.hasOption("class")){
 							String className = commandLine.getOptionValue("class");
