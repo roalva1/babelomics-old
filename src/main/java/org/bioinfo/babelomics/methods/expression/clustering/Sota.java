@@ -20,7 +20,7 @@ public class Sota extends Cluster {
 	}
 	
 	@Override
-	public MultipleTree run() throws Exception {
+	public MultipleTree run(boolean createClusterFiles) throws Exception {
 		MultipleTree nw = null;
 		
 		File inputFile = File.createTempFile("input", null);

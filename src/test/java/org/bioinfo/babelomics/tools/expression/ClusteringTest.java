@@ -23,7 +23,6 @@ public class ClusteringTest {
 	public void notest() {		
 	}
 
-	@Test
 	public void Test() {
 		//String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
 		//String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
@@ -74,12 +73,13 @@ public class ClusteringTest {
 		}
 	}	
 
+	@Test
 	public void Test3() {
 		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
 		String outdir = "/tmp/ClusteringTest3";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "kmeans", "--distance", "euclidean", "--kvalue", "4", "--home", System.getenv("BABELOMICS_HOME")};
+		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "kmeans", "--distance", "euclidean", "--kvalue", "10", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("----- clustering : KMEANS ----------------> " + Arrays.toString(args));
 		

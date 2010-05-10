@@ -48,12 +48,12 @@ public class Clustering extends BabelomicsTool {
 		String method = commandLine.getOptionValue("method");
 
 		String distance = commandLine.getOptionValue("distance", "euclidean");
-		
-		try {
-			kvalue = Integer.parseInt(commandLine.getOptionValue("kvalue", "15"));
-		} catch (NumberFormatException e ) {
-			if ( "kmeans".equalsIgnoreCase(method) ) {
-				abort("invalidkvalue_execute_clustering", "Invalid k-value", e.toString(), StringUtils.getStackTrace(e));
+
+		if ( "kmeans".equalsIgnoreCase(method) ) {
+			try {
+				kvalue = Integer.parseInt(commandLine.getOptionValue("kvalue", "15"));
+			} catch (NumberFormatException e ) {
+				abort("invalidkvalue_execute_clustering", "Invalid k-value", "Invalid value (" + commandLine.getOptionValue("method") + ") for k-value", "Invalid value (" + commandLine.getOptionValue("method") + ") for k-value");
 			}
 		}
 
@@ -69,7 +69,7 @@ public class Clustering extends BabelomicsTool {
 		if ( !"upgma".equalsIgnoreCase(method) && !"sota".equalsIgnoreCase(method) && !"som".equalsIgnoreCase(method) && !"kmeans".equalsIgnoreCase(method) ) {
 			abort("unknownclusteringmethod_execute_clustering", "Unknown clustering method", "Unknown clustering method '" + method + "'", "Unknown clustering method '" + method + "'");			
 		}
-		
+
 		try {
 			jobStatus.addStatusMessage("20", "reading dataset");
 		} catch (FileNotFoundException e) {
@@ -84,19 +84,19 @@ public class Clustering extends BabelomicsTool {
 		} catch (Exception e) {
 			abort("exception_execute_clustering", "error reading dataset '" + datasetFile.getName() + "'", e.toString(), StringUtils.getStackTrace(e));
 		}		
-		
-//		if(commandLine.hasOption("sample-filter") || commandLine.hasOption("feature-filter")) {
-//			dataset = dataset.getSubDataset(commandLine.getOptionValue("sample-filter"), "4", commandLine.getOptionValue("feature-filter"), ""); 
-//		}
 
-		
+		//		if(commandLine.hasOption("sample-filter") || commandLine.hasOption("feature-filter")) {
+		//			dataset = dataset.getSubDataset(commandLine.getOptionValue("sample-filter"), "4", commandLine.getOptionValue("feature-filter"), ""); 
+		//		}
+
+
 		if ( !"kmeans".equalsIgnoreCase(method) && !"upgma".equalsIgnoreCase(method)  &&
-			 !"sota".equalsIgnoreCase(method)   && !"som".equalsIgnoreCase(method) ) {
+				!"sota".equalsIgnoreCase(method)   && !"som".equalsIgnoreCase(method) ) {
 			abort("unknownclusteringmethod_execute_clustering", "Unknown clustering method '" + method + "'", "Unknown clustering method '" + method + "'", "Unknown clustering method '" + method + "'");
 		}
-		
+
 		MultipleTree nwGenes = null, nwSamples = null;
-		
+
 		try {
 			jobStatus.addStatusMessage("40", "generating genes clusters");
 		} catch (FileNotFoundException e) {
@@ -104,11 +104,11 @@ public class Clustering extends BabelomicsTool {
 		}
 
 		try {
-			nwGenes = runClustering(dataset.getDoubleMatrix(), dataset.getFeatureNames(), dataset.getSampleNames(), method, distance, kvalue);
+			nwGenes = runClustering(dataset.getDoubleMatrix(), dataset.getFeatureNames(), dataset.getSampleNames(), method, distance, kvalue, true);
 		} catch (Exception e) {
 			printError("exception_executesota_clustering", "error running " + method + " algorithm for genes", e.toString(), e);
 		}
-		
+
 		List<String> tags = StringUtils.toList("data,newick", ",");
 		if ( nwGenes != null ) {
 			try {
@@ -119,7 +119,7 @@ public class Clustering extends BabelomicsTool {
 				nwGenes = null;
 			}			
 		}
-		
+
 		try {
 			jobStatus.addStatusMessage("60", "generating samples clusters");
 		} catch (FileNotFoundException e) {
@@ -131,7 +131,7 @@ public class Clustering extends BabelomicsTool {
 		} catch (Exception e) {
 			printError("exception_execute" + method + "_clustering", "error running " + method + " algorithm for samples", e.toString(), e);
 		}
-		
+
 		if ( nwSamples != null ) {
 			try {
 				IOUtils.write(new File(this.getOutdir() + "/samples.nw"), nwSamples.toString());
@@ -141,17 +141,18 @@ public class Clustering extends BabelomicsTool {
 				nwSamples = null;
 			}			
 		}
-		
+
 		try {
 			jobStatus.addStatusMessage("80", "generating clustering image");
 		} catch (FileNotFoundException e) {
 			abort("filenotfoundexception_execute_clustering", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
 
-		if ( nwGenes != null && nwSamples != null ) {
+		if ( nwGenes != null && nwSamples != null) {
 			File imgFile;
 			String imgFilename;
 			try {
+
 				imgFilename = this.getOutdir() + "/samples." + method + ".png";
 				ClusteringUtils.saveImageTree(nwSamples, "Clusters of samples",  imgFilename, false);
 				imgFile = new File(imgFilename);
@@ -160,7 +161,7 @@ public class Clustering extends BabelomicsTool {
 				} else {
 					printError("execute" + method + "_clustering", "error saving sample clustering image", "error saving sample clustering image");										
 				}
-				
+
 				imgFilename = this.getOutdir() + "/genes." + method + ".png";
 				ClusteringUtils.saveImageTree(nwGenes, "Clusters of genes",  imgFilename, true);
 				imgFile = new File(imgFilename);
@@ -171,15 +172,15 @@ public class Clustering extends BabelomicsTool {
 				}
 
 				imgFilename = this.getOutdir() + "/" + method + ".png";
-				
+
 				int rowOrder[] = getOrder(nwGenes.getLabels(), dataset.getFeatureNames());
 				int columnOrder[] = getOrder(nwSamples.getLabels(), dataset.getSampleNames());
-				
-//				System.out.println("row order = \n" + ArrayUtils.toString(rowOrder));
-//				System.out.println("column order = \n" + ArrayUtils.toString(columnOrder));
-//				System.out.println("nw samples labels = " + ListUtils.toString(nwSamples.getLabels(), ",") + "\ndataset sample names = " + ListUtils.toString(dataset.getSampleNames(), ","));
+
+				//				System.out.println("row order = \n" + ArrayUtils.toString(rowOrder));
+				//				System.out.println("column order = \n" + ArrayUtils.toString(columnOrder));
+				//				System.out.println("nw samples labels = " + ListUtils.toString(nwSamples.getLabels(), ",") + "\ndataset sample names = " + ListUtils.toString(dataset.getSampleNames(), ","));
 				DoubleMatrix matrix = orderMatrix(dataset.getDoubleMatrix(), rowOrder, columnOrder);
-				
+
 				ClusteringUtils.saveImageTree(matrix, nwGenes, nwSamples, imgFilename);
 				imgFile = new File(imgFilename);
 				if ( imgFile.exists() ) {
@@ -191,6 +192,59 @@ public class Clustering extends BabelomicsTool {
 				printError("ioexception_execute" + method + "_clustering", "error saving clustering image", e.toString(), StringUtils.getStackTrace(e));
 			}
 		}
+		
+		
+		
+		if ( nwGenes != null ) {
+		
+			if ( "kmeans".equalsIgnoreCase(method) ) {
+				String redirectionTags = null; 
+				List<String> redirectionInputs = null;
+				File redirectionFile = null, list1 = null;
+				File list2 = new File(outdir + "/rownames.txt");
+				for(int i=1 ; i<=kvalue ; i++) {
+					// preparing significant list (top and bottom)
+					//
+					list1 = new File(outdir + "/cluster_" + i + ".txt");
+					if ( list1.exists() || list2.exists() ) {
+						redirectionFile = new File(outdir + "/cluster_" + i + "_to_fatigo.redirection");
+						
+						redirectionInputs = new ArrayList<String>();
+
+						redirectionInputs.add("comparison=list2list");
+
+						redirectionInputs.add("list1_wum_data=true");
+						redirectionInputs.add("list1_databox=" + list1.getName() + " (cluster " + i + " from job $JOB_NAME)");
+						redirectionInputs.add("list1=$JOB_FOLDER/" + list1.getName());
+
+						redirectionInputs.add("list2_wum_data=true");
+						redirectionInputs.add("list2_databox=" + list2.getName() + " (all genes from job $JOB_NAME)");
+						redirectionInputs.add("list2=$JOB_FOLDER/" + list2.getName());
+
+						redirectionInputs.add("duplicates=ref");
+
+						redirectionInputs.add("tool=fatigo");
+						redirectionInputs.add("jobname=fatigo from kmeans cluster " + 1);						
+						redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
+						
+						try {
+							IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}								
+
+						if ( redirectionFile.exists() ) {
+							redirectionTags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
+							result.addOutputItem(new Item("cluster_" + i + "_to_fatigo", "", "Send cluster " + i + " to FatiGO tool", TYPE.TEXT, StringUtils.toList(redirectionTags, ","), new HashMap<String, String>(2), "Continue processing"));
+						}
+					}
+				}
+			}
+
+		}
+		
+		
 	}
 
 	/**
@@ -205,26 +259,31 @@ public class Clustering extends BabelomicsTool {
 	 * @throws Exception
 	 */
 	private MultipleTree runClustering(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String method, String distance, int kvalue) throws Exception {
+		return runClustering(matrix, rowNames, colNames, method, distance, kvalue, false);
+	}
+	
+	private MultipleTree runClustering(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String method, String distance, int kvalue, boolean createClusterFiles) throws Exception {
 		MultipleTree tree = null;
 
-		
 		if ( "sota".equalsIgnoreCase(method) ) {
 			Sota sota = new Sota(matrix, rowNames, colNames, distance, babelomicsHomePath);
-			tree = sota.run();
+			tree = sota.run(createClusterFiles);
 		} else if ( "som".equalsIgnoreCase(method) ) {
 			Som som = new Som(matrix, rowNames, colNames, distance, babelomicsHomePath);
-			tree = som.run();
+			tree = som.run(createClusterFiles);
 		} else if ( "upgma".equalsIgnoreCase(method) ) {
 			Upgma upgma = new Upgma(matrix, rowNames, colNames, distance, babelomicsHomePath);
-			tree = upgma.run();
+			tree = upgma.run(createClusterFiles);
 		} else if ( "kmeans".equalsIgnoreCase(method) ) {
-			Kmeans kmeans = new Kmeans(matrix, rowNames, colNames, distance, kvalue, babelomicsHomePath);
-			tree = kmeans.run();			
+			int k = (kvalue > rowNames.size() ? rowNames.size() : kvalue);
+			
+			Kmeans kmeans = new Kmeans(matrix, rowNames, colNames, distance, k, outdir, babelomicsHomePath);
+			tree = kmeans.run(createClusterFiles);			
 		}
 		return tree;
 	}
-		
-		
+
+
 	private int[] getOrder(List<String> src, List<String> dest) {
 		int order[] = new int[src.size()];
 		int i=0;

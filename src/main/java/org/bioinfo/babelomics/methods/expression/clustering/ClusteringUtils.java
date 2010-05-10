@@ -274,6 +274,7 @@ public class ClusteringUtils {
 		canvas.save(imgFilename);		
 	}
 
+
 	private static int getMaxStringLengh(List<String> names) {
 		int max = 0;
 		for(String name: names) {

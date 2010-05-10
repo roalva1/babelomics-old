@@ -23,7 +23,7 @@ public class Som extends Cluster {
 	}
 
 	@Override
-	public MultipleTree run() throws Exception {
+	public MultipleTree run(boolean createClusterFiles) throws Exception {
 		MultipleTree nw = null;
 
 		File tmpDir = File.createTempFile("input", ".dir");
