@@ -41,6 +41,8 @@ public class Predictor extends BabelomicsTool {
 	private StringBuilder combinedTable;
 	private int numberOfBestSelectedClassifications = 5;
 	
+	private List<GenericClassifier> selectedClassifiers;    
+	
 	public Predictor() {		
 		initOptions();
 	}
@@ -103,6 +105,7 @@ public class Predictor extends BabelomicsTool {
 			
 		options.addOptionGroup(classifiers);
 
+		selectedClassifiers = new ArrayList<GenericClassifier>();
 		// feature selection (gene selection), and other options
 //		options.addOption(OptionFactory.createOption("gene-selection", "the gene selection, valid values: f-ratio, wilcoxon", false));
 		//options.addOption(OptionFactory.createOption("trainning-size", "number of genes to use in trainning separated by commas, default:2,5,10,20,35,50", false));		
@@ -234,17 +237,17 @@ public class Predictor extends BabelomicsTool {
 		
 		// train
 		knn.train(instances);
-		
-		// test
+				
+		// select best classifiers for testing
 		if(test!=null){
-			System.err.println("testing");
-			if(new File(commandLine.getOptionValue("test")).exists()){
-				int best = knn.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
-				EvaluationResult bestRMSE = knn.getEvaluationResultList().get(best);		
-				Knn testKnn = new Knn(best);
-				List<ClassificationResult> classificationResult = knn.test(instances, test);
-				IOUtils.append(outdir + "/knn_test.txt", testResultToString(classificationResult));
-			}
+			System.err.println("testing");			
+			int best = knn.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();			
+			Knn testKnn = new Knn(knn.getKnnValues()[best]);
+			selectedClassifiers.add(testKnn);
+//			List<ClassificationResult> classificationResult = knn.test(instances, test);
+//			String testResult = testResultToString(classificationResult);
+//			System.err.println(outdir + "/knn_test.txt");
+//			IOUtils.write(outdir + "/knn_test.txt", testResult);			
 		}
 		
 //		Knn testKnn = new Knn(best);
@@ -259,10 +262,13 @@ public class Predictor extends BabelomicsTool {
 		
 	}
 	
+	
+	
 	private String testResultToString(List<ClassificationResult> classificationResult){
 		StringBuilder testResult = new StringBuilder();
+		testResult.append("#Sample_name\tPredicted_class\n");
 		for(ClassificationResult classification: classificationResult){
-			testResult.append(classification.getInstanceName()).append("\t").append(classification.getClassName()).append("\t");
+			testResult.append(classification.getInstanceName()).append("\t").append(classification.getClassName()).append("\n");
 		}
 		return testResult.toString();
 	}
@@ -285,19 +291,33 @@ public class Predictor extends BabelomicsTool {
 				
 		// train
 		svm.train(instances);
+		
+		// select best classifiers for testing
+		if(test!=null){
+			System.err.println("testing");			
+			int best = svm.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
+			EvaluationResult bestRMSE = svm.getEvaluationResultList().get(best);
+			Knn testKnn = new svm(best);
+			selectedClassifiers.add(testKnn);
+//			List<ClassificationResult> classificationResult = knn.test(instances, test);
+//			String testResult = testResultToString(classificationResult);
+//			System.err.println(outdir + "/knn_test.txt");
+//			IOUtils.write(outdir + "/knn_test.txt", testResult);			
+		}
+		
 		// results
-		int best = svm.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
-		EvaluationResult bestRMSE = svm.getEvaluationResultList().get(best);
+//		int best = svm.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
+//		EvaluationResult bestRMSE = svm.getEvaluationResultList().get(best);
 //		logger.println("Beset RMSE classification");
 //		logger.println("Cost: " + svm.getCostValues()[best]);
 //		logger.println(bestRMSE.toString());
 
-		try {
-			IOUtils.write(new File(outdir + "/svm.txt"), "Best RMSE classification\n\nCost: " + svm.getCostValues()[best] + "\n\n" + bestRMSE.toString());
-			result.addOutputItem(new Item("svm_result_file", "svm.txt", "SVM result file", TYPE.FILE));
-		} catch (IOException e) {
-			printError("ioexception_executesvm_predictor", "Error saving SVM results", "Error saving SVM results");
-		}
+//		try {
+//			IOUtils.write(new File(outdir + "/svm.txt"), "Best RMSE classification\n\nCost: " + svm.getCostValues()[best] + "\n\n" + bestRMSE.toString());
+//			result.addOutputItem(new Item("svm_result_file", "svm.txt", "SVM result file", TYPE.FILE));
+//		} catch (IOException e) {
+//			printError("ioexception_executesvm_predictor", "Error saving SVM results", "Error saving SVM results");
+//		}
 		// ??????
 		
 		// save results
