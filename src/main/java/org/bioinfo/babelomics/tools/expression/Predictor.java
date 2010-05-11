@@ -239,8 +239,8 @@ public class Predictor extends BabelomicsTool {
 		int best = knn.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
 		EvaluationResult bestRMSE = knn.getEvaluationResultList().get(best);
 		
-		Knn testKnn = new Knn(best);
-		List<ClassificationResult> classificationResult = knn.test(instances, test);
+//		Knn testKnn = new Knn(best);
+//		List<ClassificationResult> classificationResult = knn.test(instances, test);
 //		logger.println("Best RMSE classification");
 //		logger.println("Knn: " + knn.getKnnValues()[best] + " neighbors");
 //		logger.println(bestRMSE.toString());
