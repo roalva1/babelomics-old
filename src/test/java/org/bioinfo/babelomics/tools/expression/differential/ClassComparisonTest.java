@@ -13,7 +13,7 @@ public class ClassComparisonTest {
 	}
 
 	public void Test() {
-		String dataset = "/mnt/commons/test/biodata/example/twoclasses100.txt";
+		String dataset = "/mnt/commons/test/biodata/example/twoclasses.txt";
 		String outdir = "/tmp/ClassComparisonTest";
 		new File(outdir).mkdir();
 
@@ -29,7 +29,7 @@ public class ClassComparisonTest {
 
 	public void Test1() {
 	    
-		String dataset = "/mnt/commons/test/biodata/example/twoclasses100.txt";
+		String dataset = "/mnt/commons/test/biodata/example/twoclasses.txt";
 		String outdir = "/tmp/ClassComparisonTest1";
 		new File(outdir).mkdir();
 
@@ -46,7 +46,7 @@ public class ClassComparisonTest {
 	@Test
 	public void Test2() {
 	    
-		String dataset = "/mnt/commons/test/biodata/example/twoclasses100.txt";
+		String dataset = "/mnt/commons/test/biodata/example/twoclasses.txt";
 		String outdir = "/tmp/ClassComparisonTest2";
 		new File(outdir).mkdir();
 

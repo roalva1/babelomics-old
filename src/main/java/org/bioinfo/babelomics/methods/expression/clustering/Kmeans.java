@@ -19,18 +19,25 @@ import org.bioinfo.math.data.DoubleMatrix;
 public class Kmeans extends Cluster {
 	private int kvalue;
 	
-	public Kmeans(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String distance, int kvalue, String home) {
-		super(matrix, rowNames, colNames, distance, home);
+	public Kmeans(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String distance, int kvalue, String outdir, String home) {
+		super(matrix, rowNames, colNames, distance, outdir, home);
 		this.kvalue = kvalue;
 	}
 
 	@Override
-	public MultipleTree run() throws Exception {
+	public MultipleTree run(boolean createClusterFiles) throws Exception {
 		MultipleTree nw = null;
 		
-		File tmpDir = File.createTempFile("input", ".dir");
-		tmpDir.delete();
-		tmpDir.mkdir();
+		File tmpDir = null; 
+		if ( outdir == null) {
+			tmpDir = File.createTempFile("input", ".dir");
+			tmpDir.delete();
+			tmpDir.mkdir();
+		} else {
+			tmpDir = new File(outdir);
+		}
+		
+		System.out.println("---> create cluster files = " + createClusterFiles + " at " + tmpDir.getAbsolutePath());
 		
 		File inputFile = new File(tmpDir.getAbsoluteFile() + "/in.txt");
 		File outputFile = new File(tmpDir.getAbsoluteFile() + "/in_K_G" + kvalue + ".kgg");
@@ -66,11 +73,19 @@ public class Kmeans extends Cluster {
 			StringBuilder sb = new StringBuilder();
 			sb.append("(");
 			List<String> keys = MapUtils.getKeys(map);
-			int i=0;
+			int i=0, nbCluster=0;
 			for(i=0 ; i<keys.size()-1 ; i++) {
+				if ( createClusterFiles ) {
+					nbCluster = Integer.parseInt(keys.get(i)) + 1;
+					IOUtils.write(tmpDir + "/cluster_" + nbCluster + ".txt", map.get(keys.get(i)));
+				}
+				
 				sb.append("(").append(ListUtils.toString(map.get(keys.get(i)), ",")).append("),");
 			}
 			sb.append("(").append(ListUtils.toString(map.get(keys.get(i)), ",")).append("));");
+			if ( createClusterFiles ) {
+				IOUtils.write(tmpDir + "/rownames.txt", rowNames);
+			}
 //			System.out.println("newick " + sb.toString());
 			nw = new NewickParser().parse(sb.toString());
 		} else {
