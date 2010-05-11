@@ -172,7 +172,7 @@ public class Predictor extends BabelomicsTool {
 
 			Instances test = null;
 			
-			if(commandLine.hasOption("test")){
+			if(commandLine.hasOption("test") && !commandLine.getOptionValue("test").equalsIgnoreCase("none")){
 				File testFile = new File(commandLine.getOptionValue("test"));				
 				// data set loading 
 				if(commandLine.hasOption("test-arff")){
@@ -235,9 +235,17 @@ public class Predictor extends BabelomicsTool {
 		// train
 		knn.train(instances);
 		
-		// output results
-		int best = knn.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
-		EvaluationResult bestRMSE = knn.getEvaluationResultList().get(best);
+		// test
+		if(test!=null){
+			System.err.println("testing");
+			if(new File(commandLine.getOptionValue("test")).exists()){
+				int best = knn.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
+				EvaluationResult bestRMSE = knn.getEvaluationResultList().get(best);		
+				Knn testKnn = new Knn(best);
+				List<ClassificationResult> classificationResult = knn.test(instances, test);
+				IOUtils.append(outdir + "/knn_test.txt", testResultToString(classificationResult));
+			}
+		}
 		
 //		Knn testKnn = new Knn(best);
 //		List<ClassificationResult> classificationResult = knn.test(instances, test);
@@ -251,6 +259,13 @@ public class Predictor extends BabelomicsTool {
 		
 	}
 	
+	private String testResultToString(List<ClassificationResult> classificationResult){
+		StringBuilder testResult = new StringBuilder();
+		for(ClassificationResult classification: classificationResult){
+			testResult.append(classification.getInstanceName()).append("\t").append(classification.getClassName()).append("\t");
+		}
+		return testResult.toString();
+	}
 	
 	private void executeSvm(Instances instances, Instances test) throws Exception {
 		
