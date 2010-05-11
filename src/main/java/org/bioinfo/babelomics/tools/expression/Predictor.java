@@ -14,6 +14,7 @@ import org.bioinfo.chart.XYLineChart;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.mlpr.classifier.AbstractFeatureSelector;
@@ -24,13 +25,12 @@ import org.bioinfo.mlpr.classifier.RForest;
 import org.bioinfo.mlpr.classifier.Svm;
 import org.bioinfo.mlpr.classifier.result.ClassificationResult;
 import org.bioinfo.mlpr.evaluation.KFoldCrossValidation;
-import org.bioinfo.mlpr.evaluation.result.EvaluationResult;
 import org.bioinfo.mlpr.utils.InstancesBuilder;
 import org.bioinfo.tool.OptionFactory;
-import org.bioinfo.tool.exception.InvalidParemeterException;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 
+import weka.classifiers.trees.RandomForest;
 import weka.core.Attribute;
 import weka.core.Instances;
 
@@ -40,9 +40,9 @@ public class Predictor extends BabelomicsTool {
 	private double progressCurrent = 0;
 	private StringBuilder combinedTable;
 	private int numberOfBestSelectedClassifications = 5;
-	
+
 	private List<GenericClassifier> selectedClassifiers;    
-	
+
 	public Predictor() {		
 		initOptions();
 	}
@@ -53,15 +53,15 @@ public class Predictor extends BabelomicsTool {
 		// data
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
 		options.addOption(OptionFactory.createOption("dataset-arff", "dataset is in arff format",false,false));
-		
+
 		// data test
 		options.addOption(OptionFactory.createOption("test", "the data test",false));
 		options.addOption(OptionFactory.createOption("test-arff", "dataset test is in arff format",false,false));
-		
+
 		// class attribute
 		options.addOption(OptionFactory.createOption("class", "corresponding class attribute in the dataset",false,true));
 		options.addOption(OptionFactory.createOption("class-file", "class variable file",false,true));
-		
+
 		// sample and feature filters
 		options.addOption(OptionFactory.createOption("sample-filter", "Sample filter", false));
 		options.addOption(OptionFactory.createOption("feature-filter", "Feature filter", false));
@@ -69,58 +69,58 @@ public class Predictor extends BabelomicsTool {
 		// classifiers algorithms
 		OptionGroup classifiers = new OptionGroup();
 		classifiers.setRequired(false);
-		
-			// Evaluation
-			options.addOption(OptionFactory.createOption("cross-validation", "Perform cross validation analysis",false,false));			
-			options.addOption(OptionFactory.createOption("cross-validation-folds", "Number of folds in cross validation evaluation",false,true));
-			options.addOption(OptionFactory.createOption("validation-repeats", "Number of repeat each randomization",false,true));
-			options.addOption(OptionFactory.createOption("feature-selection", "Feature selection",false,true));			
 
-			// KNN
-			classifiers.addOption(OptionFactory.createOption("knn", "Classify dataset with a KNN classifier",false,false));
-			options.addOption(OptionFactory.createOption("knn-tune", "Perform automated number of neighbors tunning",false,false));
-			options.addOption(OptionFactory.createOption("knn-neighbors", "Knn number of neighbors (5 by default)", false, true));
-			
-			// SVM
-			classifiers.addOption(OptionFactory.createOption("svm", "Classify dataset with a SVM classifier", false,false));
-			options.addOption(OptionFactory.createOption("svm-tune", "Perform automated parameter tunning",false,false));
-			options.addOption(OptionFactory.createOption("svm-cost", "----", false));
-			
-			// Random forest
-			classifiers.addOption(OptionFactory.createOption("random-forest", "Classify dataset with a Random Forest classifier", false,false));
-			options.addOption(OptionFactory.createOption("random-forest-tune", "Perform automated number of tree tunning",false,false));
-			options.addOption(OptionFactory.createOption("random-forest-trees", "Number of trees", false));
-			
-//			// DLDA
-//			classifiers.addOption(OptionFactory.createOption("dlda", "Classify dataset with a DLDA classifier", false,false));
-//			options.addOption(OptionFactory.createOption("dlda-tune", "Perform automated parameter tunning",false,false));
-//			
-//			// SOM
-//			classifiers.addOption(OptionFactory.createOption("som", "Classify dataset with a SOM classifier", false,false));
-//			options.addOption(OptionFactory.createOption("som-tune", "Perform automated parameter tunning",false,false));
-//			
-//			// PAM
-//			classifiers.addOption(OptionFactory.createOption("pam", "Classify dataset with a PAM classifier", false,false));
-//			options.addOption(OptionFactory.createOption("pam-tune", "Perform automated parameter tunning",false,false));
-			
+		// Evaluation
+		options.addOption(OptionFactory.createOption("cross-validation", "Perform cross validation analysis",false,false));			
+		options.addOption(OptionFactory.createOption("cross-validation-folds", "Number of folds in cross validation evaluation",false,true));
+		options.addOption(OptionFactory.createOption("validation-repeats", "Number of repeat each randomization",false,true));
+		options.addOption(OptionFactory.createOption("feature-selection", "Feature selection",false,true));			
+
+		// KNN
+		classifiers.addOption(OptionFactory.createOption("knn", "Classify dataset with a KNN classifier",false,false));
+		options.addOption(OptionFactory.createOption("knn-tune", "Perform automated number of neighbors tunning",false,false));
+		options.addOption(OptionFactory.createOption("knn-neighbors", "Knn number of neighbors (5 by default)", false, true));
+
+		// SVM
+		classifiers.addOption(OptionFactory.createOption("svm", "Classify dataset with a SVM classifier", false,false));
+		options.addOption(OptionFactory.createOption("svm-tune", "Perform automated parameter tunning",false,false));
+		options.addOption(OptionFactory.createOption("svm-cost", "----", false));
+
+		// Random forest
+		classifiers.addOption(OptionFactory.createOption("random-forest", "Classify dataset with a Random Forest classifier", false,false));
+		options.addOption(OptionFactory.createOption("random-forest-tune", "Perform automated number of tree tunning",false,false));
+		options.addOption(OptionFactory.createOption("random-forest-trees", "Number of trees", false));
+
+		//			// DLDA
+		//			classifiers.addOption(OptionFactory.createOption("dlda", "Classify dataset with a DLDA classifier", false,false));
+		//			options.addOption(OptionFactory.createOption("dlda-tune", "Perform automated parameter tunning",false,false));
+		//			
+		//			// SOM
+		//			classifiers.addOption(OptionFactory.createOption("som", "Classify dataset with a SOM classifier", false,false));
+		//			options.addOption(OptionFactory.createOption("som-tune", "Perform automated parameter tunning",false,false));
+		//			
+		//			// PAM
+		//			classifiers.addOption(OptionFactory.createOption("pam", "Classify dataset with a PAM classifier", false,false));
+		//			options.addOption(OptionFactory.createOption("pam-tune", "Perform automated parameter tunning",false,false));
+
 		options.addOptionGroup(classifiers);
 
 		selectedClassifiers = new ArrayList<GenericClassifier>();
 		// feature selection (gene selection), and other options
-//		options.addOption(OptionFactory.createOption("gene-selection", "the gene selection, valid values: f-ratio, wilcoxon", false));
+		//		options.addOption(OptionFactory.createOption("gene-selection", "the gene selection, valid values: f-ratio, wilcoxon", false));
 		//options.addOption(OptionFactory.createOption("trainning-size", "number of genes to use in trainning separated by commas, default:2,5,10,20,35,50", false));		
 
 	}
 
 	@Override
 	public void execute() {
-		
+
 		logger.info("Welcome to prophet...");
-		
+
 		// init status
 		combinedTable = new StringBuilder();
 		initStatus();
-		
+
 		try {
 
 			Instances instances = null;
@@ -131,7 +131,7 @@ public class Predictor extends BabelomicsTool {
 
 				// update status
 				updateStatus(progressCurrent,"Reading dataset");
-				
+
 				// data set loading 
 				if(commandLine.hasOption("dataset-arff")){
 					instances = InstancesBuilder.getInstancesFromArrfFile(datasetFile,"sample_name");
@@ -171,10 +171,10 @@ public class Predictor extends BabelomicsTool {
 			} else {
 				abort("execute_predictor", "dataset " + datasetFile.getName() + "not found", "dataset " + datasetFile.getName() + "not found", "dataset " + datasetFile.getName() + "not found");
 			}
-			 
+
 
 			Instances test = null;
-			
+
 			if(commandLine.hasOption("test") && !commandLine.getOptionValue("test").equalsIgnoreCase("none")){
 				File testFile = new File(commandLine.getOptionValue("test"));				
 				// data set loading 
@@ -190,80 +190,171 @@ public class Predictor extends BabelomicsTool {
 					test = InstancesBuilder.getTestInstancesFromDataList(data, dataset.getFeatureNames(), dataset.getSampleNames());				
 				}
 			}
-			
-			
+
+
 			// classifiers
 			if(commandLine.hasOption("svm")) executeSvm(instances,test);
 			if(commandLine.hasOption("knn")) executeKnn(instances,test);
 			if(commandLine.hasOption("random-forest")) executeRandomForest(instances,test);
-//			if(commandLine.hasOption("dlda")) executeDlda(instances);
-//			if(commandLine.hasOption("som")) executeSom(instances);
-//			if(commandLine.hasOption("pam")) executePam(instances);
+			//if(commandLine.hasOption("dlda")) executeDlda(instances);
+			//if(commandLine.hasOption("som")) executeSom(instances);
+			//if(commandLine.hasOption("pam")) executePam(instances);
 
+			// save combined table
+			IOUtils.write(new File(outdir + "/combined_table.txt"), GenericClassifier.getResultsTableHeader() + "\n" +  combinedTable.toString());	
+			result.getOutputItems().add(0, new Item("combined_table", "combined_table.txt", " Combined results (best " + numberOfBestSelectedClassifications + " per classifier)", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR_COMBINED_TABLE"),new HashMap<String,String>(),"Summary",""));
+
+			// test			
+			if(test!=null && selectedClassifiers.size()>0){
+				
+				// init selected names
+				List<String> selectedNames = new ArrayList<String>(selectedClassifiers.size());
+				for(int i=0; i<selectedClassifiers.size(); i++){
+					selectedNames.add(selectedClassifiers.get(i).getClassifierName() + "::" + selectedClassifiers.get(i).getParams());
+				}
+				
+				// init test result table				
+				List<List<String>> testResultTable = new ArrayList<List<String>>(test.numInstances());
+				for(int i=0; i<test.numInstances(); i++){
+					List<String> classifications = new ArrayList<String>(selectedClassifiers.size());
+					for(int j=0; j<selectedClassifiers.size(); j++) {
+						classifications.add("-");
+					}					
+					testResultTable.add(classifications);
+				}
+				
+				// fill test result table 
+				List<String> sampleNames = new ArrayList<String>(test.numInstances());
+				for(int i=0; i<selectedClassifiers.size(); i++){
+					GenericClassifier testClassifier = selectedClassifiers.get(i);
+					testClassifier.build(instances);
+					List<ClassificationResult> testResult = testClassifier.test(instances, test);
+					if(i==0){
+						for(int j=0; j<test.numInstances(); j++){
+							sampleNames.add(testResult.get(j).getInstanceName());
+						}
+					}
+					for(int j=0; j<test.numInstances(); j++){
+						testResultTable.get(j).set(i,testResult.get(j).getClassName());
+					}
+				}
+				
+				// save to disk
+				StringBuilder testResultString = new StringBuilder();
+				testResultString.append(ListUtils.toString(selectedNames, "\t")).append("\n");
+				for(int i=0; i<test.numInstances(); i++){
+					testResultString.append(sampleNames.get(i)).append("\t").append(ListUtils.toString(testResultTable.get(i))).append("\n");
+				}
+				
+			}
 			
+			
+
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			e.printStackTrace(logger.getLogWriter());
 		}
-		
-		// classification table
-		try {
-			IOUtils.write(new File(outdir + "/combined_table.txt"), GenericClassifier.getResultsTableHeader() + "\n" +  combinedTable.toString());	
-			result.getOutputItems().add(0, new Item("combined_table", "combined_table.txt", " Combined results (best " + numberOfBestSelectedClassifications + " per classifier)", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR_COMBINED_TABLE"),new HashMap<String,String>(),"Summary",""));
-		} catch (IOException e) {
-			printError("ioexception_predictor", "Error saving combined table", "Error saving combined table");
-		}
-		
+
 	}
 
 
 	private void executeKnn(Instances instances, Instances test) throws Exception {
-		
+
 		// update status
 		updateStatus(progressCurrent,"executing KNN classifier");
-				
+
 		// init classifier
 		Knn knn = new Knn();
-		
+
 		// params
 		if(commandLine.hasOption("knn-tune")) {
 			knn.setTuneParameters(true);
 		} else {
 			if(commandLine.hasOption("knn-neighbors")) knn.setKnn(Integer.parseInt(commandLine.getOptionValue("knn-neighbors")));						
 		}
-		
+
 		// validation
 		setValidation(knn);
-		
+
 		// train
 		knn.train(instances);
-				
+
 		// select best classifiers for testing
-		if(test!=null){
-			System.err.println("testing");			
+		if(test!=null){		
 			int best = knn.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();			
 			Knn testKnn = new Knn(knn.getKnnValues()[best]);
-			selectedClassifiers.add(testKnn);
-//			List<ClassificationResult> classificationResult = knn.test(instances, test);
-//			String testResult = testResultToString(classificationResult);
-//			System.err.println(outdir + "/knn_test.txt");
-//			IOUtils.write(outdir + "/knn_test.txt", testResult);			
+			selectedClassifiers.add(testKnn);		
 		}
-		
-//		Knn testKnn = new Knn(best);
-//		List<ClassificationResult> classificationResult = knn.test(instances, test);
-//		logger.println("Best RMSE classification");
-//		logger.println("Knn: " + knn.getKnnValues()[best] + " neighbors");
-//		logger.println(bestRMSE.toString());
-		
+
 		// save results
 		saveClassifierResults(knn);
-		
-		
+
+
 	}
-	
-	
-	
+
+	private void executeSvm(Instances instances, Instances test) throws Exception {
+
+		// update status
+		updateStatus(progressCurrent,"executing SVM classifier");
+
+		// init classifier
+		Svm svm = new Svm();
+		
+		// init params
+		if(commandLine.hasOption("svm-tune")) svm.setTuneParameters(true);
+		else {
+			if(commandLine.hasOption("svm-cost")) svm.setCost(Integer.parseInt(commandLine.getOptionValue("svm-cost")));						
+		}
+
+		// validation
+		setValidation(svm);
+
+		// train
+		svm.train(instances);
+
+		// select best classifiers for testing
+		if(test!=null){					
+			int best = svm.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();			
+			Svm testSvm = new Svm(svm.getCostValues()[best]);
+			selectedClassifiers.add(testSvm);
+		}
+
+		// save results
+		saveClassifierResults(svm);
+	}
+
+	private void executeRandomForest(Instances instances, Instances test) throws Exception {
+
+		// update status
+		updateStatus(progressCurrent,"executing Random Forest classifier");
+
+		// init classifier
+		RForest randomForest = new RForest();
+
+		// init params
+		if(commandLine.hasOption("random-forest-tune")) randomForest.setTuneParameters(true);
+		else {
+			if(commandLine.hasOption("random-forest-trees")) randomForest.setNumTrees(Integer.parseInt(commandLine.getOptionValue("random-forest-trees")));						
+		}
+
+		// validation
+		setValidation(randomForest);
+
+		// train
+		randomForest.train(instances);
+
+		// select best classifiers for testing
+		if(test!=null){					
+			int best = randomForest.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();			
+			RForest testRandomForest = new RForest(randomForest.getNumTreesArray()[best]);
+			selectedClassifiers.add(testRandomForest);
+		}
+
+		// save results
+		saveClassifierResults(randomForest);
+
+	}
+
 	private String testResultToString(List<ClassificationResult> classificationResult){
 		StringBuilder testResult = new StringBuilder();
 		testResult.append("#Sample_name\tPredicted_class\n");
@@ -273,101 +364,19 @@ public class Predictor extends BabelomicsTool {
 		return testResult.toString();
 	}
 	
-	private void executeSvm(Instances instances, Instances test) throws Exception {
-		
-		// update status
-		updateStatus(progressCurrent,"executing SVM classifier");
-		
-		// init classifier
-		Svm svm = new Svm();
-		// init params
-		if(commandLine.hasOption("svm-tune")) svm.setTuneParameters(true);
-		else {
-			if(commandLine.hasOption("svm-cost")) svm.setCost(Integer.parseInt(commandLine.getOptionValue("svm-cost")));						
-		}
-		
-		// validation
-		setValidation(svm);
-				
-		// train
-		svm.train(instances);
-		
-		// select best classifiers for testing
-		if(test!=null){
-			System.err.println("testing");			
-			int best = svm.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
-			EvaluationResult bestRMSE = svm.getEvaluationResultList().get(best);
-			Knn testKnn = new svm(best);
-			selectedClassifiers.add(testKnn);
-//			List<ClassificationResult> classificationResult = knn.test(instances, test);
-//			String testResult = testResultToString(classificationResult);
-//			System.err.println(outdir + "/knn_test.txt");
-//			IOUtils.write(outdir + "/knn_test.txt", testResult);			
-		}
-		
-		// results
-//		int best = svm.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
-//		EvaluationResult bestRMSE = svm.getEvaluationResultList().get(best);
-//		logger.println("Beset RMSE classification");
-//		logger.println("Cost: " + svm.getCostValues()[best]);
-//		logger.println(bestRMSE.toString());
+	private void saveClassifierResults(GenericClassifier classifier){
 
-//		try {
-//			IOUtils.write(new File(outdir + "/svm.txt"), "Best RMSE classification\n\nCost: " + svm.getCostValues()[best] + "\n\n" + bestRMSE.toString());
-//			result.addOutputItem(new Item("svm_result_file", "svm.txt", "SVM result file", TYPE.FILE));
-//		} catch (IOException e) {
-//			printError("ioexception_executesvm_predictor", "Error saving SVM results", "Error saving SVM results");
-//		}
-		// ??????
-		
-		// save results
-		saveClassifierResults(svm);
-	}
-
-	private void executeRandomForest(Instances instances, Instances test) throws Exception {
-		
-		// update status
-		updateStatus(progressCurrent,"executing Random Forest classifier");
-
-		// init classifier
-		RForest randomForest = new RForest();
-		
-		// init params
-		if(commandLine.hasOption("random-forest-tune")) randomForest.setTuneParameters(true);
-		else {
-			if(commandLine.hasOption("random-forest-trees")) randomForest.setNumTrees(Integer.parseInt(commandLine.getOptionValue("random-forest-trees")));						
-		}
-		
-		// validation
-		setValidation(randomForest);
-		
-		// train
-		randomForest.train(instances);
-		
-		// results
-		int best = randomForest.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
-		EvaluationResult bestRMSE = randomForest.getEvaluationResultList().get(best);
-//		logger.println("Best RMSE classification");
-//		logger.println("Number of trees: " + randomForest.getNumTreesArray()[best]);
-//		logger.println(bestRMSE.toString());
-
-		saveClassifierResults(randomForest);
-		
-	}
-
-private void saveClassifierResults(GenericClassifier classifier){
-		
 		int best = classifier.getEvaluationResultList().getBestAreaUnderRocIndex();
 		String name = classifier.getClassifierName();
-				
-		
+
+
 		try {
 			IOUtils.write(new File(outdir + "/" + name + ".txt"), "Best AUC classification\n\nParameters: " + classifier.getParamList().get(best) + "\n\n" + classifier.getEvaluationResultList().getBestAreaUnderRoc().toString());			
 			result.addOutputItem(new Item(name + "_result_file", name + ".txt", name + " result file", TYPE.FILE,name + " results",""));
 		} catch (IOException e) {
 			printError("ioexception_execute_" + name + "_predictor", "Error saving " + name + " results", "Error saving " + name + " results");
 		}
-		
+
 		// classification table
 		try {
 			IOUtils.write(new File(outdir + "/" + name + "_table.txt"), classifier.getResultsTable(true));
@@ -375,7 +384,7 @@ private void saveClassifierResults(GenericClassifier classifier){
 		} catch (IOException e) {
 			printError("ioexception_" + name + "_predictor", "Error saving " + name + " classifications table", "Error saving " + name + " classifications table");
 		}
-				
+
 		// Comparative plot
 		try {
 			XYLineChart comparativeplot = classifier.getComparativeMetricsPlot();
@@ -385,27 +394,27 @@ private void saveClassifierResults(GenericClassifier classifier){
 			printError("ioexception_" + name + "_predictor", "Error saving " + name + " comparative plot", "Error saving " + name + " comparative plot");
 			e.printStackTrace();
 		}
-		
-//		// Sample classification rate plot
-//		try {
-//			Canvas sampleClassficationPlot = classifier.getSampleClassificationRatePlot();			 
-//			sampleClassficationPlot.save(outdir + "/" + name + "_classification_rate_plot.png");
-//			result.addOutputItem(new Item(name + "_classification_rate_plot", name + "_classification_rate_plot.png", name + " classification rate plot", TYPE.IMAGE, Arrays.asList(""),new HashMap<String,String>(),name + " results",""));
-//		} catch (IOException e) {			
-//			printError("ioexception_" + name + "_predictor", "Error saving " + name + " classification rate plot", "Error saving " + name + " classification rate plot");
-//			e.printStackTrace();
-//		} catch (InvalidColumnIndexException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
+
+		//		// Sample classification rate plot
+		//		try {
+		//			Canvas sampleClassficationPlot = classifier.getSampleClassificationRatePlot();			 
+		//			sampleClassficationPlot.save(outdir + "/" + name + "_classification_rate_plot.png");
+		//			result.addOutputItem(new Item(name + "_classification_rate_plot", name + "_classification_rate_plot.png", name + " classification rate plot", TYPE.IMAGE, Arrays.asList(""),new HashMap<String,String>(),name + " results",""));
+		//		} catch (IOException e) {			
+		//			printError("ioexception_" + name + "_predictor", "Error saving " + name + " classification rate plot", "Error saving " + name + " classification rate plot");
+		//			e.printStackTrace();
+		//		} catch (InvalidColumnIndexException e) {
+		//			// TODO Auto-generated catch block
+		//			e.printStackTrace();
+		//		}
+
 		combinedTable.append(classifier.getSortedResultsTable(numberOfBestSelectedClassifications));
 	}
-	
+
 
 	private void setValidation(GenericClassifier classifier){
 		logger.println("SETTING VALIDATION!!!!!!!!!!!!!!!!!!!!!!!");
-		
+
 		// feature selection
 		AbstractFeatureSelector featureSelector = null;
 		if(commandLine.hasOption("feature-selection")){	
@@ -417,21 +426,13 @@ private void saveClassifierResults(GenericClassifier classifier){
 				featureSelector = new CfsFeatureSelector(); // change by Genetic algorithm
 			}
 		}
+
 		// validation
-//		if(commandLine.hasOption("cross-validation")) {
-			int repeats = Integer.parseInt(commandLine.getOptionValue("validation-repeats", "10"));
-			int folds = Integer.parseInt(commandLine.getOptionValue("cross-validation-folds", "5"));
-			classifier.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds, featureSelector));
-//			if(commandLine.hasOption("feature-selection")){
-//				classifier.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds, featureSelector));
-//				logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", feature-selection = " + commandLine.getOptionValue("feature-selection") + ")");	
-//			} else {
-//				classifier.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds));
-//				logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", no feature selection");		
-//			}					
-//		}
+		int repeats = Integer.parseInt(commandLine.getOptionValue("validation-repeats", "10"));
+		int folds = Integer.parseInt(commandLine.getOptionValue("cross-validation-folds", "5"));
+		classifier.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds, featureSelector));
 	}
-	
+
 	private void executeDlda(Instances instances) {		
 		printError("executeDlda_predictor", "DLDA is not implemented yet", "DLDA is not implemented yet");
 	}
@@ -443,28 +444,28 @@ private void saveClassifierResults(GenericClassifier classifier){
 	private void executePam(Instances instances) {
 		printError("executeDlda_predictor", "PAM is not implemented yet", "DLDA is not implemented yet");
 	}	
-	
-	
+
+
 	/*
 	 * 
 	 * STATUS MANAGEMENT (TO REMOVE!!!!!!!!)
 	 * 
 	 */
-	
+
 	private void initStatus() {
 		int steps = 2; // it includes reading dataset and done
-		
+
 		if(commandLine.hasOption("svm")) steps++;
 		if(commandLine.hasOption("knn")) steps++;
 		if(commandLine.hasOption("random-forest")) steps++;
 		if(commandLine.hasOption("dlda")) steps++;
 		if(commandLine.hasOption("som")) steps++;
 		if(commandLine.hasOption("pam")) steps++;
-		
+
 		progressStep = 100.0 / steps;
 		progressCurrent = progressStep;
 	}
-	
+
 	private void updateStatus(double progressCurrent, String message){
 		try {
 			jobStatus.addStatusMessage(StringUtils.decimalFormat(progressCurrent),message);
