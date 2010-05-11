@@ -40,7 +40,7 @@ public class DiffExpressionUtils {
 		int columnDimension = dataset.getColumnDimension();
 		int cellSide = 16;
 		int rowLabelsWidth = 70;
-		int colLabelsWidth = 70;
+		int colLabelsWidth = 140;
 		int infoWidth = 140;
 		//double min = dataset.getDoubleMatrix().getMinValue();
 		//double max = dataset.getDoubleMatrix().getMaxValue();

@@ -55,7 +55,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		// agilent or genepix normalization
 		//
 		getOptions().addOption(OptionFactory.createOption("sample-names", "Sample names. Only for agilent or genepix normalization.", false));
-		getOptions().addOption(OptionFactory.createOption("bg-correction", "Background correction: none, normexp, half, subtract, minimum, movingmin, edwards, rma. Default background correction: none. Only for Agilent or GenePix normalization.", false));
+		getOptions().addOption(OptionFactory.createOption("bg-correction", "Background correction: agilent, normexp, rma, half, subtract, minimum, movingmin, edwards, none. Default background correction: rma. Only for Agilent or GenePix normalization.", false));
 		getOptions().addOption(OptionFactory.createOption("wa-normalization", "Within arrays normalization: none, loess, printtiploess, median, composite, control, robustspline. Default within arrays normalization: loess. Only for two-colors Agilent or GenePix normalization.", false));
 		getOptions().addOption(OptionFactory.createOption("ba-normalization", "Between arrays normalization: none, quantiles, scale, vsn. Default between arrays normalization: scale. Only for Agilent or GenePix normalization.", false));
 		getOptions().addOption(OptionFactory.createOption("flags-no-fitted", "If this option is set then spots will not be used in the fitting of the parameters of the normalization steps. Only for Agilent or GenePix normalization.", false, false));
