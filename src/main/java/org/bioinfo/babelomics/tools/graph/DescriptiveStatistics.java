@@ -14,9 +14,14 @@ import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.babelomics.utils.RCommand;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.chart.HistogramChart;
+import org.bioinfo.commons.io.utils.FileUtils;
+import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.data.dataset.SampleVariable;
+import org.bioinfo.data.dataset.Variables;
 import org.bioinfo.data.format.io.exception.InvalidFileFormatException;
 import org.bioinfo.data.format.io.parser.NewickParser;
 import org.bioinfo.data.tree.multiway.MultipleTree;
@@ -121,13 +126,29 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		} catch (FileNotFoundException e) {
 			abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
-		
+		String classField = "";
 		updateJobStatus("40", "preparing execution");
+		
+//		dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
+//		
+//		//Variables<SampleVariable> file2list = dataset.getVariables();
+//		//for (int i=0;i<file2list.size();i++){
+//		//	System.out.println(i+"-"+ dataset.getVariables().get(i).getValues());
+//		//	
+//		//}
+//		for(SampleVariable var: dataset.getVariables()) {
+//			System.out.println(ListUtils.toString(var.getValues()));
+//		}
+//		
 		RCommand rCommand = new RCommand(pcaPlotBinPath, this.getOutdir());
+		
+		if (className!=null){
+			rCommand.addParam("grupos", className);	
+		}
 		rCommand.addParam("datafile", commandLine.getOptionValue("datalist"));
 		rCommand.addParam("outfile", this.getOutdir() + "/" + pcaplotFileName);
 		updateJobStatus("80", "exec");
-		rCommand.exec();		
+		rCommand.exec();
 		// saving results
 		//
 		updateJobStatus("90", "saving results");

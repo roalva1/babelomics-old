@@ -26,40 +26,41 @@ public class graphtest {
 	}
 	
 	
-	@Test
-	public void Test1() {
-		//String dataset = "/mnt/commons/test/fatiscanmini2.txt";
-		
-		String dataset = "/opt/babelomics/example/fatiscan_diabetesAffy.txt";
-		//String dataset = "/mnt/commons/test/biodata/example/dataset_example4.txt";
-		//String dataset = "/mnt/commons/test/biodata/newick1.nw";
-		String outdir = "/tmp/histogram";
-		new File(outdir).mkdir();
-		String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"--boxplot","true","--histogram","true", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
-		//String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"-tree","true", "-o", outdir};
-
-		System.out.println("----------------> " + args.toString());
-		
-		try {
-			BabelomicsMain.main(args); 
-//			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
-//			System.out.println("output dataset:\n" + IOUtils.toString(new File(outdir + "/histogram.txt")));
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail(e.toString());
-			//System.out.println(e.toString());
-		}
-	}
+//	@Test
+//	public void Test1() {
+//		//String dataset = "/mnt/commons/test/fatiscanmini2.txt";
+//		
+//		String dataset = "/opt/babelomics/example/fatiscan_diabetesAffy.txt";
+//		//String dataset = "/mnt/commons/test/biodata/example/dataset_example4.txt";
+//		//String dataset = "/mnt/commons/test/biodata/newick1.nw";
+//		String outdir = "/tmp/histogram";
+//		new File(outdir).mkdir();
+//		String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"--boxplot","true","--histogram","true", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
+//		//String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"-tree","true", "-o", outdir};
+//
+//		System.out.println("----------------> " + args.toString());
+//		
+//		try {
+//			BabelomicsMain.main(args); 
+////			System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
+////			System.out.println("output dataset:\n" + IOUtils.toString(new File(outdir + "/histogram.txt")));
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			fail(e.toString());
+//			//System.out.println(e.toString());
+//		}
+//	}
 		
 		@Test
 		public void Test2() {
 			//String dataset = "/mnt/commons/test/fatiscanmini2.txt";
 			
-			String dataset = "/mnt/commons/test/tools/pcaPlot/datos.txt";
+			//String dataset = "/opt/babelomics/example/correlation.txt";
+			String dataset = "/tmp/pcaPlot/multiclasses_data.txt";
 			//String dataset = "/mnt/commons/test/biodata/newick1.nw";
 			String outdir = "/tmp/pcaPlot";
 			new File(outdir).mkdir();
-			String []args = { "--tool", "pca-plot","--log-level", "2", "--datalist", dataset,"--pcaplot","true", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
+			String []args = { "--tool", "pca-plot","--log-level", "2", "--datalist", dataset,"--pcaplot","true","-class","EXAMPLE", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
 			//String []args = { "--tool", "descriptive-statistics","--log-level", "2", "--datalist", dataset,"-tree","true", "-o", outdir};
 
 			System.out.println("----------------> " + args.toString());
