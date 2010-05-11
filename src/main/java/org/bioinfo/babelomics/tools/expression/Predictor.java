@@ -16,11 +16,13 @@ import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.mlpr.classifier.AbstractFeatureSelector;
 import org.bioinfo.mlpr.classifier.CfsFeatureSelector;
 import org.bioinfo.mlpr.classifier.GenericClassifier;
 import org.bioinfo.mlpr.classifier.Knn;
 import org.bioinfo.mlpr.classifier.RForest;
 import org.bioinfo.mlpr.classifier.Svm;
+import org.bioinfo.mlpr.classifier.result.ClassificationResult;
 import org.bioinfo.mlpr.evaluation.KFoldCrossValidation;
 import org.bioinfo.mlpr.evaluation.result.EvaluationResult;
 import org.bioinfo.mlpr.utils.InstancesBuilder;
@@ -49,6 +51,10 @@ public class Predictor extends BabelomicsTool {
 		// data
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
 		options.addOption(OptionFactory.createOption("dataset-arff", "dataset is in arff format",false,false));
+		
+		// data test
+		options.addOption(OptionFactory.createOption("test", "the data test",false));
+		options.addOption(OptionFactory.createOption("test-arff", "dataset test is in arff format",false,false));
 		
 		// class attribute
 		options.addOption(OptionFactory.createOption("class", "corresponding class attribute in the dataset",false,true));
@@ -109,6 +115,7 @@ public class Predictor extends BabelomicsTool {
 		logger.info("Welcome to prophet...");
 		
 		// init status
+		combinedTable = new StringBuilder();
 		initStatus();
 		
 		try {
@@ -146,7 +153,7 @@ public class Predictor extends BabelomicsTool {
 								classValues = dataset.getVariables().getByName(className).getValues();	
 							} else {
 								throw new Exception("class not found in dataset");
-							}							
+							}
 						} else {
 							throw new Exception("class or class-file is not defined"); 
 						}
@@ -156,19 +163,36 @@ public class Predictor extends BabelomicsTool {
 					instances = InstancesBuilder.getInstancesFromDataList(data, dataset.getFeatureNames(), dataset.getSampleNames(), classValues);
 					// define class attribute
 					Attribute classAttr = instances.attribute("class");
-					instances.setClassIndex(classAttr.index());
-					
-				}				
+					instances.setClassIndex(classAttr.index());		
+				}
 			} else {
 				abort("execute_predictor", "dataset " + datasetFile.getName() + "not found", "dataset " + datasetFile.getName() + "not found", "dataset " + datasetFile.getName() + "not found");
 			}
+			 
 
-			combinedTable = new StringBuilder(); 
+			Instances test = null;
+			
+			if(commandLine.hasOption("test")){
+				File testFile = new File(commandLine.getOptionValue("test"));				
+				// data set loading 
+				if(commandLine.hasOption("test-arff")){
+					instances = InstancesBuilder.getInstancesFromArrfFile(datasetFile,"sample_name");				
+				} else {
+					Dataset dataset = new Dataset(testFile, true);
+					List<List<String>> data = new ArrayList<List<String>>(dataset.getColumnDimension());
+					for(int i = 0 ; i<dataset.getColumnDimension() ; i++) {
+						data.add(ArrayUtils.toStringList(dataset.getDoubleMatrix().getColumn(i)));
+					}				
+					// create instances
+					test = InstancesBuilder.getTestInstancesFromDataList(data, dataset.getFeatureNames(), dataset.getSampleNames());				
+				}
+			}
+			
 			
 			// classifiers
-			if(commandLine.hasOption("svm")) executeSvm(instances);
-			if(commandLine.hasOption("knn")) executeKnn(instances);
-			if(commandLine.hasOption("random-forest")) executeRandomForest(instances);
+			if(commandLine.hasOption("svm")) executeSvm(instances,test);
+			if(commandLine.hasOption("knn")) executeKnn(instances,test);
+			if(commandLine.hasOption("random-forest")) executeRandomForest(instances,test);
 //			if(commandLine.hasOption("dlda")) executeDlda(instances);
 //			if(commandLine.hasOption("som")) executeSom(instances);
 //			if(commandLine.hasOption("pam")) executePam(instances);
@@ -190,7 +214,7 @@ public class Predictor extends BabelomicsTool {
 	}
 
 
-	private void executeKnn(Instances instances) throws Exception {
+	private void executeKnn(Instances instances, Instances test) throws Exception {
 		
 		// update status
 		updateStatus(progressCurrent,"executing KNN classifier");
@@ -213,10 +237,13 @@ public class Predictor extends BabelomicsTool {
 		
 		// output results
 		int best = knn.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
-		EvaluationResult bestRMSE = knn.getEvaluationResultList().get(best);		
-		logger.println("Best RMSE classification");
-		logger.println("Knn: " + knn.getKnnValues()[best] + " neighbors");
-		logger.println(bestRMSE.toString());
+		EvaluationResult bestRMSE = knn.getEvaluationResultList().get(best);
+		
+		Knn testKnn = new Knn(best);
+		List<ClassificationResult> classificationResult = knn.test(instances, test);
+//		logger.println("Best RMSE classification");
+//		logger.println("Knn: " + knn.getKnnValues()[best] + " neighbors");
+//		logger.println(bestRMSE.toString());
 		
 		// save results
 		saveClassifierResults(knn);
@@ -225,7 +252,7 @@ public class Predictor extends BabelomicsTool {
 	}
 	
 	
-	private void executeSvm(Instances instances) throws Exception {
+	private void executeSvm(Instances instances, Instances test) throws Exception {
 		
 		// update status
 		updateStatus(progressCurrent,"executing SVM classifier");
@@ -246,9 +273,9 @@ public class Predictor extends BabelomicsTool {
 		// results
 		int best = svm.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
 		EvaluationResult bestRMSE = svm.getEvaluationResultList().get(best);
-		logger.println("Beset RMSE classification");
-		logger.println("Cost: " + svm.getCostValues()[best]);
-		logger.println(bestRMSE.toString());
+//		logger.println("Beset RMSE classification");
+//		logger.println("Cost: " + svm.getCostValues()[best]);
+//		logger.println(bestRMSE.toString());
 
 		try {
 			IOUtils.write(new File(outdir + "/svm.txt"), "Best RMSE classification\n\nCost: " + svm.getCostValues()[best] + "\n\n" + bestRMSE.toString());
@@ -262,7 +289,7 @@ public class Predictor extends BabelomicsTool {
 		saveClassifierResults(svm);
 	}
 
-	private void executeRandomForest(Instances instances) throws Exception {
+	private void executeRandomForest(Instances instances, Instances test) throws Exception {
 		
 		// update status
 		updateStatus(progressCurrent,"executing Random Forest classifier");
@@ -285,9 +312,9 @@ public class Predictor extends BabelomicsTool {
 		// results
 		int best = randomForest.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();
 		EvaluationResult bestRMSE = randomForest.getEvaluationResultList().get(best);
-		logger.println("Best RMSE classification");
-		logger.println("Number of trees: " + randomForest.getNumTreesArray()[best]);
-		logger.println(bestRMSE.toString());
+//		logger.println("Best RMSE classification");
+//		logger.println("Number of trees: " + randomForest.getNumTreesArray()[best]);
+//		logger.println(bestRMSE.toString());
 
 		saveClassifierResults(randomForest);
 		
@@ -298,6 +325,7 @@ private void saveClassifierResults(GenericClassifier classifier){
 		int best = classifier.getEvaluationResultList().getBestAreaUnderRocIndex();
 		String name = classifier.getClassifierName();
 				
+		
 		try {
 			IOUtils.write(new File(outdir + "/" + name + ".txt"), "Best AUC classification\n\nParameters: " + classifier.getParamList().get(best) + "\n\n" + classifier.getEvaluationResultList().getBestAreaUnderRoc().toString());			
 			result.addOutputItem(new Item(name + "_result_file", name + ".txt", name + " result file", TYPE.FILE,name + " results",""));
@@ -307,8 +335,8 @@ private void saveClassifierResults(GenericClassifier classifier){
 		
 		// classification table
 		try {
-			IOUtils.write(new File(outdir + "/" + name + "_table.txt"), classifier.getResultsTable(true));			
-			result.addOutputItem(new Item(name + "_table", name + "_table.txt", name + " classifications", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR_" + name.toUpperCase() + "_TABLE"),new HashMap<String,String>(),name + " results",""));
+			IOUtils.write(new File(outdir + "/" + name + "_table.txt"), classifier.getResultsTable(true));
+			result.addOutputItem(new Item(name + "_table", name + "_table.txt", name + " classifications", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR_TABLE"),new HashMap<String,String>(),name + " results",""));
 		} catch (IOException e) {
 			printError("ioexception_" + name + "_predictor", "Error saving " + name + " classifications table", "Error saving " + name + " classifications table");
 		}
@@ -341,18 +369,32 @@ private void saveClassifierResults(GenericClassifier classifier){
 	
 
 	private void setValidation(GenericClassifier classifier){
+		logger.println("SETTING VALIDATION!!!!!!!!!!!!!!!!!!!!!!!");
+		
+		// feature selection
+		AbstractFeatureSelector featureSelector = null;
+		if(commandLine.hasOption("feature-selection")){	
+			if("cfs".equalsIgnoreCase(commandLine.getOptionValue("feature-selection"))){
+				featureSelector = new CfsFeatureSelector();
+			} else if("pca".equalsIgnoreCase(commandLine.getOptionValue("feature-selection"))){
+				featureSelector = new CfsFeatureSelector(); // change by PCA
+			} else if("ga".equalsIgnoreCase(commandLine.getOptionValue("feature-selection"))){
+				featureSelector = new CfsFeatureSelector(); // change by Genetic algorithm
+			}
+		}
 		// validation
-		if(commandLine.hasOption("cross-validation")) {
+//		if(commandLine.hasOption("cross-validation")) {
 			int repeats = Integer.parseInt(commandLine.getOptionValue("validation-repeats", "10"));
 			int folds = Integer.parseInt(commandLine.getOptionValue("cross-validation-folds", "5"));
-			if(commandLine.hasOption("feature-selection")){
-				classifier.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds,new CfsFeatureSelector()));
-				logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", feature-selection = " + commandLine.getOptionValue("feature-selection") + ")");
-			} else {
-				classifier.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds));
-				logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", no feature selection");
-			}						
-		}
+			classifier.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds, featureSelector));
+//			if(commandLine.hasOption("feature-selection")){
+//				classifier.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds, featureSelector));
+//				logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", feature-selection = " + commandLine.getOptionValue("feature-selection") + ")");	
+//			} else {
+//				classifier.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds));
+//				logger.println("setting cross-validation evaluation (repeats = " + repeats + ", folds = " + folds + ", no feature selection");		
+//			}					
+//		}
 	}
 	
 	private void executeDlda(Instances instances) {		
