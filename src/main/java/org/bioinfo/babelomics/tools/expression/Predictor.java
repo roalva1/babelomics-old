@@ -71,6 +71,7 @@ public class Predictor extends BabelomicsTool {
 		classifiers.setRequired(false);
 
 		// Evaluation
+		options.addOption(OptionFactory.createOption("loo", "Perform leaving-one-out validation analysis",false,false));
 		options.addOption(OptionFactory.createOption("cross-validation", "Perform cross validation analysis",false,false));			
 		options.addOption(OptionFactory.createOption("cross-validation-folds", "Number of folds in cross validation evaluation",false,true));
 		options.addOption(OptionFactory.createOption("validation-repeats", "Number of repeat each randomization",false,true));
@@ -191,12 +192,6 @@ public class Predictor extends BabelomicsTool {
 				abort("execute_predictor", "dataset " + datasetFile.getName() + "not found", "dataset " + datasetFile.getName() + "not found", "dataset " + datasetFile.getName() + "not found");
 			}
 
-
-		
-
-
-
-
 			// classifiers
 			if(commandLine.hasOption("svm")) executeSvm(instances,test);
 			if(commandLine.hasOption("knn")) executeKnn(instances,test);
@@ -243,9 +238,6 @@ public class Predictor extends BabelomicsTool {
 					}
 					for(int j=0; j<test.numInstances(); j++){
 						predictedClass = testResult.get(j).getClassName();
-//						if(!testResult.get(j).isCorrect()) {
-//							predictedClass = "<font style='color:red'>" + predictedClass + "</font>";
-//						}
 						testResultTable.get(j).set(i,predictedClass);
 					}
 				}
@@ -286,7 +278,7 @@ public class Predictor extends BabelomicsTool {
 		}
 
 		// validation
-		setValidation(knn);
+		setValidation(knn,instances);
 
 		// train
 		knn.train(instances);
@@ -321,7 +313,7 @@ public class Predictor extends BabelomicsTool {
 		}
 
 		// validation
-		setValidation(svm);
+		setValidation(svm,instances);
 
 		// train
 		svm.train(instances);
@@ -354,7 +346,7 @@ public class Predictor extends BabelomicsTool {
 		}
 
 		// validation
-		setValidation(randomForest);
+		setValidation(randomForest,instances);
 
 		// train
 		randomForest.train(instances);
@@ -429,7 +421,7 @@ public class Predictor extends BabelomicsTool {
 	}
 
 
-	private void setValidation(GenericClassifier classifier){
+	private void setValidation(GenericClassifier classifier, Instances instances){
 		logger.println("SETTING VALIDATION!!!!!!!!!!!!!!!!!!!!!!!");
 
 		// feature selection
@@ -445,9 +437,13 @@ public class Predictor extends BabelomicsTool {
 		}
 
 		// validation
-		int repeats = Integer.parseInt(commandLine.getOptionValue("validation-repeats", "10"));
-		int folds = Integer.parseInt(commandLine.getOptionValue("cross-validation-folds", "5"));
-		classifier.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds, featureSelector));
+		if(commandLine.hasOption("loo")){
+			classifier.setClassifierEvaluation(new KFoldCrossValidation(1, instances.numInstances()-1, featureSelector));
+		} else {
+			int repeats = Integer.parseInt(commandLine.getOptionValue("validation-repeats", "10"));
+			int folds = Integer.parseInt(commandLine.getOptionValue("cross-validation-folds", "5"));
+			classifier.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds, featureSelector));
+		}
 	}
 
 	private void executeDlda(Instances instances) {		
