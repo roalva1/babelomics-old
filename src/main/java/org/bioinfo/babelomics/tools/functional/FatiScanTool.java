@@ -146,8 +146,10 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				// update status					
 				jobStatus.addStatusMessage("95", "Saving results");
 				
+				String tablePref = "";
 				System.err.println("significants: " + significants.size());
 				if(method==Method.Logistic){
+					tablePref = "LOGISTIC_";
 					significantOutput.addAll(LogisticResultToStringList(significants));
 				} else {
 					significantOutput.addAll(FatiScanResultToStringList(significants));					
@@ -157,7 +159,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				if(significants!=null && significants.size()>0){
 					
 					// Significant results must appear after than complete tables!!					
-					result.getOutputItems().add(1, new Item("significant","significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE",ListUtils.toString(significantDbs,",")),new HashMap<String,String>(),"Significant Results"));
+					result.getOutputItems().add(1, new Item("significant","significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_" + tablePref + "TABLE",ListUtils.toString(significantDbs,",")),new HashMap<String,String>(),"Significant Results"));
 					IOUtils.write(outdir + "/significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significantOutput,"\n"));
 					
 //					// FatiScan graph
@@ -298,7 +300,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		List<String> testResultOutput = LogisticResultToStringList(logistic.getResults());
 		
 		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
-		result.addOutputItem(new Item(fiterInfo.getName(),fileName,fiterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE",fiterInfo.getPrefix().toUpperCase()),new HashMap<String,String>(),"Database tests"));
+		result.addOutputItem(new Item(fiterInfo.getName(),fileName,fiterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_LOGISTIC_TABLE",fiterInfo.getPrefix().toUpperCase()),new HashMap<String,String>(),"Database tests"));
 						
 		// save annotation
 		IOUtils.write(outdir + "/" + annotFileName, logistic.getAnnotations().toString());

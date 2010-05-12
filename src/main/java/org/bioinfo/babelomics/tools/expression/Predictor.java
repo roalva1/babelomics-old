@@ -124,6 +124,7 @@ public class Predictor extends BabelomicsTool {
 		try {
 
 			Instances instances = null;
+			Instances test = null;
 			File datasetFile = new File(commandLine.getOptionValue("dataset"));
 
 			// data file checking
@@ -166,30 +167,34 @@ public class Predictor extends BabelomicsTool {
 					instances = InstancesBuilder.getInstancesFromDataList(data, dataset.getFeatureNames(), dataset.getSampleNames(), classValues);
 					// define class attribute
 					Attribute classAttr = instances.attribute("class");
-					instances.setClassIndex(classAttr.index());		
+					instances.setClassIndex(classAttr.index());
+					
+					if(commandLine.hasOption("test") && !commandLine.getOptionValue("test").equalsIgnoreCase("none")){
+						File testFile = new File(commandLine.getOptionValue("test"));	
+						// data set loading 
+						if(commandLine.hasOption("test-arff")){
+							instances = InstancesBuilder.getInstancesFromArrfFile(datasetFile,"sample_name");				
+						} else {
+							Dataset datasetTest = new Dataset(testFile, true);
+							List<List<String>> dataTest = new ArrayList<List<String>>(datasetTest.getColumnDimension());
+							for(int i = 0 ; i<datasetTest.getColumnDimension() ; i++) {
+								dataTest.add(ArrayUtils.toStringList(datasetTest.getDoubleMatrix().getColumn(i)));
+							}
+							// create instances
+							test = InstancesBuilder.getTestInstancesFromDataList(dataTest, datasetTest.getFeatureNames(), datasetTest.getSampleNames(),classValues);
+//							Attribute classAttr = test.attribute("class");
+//							test.setClassIndex(classAttr.index());
+						}
+					}
 				}
 			} else {
 				abort("execute_predictor", "dataset " + datasetFile.getName() + "not found", "dataset " + datasetFile.getName() + "not found", "dataset " + datasetFile.getName() + "not found");
 			}
 
 
-			Instances test = null;
+		
 
-			if(commandLine.hasOption("test") && !commandLine.getOptionValue("test").equalsIgnoreCase("none")){
-				File testFile = new File(commandLine.getOptionValue("test"));				
-				// data set loading 
-				if(commandLine.hasOption("test-arff")){
-					instances = InstancesBuilder.getInstancesFromArrfFile(datasetFile,"sample_name");				
-				} else {
-					Dataset dataset = new Dataset(testFile, true);
-					List<List<String>> data = new ArrayList<List<String>>(dataset.getColumnDimension());
-					for(int i = 0 ; i<dataset.getColumnDimension() ; i++) {
-						data.add(ArrayUtils.toStringList(dataset.getDoubleMatrix().getColumn(i)));
-					}				
-					// create instances
-					test = InstancesBuilder.getTestInstancesFromDataList(data, dataset.getFeatureNames(), dataset.getSampleNames());				
-				}
-			}
+
 
 
 			// classifiers
@@ -210,7 +215,7 @@ public class Predictor extends BabelomicsTool {
 				// init selected names
 				List<String> selectedNames = new ArrayList<String>(selectedClassifiers.size());
 				for(int i=0; i<selectedClassifiers.size(); i++){
-					selectedNames.add(selectedClassifiers.get(i).getClassifierName() + "::" + selectedClassifiers.get(i).getParams());
+					selectedNames.add(selectedClassifiers.get(i).getClassifierName() + " " + selectedClassifiers.get(i).getParams());
 				}
 				
 				// init test result table				
@@ -225,9 +230,11 @@ public class Predictor extends BabelomicsTool {
 				
 				// fill test result table 
 				List<String> sampleNames = new ArrayList<String>(test.numInstances());
+				String predictedClass;
 				for(int i=0; i<selectedClassifiers.size(); i++){
 					GenericClassifier testClassifier = selectedClassifiers.get(i);
 					testClassifier.build(instances);
+					test.setClassIndex(test.numAttributes()-1);
 					List<ClassificationResult> testResult = testClassifier.test(instances, test);
 					if(i==0){
 						for(int j=0; j<test.numInstances(); j++){
@@ -235,17 +242,22 @@ public class Predictor extends BabelomicsTool {
 						}
 					}
 					for(int j=0; j<test.numInstances(); j++){
-						testResultTable.get(j).set(i,testResult.get(j).getClassName());
+						predictedClass = testResult.get(j).getClassName();
+//						if(!testResult.get(j).isCorrect()) {
+//							predictedClass = "<font style='color:red'>" + predictedClass + "</font>";
+//						}
+						testResultTable.get(j).set(i,predictedClass);
 					}
 				}
 				
 				// save to disk
 				StringBuilder testResultString = new StringBuilder();
-				testResultString.append(ListUtils.toString(selectedNames, "\t")).append("\n");
+				testResultString.append("#Sample_names").append("\t").append(ListUtils.toString(selectedNames, "\t")).append("\n");
 				for(int i=0; i<test.numInstances(); i++){
 					testResultString.append(sampleNames.get(i)).append("\t").append(ListUtils.toString(testResultTable.get(i))).append("\n");
 				}
-				
+				IOUtils.write(outdir + "/test_result.txt", testResultString.toString());
+				result.addOutputItem(new Item("test_result", "test_result.txt", "Test result table", TYPE.FILE, Arrays.asList("TABLE"), new HashMap<String, String>(),"Test"));
 			}
 			
 			
@@ -280,10 +292,12 @@ public class Predictor extends BabelomicsTool {
 		knn.train(instances);
 
 		// select best classifiers for testing
-		if(test!=null){		
-			int best = knn.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();			
-			Knn testKnn = new Knn(knn.getKnnValues()[best]);
-			selectedClassifiers.add(testKnn);		
+		if(test!=null){
+			int[] best = knn.getBestClassifiers(numberOfBestSelectedClassifications);			
+			for(int i=0; i<best.length; i++){				 
+				Knn testKnn = new Knn(knn.getKnnValues()[best[i]]);
+				selectedClassifiers.add(testKnn);
+			}
 		}
 
 		// save results
@@ -313,10 +327,12 @@ public class Predictor extends BabelomicsTool {
 		svm.train(instances);
 
 		// select best classifiers for testing
-		if(test!=null){					
-			int best = svm.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();			
-			Svm testSvm = new Svm(svm.getCostValues()[best]);
-			selectedClassifiers.add(testSvm);
+		if(test!=null){
+			int[] best = svm.getBestClassifiers(numberOfBestSelectedClassifications);			
+			for(int i=0; i<best.length; i++){				 
+				Svm testSvm = new Svm(svm.getCostValues()[best[i]]);
+				selectedClassifiers.add(testSvm);
+			}
 		}
 
 		// save results
@@ -344,10 +360,12 @@ public class Predictor extends BabelomicsTool {
 		randomForest.train(instances);
 
 		// select best classifiers for testing
-		if(test!=null){					
-			int best = randomForest.getEvaluationResultList().getBestRootMeanSquaredErrorIndex();			
-			RForest testRandomForest = new RForest(randomForest.getNumTreesArray()[best]);
-			selectedClassifiers.add(testRandomForest);
+		if(test!=null){
+			int[] best = randomForest.getBestClassifiers(numberOfBestSelectedClassifications);			
+			for(int i=0; i<best.length; i++){				 
+				RForest testRandomForest = new RForest(randomForest.getNumTreesArray()[best[i]]);
+				selectedClassifiers.add(testRandomForest);
+			}
 		}
 
 		// save results
@@ -368,7 +386,6 @@ public class Predictor extends BabelomicsTool {
 
 		int best = classifier.getEvaluationResultList().getBestAreaUnderRocIndex();
 		String name = classifier.getClassifierName();
-
 
 		try {
 			IOUtils.write(new File(outdir + "/" + name + ".txt"), "Best AUC classification\n\nParameters: " + classifier.getParamList().get(best) + "\n\n" + classifier.getEvaluationResultList().getBestAreaUnderRoc().toString());			
