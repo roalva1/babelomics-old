@@ -1,7 +1,9 @@
 package org.bioinfo.babelomics.tools.graph;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -129,31 +131,41 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		String classField = "";
 		updateJobStatus("40", "preparing execution");
 		
-//		dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
-//		
-//		//Variables<SampleVariable> file2list = dataset.getVariables();
-//		//for (int i=0;i<file2list.size();i++){
-//		//	System.out.println(i+"-"+ dataset.getVariables().get(i).getValues());
-//		//	
-//		//}
-//		for(SampleVariable var: dataset.getVariables()) {
-//			System.out.println(ListUtils.toString(var.getValues()));
-//		}
-//		
-		RCommand rCommand = new RCommand(pcaPlotBinPath, this.getOutdir());
+		//dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
 		
-		if (className!=null){
-			rCommand.addParam("grupos", className);	
-		}
-		rCommand.addParam("datafile", commandLine.getOptionValue("datalist"));
-		rCommand.addParam("outfile", this.getOutdir() + "/" + pcaplotFileName);
-		updateJobStatus("80", "exec");
-		rCommand.exec();
-		// saving results
-		//
-		updateJobStatus("90", "saving results");
-		result.addOutputItem(new Item("pca_plot", pcaplotFileName,"pca plot (png format)",TYPE.IMAGE, Arrays.asList("IMAGE","PCA_IMAGE"),new HashMap<String,String>(),"pca image"));
-	
+		File dataset = new File(commandLine.getOptionValue("datalist"));
+		FileUtils.checkFile(commandLine.getOptionValue("datalist"));
+		BufferedReader br = new BufferedReader(new FileReader(dataset.getAbsolutePath()));
+		String line = "";
+		String[] attr;
+		boolean hasName = false;
+		while((line = br.readLine()) != null) {
+			line = line.trim();
+			attr = line.split("\t");
+			if(line.startsWith("#")) {
+				}if(attr[0].equalsIgnoreCase("#NAMES")) {
+					hasName=true;
+					RCommand rCommand = new RCommand(pcaPlotBinPath, this.getOutdir());
+					
+					if (className!=null){
+						rCommand.addParam("grupos", className);	
+					}
+					
+					rCommand.addParam("datafile", commandLine.getOptionValue("datalist"));
+					rCommand.addParam("outfile", this.getOutdir() + "/" + pcaplotFileName);
+					updateJobStatus("80", "exec");
+					rCommand.exec();
+					// saving results
+					//
+					updateJobStatus("90", "saving results");
+					result.addOutputItem(new Item("pca_plot", pcaplotFileName,"pca plot (png format)",TYPE.IMAGE, Arrays.asList("IMAGE","PCA_IMAGE"),new HashMap<String,String>(),"pca image"));
+					break;
+				}
+	}
+		br.close();
+		
+		if (!hasName)result.addOutputItem(new Item("pca_plot","PCA analisys can't be continue with you data. '#NAMES' variable doesn't found. This variable is used as 'id' to tag your samples in PCA analisys and plotting","PCA warning result",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"PCA warning result"));
+		
 	}
 
 
