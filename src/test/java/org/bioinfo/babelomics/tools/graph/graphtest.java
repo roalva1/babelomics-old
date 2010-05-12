@@ -55,8 +55,8 @@ public class graphtest {
 		public void Test2() {
 			//String dataset = "/mnt/commons/test/fatiscanmini2.txt";
 			
-			//String dataset = "/opt/babelomics/example/correlation.txt";
-			String dataset = "/tmp/pcaPlot/multiclasses_data.txt";
+			//String dataset = "/opt/babelomics/example/multiclasses_data2.txt";
+			String dataset = "/tmp/pcaPlot/multiclasses_data2.txt";
 			//String dataset = "/mnt/commons/test/biodata/newick1.nw";
 			String outdir = "/tmp/pcaPlot";
 			new File(outdir).mkdir();
