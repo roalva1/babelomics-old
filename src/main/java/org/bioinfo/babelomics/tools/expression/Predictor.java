@@ -41,7 +41,8 @@ public class Predictor extends BabelomicsTool {
 	private StringBuilder combinedTable;
 	private int numberOfBestSelectedClassifications = 5;
 
-	private List<GenericClassifier> selectedClassifiers;    
+	private List<GenericClassifier> selectedClassifiers;
+	private List<GenericClassifier> trainedClassifiers;
 
 	public Predictor() {		
 		initOptions();
@@ -70,11 +71,12 @@ public class Predictor extends BabelomicsTool {
 		OptionGroup classifiers = new OptionGroup();
 		classifiers.setRequired(false);
 
-		// Evaluation
-		options.addOption(OptionFactory.createOption("loo", "Perform leaving-one-out validation analysis",false,false));
-		options.addOption(OptionFactory.createOption("cross-validation", "Perform cross validation analysis",false,false));			
-		options.addOption(OptionFactory.createOption("cross-validation-folds", "Number of folds in cross validation evaluation",false,true));
-		options.addOption(OptionFactory.createOption("validation-repeats", "Number of repeat each randomization",false,true));
+		// Validation
+		options.addOption(OptionFactory.createOption("loo", "Perform leaving-one-out cross validation analysis",false,false));
+		options.addOption(OptionFactory.createOption("kfold", "Perform kfold cross validation analysis",false,false));
+		options.addOption(OptionFactory.createOption("folds", "Number of folds in cross validation evaluation",false,true));
+		options.addOption(OptionFactory.createOption("repeats", "Number of repeat each randomization",false,true));
+		
 		options.addOption(OptionFactory.createOption("feature-selection", "Feature selection",false,true));			
 
 		// KNN
@@ -107,10 +109,12 @@ public class Predictor extends BabelomicsTool {
 		options.addOptionGroup(classifiers);
 
 		selectedClassifiers = new ArrayList<GenericClassifier>();
+		trainedClassifiers = new ArrayList<GenericClassifier>();
+		
 		// feature selection (gene selection), and other options
 		//		options.addOption(OptionFactory.createOption("gene-selection", "the gene selection, valid values: f-ratio, wilcoxon", false));
 		//options.addOption(OptionFactory.createOption("trainning-size", "number of genes to use in trainning separated by commas, default:2,5,10,20,35,50", false));		
-
+		
 	}
 
 	@Override
@@ -155,7 +159,7 @@ public class Predictor extends BabelomicsTool {
 						if(commandLine.hasOption("class")){
 							String className = commandLine.getOptionValue("class");
 							if(dataset.getVariables()!=null && dataset.getVariables().getByName(className)!=null && dataset.getVariables().getByName(className).getValues()!=null){
-								classValues = dataset.getVariables().getByName(className).getValues();	
+								classValues = dataset.getVariables().getByName(className).getValues();
 							} else {
 								throw new Exception("class not found in dataset");
 							}
@@ -285,10 +289,11 @@ public class Predictor extends BabelomicsTool {
 
 		// select best classifiers for testing
 		if(test!=null){
-			int[] best = knn.getBestClassifiers(numberOfBestSelectedClassifications);			
+			int[] best = knn.getBestClassifiers(numberOfBestSelectedClassifications);
+			trainedClassifiers.add(knn);
 			for(int i=0; i<best.length; i++){				 
 				Knn testKnn = new Knn(knn.getKnnValues()[best[i]]);
-				selectedClassifiers.add(testKnn);
+				selectedClassifiers.add(testKnn);				
 			}
 		}
 
@@ -320,10 +325,10 @@ public class Predictor extends BabelomicsTool {
 
 		// select best classifiers for testing
 		if(test!=null){
-			int[] best = svm.getBestClassifiers(numberOfBestSelectedClassifications);			
+			int[] best = svm.getBestClassifiers(numberOfBestSelectedClassifications);	
 			for(int i=0; i<best.length; i++){				 
 				Svm testSvm = new Svm(svm.getCostValues()[best[i]]);
-				selectedClassifiers.add(testSvm);
+				selectedClassifiers.add(testSvm);				
 			}
 		}
 
@@ -421,28 +426,33 @@ public class Predictor extends BabelomicsTool {
 	}
 
 
-	private void setValidation(GenericClassifier classifier, Instances instances){
+	private void setValidation(GenericClassifier classifier, Instances instances) throws Exception{
 		logger.println("SETTING VALIDATION!!!!!!!!!!!!!!!!!!!!!!!");
 
 		// feature selection
 		AbstractFeatureSelector featureSelector = null;
-		if(commandLine.hasOption("feature-selection")){	
-			if("cfs".equalsIgnoreCase(commandLine.getOptionValue("feature-selection"))){
+		if(commandLine.hasOption("feature-selection")){
+			String featureSelectionMethod = commandLine.getOptionValue("feature-selection"); 
+			if("cfs".equalsIgnoreCase(featureSelectionMethod)){
 				featureSelector = new CfsFeatureSelector();
-			} else if("pca".equalsIgnoreCase(commandLine.getOptionValue("feature-selection"))){
+			} else if("pca".equalsIgnoreCase(featureSelectionMethod)){
 				featureSelector = new CfsFeatureSelector(); // change by PCA
-			} else if("ga".equalsIgnoreCase(commandLine.getOptionValue("feature-selection"))){
+			} else if("ga".equalsIgnoreCase(featureSelectionMethod)){
 				featureSelector = new CfsFeatureSelector(); // change by Genetic algorithm
+			} else {				
+				throw new Exception("ERROR: feature selection method " + featureSelectionMethod + " is undefined");
 			}
 		}
 
 		// validation
 		if(commandLine.hasOption("loo")){
 			classifier.setClassifierEvaluation(new KFoldCrossValidation(1, instances.numInstances()-1, featureSelector));
+			logger.println("Setting Leave-one-out cross-validation");	
 		} else {
-			int repeats = Integer.parseInt(commandLine.getOptionValue("validation-repeats", "10"));
-			int folds = Integer.parseInt(commandLine.getOptionValue("cross-validation-folds", "5"));
+			int repeats = Integer.parseInt(commandLine.getOptionValue("repeats", "10"));
+			int folds = Integer.parseInt(commandLine.getOptionValue("folds", "5"));
 			classifier.setClassifierEvaluation(new KFoldCrossValidation(repeats, folds, featureSelector));
+			logger.println("Setting Kfold cross-validation (repeats=" + repeats + ",folds=" + folds + ")");
 		}
 	}
 
