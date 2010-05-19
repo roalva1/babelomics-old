@@ -17,7 +17,7 @@ import org.bioinfo.math.data.DoubleMatrix;
 public class ClusteringUtils {
 
 
-	public static void saveImageTree(MultipleTree tree, String title, String imgFilename, boolean vertical) throws IOException {
+	public static void saveImageTree(MultipleTree tree, String title, String imgFilename, boolean vertical, boolean createMap) throws IOException {
 
 		int width = vertical ? (tree.getNumberOfLevels() * 10 + 30) : (tree.getNumberOfLeaves() * 10);
 		int height = vertical ? (tree.getNumberOfLeaves() * 10) : (tree.getNumberOfLevels() * 10 + 30);
@@ -53,7 +53,7 @@ public class ClusteringUtils {
 		try {
 			System.out.println("saving tree in : " + imgFilename);
 			System.out.println("tree labels : " + ListUtils.toString(tree.getLabels(), ","));
-			canvas.save(imgFilename);
+			canvas.save(imgFilename, createMap);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		
@@ -153,7 +153,7 @@ public class ClusteringUtils {
 	//	}
 
 
-	public static void saveImageTree(DoubleMatrix matrix, MultipleTree vTree, MultipleTree hTree, String imgFilename) throws IOException {
+	public static void saveImageTree(DoubleMatrix matrix, MultipleTree vTree, MultipleTree hTree, String imgFilename, boolean createMap) throws IOException {
 
 		int cellSide = 20;
 		int rowLabelsWidth = getMaxStringLengh(vTree.getLabels()) * 9;
@@ -271,7 +271,7 @@ public class ClusteringUtils {
 		canvas.addPanel(newickVPanel);
 
 		canvas.render();
-		canvas.save(imgFilename);		
+		canvas.save(imgFilename, createMap);		
 	}
 
 

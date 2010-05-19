@@ -57,7 +57,7 @@ public class DiffExpressionUtils {
 		gridTrack.setRowLabels(ListUtils.ordered(dataset.getFeatureNames(), rowOrder));
 		List<String> columnLabels = new ArrayList<String>(dataset.getSampleNames().size());
 		for(int i=0 ; i <columnOrder.length ; i++) {
-			columnLabels.add(dataset.getSampleNames().get(columnOrder[i]) + " (" + dataset.getVariables().getByName(className).getValues().get(columnOrder[i]) + ")");
+			columnLabels.add(dataset.getVariables().getByName(className).getValues().get(columnOrder[i]) + ": " +  dataset.getSampleNames().get(columnOrder[i]));
 		}
 		gridTrack.setColumnLabels(columnLabels);
 		//gridTrack.setName();

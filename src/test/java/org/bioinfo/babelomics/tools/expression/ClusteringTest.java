@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.Arrays;
 
 import org.bioinfo.babelomics.BabelomicsMain;
+import org.bioinfo.data.format.io.parser.NewickParser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,10 +24,11 @@ public class ClusteringTest {
 	public void notest() {		
 	}
 
+	@Test
 	public void Test() {
 		//String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
-		//String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
-		String dataset = "/mnt/commons/test/biodata/example/merged_normalized_data.txt";
+		String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
+		//String dataset = "/mnt/commons/test/biodata/example/merged_normalized_data.txt";
 		String outdir = "/tmp/ClusteringTest";
 		new File(outdir).mkdir();
 
@@ -73,7 +75,6 @@ public class ClusteringTest {
 		}
 	}	
 
-	@Test
 	public void Test3() {
 		String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
 		String outdir = "/tmp/ClusteringTest3";

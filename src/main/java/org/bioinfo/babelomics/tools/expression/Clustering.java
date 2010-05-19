@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -14,11 +15,10 @@ import org.bioinfo.babelomics.methods.expression.clustering.Sota;
 import org.bioinfo.babelomics.methods.expression.clustering.Upgma;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.utils.ArrayUtils;
-import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.tree.multiway.MultipleTree;
+import org.bioinfo.data.tree.multiway.MultipleTreeUtils;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
@@ -112,7 +112,10 @@ public class Clustering extends BabelomicsTool {
 		List<String> tags = StringUtils.toList("data,newick", ",");
 		if ( nwGenes != null ) {
 			try {
-				IOUtils.write(new File(this.getOutdir() + "/genes.nw"), nwGenes.toString());
+				String clusterFolder = outdir + "/clusters/";
+				new  File(clusterFolder).mkdir();
+				//MultipleTreeUtils.saveClusters(nwGenes, "", clusterFolder);
+				IOUtils.write(new File(this.getOutdir() + "/genes.nw"), nwGenes.toString());		
 				result.addOutputItem(new Item("gene_newick_file", "genes.nw", "Clusters of genes", TYPE.FILE, tags, new HashMap<String, String>(2), "Clusters in newick format"));
 			} catch (IOException e) {
 				printError("ioexception_executesota_clustering", "error saving genes newick", e.toString(), e);
@@ -148,28 +151,59 @@ public class Clustering extends BabelomicsTool {
 			abort("filenotfoundexception_execute_clustering", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
 
+		File imgFile;
+		String imgFilename;
+//		if ( nwSamples != null) {
+//			try {
+//
+//				imgFilename = this.getOutdir() + "/samples." + method + ".png";
+//				ClusteringUtils.saveImageTree(nwSamples, "Clusters of samples",  imgFilename, false, false);
+//				imgFile = new File(imgFilename);
+//				if ( imgFile.exists() ) {
+//					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " sample clustering image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Cluster images"));					
+//				} else {
+//					printError("execute" + method + "_clustering", "error saving sample clustering image", "error saving sample clustering image");										
+//				}
+//			} catch (IOException e) {
+//				printError("ioexception_execute" + method + "_clustering", "error saving clustering image", e.toString(), StringUtils.getStackTrace(e));
+//			}
+//		}
+
+//		if ( nwGenes != null && nwSamples != null) {
+//			try {
+//
+//				imgFilename = this.getOutdir() + "/genes." + method + ".png";
+//				ClusteringUtils.saveImageTree(nwGenes, "Clusters of genes",  imgFilename, true, true);
+//				imgFile = new File(imgFilename);
+//				if ( imgFile.exists() ) {
+//					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " gene clustering image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Cluster images"));
+//					
+//					String mapFilename = imgFilename + ".html.map";
+//					File mapFile = new File(mapFilename);
+//					if ( mapFile.exists() ) {
+//						String[] values;
+//						String cleanLine;
+//						String clusterDir = outdir + "/clusters/";
+//						List<String> lines = IOUtils.readLines(mapFile);
+//						new File(clusterDir).mkdir();
+//						for(String line: lines) {
+//							if ( line.startsWith("<!--cluster_") ) {
+//								cleanLine = line.replace("<!--", "").replace("-->", "");
+//								values = cleanLine.split(":");
+//								IOUtils.write(new File(clusterDir + values[0] + ".txt"), StringUtils.toList(values[1]));
+//							}
+//						}
+//					}
+//				} else {
+//					printError("execute" + method + "_clustering", "error saving gene clustering image", "error saving gene clustering image");										
+//				}
+//			} catch (IOException e) {
+//				printError("ioexception_execute" + method + "_clustering", "error saving clustering image", e.toString(), StringUtils.getStackTrace(e));
+//			}
+//		}
+
 		if ( nwGenes != null && nwSamples != null) {
-			File imgFile;
-			String imgFilename;
 			try {
-
-				imgFilename = this.getOutdir() + "/samples." + method + ".png";
-				ClusteringUtils.saveImageTree(nwSamples, "Clusters of samples",  imgFilename, false);
-				imgFile = new File(imgFilename);
-				if ( imgFile.exists() ) {
-					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " sample clustering image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Cluster images"));					
-				} else {
-					printError("execute" + method + "_clustering", "error saving sample clustering image", "error saving sample clustering image");										
-				}
-
-				imgFilename = this.getOutdir() + "/genes." + method + ".png";
-				ClusteringUtils.saveImageTree(nwGenes, "Clusters of genes",  imgFilename, true);
-				imgFile = new File(imgFilename);
-				if ( imgFile.exists() ) {
-					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " gene clustering image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Cluster images"));					
-				} else {
-					printError("execute" + method + "_clustering", "error saving gene clustering image", "error saving gene clustering image");										
-				}
 
 				imgFilename = this.getOutdir() + "/" + method + ".png";
 
@@ -181,10 +215,10 @@ public class Clustering extends BabelomicsTool {
 				//				System.out.println("nw samples labels = " + ListUtils.toString(nwSamples.getLabels(), ",") + "\ndataset sample names = " + ListUtils.toString(dataset.getSampleNames(), ","));
 				DoubleMatrix matrix = orderMatrix(dataset.getDoubleMatrix(), rowOrder, columnOrder);
 
-				ClusteringUtils.saveImageTree(matrix, nwGenes, nwSamples, imgFilename);
+				ClusteringUtils.saveImageTree(matrix, nwGenes, nwSamples, imgFilename, true);
 				imgFile = new File(imgFilename);
 				if ( imgFile.exists() ) {
-					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " heatmap image (png format)", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Cluster images"));					
+					result.addOutputItem(new Item(method + "_clustering_image", imgFile.getName(), method.toUpperCase() + " heatmap image (png format)", TYPE.IMAGE, Arrays.asList("CLUSTER"), new HashMap<String, String>(2), "Cluster images"));					
 				} else {
 					printError("execute" + method + "_clustering", "error saving clustering image", "error saving clustering image");					
 				}
@@ -192,11 +226,11 @@ public class Clustering extends BabelomicsTool {
 				printError("ioexception_execute" + method + "_clustering", "error saving clustering image", e.toString(), StringUtils.getStackTrace(e));
 			}
 		}
-		
-		
-		
+
+
+
 		if ( nwGenes != null ) {
-		
+
 			if ( "kmeans".equalsIgnoreCase(method) ) {
 				String redirectionTags = null; 
 				List<String> redirectionInputs = null;
@@ -208,7 +242,7 @@ public class Clustering extends BabelomicsTool {
 					list1 = new File(outdir + "/cluster_" + i + ".txt");
 					if ( list1.exists() || list2.exists() ) {
 						redirectionFile = new File(outdir + "/cluster_" + i + "_to_fatigo.redirection");
-						
+
 						redirectionInputs = new ArrayList<String>();
 
 						redirectionInputs.add("comparison=list2list");
@@ -226,7 +260,7 @@ public class Clustering extends BabelomicsTool {
 						redirectionInputs.add("tool=fatigo");
 						redirectionInputs.add("jobname=fatigo from kmeans cluster " + 1);						
 						redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
-						
+
 						try {
 							IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
 						} catch (IOException e) {
@@ -243,8 +277,8 @@ public class Clustering extends BabelomicsTool {
 			}
 
 		}
-		
-		
+
+
 	}
 
 	/**
@@ -261,7 +295,7 @@ public class Clustering extends BabelomicsTool {
 	private MultipleTree runClustering(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String method, String distance, int kvalue) throws Exception {
 		return runClustering(matrix, rowNames, colNames, method, distance, kvalue, false);
 	}
-	
+
 	private MultipleTree runClustering(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String method, String distance, int kvalue, boolean createClusterFiles) throws Exception {
 		MultipleTree tree = null;
 
@@ -276,7 +310,7 @@ public class Clustering extends BabelomicsTool {
 			tree = upgma.run(createClusterFiles);
 		} else if ( "kmeans".equalsIgnoreCase(method) ) {
 			int k = (kvalue > rowNames.size() ? rowNames.size() : kvalue);
-			
+
 			Kmeans kmeans = new Kmeans(matrix, rowNames, colNames, distance, k, outdir, babelomicsHomePath);
 			tree = kmeans.run(createClusterFiles);			
 		}

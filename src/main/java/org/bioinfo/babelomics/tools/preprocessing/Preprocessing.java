@@ -35,15 +35,16 @@ public class Preprocessing extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("filter-missing", "minimum percentage of existing values, from 0 to 100", false));
 		options.addOption(OptionFactory.createOption("impute-missing", "method to impute missing values, valid values are: zero, mean, median, knn", false));
 		options.addOption(OptionFactory.createOption("kvalue", "kvalue for knn impute method, default 15", false));
+		options.addOption(OptionFactory.createOption("extract-ids", "This option will extract the IDs (first column) in the dataset", false));
 		options.addOption(OptionFactory.createOption("gene-file-filter", "This option will remove all the patterns of the genes that are not present in this gene file", false));
 		//		options.addOption(OptionFactory.createOption("sample-filter", "class variable", false));
 		//		options.addOption(OptionFactory.createOption("feature-filter", "class variable", false));
 	}
 
 	public void execute2() {
-		
+
 	}
-	
+
 	@Override
 	public void execute() {
 		Dataset dataset = null;
@@ -54,6 +55,7 @@ public class Preprocessing extends BabelomicsTool {
 		String mergeMethod = commandLine.getOptionValue("merge-replicates", null);
 		String filterPercentage = commandLine.getOptionValue("filter-missing", null);
 		String imputeMethod = commandLine.getOptionValue("impute-missing", null);
+		String extractIds = commandLine.getOptionValue("extract-ids", null);
 		String filterFilename = commandLine.getOptionValue("gene-file-filter", null);
 
 		int progress = 1;
@@ -62,6 +64,7 @@ public class Preprocessing extends BabelomicsTool {
 		if ( mergeMethod != null && !("none".equalsIgnoreCase(mergeMethod)) ) finalProgress++;
 		if ( filterPercentage != null && !("none".equalsIgnoreCase(filterPercentage)) ) finalProgress++;
 		if ( imputeMethod != null && !("none".equalsIgnoreCase(imputeMethod)) ) finalProgress++; 
+		if ( extractIds != null ) finalProgress++; 
 		if ( filterFilename != null && new File(filterFilename).exists() ) finalProgress++; 
 
 		imputeMethodMsg = imputeMethod;
@@ -73,7 +76,7 @@ public class Preprocessing extends BabelomicsTool {
 			}
 			imputeMethodMsg = imputeMethodMsg + ", k-value = " + kvalue;
 		}
-		
+
 		try {
 			jobStatus.addStatusMessage("" + (progress*100/finalProgress), "reading dataset");
 		} catch (FileNotFoundException e) {
@@ -94,15 +97,15 @@ public class Preprocessing extends BabelomicsTool {
 		//		if(commandLine.hasOption("sample-filter") || commandLine.hasOption("feature-filter")) {
 		//			dataset = dataset.getSubDataset(commandLine.getOptionValue("sample-filter"), "4", commandLine.getOptionValue("feature-filter"), "");
 		//		}
-		
+
 		if ( dataset == null ) {
 			abort("datasetisnull_execute_preprocessing", "dataset is null", "Dataset is null after reading file '" + datasetFile.getName() + "'", "Dataset is null after reading file " + datasetFile.getAbsolutePath());
 		}
-		
+
 		progress++;
 
 
-		
+
 		// apply logarithm
 		//
 		if ( logBase != null && !("none".equalsIgnoreCase(logBase)) ) {
@@ -182,7 +185,7 @@ public class Preprocessing extends BabelomicsTool {
 				}
 				dataset.validate();
 			}
-						
+
 			try {
 				double perc = Double.parseDouble(filterPercentage);					
 
@@ -233,6 +236,33 @@ public class Preprocessing extends BabelomicsTool {
 			progress++;
 		}
 
+		// extract ids
+		//
+		File idsFile = new File(outdir + "/id_list.txt");
+		if ( extractIds != null ) {
+			try {
+				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "filtering by names");
+			} catch (FileNotFoundException e) {
+				abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
+			}
+			logger.debug("extracting ids...\n");
+
+			try {
+				//System.out.println("*************** features names size = " + (dataset.getFeatureNames().size()));
+				if ( dataset.getFeatureNames() == null || dataset.getFeatureNames().size() == 0) {
+					printWarning("invaliddataset_execute_preprocessing", "Invalid dataset", "Dataset " + datasetFile.getName() + " is not valid");
+				} else {
+					IOUtils.write(idsFile, dataset.getFeatureNames());
+				}
+			} catch (IOException e1) {
+				printWarning("ioexception_execute_maplot", "IO error", "Error ocurred when accessing input file: " + datasetFile.getName(), "");
+			}				
+
+			logger.debug("end of extracting ids\n");
+			progress++;
+		}
+
+
 		// filter by gene names
 		//
 		if ( filterFilename != null && !("none".equalsIgnoreCase(filterFilename)) ) {
@@ -254,21 +284,21 @@ public class Preprocessing extends BabelomicsTool {
 
 			List<String> validGenes = null;
 			try {
-				System.out.println("---> " + filterFilename + ", content = " + IOUtils.toString(filterFilename));
-				
+				//System.out.println("---> " + filterFilename + ", content = " + IOUtils.toString(filterFilename));
+
 				validGenes = IOUtils.grep(filterFilename, "[^#].+", false);
-//				validGenes = IOUtils.grep(filterFilename, "f");
-				
-				System.out.println("size of valid genes = " + validGenes.size());
+				//				validGenes = IOUtils.grep(filterFilename, "f");
+
+				//System.out.println("size of valid genes = " + validGenes.size());
 				if ( validGenes.size() > 0 ) {
-					System.out.println("list = " + ListUtils.toString(validGenes));
+					//System.out.println("list = " + ListUtils.toString(validGenes));
 				}
-				
-				
+
+
 			} catch (IOException e) {
 				abort("ioexecption_filterbynames_execute_preprocessing", "Error reading names from file '" + new File(filterFilename).getName() + "' when filtering by names", e.toString(), StringUtils.getStackTrace(e));
 			}
-			
+
 			//System.out.println("valid genes = " + ListUtils.toString(validGenes));
 
 			if ( validGenes != null && validGenes.size() > 0 ) {
@@ -286,11 +316,11 @@ public class Preprocessing extends BabelomicsTool {
 					abort("exception_filterbynames_execute_preprocessing", "Error filtering rows by names", e.toString(), StringUtils.getStackTrace(e));
 				}
 				dataset.validate();	
-				
-				
-				System.out.println("------------> feature data is null ? " + (dataset.getFeatureData() == null));
+
+
+				//System.out.println("------------> feature data is null ? " + (dataset.getFeatureData() == null));
 			}
-			
+
 			logger.debug("end of filtering by names\n");
 			progress++;
 		}
@@ -303,44 +333,60 @@ public class Preprocessing extends BabelomicsTool {
 		} catch (FileNotFoundException e) {
 			abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
-		
+
+
+
 		try {
-			File file = new File(this.getOutdir() + "/preprocessed.txt");
-			dataset.save(file);
-			
-			
-			if ( file.exists() ) {				
-				String tags = "DATA,DATAMATRIX,EXPRESSION";
-				
-				
-				File redirectionFile = new File(outdir + "/clustering.redirection");
-				createClusteringRedirectionFile(redirectionFile, file);
-				if ( redirectionFile.exists() ) {
-					tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Clustering tool...)";
+			if ( (finalProgress > 4) || (finalProgress == 4 && extractIds == null) ) {
+
+				File file = new File(this.getOutdir() + "/preprocessed.txt");
+				dataset.save(file);
+
+
+				if ( file.exists() ) {				
+					String tags = "data,datamatrix,expression";
+
+
+					File redirectionFile = new File(outdir + "/clustering.redirection");
+					createClusteringRedirectionFile(redirectionFile, file);
+					if ( redirectionFile.exists() ) {
+						tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Clustering tool...)";
+					}
+
+					if (dataset.getVariables() != null && dataset.getVariables().size() > 0 ) {
+						redirectionFile = new File(outdir + "/classcomparison.redirection");
+						createClassComparisonRedirectionFile(redirectionFile, file);
+						if ( redirectionFile.exists() ) {
+							tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Class-comparison tool...)";
+						}
+
+						redirectionFile = new File(outdir + "/correlation.redirection");
+						createCorrelationRedirectionFile(redirectionFile, file);
+						if ( redirectionFile.exists() ) {
+							tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Correlation tool...)";
+						}
+
+						redirectionFile = new File(outdir + "/classprediction.redirection");
+						createClassPredictionRedirectionFile(redirectionFile, file);
+						if ( redirectionFile.exists() ) {
+							tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Class-prediction tool...)";
+						}
+					}
+
+					result.addOutputItem(new Item("prepocessed_file", file.getName(), "Preprocessed file", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Preprocessed data"));			
 				}
-				
-				if (dataset.getVariables() != null && dataset.getVariables().size() > 0 ) {
-					redirectionFile = new File(outdir + "/classcomparison.redirection");
-					createClassComparisonRedirectionFile(redirectionFile, file);
-					if ( redirectionFile.exists() ) {
-						tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Class-comparison tool...)";
-					}
-					
-					redirectionFile = new File(outdir + "/correlation.redirection");
-					createCorrelationRedirectionFile(redirectionFile, file);
-					if ( redirectionFile.exists() ) {
-						tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Correlation tool...)";
-					}
-					
-					redirectionFile = new File(outdir + "/classprediction.redirection");
-					createClassPredictionRedirectionFile(redirectionFile, file);
-					if ( redirectionFile.exists() ) {
-						tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Class-prediction tool...)";
-					}
-				}
-				
-				result.addOutputItem(new Item("prepocessed_file", file.getName(), "Preprocessed file", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Preprocessed data"));
 			}
+
+			if ( idsFile.exists() ) {				
+				String tags = "data,idlist";											
+				File redirectionFile = new File(outdir + "/idconverter.redirection");
+				createIDConverterRedirectionFile(redirectionFile, idsFile);
+				if ( redirectionFile.exists() ) {
+					tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to ID converter tool...)";
+				}
+				result.addOutputItem(new Item("ids_file", idsFile.getName(), "File containing IDs", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "ID list"));
+			}
+
 		} catch (IOException e) {
 			abort("ioexception_savingresults_execute_preprocessing", "error saving output file", e.toString(), StringUtils.getStackTrace(e));
 		}		
@@ -416,7 +462,23 @@ public class Preprocessing extends BabelomicsTool {
 			e.printStackTrace();
 		}
 	}
-	
+
+	private void createIDConverterRedirectionFile(File redirectionFile, File fileToRedirect) {
+		List<String> redirectionInputs = new ArrayList<String>();
+		redirectionInputs.add("tool=id-converter");
+		redirectionInputs.add("jobname=id converter");
+		redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
+		redirectionInputs.add("listfile_databox=" + fileToRedirect.getName() + " (from job $JOB_NAME)");
+		redirectionInputs.add("listfile=$JOB_FOLDER/" + fileToRedirect.getName());
+		redirectionInputs.add("listfile_wum_data=true");
+		try {
+			IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * 
 	 * @param dataset
@@ -431,12 +493,12 @@ public class Preprocessing extends BabelomicsTool {
 			File outputFile = new File(wd + "/out.txt");
 			if ( new File(wd).isDirectory() || FileUtils.createDirectory(wd) ) {
 				dataset.save(inputFile);
-				
+
 				String cmdStr = babelomicsHomePath + "/bin/KNNimpute -K=" + kvalue + " " + inputFile.getAbsolutePath() + " " + outputFile.getAbsolutePath();
 				Command cmd = new Command(cmdStr); 
 				SingleProcess sp = new SingleProcess(cmd);
 				sp.runSync();
-				
+
 				System.out.println("cmd = " + cmdStr);				
 				if ( outputFile.exists() ) {
 					List<String> values;
