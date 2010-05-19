@@ -74,9 +74,9 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		String rawDirName = commandLine.getOptionValue("raw-dir", null);
 		List<String> tags = StringUtils.toList(commandLine.getOptionValue("compressed-file-tags", ""), ",");
 
-		
+
 		System.out.println("----------> " + ListUtils.toString(tags, ","));
-		
+
 		// checking analysis methods and input data (compressed file or directory name)
 		//
 		if ( compressedFileName == null && rawDirName == null ) {
@@ -138,7 +138,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			//
 			tmpDir = new File(rawDirName); 
 		}
-		
+
 		File[] rawFiles = FileUtils.listFiles(tmpDir, "affy".equalsIgnoreCase(technology) ? ".+.cel" : ".+", true);
 		rawFileNames = new ArrayList<String>(rawFiles.length);
 		for(File file: rawFiles) {
@@ -171,13 +171,15 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 	}
 
 	private void normalization() throws IOException, InvalidIndexException {
-		
+
 		String sampleNames = commandLine.getOptionValue("sample-names", null);
 		String bgCorrection = commandLine.getOptionValue("bg-correction", "minimum");
 		String waNormalization = commandLine.getOptionValue("wa-normalization", "median");
 		String baNormalization = commandLine.getOptionValue("ba-normalization", "none");
 		boolean flagsNotFitted = commandLine.hasOption("flags-not-fitted");
 		boolean flagsAsMissing = commandLine.hasOption("flags-as-missing");
+
+		String intensityPlotBinPath = babelomicsHomePath + "/bin/plots/plot_image_" + technology.toLowerCase() + ".r";
 
 		// input parameters
 		//
@@ -193,8 +195,8 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		if ( flagsAsMissing ) {
 			result.addOutputItem(new Item("notfitted_input_param", "Flagged spots have a missing (NA) normalized value and A-value as well", "Flag", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		}
-		
-		
+
+
 		String readingScript = babelomicsHomePath + "/bin/normalizexp/" + (nbChannels == 1 ? "onecolor" : "twocolor");
 		String normalizationScript = babelomicsHomePath + "/bin/normalizexp/" + (nbChannels == 1 ? "onecolor" : "twocolor");
 
@@ -212,7 +214,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		//
 		jobStatus.addStatusMessage("50", "normalizing data");
 		String maPlotBinPath = "";
-		
+
 		if ( nbChannels == 1 ) {
 			ExpressionUtils.OneColorNormalization(readingScript, normalizationScript, rawFileNames, (sampleNames != null ? StringUtils.toList(sampleNames, ","): getSamples(rawFileNames)), bgCorrection, baNormalization, flagsNotFitted, flagsAsMissing, outdir);
 			maPlotBinPath = babelomicsHomePath + "/bin/plots/plotMA_from_single_matrix.r";
@@ -230,7 +232,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 
 		File file;
 		if ( new File(outdir + "/" + ExpressionUtils.getNormalizedFileName()).exists() && 
-			 new File(outdir + "/" + ExpressionUtils.getFeatureDataFileName()).exists() ) {
+				new File(outdir + "/" + ExpressionUtils.getFeatureDataFileName()).exists() ) {
 
 			file = new File(outdir + "/normalized_dataset.txt"); 			
 			ExpressionUtils.createDataset(outdir + "/" + ExpressionUtils.getNormalizedFileName(), outdir + "/" + ExpressionUtils.getFeatureDataFileName(), 1, file.getAbsolutePath());
@@ -250,6 +252,9 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			if ( file.exists() ) {				
 				result.addOutputItem(new Item("normalized", file.getName(), "Feature data ", TYPE.FILE, StringUtils.toList("idlist", ","), new HashMap<String, String>(2), "Normalization output files"));				
 			}
+
+			ExpressionUtils.createIntensityPlot(intensityPlotBinPath, outdir + "/" + ExpressionUtils.getNormalizedFileName(), outdir + "/" + ExpressionUtils.getFeatureDataFileName(), "norm_", false, "norm_intensity_plot.Rout", outdir);
+			addOutputItemImgs(outdir, "norm_", "png", "norm_intensity_image", "Intensity image", "Intensity images");						
 		}
 
 
@@ -259,17 +264,18 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			result.addOutputItem(new Item("avalues", file.getName(), "A-values", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Normalization output files"));
 		}
 		
+
 		if ( nbChannels == 1 ) {
 			ExpressionUtils.createMAPlot(maPlotBinPath, outdir + "/" + ExpressionUtils.getNormalizedFileName(), "MA_", false, "ma_plot.Rout", outdir);
-			addOutputItemImgs(outdir, "MA_", "png", "ma_plot", "MA plot");				
+			addOutputItemImgs(outdir, "MA_", "png", "ma_plot", "MA plot", "MA plots");				
 		} else if ( nbChannels == 2 ) {
 			ExpressionUtils.createMAPlot(maPlotBinPath, outdir + "/" + ExpressionUtils.getNormalizedFileName(), outdir + "/" + ExpressionUtils.getaValuesFileName(), "MA_", false, "ma_plot.Rout", outdir);
-			addOutputItemImgs(outdir, "MA_", "png", "ma_plot", "MA plot");				
+			addOutputItemImgs(outdir, "MA_", "png", "ma_plot", "MA plot", "MA plots");				
 		}
 	}
 
-	
-	private void addOutputItemImgs(String dir, String prefix, String suffix, String id, String groupName) {
+
+	private void addOutputItemImgs(String dir, String prefix, String suffix, String id, String label, String groupName) {
 		String sampleName;
 		String pattern = prefix + ".*" + suffix;
 		File [] files = FileUtils.listFiles(new File(dir), pattern);
@@ -277,9 +283,9 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		System.out.println("addOutputItems...");
 		for (int i=0 ; i<files.length ; i++) {
 			System.out.println("file " + i + " -> " + files[i].getName());
-			
+
 			sampleName = files[i].getName().replace(prefix, "").replace(".png", "");
-			result.addOutputItem(new Item(id + "_" + i, files[i].getName(), groupName + " for " + sampleName, TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), groupName));
+			result.addOutputItem(new Item(id + "_" + i, files[i].getName(), label + " for " + sampleName, TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), groupName));
 		}
 	}
 
@@ -316,14 +322,14 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		if ( calls ) {
 			result.addOutputItem(new Item("calls_input_param", "Present-absent calls", "Analysis", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		}	
-		
+
 		// creating the cel_files containning the cel files to normalize
 		//
 		File celFiles = new File(outdir + "/cel_files.txt");
 		IOUtils.write(celFiles, "cel_files\n" + ListUtils.toString(rawFileNames, "\n"));
 
 		System.out.println("raw files = " + ListUtils.toString(rawFileNames, "\n"));
-		
+
 		// converting to CEL text
 		//
 		if ( celConvert ) {			
@@ -337,15 +343,15 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			//System.out.println("-----------> converting to gcos text file format, raw file names = " + ListUtils.toString(rawFileNames, ","));
 			IOUtils.write(celFiles, "cel_files\n" + ListUtils.toString(rawFileNames, "\n"));
 
-//			AffymetrixExpresionUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", celFiles.getAbsolutePath(), tmpDir.getAbsolutePath());
-//
-//			File[] rawFiles = FileUtils.listFiles(tmpDir, ".+.CEL", true);
-//			rawFileNames = ArrayUtils.toStringList(rawFiles);
-//			System.out.println("-----------> converting to gcos text file format, raw file names = " + ListUtils.toString(rawFileNames, ","));
-//
-//			IOUtils.write(celFiles, "cel_files\n" + ListUtils.toString(rawFileNames, "\n"));
+			//			AffymetrixExpresionUtils.aptCelConvert(aptBinPath + "/apt-cel-convert", celFiles.getAbsolutePath(), tmpDir.getAbsolutePath());
+			//
+			//			File[] rawFiles = FileUtils.listFiles(tmpDir, ".+.CEL", true);
+			//			rawFileNames = ArrayUtils.toStringList(rawFiles);
+			//			System.out.println("-----------> converting to gcos text file format, raw file names = " + ListUtils.toString(rawFileNames, ","));
+			//
+			//			IOUtils.write(celFiles, "cel_files\n" + ListUtils.toString(rawFileNames, "\n"));
 		}		
-		
+
 		//Config config = new Config();
 		config.append(new File(babelomicsHomePath + "/conf/apt.conf"));
 		String chipName = getChipName(rawFileNames, config.getKeys());
@@ -360,7 +366,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 
 		System.out.println(" chip info = " + chipInfo.toString());
 
-		
+
 		String chipType = chipInfo.get("type");
 		if ( chipType == null ) {
 			abort("exception_execute_affynormalization", "could not find out the chip type", "could not find out the chip type", "could not find out the chip type");			
@@ -406,27 +412,27 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		File file;
 		//List<String> tags = StringUtils.toList("data,datamatrix,expression", ",");
 
-		
+
 		String maPlotBinPath = babelomicsHomePath + "/bin/plots/plotMA_from_single_matrix.r";
 
 		file = new File(outdir + "/rma.summary.txt"); 
 		if ( file.exists() ) {
 			IOUtils.write(file, cleanLines(IOUtils.readLines(file)));
 			ExpressionUtils.createMAPlot(maPlotBinPath, file.getAbsolutePath(), "MA_RMA_", false, "ma_plot.Rout", outdir);
-			
+
 			saveAsDataset(file);
-			
+
 			String tags = "data,datamatrix,expression";
 			File redirectionFile = new File(outdir + "/rma.summary.redirection");
 			createPreprocessingRedirectionFile(redirectionFile, file);
 			if ( redirectionFile.exists() ) {
 				tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Preprocessing tool...)";
 			}
-			
-			result.addOutputItem(new Item("rma.summary", file.getName(), "RMA summary ", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "RMA.Summary"));
+
+			result.addOutputItem(new Item("rma.summary", file.getName(), "RMA summary ", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(1), "RMA.Summary"));
 			saveBoxPlot(file, false, "RMA box-plot", "rmaimg", "RMA.Box-plot");
 
-			addOutputItemImgs(outdir, "MA_RMA_", "png", "ma_plot", "RMA.MA plot");							
+			addOutputItemImgs(outdir, "MA_RMA_", "png", "ma_plot", "RMA plot", "RMA.MA plot");							
 		}
 
 		file = new File(outdir + "/plier-mm.summary.txt"); 
@@ -443,10 +449,10 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 				tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Preprocessing tool...)";
 			}
 
-			result.addOutputItem(new Item("plier-mm.summary", file.getName(), "Plier MM summary ", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Plier MM.Summary"));								
+			result.addOutputItem(new Item("plier-mm.summary", file.getName(), "Plier MM summary ", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(1), "Plier MM.Summary"));								
 			saveBoxPlot(file, false, "Plier MM box-plot", "plierimg", "Plier MM.Box-plot");
-			
-			addOutputItemImgs(outdir, "MA_PLIER_MM", "png", "ma_plot", "Plier MM.MA plot");							
+
+			addOutputItemImgs(outdir, "MA_PLIER_MM", "png", "ma_plot", "MA plot", "Plier MM.MA plot");							
 		}
 
 		file = new File(outdir + "/plier-gcbg.summary.txt"); 
@@ -462,11 +468,11 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			if ( redirectionFile.exists() ) {
 				tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Preprocessing tool...)";
 			}
-			
-			result.addOutputItem(new Item("plier-gcbg.summary", file.getName(), "Plier GCBG summary ", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Plier GCBG.Summary"));								
+
+			result.addOutputItem(new Item("plier-gcbg.summary", file.getName(), "Plier GCBG summary ", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(1), "Plier GCBG.Summary"));								
 			saveBoxPlot(file, false, "Plier GCBG box-plot", "plierimg", "Plier GCBG.Box-plot");
-			
-			addOutputItemImgs(outdir, "MA_PLIER_GCBG_", "png", "ma_plot", "Plier GCBG.MA plot");							
+
+			addOutputItemImgs(outdir, "MA_PLIER_GCBG_", "png", "ma_plot", "MA plot", "Plier GCBG.MA plot");							
 		}
 
 		file = new File(outdir + "/pm-mm.mas5-detect.summary.txt"); 
@@ -480,20 +486,21 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			if ( redirectionFile.exists() ) {
 				tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Preprocessing tool...)";
 			}
-			
-			result.addOutputItem(new Item("pm-mm.summary", file.getName(), "PM-MM summary ", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Present-absent calls"));								
+
+			result.addOutputItem(new Item("pm-mm.summary", file.getName(), "PM-MM summary ", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(1), "Present-absent calls"));								
 			//saveBoxPlot(file, "PM-MM box-plot", "pmmmimg", "Present-absent calls");				
 		}
 
 		file = new File(outdir + "/pm-mm.mas5-detect.calls.txt"); 
 		if ( file.exists() ) {
 			IOUtils.write(file, cleanLines(IOUtils.readLines(file)));
-			result.addOutputItem(new Item("pm-mm.calls", file.getName(), "Calls ", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Present-absent calls"));								
+			result.addOutputItem(new Item("pm-mm.calls", file.getName(), "Calls ", TYPE.FILE, new ArrayList<String>(1), new HashMap<String, String>(1), "Present-absent calls"));								
 		}
 
 		file = new File(outdir + "/dabg.summary.txt"); 
 		if ( file.exists() ) {
-			IOUtils.write(file, cleanLines(IOUtils.readLines(file)));
+			List<String> lines = cleanLines(IOUtils.readLines(file)); 
+			IOUtils.write(file, lines);
 			saveAsDataset(file);
 
 			String tags = "data,datamatrix,expression";
@@ -503,17 +510,52 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 				tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Preprocessing tool...)";
 			}
 
-			result.addOutputItem(new Item("dabg.summary", file.getName(), "DABG summary ", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Present-absent calls"));								
+			result.addOutputItem(new Item("dabg.summary", file.getName(), "DABG summary ", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(1), "Present-absent calls"));
+
+
+			File callFile = new File(outdir + "/dabg.calls.txt");
+			List<String> newLines = new ArrayList<String>();
+			String [] values;
+			double value;
+			List<String> valueList = new ArrayList<String>();
+			for(String line: lines) {
+				
+				if ( line != null && line.trim() != null && line.trim().length() > 0 ) {
+					line = line.trim();
+					if ( line.startsWith("#NAMES") ) {
+						newLines.add(line);
+					} if ( !line.startsWith("#") ) {
+						values = line.split("\t");
+						valueList.clear();
+						valueList.add(values[0]);
+						for(int i=1 ; i<values.length ; i++) {
+							value = Double.parseDouble(values[i]);
+							if ( value < 0.05 ) {
+								valueList.add("P");
+							} else if ( value > 0.065 ) {
+								valueList.add("A");
+							} else {
+								valueList.add("M");
+							}
+						}
+						newLines.add(ListUtils.toString(valueList, "\t"));
+					}
+				}
+			}
+			IOUtils.write(callFile, newLines);
+			result.addOutputItem(new Item("dabg.summary.calls", callFile.getName(), "Calls ", TYPE.FILE, new ArrayList<String>(1), new HashMap<String, String>(1), "Present-absent calls"));
+
+
 			//saveBoxPlot(file, "DABG box-plot", "dabgimg", "Present-absent calls");				
 		}
-		
-//		String maPlotBinPath = babelomicsHomePath + "/bin/plots/plotMA_from_single_matrix.r";
-//		ExpressionUtils.createMAPlot(maPlotBinPath, ExpressionUtils.getNormalizedFileName(), "MA_", "ma_plot.Rout", outdir);
-//		addOutputItemImgs(outdir, "MA_", "png", "ma_plot", "MA plot");				
+
+		//		String maPlotBinPath = babelomicsHomePath + "/bin/plots/plotMA_from_single_matrix.r";
+		//		ExpressionUtils.createMAPlot(maPlotBinPath, ExpressionUtils.getNormalizedFileName(), "MA_", "ma_plot.Rout", outdir);
+		//		addOutputItemImgs(outdir, "MA_", "png", "ma_plot", "MA plot");				
 
 	}
-	
-	
+
+
 	/**
 	 * 
 	 * @param rawFilenames
@@ -530,11 +572,11 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		List<List<String>> results = new ArrayList<List<String>>(rawFilenames.size());
 
 		//System.out.println("----------> getChipName, chip names = " + ListUtils.toString(chipNames, ", "));
-		
+
 		for(int i=0 ; i<rawFilenames.size() ; i++) {
-			
+
 			//System.out.println("----------> getChipName, file name = " + rawFilenames.get(i));
-			
+
 			results.add(i, new ArrayList<String>());
 			lines = IOUtils.head(new File(rawFilenames.get(i)), 20);
 			for(String name: chipNames) {
@@ -548,12 +590,12 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 				//if ( results.get(i) != null ) break;
 			}
 		}
-		
+
 		if ( foundChips.size() == 0 ) {
 			throw new InvalidParameterException("array type not supported");
 		}
 
-			
+
 		int maxLength = 0;
 		for(int i=0 ; i<foundChips.size() ; i++) {
 			if ( foundChips.get(i).length() > maxLength ) {
@@ -568,11 +610,11 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		for (int i=0 ; i<rawFilenames.size() ; i++) {
 			if ( ! results.get(i).contains(chipName) ) {
 				String msg = "mismatch CEL files corresponding to different chips, please, check your cel files.\n";
-//				for(int j=0 ; j<rawFilenames.size() ; j++) {
-//					if ( ! results.get(i).contains(chipName) ) {
-//						msg = msg + "Raw file '" + new File(rawFilenames.get(j)).getName() + "' is a '" + results.get(j) + "' array\n";
-//					}
-//				}
+				//				for(int j=0 ; j<rawFilenames.size() ; j++) {
+				//					if ( ! results.get(i).contains(chipName) ) {
+				//						msg = msg + "Raw file '" + new File(rawFilenames.get(j)).getName() + "' is a '" + results.get(j) + "' array\n";
+				//					}
+				//				}
 				throw new InvalidParameterException(msg);
 			}
 		}
@@ -621,7 +663,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			if ( log2 ) {
 				double log2Value = Math.log(2);
 				double [] values = new double[dataset.getRowDimension()];
-				
+
 				for(int i=0; i<dataset.getColumnDimension(); i++) {
 					for(int j=0; j<dataset.getRowDimension(); j++) {
 						values[j] = Math.log(dataset.getDoubleMatrix().getColumn(i)[j]) / log2Value;		
