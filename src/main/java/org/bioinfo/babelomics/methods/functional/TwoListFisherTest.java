@@ -19,10 +19,15 @@ public class TwoListFisherTest extends FunctionalTest {
 	public final static double DEFAULT_PVALUE_THRESHOLD = 0.05;
 	
 	private List<TwoListFisherTestResult> results;
-
+	
 	@Override
 	public void test(List<String> list1, List<String> list2, FeatureList<AnnotationItem> annotations, int testMode) {
+		test(list1, list2, annotations, testMode, null);
+	}
 		
+	public void test(List<String> list1, List<String> list2, FeatureList<AnnotationItem> annotations, int testMode, Map<String,Integer> termSizes) {
+		
+		// init term hashes
 		HashMap<String, Boolean> mList1 = new HashMap<String,Boolean>();
 		for(String id0: list1){
 			mList1.put(id0, true);
@@ -83,49 +88,29 @@ public class TwoListFisherTest extends FunctionalTest {
 		// count summary		
 		if(terms!= null && terms.size()>0){			
 			IntegerMatrix fisherCounts = new IntegerMatrix(terms.size(), 4);
-			for(int i=0 ; i<terms.size() ; i++) {				
-//				fisherCounts.set(i, 0, map1.get(terms.get(i)));
-//				fisherCounts.set(i, 1, map2.get(terms.get(i)));
-//				fisherCounts.set(i, 2, list1.size()-map1.get(terms.get(i)));
-//				fisherCounts.set(i, 3, list2.size()-map2.get(terms.get(i)));			
+			for(int i=0 ; i<terms.size() ; i++) {	
 				fisherCounts.set(i, 0, map1.get(terms.get(i)));
 				fisherCounts.set(i, 1, list1.size()-map1.get(terms.get(i)));
 				fisherCounts.set(i, 2, map2.get(terms.get(i)));
 				fisherCounts.set(i, 3, list2.size()-map2.get(terms.get(i)));
 			}			
 			TestResultList<FisherTestResult> testResult = new FisherExactTest().fisherTest(fisherCounts, testMode);
-						
+			
 			// p-value adjustment
-//			System.err.println("antes");
-//			System.err.println(Arrays.toString(testResult.getPValues()));
-//			System.err.println();
-//			System.err.println();
-//			System.err.println(Arrays.toString(testResult.getAdjPValues()));
 			MultipleTestCorrection.BHCorrection(testResult);
 			
-//			System.err.println("***************");
-//			double[] pvalues = testResult.getPValues();
-//			System.err.println(Arrays.toString(pvalues));
-//			System.err.println();
-//			System.err.println();
-//			double[] adjPvalues = MultipleTestCorrection.BHCorrection(pvalues);
-//			System.err.println(Arrays.toString(adjPvalues));
-//			System.err.println("***************");
-			
-//			System.err.println("despues");
-//			System.err.println(Arrays.toString(testResult.getPValues()));
-//			System.err.println();
-//			System.err.println();
-//			System.err.println(Arrays.toString(testResult.getAdjPValues()));
-			
+			// fill results
 			results = new ArrayList<TwoListFisherTestResult>(testResult.size());
-			for(int i=0; i<testResult.size(); i++){
-				results.add(new TwoListFisherTestResult(terms.get(i),fisherCounts.get(i,0),fisherCounts.get(i,1),fisherCounts.get(i,2),fisherCounts.get(i,3),list1Positives.get(terms.get(i)),list2Positives.get(terms.get(i)),testResult.get(i).getPValue(),testResult.get(i).getAdjPValue()));
+			int termSizeInGenome;
+			for(int i=0; i<testResult.size(); i++){	
+				if(termSizes==null)termSizeInGenome = 0;
+				else termSizeInGenome = termSizes.get(terms.get(i));
+				results.add(new TwoListFisherTestResult(terms.get(i),fisherCounts.get(i,0)+fisherCounts.get(i,2),termSizeInGenome,fisherCounts.get(i,0),fisherCounts.get(i,1),fisherCounts.get(i,2),fisherCounts.get(i,3),list1Positives.get(terms.get(i)),list2Positives.get(terms.get(i)),testResult.get(i).getOddRatio(),testResult.get(i).getPValue(),testResult.get(i).getAdjPValue()));
 			}
 			
 		} else {
 			//FIXME thrown an exception
-			System.out.println("\nannotation is null\n");
+			System.out.println("\nNo annotations was found\n");
 			results = null;
 		}
 			
@@ -137,7 +122,7 @@ public class TwoListFisherTest extends FunctionalTest {
 	
 	public List<TwoListFisherTestResult> getSignificantResults(double threshold){
 		List<TwoListFisherTestResult> significant = new ArrayList<TwoListFisherTestResult>();
-		for(TwoListFisherTestResult result: this.results){			
+		for(TwoListFisherTestResult result: this.results){
 			if(result.getAdjPValue()<threshold) significant.add(result);
 		}
 		return significant;

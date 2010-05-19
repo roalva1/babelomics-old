@@ -114,11 +114,10 @@ public class FatiGO {
 
 		logger.println("Starting FatiGO test...");
 				
-		// duplicates managing		
+		// duplicates managing
 		logger.print("removing duplicates...");		
 		removeDuplicates();		
 		logger.println("OK");
-				
 		
 		logger.print("preparing list union...");
 		List<String> all = new ArrayList<String>(list1.size()+list2.size());
@@ -128,14 +127,15 @@ public class FatiGO {
 		//logger.println("list2_annotation.size: " + InfraredUtils.getAnnotations(dbConnector, list2, filter).size());
 		
 		// annotation
-		logger.print("getting annotations from infrared");		
-		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);	
+		logger.print("getting annotations from infrared");
+		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
 		logger.println("OK");
 		
 		computeAnnotateds();
 		
 		// run test
 		fisher = new TwoListFisherTest();
+		
 		logger.print("executing fisher test...");
 		fisher.test(list1, list2, annotations, testMode);
 		logger.println("OK");

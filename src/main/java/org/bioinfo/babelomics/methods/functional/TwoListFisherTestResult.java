@@ -1,22 +1,30 @@
 package org.bioinfo.babelomics.methods.functional;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import org.bioinfo.commons.utils.ListUtils;
 
 public class TwoListFisherTestResult {
-
+	
+	private DecimalFormat percentageFormatter = new DecimalFormat("##.##");
+	private DecimalFormat pvalueFormatter = new DecimalFormat("#.#####E0");
 	
 	private String term;
+	private int termSize;
+	private int termSizeInGenome;
 	private int list1Positives;
 	private int list1Negatives;
+	private double list1Percentage;
 	private int list2Positives;
 	private int list2Negatives;
+	private double list2Percentage;
 	private List<String> list1Ids;
 	private List<String> list2Ids;
+	private double oddsRatio;
 	private double pValue;
 	private double adjPValue;
-	
+		
 	
 	/**
 	 * @param term
@@ -29,14 +37,19 @@ public class TwoListFisherTestResult {
 	 * @param value
 	 * @param adjPValue
 	 */
-	public TwoListFisherTestResult(String term, int list1Positives, int list1Negatives, int list2Positives, int list2Negatives, List<String> list1Ids, List<String> list2Ids, double pValue, double adjPValue) {
+	public TwoListFisherTestResult(String term, int termSize, int termSizeInGenome, int list1Positives, int list1Negatives, int list2Positives, int list2Negatives, List<String> list1Ids, List<String> list2Ids, double oddsRatio, double pValue, double adjPValue) {
 		this.term = term;
+		this.termSize = termSize;
+		this.termSizeInGenome = termSizeInGenome;
 		this.list1Positives = list1Positives;
-		this.list1Negatives = list1Negatives;
+		this.list1Negatives = list1Negatives;		
+		this.list1Percentage = 100.0*((double)list1Positives/(double)(list1Positives+list1Negatives));		
 		this.list2Positives = list2Positives;
 		this.list2Negatives = list2Negatives;
+		this.list2Percentage = 100.0*((double)list2Positives/(double)(list2Positives+list2Negatives));
 		this.list1Ids = list1Ids;
 		this.list2Ids = list2Ids;
+		this.oddsRatio = oddsRatio;
 		this.pValue = pValue;
 		this.adjPValue = adjPValue;
 	}
@@ -44,26 +57,38 @@ public class TwoListFisherTestResult {
 	public String toString(){
 		StringBuilder out = new StringBuilder();
 		out.append(this.term).append("\t");
+		out.append(this.termSize).append("\t");
+		out.append(this.termSizeInGenome).append("\t");
 		out.append(this.list1Positives).append("\t");
 		out.append(this.list1Negatives).append("\t");
+		out.append(percentageFormatter.format(this.list1Percentage)).append("\t");
 		out.append(this.list2Positives).append("\t");
 		out.append(this.list2Negatives).append("\t");
+		out.append(percentageFormatter.format(this.list2Percentage)).append("\t");
 		out.append(ListUtils.toString(this.list1Ids,",")).append("\t");
 		out.append(ListUtils.toString(this.list2Ids,",")).append("\t");
-		out.append(this.pValue).append("\t");
-		out.append(this.adjPValue);
+		double oddsRatioLog = Math.log(oddsRatio);
+		if(new Double(oddsRatioLog).isInfinite()) out.append(Double.MAX_VALUE).append("\t");
+		else out.append(oddsRatioLog).append("\t");
+		out.append(pvalueFormatter.format(this.pValue)).append("\t");
+		out.append(pvalueFormatter.format(this.adjPValue));
 		return out.toString();
 	}
 
 	public static String header(){
 		StringBuilder out = new StringBuilder();
 		out.append("#term").append("\t");
+		out.append("term_size").append("\t");
+		out.append("term_size_in_genome").append("\t");
 		out.append("list1_positives").append("\t");
 		out.append("list1_negatives").append("\t");
+		out.append("list1_percentage").append("\t");
 		out.append("list2_positives").append("\t");
 		out.append("list2_negatives").append("\t");
+		out.append("list2_percentage").append("\t");
 		out.append("list1_positive_ids").append("\t");
 		out.append("list2_positive_ids").append("\t");
+		out.append("odds_ratio_log").append("\t");
 		out.append("pvalue").append("\t");
 		out.append("adj_pvalue");
 		return out.toString();
@@ -210,6 +235,76 @@ public class TwoListFisherTestResult {
 	 */
 	public void setAdjPValue(double adjPValue) {
 		this.adjPValue = adjPValue;
+	}
+
+	/**
+	 * @return the termSize
+	 */
+	public int getTermSize() {
+		return termSize;
+	}
+
+	/**
+	 * @param termSize the termSize to set
+	 */
+	public void setTermSize(int termSize) {
+		this.termSize = termSize;
+	}
+
+	/**
+	 * @return the termSizeInGenome
+	 */
+	public int getTermSizeInGenome() {
+		return termSizeInGenome;
+	}
+
+	/**
+	 * @param termSizeInGenome the termSizeInGenome to set
+	 */
+	public void setTermSizeInGenome(int termSizeInGenome) {
+		this.termSizeInGenome = termSizeInGenome;
+	}
+
+	/**
+	 * @return the oddsRatio
+	 */
+	public double getOddsRatio() {
+		return oddsRatio;
+	}
+
+	/**
+	 * @param oddsRatio the oddsRatio to set
+	 */
+	public void setOddsRatio(double oddRatio) {
+		this.oddsRatio = oddRatio;
+	}
+
+	/**
+	 * @return the list1Percentage
+	 */
+	public double getList1Percentage() {
+		return list1Percentage;
+	}
+
+	/**
+	 * @param list1Percentage the list1Percentage to set
+	 */
+	public void setList1Percentage(double list1Percentage) {
+		this.list1Percentage = list1Percentage;
+	}
+
+	/**
+	 * @return the list2Percentage
+	 */
+	public double getList2Percentage() {
+		return list2Percentage;
+	}
+
+	/**
+	 * @param list2Percentage the list2Percentage to set
+	 */
+	public void setList2Percentage(double list2Percentage) {
+		this.list2Percentage = list2Percentage;
 	}
 	
 }

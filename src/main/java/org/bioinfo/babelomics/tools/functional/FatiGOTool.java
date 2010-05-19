@@ -2,6 +2,7 @@ package org.bioinfo.babelomics.tools.functional;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Proxy.Type;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -26,16 +27,18 @@ import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.stats.inference.FisherExactTest;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
+import org.bioinfo.tool.result.Item.TYPE;
 
 public class FatiGOTool extends FunctionalProfilingTool{
 
 	public final static double DEFAULT_PVALUE_THRESHOLD = 0.05;
-		
+	public final static double[] DEFAULT_PVALUES = {0.1,0.05,0.01,0.05};
+	
 	// list1
 	private FeatureData list1;
 	
 	// list2
-	private FeatureData list2;		
+	private FeatureData list2;
 	private List<Chromosome> chromosomes;
 	
 	// other capabilities
@@ -45,6 +48,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 	private String list2label;
 	
 	private List<String> significantDbs;
+	private List<StringBuilder> significantCount;
 	
 	public FatiGOTool() {
 		initOptions();
@@ -93,7 +97,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		String duplicates = commandLine.getOptionValue("duplicates", "never");		
 		if(duplicates.equalsIgnoreCase("each")) duplicatesMode = FatiGO.REMOVE_EACH;
 		if(duplicates.equalsIgnoreCase("ref")) duplicatesMode = FatiGO.REMOVE_REF;
-		if(duplicates.equalsIgnoreCase("all")) duplicatesMode = FatiGO.REMOVE_ALL;		
+		if(duplicates.equalsIgnoreCase("all")) duplicatesMode = FatiGO.REMOVE_ALL;
 		// your annotations
 		if(isYourAnnotations){
 			
@@ -119,7 +123,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			list2label = "List 2";
 			
 			// list 1			
-			System.err.println(list1.getDataFrame());
+			//System.err.println(list1.getDataFrame());
 			List<String> idList1 = list1.getDataFrame().getRowNames();//list1.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list1.getDataFrame().getColumn(0));
 			
 			// list 2
@@ -127,7 +131,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			if(list2!=null) {
 				idList2 = list2.getDataFrame().getRowNames();//list2.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list2.getDataFrame().getColumn(0));
 				fatigo = new FatiGO(idList1, idList2, null, dbConnector, testMode, duplicatesMode);
-			} else if(isRestOfGenome()) {				
+			} else if(isRestOfGenome()) {
 				duplicatesMode = FatiGO.REMOVE_GENOME;
 				fatigo = new FatiGO(idList1, null, dbConnector);
 				list2label = "Genome";
@@ -148,7 +152,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			result.addOutputItem(new Item("clean_list1","clean_list1.txt","List 1 (after duplicates managing)",Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
 			IOUtils.write(outdir + "/clean_list2.txt", ListUtils.toString(fatigo.getList2(),"\n"));
 			result.addOutputItem(new Item("clean_list2","clean_list2.txt",list2label + " (after duplicates managing)",Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
-			
+
 			
 			// run fatigo's
 			if(filterList.size()==0 && !isYourAnnotations){
@@ -158,13 +162,19 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				// significant terms
 				List<String> significant = new ArrayList<String>();
 				significantDbs = new ArrayList<String>();
+				significantCount = new ArrayList<StringBuilder>();
+				for(int i=0; i<DEFAULT_PVALUES.length; i++){
+					significantCount.add(new StringBuilder("#DB\tNº of significant terms\n"));
+				}
 		
 				annotationReport = new StringBuilder();
 				annotationReport.append("#DB").append("\t").append("List1").append("\t").append(list2label).append("\n");
+				significant.add(TwoListFisherTestResult.header());
 				
-				// run fatigo's				
+				// run fatigo's
 				for(FunctionalFilter filter: filterList) {
 					fatigo = doFatigo(idList1,idList2,filter,dbConnector,significant);
+					fatigo.getSignificant(0.01).size();
 					addAnnotationReport(fatigo,getDBTitle(filter));
 				}				
 				if(isYourAnnotations){					
@@ -176,12 +186,20 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				saveAnnotationsReport();
 				
 				// significant terms				
-				result.getOutputItems().add(4, new Item("significant","significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",ListUtils.toString(significantDbs,",")),new HashMap<String,String>(),"Significant Results"));
-				significant.add(TwoListFisherTestResult.header());
-				IOUtils.write(outdir + "/significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significant,"\n"));
+				//result.getOutputItems().add(4, new Item("significant","significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",ListUtils.toString(significantDbs,",")),new HashMap<String,String>(),"Significant Results"));				
+				//IOUtils.write(outdir + "/significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significant,"\n"));
 				
-			}
+				
+				//result.getOutputItems().add(4, new Item("significant","significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",ListUtils.toString(significantDbs,",")),new HashMap<String,String>(),"Significant Results"));				
+				//IOUtils.write(outdir + "/significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significant,"\n"));			}
 			
+				for(int i=0; i<DEFAULT_PVALUES.length; i++){
+					IOUtils.write(outdir + "/significant_count_" + DEFAULT_PVALUES[i] + ".txt", significantCount.get(i).toString());
+				}
+				result.getOutputItems().add(3, new Item("significant","significant_count_${pvalue}.txt","Number of significant terms per DB",Item.TYPE.FILE,Arrays.asList("TABLE"),new HashMap<String,String>(),"Significant Results"));
+				
+				result.addMetaItem(new Item("flags","SHOW_PVALUES","",TYPE.MESSAGE));
+			}
 		}catch(ParseException pe){
 			logger.error(pe.getMessage());
 		}catch(Exception e){
@@ -214,7 +232,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		duplicates.put(FatiGO.REMOVE_REF, "Remove list 1 ids from list 2 (complementary list)");
 		duplicates.put(FatiGO.REMOVE_GENOME, "Remove list 1 ids from genome");
 		duplicates.put(FatiGO.REMOVE_ALL, "Remove all duplicates (owned and shared duplicates)");
-		addInputParam("duplicates", "Duplicates management", duplicates.get(duplicatesMode));
+		addInputParam("duplicates_management", "Duplicates management", duplicates.get(duplicatesMode));
 		// fisher laterality
 		HashMap<Integer,String> fisher = new HashMap<Integer, String>();
 		fisher.put(FisherExactTest.GREATER, "Over represented terms in list 1");
@@ -323,7 +341,21 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			List<String> testResultOutput = testResultToStringList(fatigo.getResults());
 			IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
 			result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Database tests"));
-			result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Database tests"));	
+			result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Database tests"));
+			List<TwoListFisherTestResult> significant;
+			String lastReport;
+			int numberOfSignificantTerms;
+			for(int i=0; i<DEFAULT_PVALUES.length; i++){
+				significant = fatigo.getSignificant(DEFAULT_PVALUES[i]);
+				if(significant!=null){
+					IOUtils.write(outdir + "/significant_" + filterInfo.getName() + "_" + DEFAULT_PVALUES[i] + ".txt", ListUtils.toString(significant,"\n"));					
+					numberOfSignificantTerms = significant.size();
+				} else {
+					numberOfSignificantTerms = 0;
+				}
+				significantCount.get(i).append(filterInfo.getTitle()).append("\t").append(numberOfSignificantTerms).append("\n");		
+			}
+			result.getOutputItems().add(3, new Item("significant_" + filterInfo.getName(),"significant_" + filterInfo.getName() + "_${pvalue}.txt",filterInfo.getTitle() + " significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE,",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Significant Results"));	
 		}		
 		System.err.println("fatigo.getAnnotations():" + fatigo.getAnnotations().size());
 		if(fatigo.getAnnotations()!=null && fatigo.getAnnotations().size()>0){				
@@ -332,7 +364,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			result.addOutputItem(new Item("annot_" + filterInfo.getName(),annotFileName,"Annotations for " + filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
 		} else {
 			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"no annotations found for input ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
-		}
+		}		
 	}
 	
 }
