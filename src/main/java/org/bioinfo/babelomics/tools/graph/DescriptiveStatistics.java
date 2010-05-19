@@ -143,7 +143,8 @@ public class DescriptiveStatistics extends BabelomicsTool {
 			line = line.trim();
 			attr = line.split("\t");
 			if(line.startsWith("#")) {
-				}if(attr[0].equalsIgnoreCase("#NAMES")) {
+				System.out.println(attr[0]);
+				}if(attr[0].indexOf("#NAMES") > -1) {
 					hasName=true;
 					RCommand rCommand = new RCommand(pcaPlotBinPath, this.getOutdir());
 					

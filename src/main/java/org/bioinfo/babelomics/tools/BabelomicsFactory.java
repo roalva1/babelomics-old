@@ -40,7 +40,19 @@ public class BabelomicsFactory {
 		 * *****	Preprocessing, normalization and annotation tools	*************************************
 		 * **************************************************************************************************
 		 */
-		if(toolName.equalsIgnoreCase("expression-normalization")) {
+		if(toolName.equalsIgnoreCase("affy-expression-normalization")) {
+			return new ExpressionNormalizationTool();
+		}
+		
+		if(toolName.equalsIgnoreCase("agilent-expression-one-color-normalization")) {
+			return new ExpressionNormalizationTool();
+		}
+		
+		if(toolName.equalsIgnoreCase("genepix-expression-one-color-normalization")) {
+			return new ExpressionNormalizationTool();
+		}
+		
+		if(toolName.equalsIgnoreCase("genepix-expression-two-color-normalization")) {
 			return new ExpressionNormalizationTool();
 		}
 
