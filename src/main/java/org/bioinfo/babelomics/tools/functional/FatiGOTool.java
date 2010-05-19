@@ -31,8 +31,7 @@ import org.bioinfo.tool.result.Item.TYPE;
 
 public class FatiGOTool extends FunctionalProfilingTool{
 
-	public final static double DEFAULT_PVALUE_THRESHOLD = 0.05;
-	public final static double[] DEFAULT_PVALUES = {0.1,0.05,0.01,0.05};
+	private DecimalFormat pvalueFormatter = new DecimalFormat("#.####"); 
 	
 	// list1
 	private FeatureData list1;
@@ -194,9 +193,9 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				//IOUtils.write(outdir + "/significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significant,"\n"));			}
 			
 				for(int i=0; i<DEFAULT_PVALUES.length; i++){
-					IOUtils.write(outdir + "/significant_count_" + DEFAULT_PVALUES[i] + ".txt", significantCount.get(i).toString());
+					IOUtils.write(outdir + "/significant_count_" + pvalueFormatter.format(DEFAULT_PVALUES[i]) + ".txt", significantCount.get(i).toString());
 				}
-				result.getOutputItems().add(3, new Item("significant","significant_count_${pvalue}.txt","Number of significant terms per DB",Item.TYPE.FILE,Arrays.asList("TABLE"),new HashMap<String,String>(),"Significant Results"));
+				result.getOutputItems().add(3, new Item("significant","significant_count_${pvalue}.txt","Number of significant terms per DB",Item.TYPE.FILE,Arrays.asList("TABLE,SUMMARY_TABLE,SIGNIFICANT_COUNT_TABLE"),new HashMap<String,String>(),"Significant Results"));
 				
 				result.addMetaItem(new Item("flags","SHOW_PVALUES","",TYPE.MESSAGE));
 			}
@@ -338,25 +337,33 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		
 		// save statistic resultss		
 		if(fatigo.getResults()!=null){
+			
+			// save result table
 			List<String> testResultOutput = testResultToStringList(fatigo.getResults());
 			IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
-			result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Database tests"));
-			result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Database tests"));
-			List<TwoListFisherTestResult> significant;
-			String lastReport;
+			//result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"All results"));
+			result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList(filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"All results"));
+			
+			// save table description
+			//result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"All results"));
+						
+			// save significant results
 			int numberOfSignificantTerms;
+			List<TwoListFisherTestResult> significant;
 			for(int i=0; i<DEFAULT_PVALUES.length; i++){
 				significant = fatigo.getSignificant(DEFAULT_PVALUES[i]);
 				if(significant!=null){
-					IOUtils.write(outdir + "/significant_" + filterInfo.getName() + "_" + DEFAULT_PVALUES[i] + ".txt", ListUtils.toString(significant,"\n"));					
+					IOUtils.write(outdir + "/significant_" + filterInfo.getName() + "_" + pvalueFormatter.format(DEFAULT_PVALUES[i]) + ".txt", ListUtils.toString(significant,"\n"));					
 					numberOfSignificantTerms = significant.size();
 				} else {
 					numberOfSignificantTerms = 0;
 				}
 				significantCount.get(i).append(filterInfo.getTitle()).append("\t").append(numberOfSignificantTerms).append("\n");		
 			}
-			result.getOutputItems().add(3, new Item("significant_" + filterInfo.getName(),"significant_" + filterInfo.getName() + "_${pvalue}.txt",filterInfo.getTitle() + " significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE,",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Significant Results"));	
-		}		
+			result.getOutputItems().add(3, new Item("significant_" + filterInfo.getName(),"significant_" + filterInfo.getName() + "_${pvalue}.txt",filterInfo.getTitle() + " significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Significant Results"));
+			
+		}
+		
 		System.err.println("fatigo.getAnnotations():" + fatigo.getAnnotations().size());
 		if(fatigo.getAnnotations()!=null && fatigo.getAnnotations().size()>0){				
 			// save annotation

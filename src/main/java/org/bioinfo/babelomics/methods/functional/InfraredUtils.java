@@ -40,7 +40,10 @@ public class InfraredUtils {
 	// get genome (ensembl gene format)
 	public static List<String> getGenome(DBConnector dbConnector){
 		try {
-			return new GeneDBManager(dbConnector).getAllEnsemblIds();
+//			return new GeneDBManager(dbConnector).getAllEnsemblIds();
+			System.err.println("all genes: " +  new GeneDBManager(dbConnector).getAllEnsemblIds().size());
+			System.err.println("protein_coding: " +  new GeneDBManager(dbConnector).getAllByBiotype("protein_coding").getFeaturesIds().size());
+			return new GeneDBManager(dbConnector).getAllByBiotype("protein_coding").getFeaturesIds();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -65,7 +68,7 @@ public class InfraredUtils {
 	// translate a list of ids to ensembl format
 	public static List<String> toEnsemblId(DBConnector dbConnector, List<String> ids) {
 		try {	
-			List<List<String>> list = new XRefDBManager(dbConnector).getIdsByDBName(ids, "ensembl_gene");			
+			List<List<String>> list = new XRefDBManager(dbConnector).getIdsByDBName(ids, "ensembl_gene");
 			List<String> ensemblIds = new ArrayList<String>();
 			if(list==null) {				
 				ensemblIds = null;

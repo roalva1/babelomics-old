@@ -29,6 +29,9 @@ import org.bioinfo.tool.OptionFactory;
 
 public abstract class FunctionalProfilingTool extends BabelomicsTool {
 
+	public final static double DEFAULT_PVALUE_THRESHOLD = 0.05;
+	public final static double[] DEFAULT_PVALUES = {0.1,0.05,0.01,0.005};
+	
 //	// JT.2009.09.07
 //	private String removeDuplicates;
 	
