@@ -121,11 +121,12 @@ public class Correlation extends BabelomicsTool {
 			File outFile = new File(getOutdir() + "/" + test + ".txt");
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.save(outFile);
-			result.addOutputItem(new Item(test + "_file", outFile.getName(), test.toUpperCase() + " output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Output files"));
+//			result.addOutputItem(new Item(test + "_file", outFile.getName(), test.toUpperCase() + " output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Output files"));
+			result.addOutputItem(new Item(test + "_file", outFile.getName(), test.toUpperCase() + " output file", TYPE.FILE, StringUtils.toList("TABLE,CORRELATION_TABLE", ","), new HashMap<String, String>(2), "Output files"));
 
-			outFile = new File(getOutdir() + "/" + test + "_table.txt");
-			IOUtils.write(outFile, dataFrame.toString(true, true));			
-			result.addOutputItem(new Item(test + "_table", outFile.getName(), test.toUpperCase() + " output table", TYPE.FILE, StringUtils.toList("TABLE,CORRELATION_TABLE", ","), new HashMap<String, String>(2), "Output files"));
+//			outFile = new File(getOutdir() + "/" + test + "_table.txt");
+//			IOUtils.write(outFile, dataFrame.toString(true, true));			
+//			result.addOutputItem(new Item(test + "_table", outFile.getName(), test.toUpperCase() + " output table", TYPE.FILE, StringUtils.toList("TABLE,CORRELATION_TABLE", ","), new HashMap<String, String>(2), "Output files"));
 
 			DiffExpressionUtils.addOutputLists(dataFrame, test, "correlation", result, outdir);
 		} catch (Exception e) {
@@ -146,15 +147,15 @@ public class Correlation extends BabelomicsTool {
 			}
 		}
 
-		String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
-		try {
-			heatmap.save(heatmapFilename);
-			if ( new File(heatmapFilename).exists() ) {
-				result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
-			}
-		} catch (IOException e) {
-			printError("ioexception_executecorrelation_correlation", "error generating heatmap", e.toString(), e);
-		}
+//		String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
+//		try {
+//			heatmap.save(heatmapFilename);
+//			if ( new File(heatmapFilename).exists() ) {
+//				result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap images"));
+//			}
+//		} catch (IOException e) {
+//			printError("ioexception_executecorrelation_correlation", "error generating heatmap", e.toString(), e);
+//		}
 	}
 
 
@@ -207,11 +208,12 @@ public class Correlation extends BabelomicsTool {
 			File outFile = new File(getOutdir() + "/" + test + ".txt");
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.save(outFile);
-			result.addOutputItem(new Item(test + "_file", outFile.getName(), test.toUpperCase() + " output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Output files"));
+//			result.addOutputItem(new Item(test + "_file", outFile.getName(), test.toUpperCase() + " output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Output files"));
+			result.addOutputItem(new Item(test + "_file", outFile.getName(), test.toUpperCase() + " output file", TYPE.FILE, StringUtils.toList("TABLE,REGRESSION_TABLE", ","), new HashMap<String, String>(2), "Output files"));
 
-			outFile = new File(getOutdir() + "/" + test + "_table.txt");
-			IOUtils.write(outFile, dataFrame.toString(true, true));			
-			result.addOutputItem(new Item(test + "_table", outFile.getName(), test.toUpperCase() + " output table", TYPE.FILE, StringUtils.toList("TABLE,REGRESSION_TABLE", ","), new HashMap<String, String>(2), "Output files"));
+//			outFile = new File(getOutdir() + "/" + test + "_table.txt");
+//			IOUtils.write(outFile, dataFrame.toString(true, true));			
+//			result.addOutputItem(new Item(test + "_table", outFile.getName(), test.toUpperCase() + " output table", TYPE.FILE, StringUtils.toList("TABLE,REGRESSION_TABLE", ","), new HashMap<String, String>(2), "Output files"));
 
 			DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
 
@@ -233,14 +235,14 @@ public class Correlation extends BabelomicsTool {
 			}
 		}
 
-		String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
-		try {
-			heatmap.save(heatmapFilename);
-			if ( new File(heatmapFilename).exists() ) {
-				result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
-			}		
-		} catch (IOException e) {
-			printError("ioexception_executecorrelation_correlation", "error generating heatmap", e.toString(), e);
-		}
+//		String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
+//		try {
+//			heatmap.save(heatmapFilename);
+//			if ( new File(heatmapFilename).exists() ) {
+//				result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap images"));
+//			}		
+//		} catch (IOException e) {
+//			printError("ioexception_executecorrelation_correlation", "error generating heatmap", e.toString(), e);
+//		}
 	}
 }

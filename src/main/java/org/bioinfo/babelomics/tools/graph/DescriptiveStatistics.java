@@ -234,7 +234,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		try {
 			tree = nwParser.parse(new File(commandLine.getOptionValue("datalist")));
 			String imgFilename = this.getOutdir() + "/tree.png";
-			ClusteringUtils.saveImageTree(tree, "Tree",  imgFilename, true);
+			ClusteringUtils.saveImageTree(tree, "Tree",  imgFilename, true, false);
 			try {
 				jobStatus.addStatusMessage("" + ("80"), "saving");
 			} catch (FileNotFoundException e) {

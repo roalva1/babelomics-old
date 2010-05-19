@@ -1,6 +1,7 @@
 package org.bioinfo.babelomics.tools;
 
 import org.bioinfo.babelomics.tools.expression.Clustering;
+import org.bioinfo.babelomics.tools.expression.MAPlot;
 import org.bioinfo.babelomics.tools.expression.OutlierLrs;
 import org.bioinfo.babelomics.tools.expression.Predictor;
 import org.bioinfo.babelomics.tools.expression.RawExpressionViewer;
@@ -46,6 +47,10 @@ public class BabelomicsFactory {
 
 		if(toolName.equalsIgnoreCase("raw-expression-viewer")) {
 			return new RawExpressionViewer();
+		}
+		
+		if(toolName.equalsIgnoreCase("ma-plot")) {
+			return new MAPlot();
 		}
 
 		if(toolName.equalsIgnoreCase("affy-genotype-preprocess")) {

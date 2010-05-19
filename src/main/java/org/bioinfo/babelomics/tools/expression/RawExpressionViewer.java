@@ -188,47 +188,47 @@ public class RawExpressionViewer extends BabelomicsTool {
 				addOutputItems(outdir, "intensity_", "png", "intensity_image", "Intensity image");
 				
 				if ( fFile.exists() ) {
-					ExpressionUtils.createIntensityPlot(intensityPlotBinPath, fFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "fg_", "fg_intensity_plot.Rout", outdir);
-					addOutputItems(outdir, "fg_", "png", "fg_intensity_image", "Foreground intensity image");
+					ExpressionUtils.createIntensityPlot(intensityPlotBinPath, fFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "fg_", true, "fg_intensity_plot.Rout", outdir);
+					addOutputItems(outdir, "fg_", "png", "fg_intensity_image", "Foreground intensity image (in log 2 scale)");
 					
-					saveBoxPlot(fFile, "Foreground box-plot", "fgboxplot", "Box-plots");				
+					saveBoxPlot(fFile, true, "Foreground box-plot (in log 2 scale)", "fgboxplot", "Box-plots");				
 				}
 			} else {
 				if ( featuresFile.exists() ) {
 					if ( fFile.exists() ) {
-						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, fFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "fg_", "fg_intensity_plot.Rout", outdir);
-						addOutputItems(outdir, "fg_", "png", "fg_intensity_image", "Foreground intensity image");
+						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, fFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "fg_", true, "fg_intensity_plot.Rout", outdir);
+						addOutputItems(outdir, "fg_", "png", "fg_intensity_image", "Foreground intensity image (in log 2 scale)");
 						
 						System.out.println("---------------------------> box plot for file : " + fFile.getAbsolutePath());
-						saveBoxPlot(fFile, "Foreground box-plot", "fgboxplot", "Box-plots");				
+						saveBoxPlot(fFile, true, "Foreground box-plot (in log 2 scale)", "fgboxplot", "Box-plots");				
 					}
 
 					if ( bFile.exists() ) {
-						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, bFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "bg_", "bg_intensity_plot.Rout", outdir);
-						addOutputItems(outdir, "bg_", "png", "bg_intensity_image", "Background intensity image");
+						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, bFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "bg_", true, "bg_intensity_plot.Rout", outdir);
+						addOutputItems(outdir, "bg_", "png", "bg_intensity_image", "Background intensity image (in log 2 scale)");
 						
-						saveBoxPlot(bFile, "Background box-plot", "bgboxplot", "Box-plots");				
+						saveBoxPlot(bFile, true, "Background box-plot (in log 2 scale)", "bgboxplot", "Box-plots");				
 					}
 
 					if ( mFile.exists() ) {
-						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, mFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "m_", "m_intensity_plot.Rout", outdir);
-						addOutputItems(outdir, "m_", "png", "m_intensity_image", "M-values intensity image");
+						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, mFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "m_", false, "m_intensity_plot.Rout", outdir);
+						addOutputItems(outdir, "m_", "png", "m_intensity_image", "M-values intensity image (in log 2 scale)");
 						
-						saveBoxPlot(mFile, "M-values box-plot", "mboxplot", "Box-plots");				
+						saveBoxPlot(mFile, false, "M-values box-plot (in log 2 scale)", "mboxplot", "Box-plots");				
 					}
 
 					if ( gFile.exists() ) {
-						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, gFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "g_", "g_intensity_plot.Rout", outdir);
-						addOutputItems(outdir, "g_", "png", "g_intensity_image", "Green-values intensity image");
+						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, gFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "g_", true, "g_intensity_plot.Rout", outdir);
+						addOutputItems(outdir, "g_", "png", "g_intensity_image", "Green-values intensity image (in log 2 scale)");
 						
-						saveBoxPlot(gFile, "Green-values box-plot", "gboxplot", "Box-plots");				
+						saveBoxPlot(gFile, true, "Green-values box-plot (in log 2 scale)", "gboxplot", "Box-plots");				
 					}
 
 					if ( rFile.exists() ) {
-						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, gFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "r_", "r_intensity_plot.Rout", outdir);
-						addOutputItems(outdir, "r_", "png", "r_intensity_image", "Red-values intensity image");
+						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, gFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "r_", true, "r_intensity_plot.Rout", outdir);
+						addOutputItems(outdir, "r_", "png", "r_intensity_image", "Red-values intensity image (in log 2 scale)");
 						
-						saveBoxPlot(rFile, "Red-values box-plot", "rboxplot", "Box-plots");				
+						saveBoxPlot(rFile, true, "Red-values box-plot (in log 2 scale)", "rboxplot", "Box-plots");				
 					}
 				}
 			}
@@ -237,11 +237,11 @@ public class RawExpressionViewer extends BabelomicsTool {
 			//
 			if ( nbChannels == 1 ) {
 				if ( fFile.exists() ) {
-					ExpressionUtils.createMAPlot(maPlotBinPath, fFile.getAbsolutePath(), "MA_", "ma_plot.Rout", outdir);
+					ExpressionUtils.createMAPlot(maPlotBinPath, fFile.getAbsolutePath(), "MA_", true, "ma_plot.Rout", outdir);
 				}
 			} else {
 				if ( mFile.exists() && aFile.exists() ) {
-					ExpressionUtils.createMAPlot(maPlotBinPath, mFile.getAbsolutePath(), aFile.getAbsolutePath(), "MA_", "ma_plot.Rout", outdir);
+					ExpressionUtils.createMAPlot(maPlotBinPath, mFile.getAbsolutePath(), aFile.getAbsolutePath(), "MA_", true, "ma_plot.Rout", outdir);
 				}
 			}
 			if ( "affy".equalsIgnoreCase(technology) ) {
@@ -268,20 +268,35 @@ public class RawExpressionViewer extends BabelomicsTool {
 
 		System.out.println("addOutputItems...");
 		for (int i=0 ; i<files.length ; i++) {
-			System.out.println("file " + i + " -> " + files[i].getName());
+			//System.out.println("file " + i + " -> " + files[i].getName());
 			
 			sampleName = files[i].getName().replace(prefix, "").replace(".png", "");
-			result.addOutputItem(new Item(id + "_" + i, files[i].getName(), groupName + " for " + sampleName, TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), groupName + "s"));
+			result.addOutputItem(new Item(id + "_" + i, files[i].getName(), groupName + " for " + sampleName, TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), groupName));
 		}
 	}
 
-	public void saveBoxPlot(File file, String title, String resultId, String group) throws IOException, InvalidIndexException {
+	public void saveBoxPlot(File file, boolean log2, String title, String resultId, String group) throws IOException, InvalidIndexException {
 		File imgFile = new File(file.getAbsolutePath().replace(".txt", "_boxplot.png"));
 		Dataset dataset = new Dataset(file, true);
 		BoxPlotChart bpc = new BoxPlotChart(title, "", "");
 		bpc.getLegend().setVisible(false);
-		for(int i=0; i<dataset.getColumnDimension(); i++) {
-			bpc.addSeries(dataset.getDoubleMatrix().getColumn(i), "samples", dataset.getSampleNames().get(i));
+		
+		if ( dataset.getColumnDimension() != 0 && dataset.getRowDimension() != 0 ) {
+			if ( log2 ) {
+				double log2Value = Math.log(2);
+				double [] values = new double[dataset.getRowDimension()];
+				
+				for(int i=0; i<dataset.getColumnDimension(); i++) {
+					for(int j=0; j<dataset.getRowDimension(); j++) {
+						values[j] = Math.log(dataset.getDoubleMatrix().getColumn(i)[j]) / log2Value;		
+					}
+					bpc.addSeries(values, "samples", dataset.getSampleNames().get(i));
+				}
+			} else {
+				for(int i=0; i<dataset.getColumnDimension(); i++) {
+					bpc.addSeries(dataset.getDoubleMatrix().getColumn(i), "samples", dataset.getSampleNames().get(i));
+				}
+			}
 		}
 		try {
 			ChartUtilities.saveChartAsPNG(imgFile, bpc, 400, 256);
