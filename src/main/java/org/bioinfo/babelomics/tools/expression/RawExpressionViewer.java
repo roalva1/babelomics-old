@@ -197,7 +197,7 @@ public class RawExpressionViewer extends BabelomicsTool {
 				jobStatus.addStatusMessage("70", "generating intensity plots");
 
 				AffymetrixExpressionUtils.createIntensityPlot(intensityPlotBinPath, rawDataRObjectFile.getAbsolutePath(), "intensity_", "intensity_plot.Rout", outdir);
-				addOutputItems(outdir, "intensity_", "png", "intensity_image", "Raw-data image", "Intensity images");				
+				addOutputItems(outdir, "intensity_", "png", "intensity_image", "Raw-data image (in log 2 scale)", "Intensity images");				
 
 //				if ( fFile.exists() ) {
 //					ExpressionUtils.createIntensityPlot(intensityPlotBinPath, fFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "fg_", true, "fg_intensity_plot.Rout", outdir);
