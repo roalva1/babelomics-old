@@ -260,8 +260,9 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 
 		file = new File(outdir + "/" + ExpressionUtils.getaValuesFileName()); 
 		if ( file.exists() ) {
-			ExpressionUtils.updateAValuesFile(file.getAbsolutePath(), outdir + "/" + ExpressionUtils.getFeatureDataFileName(), 1);
-			result.addOutputItem(new Item("avalues", file.getName(), "A-values", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Normalization output files"));
+			File aFile = new File(outdir + "/Avalues.txt");
+			ExpressionUtils.updateAValuesFile(file.getAbsolutePath(), outdir + "/" + ExpressionUtils.getFeatureDataFileName(), 1, aFile.getAbsolutePath());
+			result.addOutputItem(new Item("avalues", aFile.getName(), "A-values", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Normalization output files"));
 		}
 		
 
