@@ -114,7 +114,7 @@ public class Clustering extends BabelomicsTool {
 			try {
 				String clusterFolder = outdir + "/clusters/";
 				new  File(clusterFolder).mkdir();
-				//MultipleTreeUtils.saveClusters(nwGenes, "", clusterFolder);
+				MultipleTreeUtils.saveClusters(nwGenes, "", clusterFolder);
 				IOUtils.write(new File(this.getOutdir() + "/genes.nw"), nwGenes.toString());		
 				result.addOutputItem(new Item("gene_newick_file", "genes.nw", "Clusters of genes", TYPE.FILE, tags, new HashMap<String, String>(2), "Clusters in newick format"));
 			} catch (IOException e) {
