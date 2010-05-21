@@ -52,7 +52,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("boxplot", "",false));
 		options.addOption(OptionFactory.createOption("pcaplot", "",false));
 		//options.addOption(OptionFactory.createOption("histogramboxplot", "",false,false));		
-		options.addOption(OptionFactory.createOption("class", "",false,true));
+		options.addOption(OptionFactory.createOption("classname", "",false,true));
 		options.addOption(OptionFactory.createOption("title", "",false,true,' '));
 		options.addOption(OptionFactory.createOption("width", "",false,true));
 		options.addOption(OptionFactory.createOption("height", "",false,true));
@@ -64,7 +64,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		
 		updateJobStatus("10", "init execution");
 		dataset = null;
-		className = commandLine.getOptionValue("class", null);		
+		className = commandLine.getOptionValue("classname", null);		
 		axeTitle = commandLine.getOptionValue("title", "");
 		axeTitle = axeTitle.replaceAll("_____", " ");
 		//axeTitle = ArrayUtils.toString(commandLine.getOptionValues("title")," ");
