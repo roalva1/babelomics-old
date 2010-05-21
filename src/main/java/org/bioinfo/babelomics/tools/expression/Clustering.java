@@ -14,6 +14,8 @@ import org.bioinfo.babelomics.methods.expression.clustering.Som;
 import org.bioinfo.babelomics.methods.expression.clustering.Sota;
 import org.bioinfo.babelomics.methods.expression.clustering.Upgma;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.babelomics.tools.expression.differential.DiffExpressionUtils;
+import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
@@ -56,7 +58,12 @@ public class Clustering extends BabelomicsTool {
 				abort("invalidkvalue_execute_clustering", "Invalid k-value", "Invalid value (" + commandLine.getOptionValue("method") + ") for k-value", "Invalid value (" + commandLine.getOptionValue("method") + ") for k-value");
 			}
 		}
-
+		
+		// input parameters
+		//
+		result.addOutputItem(new Item("method_input_param", method + ("kmeans".equalsIgnoreCase(method) ? " (k-value = " + kvalue + ")" : ""), "Method", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("distance_input_param", distance, "Distance", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		
 		String datasetPath = commandLine.getOptionValue("dataset");
 		if ( datasetPath == null ) {
 			abort("missingdataset_execute_clustering", "Missing dataset", "Missing dataset", "Missing dataset");
@@ -115,6 +122,22 @@ public class Clustering extends BabelomicsTool {
 				String clusterFolder = outdir + "/clusters/";
 				new  File(clusterFolder).mkdir();
 				MultipleTreeUtils.saveClusters(nwGenes, "", clusterFolder);
+				
+				File redirectionFile = null;
+				File topListFile = null;
+				File bottomListFile = new File(clusterFolder + "cluster_0.txt");
+				if ( bottomListFile.exists() ) {
+					File[] clusterFiles = FileUtils.listFiles(new File(clusterFolder), "cluster_.+.txt", true);
+					for(File clusterFile: clusterFiles) {					
+						if ( !clusterFile.getName().equalsIgnoreCase(bottomListFile.getName()) ) {
+							redirectionFile = new File(clusterFolder + clusterFile.getName().replace(".txt", "") + ".fatigo.redirection");
+							createFatiGORedirectionFile(redirectionFile, clusterFile, bottomListFile);
+						}
+						redirectionFile = new File(clusterFolder + clusterFile.getName().replace(".txt", "") + ".fatigo.genome.redirection");
+						createFatiGORedirectionFile(redirectionFile, clusterFile, null);							
+					}					
+				}
+												
 				IOUtils.write(new File(this.getOutdir() + "/genes.nw"), nwGenes.toString());		
 				result.addOutputItem(new Item("gene_newick_file", "genes.nw", "Clusters of genes", TYPE.FILE, tags, new HashMap<String, String>(2), "Clusters in newick format"));
 			} catch (IOException e) {
@@ -228,55 +251,54 @@ public class Clustering extends BabelomicsTool {
 		}
 
 
-
-		if ( nwGenes != null ) {
-
-			if ( "kmeans".equalsIgnoreCase(method) ) {
-				String redirectionTags = null; 
-				List<String> redirectionInputs = null;
-				File redirectionFile = null, list1 = null;
-				File list2 = new File(outdir + "/rownames.txt");
-				for(int i=1 ; i<=kvalue ; i++) {
-					// preparing significant list (top and bottom)
-					//
-					list1 = new File(outdir + "/cluster_" + i + ".txt");
-					if ( list1.exists() || list2.exists() ) {
-						redirectionFile = new File(outdir + "/cluster_" + i + "_to_fatigo.redirection");
-
-						redirectionInputs = new ArrayList<String>();
-
-						redirectionInputs.add("comparison=list2list");
-
-						redirectionInputs.add("list1_wum_data=true");
-						redirectionInputs.add("list1_databox=" + list1.getName() + " (cluster " + i + " from job $JOB_NAME)");
-						redirectionInputs.add("list1=$JOB_FOLDER/" + list1.getName());
-
-						redirectionInputs.add("list2_wum_data=true");
-						redirectionInputs.add("list2_databox=" + list2.getName() + " (all genes from job $JOB_NAME)");
-						redirectionInputs.add("list2=$JOB_FOLDER/" + list2.getName());
-
-						redirectionInputs.add("duplicates=ref");
-
-						redirectionInputs.add("tool=fatigo");
-						redirectionInputs.add("jobname=fatigo from kmeans cluster " + 1);						
-						redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
-
-						try {
-							IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}								
-
-						if ( redirectionFile.exists() ) {
-							redirectionTags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
-							result.addOutputItem(new Item("cluster_" + i + "_to_fatigo", "", "Send cluster " + i + " to FatiGO tool", TYPE.TEXT, StringUtils.toList(redirectionTags, ","), new HashMap<String, String>(2), "Continue processing"));
-						}
-					}
-				}
-			}
-
-		}
+//		if ( nwGenes != null ) {
+//
+//			if ( "kmeans".equalsIgnoreCase(method) ) {
+//				String redirectionTags = null; 
+//				List<String> redirectionInputs = null;
+//				File redirectionFile = null, list1 = null;
+//				File list2 = new File(outdir + "/rownames.txt");
+//				for(int i=1 ; i<=kvalue ; i++) {
+//					// preparing significant list (top and bottom)
+//					//
+//					list1 = new File(outdir + "/cluster_" + i + ".txt");
+//					if ( list1.exists() || list2.exists() ) {
+//						redirectionFile = new File(outdir + "/cluster_" + i + "_to_fatigo.redirection");
+//
+//						redirectionInputs = new ArrayList<String>();
+//
+//						redirectionInputs.add("comparison=list2list");
+//
+//						redirectionInputs.add("list1_wum_data=true");
+//						redirectionInputs.add("list1_databox=" + list1.getName() + " (cluster " + i + " from job $JOB_NAME)");
+//						redirectionInputs.add("list1=$JOB_FOLDER/" + list1.getName());
+//
+//						redirectionInputs.add("list2_wum_data=true");
+//						redirectionInputs.add("list2_databox=" + list2.getName() + " (all genes from job $JOB_NAME)");
+//						redirectionInputs.add("list2=$JOB_FOLDER/" + list2.getName());
+//
+//						redirectionInputs.add("duplicates=ref");
+//
+//						redirectionInputs.add("tool=fatigo");
+//						redirectionInputs.add("jobname=fatigo from kmeans cluster " + 1);						
+//						redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
+//
+//						try {
+//							IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}								
+//
+//						if ( redirectionFile.exists() ) {
+//							redirectionTags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
+//							result.addOutputItem(new Item("cluster_" + i + "_to_fatigo", "", "Send cluster " + i + " to FatiGO tool", TYPE.TEXT, StringUtils.toList(redirectionTags, ","), new HashMap<String, String>(2), "Continue processing"));
+//						}
+//					}
+//				}
+//			}
+//
+//		}
 
 
 	}
@@ -338,4 +360,47 @@ public class Clustering extends BabelomicsTool {
 		}				
 		return matrix;
 	}
+	
+	
+	public static void createFatiGORedirectionFile(File redirectionFile, File topListFile, File bottomListFile) {
+
+		List<String> redirectionInputs = new ArrayList<String>();
+
+		if ( topListFile != null && bottomListFile != null && topListFile.exists() && bottomListFile.exists() ) {
+			redirectionInputs.add("comparison=list2list");
+
+			redirectionInputs.add("list1_wum_data=true");
+			redirectionInputs.add("list1_databox=" + topListFile.getName() + " (top list from job $JOB_NAME)");
+			redirectionInputs.add("list1=$JOB_FOLDER/clusters/" + topListFile.getName());
+
+			redirectionInputs.add("list2_wum_data=true");
+			redirectionInputs.add("list2_databox=" + bottomListFile.getName() + " (bottom list from job $JOB_NAME)");
+			redirectionInputs.add("list2=$JOB_FOLDER/clusters/" + bottomListFile.getName());
+			
+			redirectionInputs.add("duplicates=ref");
+		} else if ( topListFile != null && topListFile.exists() ) {
+			redirectionInputs.add("comparison=list2genome");
+
+			redirectionInputs.add("list1_wum_data=true");
+			redirectionInputs.add("list1_databox=" + topListFile.getName() + " (top list from job $JOB_NAME)");
+			redirectionInputs.add("list1=$JOB_FOLDER/clusters/" + topListFile.getName());
+		} else if ( bottomListFile != null && bottomListFile.exists() ) {
+			redirectionInputs.add("comparison=list2genome");
+
+			redirectionInputs.add("list1_wum_data=true");
+			redirectionInputs.add("list1_databox=" + bottomListFile.getName() + " (top list from job $JOB_NAME)");
+			redirectionInputs.add("list1=$JOB_FOLDER/clusters/" + bottomListFile.getName());
+		}		
+
+		redirectionInputs.add("tool=fatigo");
+		redirectionInputs.add("jobname=fatigo");
+		redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
+		try {
+			IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	}
+	
 }
