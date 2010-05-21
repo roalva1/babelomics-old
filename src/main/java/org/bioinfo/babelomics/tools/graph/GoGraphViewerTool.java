@@ -58,7 +58,7 @@ public class GoGraphViewerTool  extends BabelomicsTool{
 				File input = new File(associationFile);
 				File output = new File(outdir + "/" +  new File(associationFile).getName());				
 				FileUtils.touch(output);
-				FileUtils.copy(input,output);				
+				FileUtils.copy(input,output);
 				associationFile = new File(associationFile).getName();
 			}
 			

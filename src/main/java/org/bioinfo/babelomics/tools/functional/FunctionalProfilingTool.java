@@ -29,6 +29,9 @@ import org.bioinfo.tool.OptionFactory;
 
 public abstract class FunctionalProfilingTool extends BabelomicsTool {
 
+	public final static double DEFAULT_PVALUE_THRESHOLD = 0.05;
+	public final static double[] DEFAULT_PVALUES = {0.1,0.05,0.01,0.005};
+	
 //	// JT.2009.09.07
 //	private String removeDuplicates;
 	
@@ -50,6 +53,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 
 		// commons options
 		getOptions().addOption(OptionFactory.createOption("fisher", "the Fisher test mode, valid values: less, greater, two_sided. By default, two_sided", false));
+		getOptions().addOption(OptionFactory.createOption("go-dag", "Compute DAG for significant GO terms", false));
 		
 		// GO biological process options
 		addGOOptions("bp");
