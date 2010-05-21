@@ -49,11 +49,15 @@ public class BabelomicsFactory {
 			return new ExpressionNormalizationTool();
 		}
 		
+		if(toolName.equalsIgnoreCase("agilent-expression-two-colors-normalization")) {
+			return new ExpressionNormalizationTool();
+		}
+
 		if(toolName.equalsIgnoreCase("genepix-expression-one-color-normalization")) {
 			return new ExpressionNormalizationTool();
 		}
 		
-		if(toolName.equalsIgnoreCase("genepix-expression-two-color-normalization")) {
+		if(toolName.equalsIgnoreCase("genepix-expression-two-colors-normalization")) {
 			return new ExpressionNormalizationTool();
 		}
 
