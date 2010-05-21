@@ -3,7 +3,6 @@ package org.bioinfo.babelomics.tools.functional;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.Proxy.Type;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.genetics.Chromosome;
 import org.bioinfo.babelomics.methods.functional.FatiGO;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
+import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
@@ -65,7 +65,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		options.addOption(OptionFactory.createOption("list1", "the feature data containig the list #1 of genes, or the feature data file"));
 		// list 2
 		OptionGroup input2 = new OptionGroup();
-		input2.setRequired(false);		
+		input2.setRequired(false);
 			input2.addOption(OptionFactory.createOption("list2", "the file containig the list #2 of genes, or the feature data file",false));
 			input2.addOption(OptionFactory.createOption("genome", "compares list #1 with the rest of genome",false,false));
 			input2.addOption(OptionFactory.createOption("chromosomes", "the chromosome region to compare with list #1. Use chromosome-start and chromosome-end options tp delimite the region within the chromosome",false));
@@ -201,8 +201,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				for(int i=0; i<DEFAULT_PVALUES.length; i++){
 					IOUtils.write(outdir + "/significant_count_" + pvalueFormatter.format(DEFAULT_PVALUES[i]) + ".txt", significantCount.get(i).toString());
 				}
-				result.getOutputItems().add(3, new Item("significant","significant_count_${pvalue}.txt","Number of significant terms per DB",Item.TYPE.FILE,Arrays.asList("TABLE,SUMMARY_TABLE,SIGNIFICANT_COUNT_TABLE"),new HashMap<String,String>(),"Significant Results"));
-				
+				result.getOutputItems().add(3, new Item("significant","significant_count_${pvalue}.txt","Number of significant terms per DB",Item.TYPE.FILE,Arrays.asList("TABLE,SUMMARY_TABLE,SIGNIFICANT_COUNT_TABLE"),new HashMap<String,String>(),"Significant Results"));				
 				result.addMetaItem(new Item("flags","SHOW_PVALUES","",TYPE.MESSAGE));
 			}
 		}catch(ParseException pe){
@@ -356,21 +355,43 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			// save significant results
 			int numberOfSignificantTerms;
 			List<TwoListFisherTestResult> significant;
+			String formattedPValue;
 			for(int i=0; i<DEFAULT_PVALUES.length; i++){
+				formattedPValue = pvalueFormatter.format(DEFAULT_PVALUES[i]);
 				significant = fatigo.getSignificant(DEFAULT_PVALUES[i]);
 				if(significant!=null){
-					IOUtils.write(outdir + "/significant_" + filterInfo.getName() + "_" + pvalueFormatter.format(DEFAULT_PVALUES[i]) + ".txt", ListUtils.toString(significant,"\n"));					
+					IOUtils.write(outdir + "/significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt", ListUtils.toString(significant,"\n"));					
 					numberOfSignificantTerms = significant.size();					
 				} else {
 					numberOfSignificantTerms = 0;
 				}
-				significantCount.get(i).append(filterInfo.getTitle()).append("\t").append(numberOfSignificantTerms).append("\n");				
-				if(filterInfo.getPrefix().equalsIgnoreCase("go") && numberOfSignificantTerms>0) {
-					createGoGraph(significant,DEFAULT_PVALUES[i],filterInfo);					
+				significantCount.get(i).append(filterInfo.getTitle()).append("\t").append(numberOfSignificantTerms).append("\n");
+				if(numberOfSignificantTerms>0){
+					if(filterInfo.getPrefix().equalsIgnoreCase("go")) {
+						try {
+							createGoGraph(significant,DEFAULT_PVALUES[i],filterInfo);						
+							Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"go_graph_" + filterInfo.getName() + "_" + formattedPValue + "_graphimage.png",filterInfo.getTitle() + " DAG (significant terms, pvalue<" + formattedPValue + ")",Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT,THUMBNAIL"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+							item.setContext("pvalue==" + formattedPValue);
+							result.getOutputItems().add(4, item);
+						} catch(GoGraphException gge){
+							Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"Graph not found",filterInfo.getTitle() + " DAG (significant terms, pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+							item.setContext("pvalue==" + formattedPValue);
+							result.getOutputItems().add(4, item);
+						}
+					}
+					Item item = new Item("significant_" + filterInfo.getName(),"significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt",filterInfo.getTitle() + " significant terms (pvalue<" + formattedPValue + ")",Item.TYPE.FILE,Arrays.asList("SIGNIFICANT","TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+					item.setContext("pvalue==" + formattedPValue);
+					result.getOutputItems().add(4, item);
+				} else {
+					Item item = new Item("significant_" + filterInfo.getName(),"No significant terms for current pvalue " + formattedPValue,filterInfo.getTitle() + " significant terms (pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle()); 
+					item.setContext("pvalue==" + formattedPValue);
+					result.getOutputItems().add(4, item);
 				}
+				
+				
 			}			
-			result.getOutputItems().add(4, new Item("significant_" + filterInfo.getName(),"significant_" + filterInfo.getName() + "_${pvalue}.txt",filterInfo.getTitle() + " significant terms",Item.TYPE.FILE,Arrays.asList("SIGNIFICANT","TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Significant Results." + filterInfo.getName()));
-			if(filterInfo.getPrefix().equalsIgnoreCase("go")) result.getOutputItems().add(4, new Item("go_graphsignificant_" + filterInfo.getName(),"go_graph_" + filterInfo.getName() + "_${pvalue}.png",filterInfo.getTitle() + " DAG",Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT"),new HashMap<String,String>(),"Significant Results." + filterInfo.getName()));
+			//if(filterInfo.getPrefix().equalsIgnoreCase("go")) result.getOutputItems().add(4, new Item("go_graphsignificant_" + filterInfo.getName(),"go_graph_" + filterInfo.getName() + "_${pvalue}_graphimage.png",filterInfo.getTitle() + " DAG",Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT,THUMBNAIL"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle()));
+			//result.getOutputItems().add(4, new Item("significant_" + filterInfo.getName(),"significant_" + filterInfo.getName() + "_${pvalue}.txt",filterInfo.getTitle() + " significant terms",Item.TYPE.FILE,Arrays.asList("SIGNIFICANT","TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle()));
 			
 		}
 		
@@ -384,27 +405,52 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		}		
 	}
 	
-	private void createGoGraph(List<TwoListFisherTestResult> significant, double pvalue, FunctionalDbDescriptor filterInfo){
+	private void createGoGraph(List<TwoListFisherTestResult> significant, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
 		String prefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue);
+		
+		// preparing association file
 		StringBuilder association = new StringBuilder();
 		String color;
-		for(TwoListFisherTestResult result: significant){
-			if(result.getOddsRatio()>=1) color="100";
-			else color="25";
+		for(TwoListFisherTestResult result: significant){			
+			color=""+ (result.getList1Percentage()/(result.getList1Percentage()+result.getList2Percentage()));
 			association.append(result.getTerm()).append("\t").append(result.getTerm()).append("\t").append(color).append("\n");
-		}						
-		try {			
-			IOUtils.write(outdir + "/" + prefix  + "_association.txt", association.toString());
-			GetGraphApi graph = new GetGraphApi(outdir + "/",prefix,prefix  + "_association.txt","b",0,"byDesc",0.6,0, "orange");			
+		}
+		
+		try {
+			
+			// create graph directory
+			FileUtils.createDirectory(outdir + "/graphs");
+			
+			// save association file
+			IOUtils.write(outdir + "/graphs/" + prefix  + "_association.txt", association.toString());
+			
+			// namespace
+			String namespace = "b";
+			if(filterInfo.getName().contains("molecular_function")) namespace = "m";
+			if(filterInfo.getName().contains("cellular_component")) namespace = "c";
+			System.err.println("namespace: " + namespace);
+			
+			// init graph api
+			GetGraphApi graph = new GetGraphApi(outdir + "/graphs/",prefix,prefix  + "_association.txt",namespace,0,"byDesc",0.6,0,"orange");
+			
+			// setting server params
 			graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));				
 			graph.setDataBase(config.getProperty("BLAST2GO_HOST_NAME"),config.getProperty("BLAST2GO_DB_NAME"),config.getProperty("BLAST2GO_DB_USER"), config.getProperty("BLAST2GO_DB_PASSWORD"));
+			
 			// run
 			graph.run();
-		  // continuar normal
-		} catch (GoGraphException e) {
+			
+			// copy files
+			String imagePrefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue) + "_graphimage";
+			FileUtils.touch(new File(outdir + "/" + imagePrefix + ".png"));
+			FileUtils.copy(outdir + "/graphs/" + imagePrefix + ".png", outdir + "/" + imagePrefix + ".png");
+//			FileUtils.touch(new File(outdir + "/" + imagePrefix + ".png_thumb"));
+//			FileUtils.copy(outdir + "/graphs/" + imagePrefix + "small.jpg", outdir + "/" + imagePrefix + ".png_thumb");
+			
+
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+			throw new GoGraphException(e.getMessage());
 		}	
 	}
 	

@@ -53,6 +53,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 
 		// commons options
 		getOptions().addOption(OptionFactory.createOption("fisher", "the Fisher test mode, valid values: less, greater, two_sided. By default, two_sided", false));
+		getOptions().addOption(OptionFactory.createOption("go-dag", "Compute DAG for significant GO terms", false));
 		
 		// GO biological process options
 		addGOOptions("bp");
