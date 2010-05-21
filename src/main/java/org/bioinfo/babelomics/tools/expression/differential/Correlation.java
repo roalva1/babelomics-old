@@ -40,7 +40,7 @@ public class Correlation extends BabelomicsTool {
 	public void initOptions() {
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
 		options.addOption(OptionFactory.createOption("test", "the test, possible values: pearson, spearman, regression"));
-		options.addOption(OptionFactory.createOption("class", "class variable", false));
+		options.addOption(OptionFactory.createOption("classname", "class variable", false));
 		options.addOption(OptionFactory.createOption("correction", "Multiple-test correction: fdr, bh, by, bonferroni, hochberg, hold"));
 	}
 
@@ -52,7 +52,7 @@ public class Correlation extends BabelomicsTool {
 		dataset = initDataset(new File(commandLine.getOptionValue("dataset")));
 
 		test = commandLine.getOptionValue("test", null);
-		className = commandLine.getOptionValue("class", null);
+		className = commandLine.getOptionValue("classname", null);
 		correction = commandLine.getOptionValue("correction", null);
 
 		if ( ! "pearson".equalsIgnoreCase(test) && ! "spearman".equalsIgnoreCase(test) && ! "regression".equalsIgnoreCase(test) ) {
