@@ -98,7 +98,7 @@ public class Correlation extends BabelomicsTool {
 		Canvas heatmap = null, sigHeatmap = null;
 		try {
 			updateJobStatus("60", "generating heatmap");
-			heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "correlation", res.getCorrelations(), "adj. p-value", res.getAdjPValues());
+			//heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "correlation", res.getCorrelations(), "adj. p-value", res.getAdjPValues());
 			sigHeatmap = DiffExpressionUtils.generateSigHeatmap(dataset, className, columnOrder, "correlation", res.getCorrelations(), "adj. p-value", res.getAdjPValues(), pValue);
 		} catch (Exception e) {
 			printError("ioexception_executecorrelation_correlation", "error generating heatmaps for " + test + " test", e.toString(), e);
@@ -185,7 +185,7 @@ public class Correlation extends BabelomicsTool {
 		updateJobStatus("60", "generating heatmap");
 		Canvas heatmap = null, sigHeatmap = null;
 		try {
-			heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "slope", res.getSlopes(), "adj. p-value", res.getAdjPValues());
+			//heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "slope", res.getSlopes(), "adj. p-value", res.getAdjPValues());
 			sigHeatmap = DiffExpressionUtils.generateSigHeatmap(dataset, className, columnOrder, "slope", res.getSlopes(), "adj. p-value", res.getAdjPValues(), pValue);
 		} catch (Exception e) {
 			printError("ioexception_executecorrelation_correlation", "error generating heatmaps for " + test + " test", e.toString(), e);

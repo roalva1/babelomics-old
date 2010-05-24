@@ -104,9 +104,9 @@ public class TimeSeries extends BabelomicsTool {
 		if ( (outFile = new File(outdir + "/influ_info.txt")).exists() ) {
 			result.addOutputItem(new Item("influinfofile", outFile.getName(), "Influence data file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Influence data (genes with influential values, possible outliers)"));						
 		}
-		if ( (outFile = new File(outdir + "/influ_data.png")).exists() ) {
-			result.addOutputItem(new Item("infludataimg", outFile.getName(), "Influence data plot", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Influence data (genes with influential values, possible outliers)"));						
-		}
+//		if ( (outFile = new File(outdir + "/influ_data.png")).exists() ) {
+//			result.addOutputItem(new Item("infludataimg", outFile.getName(), "Influence data plot", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Influence data (genes with influential values, possible outliers)"));						
+//		}
 		
 		// model data
 		outFiles = FileUtils.listFiles(outDirFile, ".*coefficients\\.txt");

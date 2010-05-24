@@ -253,8 +253,6 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 				result.addOutputItem(new Item("normalized", file.getName(), "Feature data ", TYPE.FILE, StringUtils.toList("idlist", ","), new HashMap<String, String>(2), "Normalization output files"));				
 			}
 
-			ExpressionUtils.createIntensityPlot(intensityPlotBinPath, outdir + "/" + ExpressionUtils.getNormalizedFileName(), outdir + "/" + ExpressionUtils.getFeatureDataFileName(), "norm_", false, "norm_intensity_plot.Rout", outdir);
-			addOutputItemImgs(outdir, "norm_", "png", "norm_intensity_image", "Intensity image", "Intensity images");						
 		}
 
 
@@ -264,8 +262,9 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			ExpressionUtils.updateAValuesFile(file.getAbsolutePath(), outdir + "/" + ExpressionUtils.getFeatureDataFileName(), 1, aFile.getAbsolutePath());
 			result.addOutputItem(new Item("avalues", aFile.getName(), "A-values", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Normalization output files"));
 		}
-		
 
+		// ma plots
+		//
 		if ( nbChannels == 1 ) {
 			ExpressionUtils.createMAPlot(maPlotBinPath, outdir + "/" + ExpressionUtils.getNormalizedFileName(), "MA_", false, "ma_plot.Rout", outdir);
 			addOutputItemImgs(outdir, "MA_", "png", "ma_plot", "MA plot", "MA plots");				
@@ -273,6 +272,15 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			ExpressionUtils.createMAPlot(maPlotBinPath, outdir + "/" + ExpressionUtils.getNormalizedFileName(), outdir + "/" + ExpressionUtils.getaValuesFileName(), "MA_", false, "ma_plot.Rout", outdir);
 			addOutputItemImgs(outdir, "MA_", "png", "ma_plot", "MA plot", "MA plots");				
 		}
+
+		// intensity images
+		//
+		if ( new File(outdir + "/" + ExpressionUtils.getNormalizedFileName()).exists() && 
+			 new File(outdir + "/" + ExpressionUtils.getFeatureDataFileName()).exists() ) {
+			ExpressionUtils.createIntensityPlot(intensityPlotBinPath, outdir + "/" + ExpressionUtils.getNormalizedFileName(), outdir + "/" + ExpressionUtils.getFeatureDataFileName(), "norm_", false, "norm_intensity_plot.Rout", outdir);
+			addOutputItemImgs(outdir, "norm_", "png", "norm_intensity_image", "Intensity image", "Intensity images");
+		}
+
 	}
 
 

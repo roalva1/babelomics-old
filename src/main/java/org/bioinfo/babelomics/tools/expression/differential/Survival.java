@@ -14,6 +14,7 @@ import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.DataFrame;
+import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.graphics.canvas.Canvas;
 import org.bioinfo.math.result.CoxTestResult;
 import org.bioinfo.math.result.TestResultList;
@@ -78,7 +79,12 @@ public class Survival extends BabelomicsTool {
 			abort("exception_run_cox", "error running cox test", e.toString(), StringUtils.getStackTrace(e));
 		}
 
-		int[] columnOrder = ListUtils.order(vars);
+		//int[] columnOrder = ListUtils.order(vars);
+		int[] columnOrder = ListUtils.order(timeVars);
+		
+//		System.out.println("time vars = " + ListUtils.toString(timeVars, ","));
+//		System.out.println("column order = " + ArrayUtils.toString(columnOrder, ","));
+		
 		int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
 
 		// generating heatmap
@@ -86,7 +92,7 @@ public class Survival extends BabelomicsTool {
 		updateJobStatus("60", "generating heatmap");
 		Canvas heatmap = null, sigHeatmap = null;
 		try {
-			heatmap = DiffExpressionUtils.generateHeatmap(dataset, timeClass, columnOrder, rowOrder, "coeff.", res.getCoefs(), "adj. p-value", res.getAdjPValues());
+			//heatmap = DiffExpressionUtils.generateHeatmap(dataset, timeClass, columnOrder, rowOrder, "coeff.", res.getCoefs(), "adj. p-value", res.getAdjPValues());
 			sigHeatmap = DiffExpressionUtils.generateSigHeatmap(dataset, timeClass, columnOrder, "coeff.", res.getCoefs(), "adj. p-value", res.getAdjPValues(), pValue);
 		} catch (Exception e) {
 			printError("ioexception_executesurvival_survival", "error generating heatmaps for " + test + " test", e.toString(), e);
@@ -107,39 +113,45 @@ public class Survival extends BabelomicsTool {
 
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.save(new File(getOutdir() + "/cox.txt"));
-			result.addOutputItem(new Item("cox_file", "cox.txt", "Cox output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Output files"));
+			result.addOutputItem(new Item("cox_file", "cox.txt", "Cox output file", TYPE.FILE, StringUtils.toList("TABLE,COX_TABLE", ","), new HashMap<String, String>(2), "Output files"));
+//			result.addOutputItem(new Item("cox_file", "cox.txt", "Cox output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Output files"));
+//			
+//			IOUtils.write(new File(getOutdir() + "/cox_table.txt"), dataFrame.toString(true, true));			
+//			result.addOutputItem(new Item("cox_table", "cox_table.txt", "Cox table", TYPE.FILE, StringUtils.toList("TABLE,COX_TABLE", ","), new HashMap<String, String>(2), "Output files"));
 			
-			IOUtils.write(new File(getOutdir() + "/cox_table.txt"), dataFrame.toString(true, true));			
-			result.addOutputItem(new Item("cox_table", "cox_table.txt", "Cox table", TYPE.FILE, StringUtils.toList("TABLE,COX_TABLE", ","), new HashMap<String, String>(2), "Output files"));
-			
-			DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
 			
 		} catch (Exception e) {
-			printError("ioexception_cox_cox", "error saving results", e.toString(), e);
+			printError("ioexception_execute_survival", "error saving results", "error saving results");
 		}
 
 		String sigHeatmapFilename = getOutdir() + "/" + test + "_heatmap_significative.png";
 		if ( sigHeatmap == null ) {
-			result.addOutputItem(new Item(test + "_heatmap_significative", "None significative terms", test.toUpperCase() + " heatmap with significative terms (p-value = " + pValue + ")", TYPE.TEXT, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap images"));
+			result.addOutputItem(new Item(test + "_heatmap_significative", "None significative terms", test.toUpperCase() + " heatmap with significative terms (p-value = " + pValue + ")", TYPE.TEXT, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
 		} else {
 			try {
 				sigHeatmap.save(sigHeatmapFilename);
 				if ( new File(sigHeatmapFilename).exists() ) {
-					result.addOutputItem(new Item(test + "_heatmap_significative", test + "_heatmap_significative.png", test.toUpperCase() + " heatmap with significative terms (p-value = " + pValue + ")", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap images"));
+					result.addOutputItem(new Item(test + "_heatmap_significative", test + "_heatmap_significative.png", test.toUpperCase() + " heatmap with significative terms (p-value = " + pValue + ")", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
 				}
 			} catch (IOException e) {
-				printError("ioexception_executet_classcomparison", "error generating heatmap", e.toString(), e);
+				printError("ioexception_execute_survival", "error generating heatmap", "error generating heatmap");
 			}
 		}
 
-		String heatmapFilename = getOutdir() + "/cox_heatmap.png";
 		try {
-			heatmap.save(heatmapFilename);
-			if ( new File(heatmapFilename).exists() ) {
-				result.addOutputItem(new Item("cox_heatmap", "cox_heatmap.png", "Cox heatmap", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
-			}
-		} catch (IOException e) {
-			printError("ioexception_cox_cox", "error generating heatmap", e.toString(), e);
+			DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
+		} catch (Exception e) {
+			printError("ioexception_execute_survival", "error", "error creating redirection files");
 		}
+
+//		String heatmapFilename = getOutdir() + "/cox_heatmap.png";
+//		try {
+//			heatmap.save(heatmapFilename);
+//			if ( new File(heatmapFilename).exists() ) {
+//				result.addOutputItem(new Item("cox_heatmap", "cox_heatmap.png", "Cox heatmap", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
+//			}
+//		} catch (IOException e) {
+//			printError("ioexception_cox_cox", "error generating heatmap", e.toString(), e);
+//		}
 	}
 }
