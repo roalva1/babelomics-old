@@ -346,12 +346,20 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		String prefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue);
 		
 		// preparing association file
-		StringBuilder association = new StringBuilder();
-		String color;
+		StringBuilder association = new StringBuilder();		
+		double ratio,intensity;
 		for(GeneSetAnalysisTestResult result: significant){			
+			
 			//color=""+ (result.getList1Percentage()/(result.getList1Percentage()+result.getList2Percentage()));
-			color=""+ (1-(result.getAdjPValue()/pvalue));
-			association.append(result.getTerm()).append("\t").append(result.getTerm()).append("\t").append(color).append("\n");
+			ratio = result.getAdjPValue()/pvalue;
+			if(result.getList1Percentage()> result.getList2Percentage()){
+				intensity = (0.5 + (1-ratio)/2.0);	
+			} else {
+				intensity = ratio/2.0;
+			}
+			System.err.println(result.getList1Percentage() + ":" + result.getList2Percentage() + " " + result.getAdjPValue() + " " + intensity);
+			
+			association.append(result.getTerm()).append("\t").append(result.getTerm()).append("\t").append(intensity).append("\n");
 		}
 		
 		try {
