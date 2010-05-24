@@ -253,8 +253,6 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 				result.addOutputItem(new Item("normalized", file.getName(), "Feature data ", TYPE.FILE, StringUtils.toList("idlist", ","), new HashMap<String, String>(2), "Normalization output files"));				
 			}
 
-			ExpressionUtils.createIntensityPlot(intensityPlotBinPath, outdir + "/" + ExpressionUtils.getNormalizedFileName(), outdir + "/" + ExpressionUtils.getFeatureDataFileName(), "norm_", false, "norm_intensity_plot.Rout", outdir);
-			addOutputItemImgs(outdir, "norm_", "png", "norm_intensity_image", "Intensity image", "Intensity images");						
 		}
 
 
@@ -264,8 +262,9 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			ExpressionUtils.updateAValuesFile(file.getAbsolutePath(), outdir + "/" + ExpressionUtils.getFeatureDataFileName(), 1, aFile.getAbsolutePath());
 			result.addOutputItem(new Item("avalues", aFile.getName(), "A-values", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Normalization output files"));
 		}
-		
 
+		// ma plots
+		//
 		if ( nbChannels == 1 ) {
 			ExpressionUtils.createMAPlot(maPlotBinPath, outdir + "/" + ExpressionUtils.getNormalizedFileName(), "MA_", false, "ma_plot.Rout", outdir);
 			addOutputItemImgs(outdir, "MA_", "png", "ma_plot", "MA plot", "MA plots");				
@@ -273,6 +272,15 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			ExpressionUtils.createMAPlot(maPlotBinPath, outdir + "/" + ExpressionUtils.getNormalizedFileName(), outdir + "/" + ExpressionUtils.getaValuesFileName(), "MA_", false, "ma_plot.Rout", outdir);
 			addOutputItemImgs(outdir, "MA_", "png", "ma_plot", "MA plot", "MA plots");				
 		}
+
+		// intensity images
+		//
+		if ( new File(outdir + "/" + ExpressionUtils.getNormalizedFileName()).exists() && 
+			 new File(outdir + "/" + ExpressionUtils.getFeatureDataFileName()).exists() ) {
+			ExpressionUtils.createIntensityPlot(intensityPlotBinPath, outdir + "/" + ExpressionUtils.getNormalizedFileName(), outdir + "/" + ExpressionUtils.getFeatureDataFileName(), "norm_", false, "norm_intensity_plot.Rout", outdir);
+			addOutputItemImgs(outdir, "norm_", "png", "norm_intensity_image", "Intensity image", "Intensity images");
+		}
+
 	}
 
 
@@ -438,7 +446,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 
 		file = new File(outdir + "/plier-mm.summary.txt"); 
 		if ( file.exists() ) {
-			IOUtils.write(file, cleanLines(IOUtils.readLines(file)));
+			IOUtils.write(file, cleanLines(IOUtils.readLines(file), true));
 			ExpressionUtils.createMAPlot(maPlotBinPath, file.getAbsolutePath(), "MA_PLIER_MM_", false, "ma_plot.Rout", outdir);
 
 			saveAsDataset(file);
@@ -458,7 +466,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 
 		file = new File(outdir + "/plier-gcbg.summary.txt"); 
 		if ( file.exists() ) {
-			IOUtils.write(file, cleanLines(IOUtils.readLines(file)));
+			IOUtils.write(file, cleanLines(IOUtils.readLines(file), true));
 			ExpressionUtils.createMAPlot(maPlotBinPath, file.getAbsolutePath(), "MA_PLIER_GCBG_", false, "ma_plot.Rout", outdir);
 
 			saveAsDataset(file);
@@ -628,6 +636,13 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 	 * @return
 	 */
 	private List<String> cleanLines(List<String> lines) {
+		return cleanLines(lines, false);
+	}
+	
+	private List<String> cleanLines(List<String> lines, boolean log2) {
+		double value;
+		String []values = null;
+		List<String> newLine = new ArrayList<String>();
 		List<String> result = new ArrayList<String>();
 		for(String line: lines) {
 			if ( line.startsWith("#") ) {
@@ -636,7 +651,26 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 				//result.add(line.replace("probeset_id,", "#NAMES\t"));
 				result.add(line.replace("probeset_id", "#NAMES"));
 			} else {
-				result.add(line);
+				if ( log2 ) {
+					double log2Value = Math.log(2);
+					
+					values = line.split("\t");
+					if ( values != null && values.length > 0 ) {
+						newLine.clear();
+						newLine.add(values[0]);
+						for(int i=1 ; i<values.length ; i++) {
+							try {
+								value = Math.log(Double.parseDouble(values[i])) / log2Value;
+							} catch (Exception e) {
+								value = Double.NaN;
+							}
+							newLine.add(String.valueOf(value));
+						}
+						result.add(ListUtils.toString(newLine, "\t"));
+					}
+				} else {
+					result.add(line);
+				}
 			}
 		}
 		return result;
@@ -663,11 +697,13 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		if ( dataset.getColumnDimension() != 0 && dataset.getRowDimension() != 0 ) {
 			if ( log2 ) {
 				double log2Value = Math.log(2);
+				double[]srcValues = null;
 				double [] values = new double[dataset.getRowDimension()];
 
 				for(int i=0; i<dataset.getColumnDimension(); i++) {
+					srcValues = dataset.getDoubleMatrix().getColumn(i);
 					for(int j=0; j<dataset.getRowDimension(); j++) {
-						values[j] = Math.log(dataset.getDoubleMatrix().getColumn(i)[j]) / log2Value;		
+						values[j] = Math.log(srcValues[j]) / log2Value;		
 					}
 					bpc.addSeries(values, "samples", dataset.getSampleNames().get(i));
 				}
