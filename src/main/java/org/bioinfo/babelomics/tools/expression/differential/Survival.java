@@ -3,18 +3,17 @@ package org.bioinfo.babelomics.tools.expression.differential;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.DataFrame;
-import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.graphics.canvas.Canvas;
 import org.bioinfo.math.result.CoxTestResult;
 import org.bioinfo.math.result.TestResultList;
@@ -65,6 +64,13 @@ public class Survival extends BabelomicsTool {
 			censoredVars.add(Double.parseDouble(str));
 		}
 
+		// input parameters
+		//
+		result.addOutputItem(new Item("test_input_param", test, "Test", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("correction_input_param", correction, "Multiple-test correction", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("timeclass_input_param", timeClass + ", values: " + ListUtils.toString(timeVars, ","), "Time class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("censoredclass_input_param", censoredClass, "Censored class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		
 		// cox test
 		//
 		updateJobStatus("40", "computing cox test");

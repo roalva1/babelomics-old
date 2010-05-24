@@ -3,12 +3,12 @@ package org.bioinfo.babelomics.tools.expression.differential;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 import org.bioinfo.babelomics.methods.expression.differential.Limma;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
@@ -87,6 +87,12 @@ public class ClassComparison extends BabelomicsTool {
 			abort("testmissing_execute_classcomparison", "class comparison test missing", "class comparison test missing", "class comparison test missing");
 		}
 
+		// input parameters
+		//
+		result.addOutputItem(new Item("test_input_param", test, "Test", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("correction_input_param", correction, "Multiple-test correction", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("class_input_param", className + ", values: " + ListUtils.toString(classValues, ","), "Class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		
 		// executing test
 		//
 		updateJobStatus("40", "computing " + test);
