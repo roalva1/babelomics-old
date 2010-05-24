@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.methods.functional.InfraredUtils;
+import org.bioinfo.babelomics.tools.functional.FunctionalDbDescriptor;
 import org.bioinfo.babelomics.tools.functional.FunctionalProfilingTool;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
@@ -110,18 +111,17 @@ public class CreateAnnotation extends FunctionalProfilingTool {
 			String name = null;
 
 			for(FunctionalFilter filter: filterList) {
-
+				
+				// db attributes
+				FunctionalDbDescriptor filterInfo = new FunctionalDbDescriptor(filter);
+				
 				al = InfraredUtils.getAnnotations(dbConnector, ids, filter);
 
 				if ( al != null ) {
-					name = getDBName(filter);
-					//System.out.println("----> db name = " + name);				
-					//System.out.println("size of annotations : " + al.size());
+					name = filterInfo.getName();
 					
 					if ( outputFormat.equalsIgnoreCase("extended") ) {
 						IOUtils.write(new File(outdir + "/" + name + ".txt"), al.toString());
-						//result.addOutputItem(new Item(name, name + "_extended.txt", getDBTitle(filter) + " annotation (extended format): ", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Extended output"));					
-						//System.out.println(al.toString());
 					} else {
 						Map<String, List<String>> map = new HashMap<String, List<String>>();
 						for(int i=0 ; i<al.size() ; i++) {
@@ -139,7 +139,7 @@ public class CreateAnnotation extends FunctionalProfilingTool {
 						//System.out.println(sb.toString());
 					}
 
-					result.addOutputItem(new Item(name, name + ".txt", getDBTitle(filter) + " annotation table", Item.TYPE.FILE, StringUtils.toList("TABLE,ANNOTATION_TABLE", ","), new HashMap<String, String>(), "Annotation tables"));
+					result.addOutputItem(new Item(name, name + ".txt", filterInfo.getTitle() + " annotation table", Item.TYPE.FILE, StringUtils.toList("TABLE,ANNOTATION_TABLE", ","), new HashMap<String, String>(), "Annotation tables"));
 					//result.addOutputItem(new Item(name, name + ".txt", getDBTitle(filter) + " annotation: ", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Results"));					
 				}
 			}

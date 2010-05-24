@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.ParseException;
@@ -18,12 +19,15 @@ import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
+import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
+import org.bioinfo.infrared.funcannot.dbsql.AnnotationDBManager;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
+import org.bioinfo.io.file.parser.msexcel.ExcelFileWriter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.stats.inference.FisherExactTest;
 import org.bioinfo.tool.OptionFactory;
@@ -34,8 +38,6 @@ import es.blast2go.prog.graph.GetGraphApi;
 import es.blast2go.prog.graph.GoGraphException;
 
 public class FatiGOTool extends FunctionalProfilingTool{
-
-	private DecimalFormat pvalueFormatter = new DecimalFormat("#.####"); 
 	
 	// list1
 	private FeatureData list1;
@@ -46,13 +48,8 @@ public class FatiGOTool extends FunctionalProfilingTool{
 	
 	// other capabilities
 	protected int duplicatesMode;
-	private StringBuilder duplicatesReport;
-	private StringBuilder annotationReport;
 	private String list2label;
-	
-	private List<String> significantDbs;
-	private List<StringBuilder> significantCount;
-	
+
 	public FatiGOTool() {
 		initOptions();
 	}
@@ -122,13 +119,11 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			DBConnector dbConnector = new DBConnector(species, new File(babelomicsHomePath + "/conf/infrared.properties"));
 			
 			// prepare params
-			prepare();			
-	
+			prepare();	
 			FatiGO fatigo = null;
 			list2label = "List 2";
 			
 			// list 1			
-			//System.err.println(list1.getDataFrame());
 			List<String> idList1 = list1.getDataFrame().getRowNames();//list1.getDataFrame().getColumn(0); //InfraredUtils.toEnsemblId(dbConnector, list1.getDataFrame().getColumn(0));
 			
 			// list 2
@@ -152,7 +147,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			
 			addInputParams();
 			
-			// save data
+			// save clean lists
 			IOUtils.write(outdir + "/clean_list1.txt", ListUtils.toString(fatigo.getList1(),"\n"));
 			result.addOutputItem(new Item("clean_list1","clean_list1.txt","List 1 (after duplicates managing)",Item.TYPE.FILE,Arrays.asList("IDLIST","CLEAN"),new HashMap<String,String>(),"Input data"));
 			IOUtils.write(outdir + "/clean_list2.txt", ListUtils.toString(fatigo.getList2(),"\n"));
@@ -164,45 +159,36 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				throw new ParseException("No biological database selected (eg. --go-bp)");
 			} else {
 
-				// significant terms
-				List<String> significant = new ArrayList<String>();
-				significantDbs = new ArrayList<String>();
+				// significant count
 				significantCount = new ArrayList<StringBuilder>();
 				for(int i=0; i<DEFAULT_PVALUES.length; i++){
 					significantCount.add(new StringBuilder("#DB\tNº of significant terms\n"));
 				}
 		
+				// init annotation report
 				annotationReport = new StringBuilder();
 				annotationReport.append("#DB").append("\t").append("List1").append("\t").append(list2label).append("\n");
-				significant.add(TwoListFisherTestResult.header());
+				
 				
 				// run fatigo's
 				for(FunctionalFilter filter: filterList) {
-					fatigo = doFatigo(idList1,idList2,filter,dbConnector,significant);
-					fatigo.getSignificant(0.01).size();
-					addAnnotationReport(fatigo,getDBTitle(filter));
+					fatigo = doFatigo(idList1,idList2,filter,dbConnector);					
 				}				
 				if(isYourAnnotations){					
-					fatigo = doFatigoYourAnnotations(idList1, idList2, yourAnnotations, significant);
-					addAnnotationReport(fatigo,"Your annotations");
+					fatigo = doFatigoYourAnnotations(idList1, idList2, yourAnnotations);					
 				}
 				
+				// duplicates report
 				if(duplicatesMode!=FatiGO.REMOVE_NEVER) saveDuplicatesReport(fatigo);
 				saveAnnotationsReport();
 				
-				// significant terms				
-				//result.getOutputItems().add(4, new Item("significant","significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",ListUtils.toString(significantDbs,",")),new HashMap<String,String>(),"Significant Results"));				
-				//IOUtils.write(outdir + "/significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significant,"\n"));
-				
-				
-				//result.getOutputItems().add(4, new Item("significant","significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",ListUtils.toString(significantDbs,",")),new HashMap<String,String>(),"Significant Results"));				
-				//IOUtils.write(outdir + "/significant_" + DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significant,"\n"));			}
-			
+				// save significant count table
 				for(int i=0; i<DEFAULT_PVALUES.length; i++){
 					IOUtils.write(outdir + "/significant_count_" + pvalueFormatter.format(DEFAULT_PVALUES[i]) + ".txt", significantCount.get(i).toString());
 				}
 				result.getOutputItems().add(3, new Item("significant","significant_count_${pvalue}.txt","Number of significant terms per DB",Item.TYPE.FILE,Arrays.asList("TABLE,SUMMARY_TABLE,SIGNIFICANT_COUNT_TABLE"),new HashMap<String,String>(),"Significant Results"));				
 				result.addMetaItem(new Item("flags","SHOW_PVALUES","",TYPE.MESSAGE));
+				
 			}
 		}catch(ParseException pe){
 			logger.error(pe.getMessage());
@@ -212,20 +198,152 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		
 	}
 
-	private void addAnnotationReport(FatiGO fatigo, String dbName){
-		DecimalFormat formatter = new DecimalFormat("#######.##");
-		double list1Percentage = ((double)(fatigo.getList1AnnotatedCounter())/(double)fatigo.getList1SizeBeforeDuplicates())*100.0;
-		double list2Percentage = ((double)(fatigo.getList2AnnotatedCounter())/(double)fatigo.getList2SizeBeforeDuplicates())*100.0;
-		String list1Message = fatigo.getList1AnnotatedCounter() + " of " + fatigo.getList1SizeAfterDuplicates() + " (" + formatter.format(list1Percentage) + "%) " + formatter.format(fatigo.getList1MeanAnnotationsPerId()) + " annotations/id";
-		String list2Message = fatigo.getList2AnnotatedCounter() + " of " + fatigo.getList2SizeAfterDuplicates() + " (" + formatter.format(list2Percentage) +"%) " + formatter.format(fatigo.getList2MeanAnnotationsPerId()) + " annotations/id";
-		annotationReport.append(dbName).append("\t").append(list1Message).append("\t").append(list2Message).append("\n");
-	}	
-	private void saveAnnotationsReport() throws IOException{
-		IOUtils.write(outdir + "/annotations_per_db.txt", annotationReport.toString());
-		result.getOutputItems().add(1,new Item("annotations_per_db","annotations_per_db.txt","Id annotations per DB",Item.TYPE.FILE,Arrays.asList("TABLE","SUMMARY_TABLE"),new HashMap<String,String>(),"Summary"));
+	private FatiGO doFatigo(List<String> idList1, List<String> idList2,FunctionalFilter filter,DBConnector dbConnector) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException{
+		
+		// db attributes
+		FunctionalDbDescriptor filterInfo = new FunctionalDbDescriptor(filter);
+		
+		// get term sizes
+		AnnotationDBManager adbm = new AnnotationDBManager(dbConnector);
+		
+		Map<String, Integer> termSizes = adbm.getAnnotationTermsSize(filterInfo.getPrefix());
+				
+		logger.println(filterInfo.getTitle() + "...");
+
+		// init test
+		FatiGO fatigo = null;
+		if(list2!=null) fatigo = new FatiGO(idList1, idList2, filter, dbConnector, testMode, duplicatesMode);
+		else if(isRestOfGenome()) fatigo = new FatiGO(idList1, filter, dbConnector);
+				
+		fatigo.setLogger(logger);
+		
+		// term sizes
+		fatigo.setTermSizes(termSizes);
+		
+		// run test
+		fatigo.run();
+		
+		// save results
+		saveFatigoResults(fatigo,filterInfo);
+		
+		// annotation count
+		addAnnotationReport(fatigo,filterInfo.getTitle());
+		
+		logger.println("...finished");
+		
+		return fatigo;
+		
 	}
 	
+	private FatiGO doFatigoYourAnnotations(List<String> idList1, List<String> idList2,FeatureList<AnnotationItem> yourAnnotations) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException{
+		
+		// db attributes
+		FunctionalDbDescriptor filterInfo = new FunctionalDbDescriptor("your_annotation","Your annotations", "your_annotations","Your annotations");
+//		String name = "your_annotations";
+//		String title = "Your annotations";					
+				
+		logger.println(filterInfo.getTitle() + "...");
+
+		// init test
+		FatiGO fatigo = null;
+		if(list2!=null) fatigo = new FatiGO(idList1, idList2, yourAnnotations, testMode, duplicatesMode);
+		//else if(isRestOfGenome()) fatigo = new FatiGO(idList1,yourAnnotations);
+		else fatigo = new FatiGO(idList1,yourAnnotations);
+		
+		// run test
+		fatigo.run();
+		
+		// save results
+		saveFatigoResults(fatigo,filterInfo);
 	
+		// annotation count
+		
+		
+		logger.println("...finished");
+		
+		return fatigo;
+	}
+		
+	private void saveFatigoResults(FatiGO fatigo, FunctionalDbDescriptor filterInfo) throws IOException{
+		
+		String fileName = filterInfo.getName() + ".txt";
+		String annotFileName = filterInfo.getName() + ".annot";
+		
+		// save result table
+		List<String> testResultOutput = testResultToStringList(fatigo.getResults());
+		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
+		result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList(filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"All results"));
+
+		// save table description
+		//result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"All results"));
+
+		// save significant results
+		int numberOfSignificantTerms;
+		List<TwoListFisherTestResult> significant;
+		String formattedPValue;
+		for(int i=0; i<DEFAULT_PVALUES.length; i++){
+			formattedPValue = pvalueFormatter.format(DEFAULT_PVALUES[i]);
+			
+			// significant terms
+			significant = fatigo.getSignificant(DEFAULT_PVALUES[i]);
+			if(significant!=null){
+				IOUtils.write(outdir + "/significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt", ListUtils.toString(significant,"\n"));					
+				numberOfSignificantTerms = significant.size();					
+			} else {
+				numberOfSignificantTerms = 0;
+			}
+			
+			// significant count
+			significantCount.get(i).append(filterInfo.getTitle()).append("\t").append(numberOfSignificantTerms).append("\n");
+			
+			
+			if(numberOfSignificantTerms>0){
+				
+				// go graph
+				if(filterInfo.getPrefix().equalsIgnoreCase("go")) {
+					try {
+						createGoGraph(significant,DEFAULT_PVALUES[i],filterInfo);						
+						Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"go_graph_" + filterInfo.getName() + "_" + formattedPValue + "_graphimage.png",filterInfo.getTitle() + " DAG (significant terms, pvalue<" + formattedPValue + ")",Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT,THUMBNAIL"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+						item.setContext("pvalue==" + formattedPValue);
+						result.getOutputItems().add(4, item);
+					} catch(GoGraphException gge){
+						Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"Graph not found",filterInfo.getTitle() + " DAG (significant terms, pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+						item.setContext("pvalue==" + formattedPValue);
+						result.getOutputItems().add(4, item);
+					}
+				}
+				// table
+				Item item = new Item("significant_" + filterInfo.getName(),"significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt",filterInfo.getTitle() + " significant terms (pvalue<" + formattedPValue + ")",Item.TYPE.FILE,Arrays.asList("SIGNIFICANT","TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+				item.setContext("pvalue==" + formattedPValue);
+				result.getOutputItems().add(4, item);
+
+			} else {
+				Item item = new Item("significant_" + filterInfo.getName(),"No significant terms for current pvalue " + formattedPValue,filterInfo.getTitle() + " significant terms (pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle()); 
+				item.setContext("pvalue==" + formattedPValue);
+				result.getOutputItems().add(4, item);
+			}
+
+
+		}			
+		
+		// save annotations
+		if(fatigo.getAnnotations()!=null && fatigo.getAnnotations().size()>0){				
+			IOUtils.write(outdir + "/" + annotFileName, fatigo.getAnnotations().toString());
+			result.addOutputItem(new Item("annot_" + filterInfo.getName(),annotFileName,"Annotations for " + filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
+		} else {
+			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"no annotations found for input ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
+		}		
+	}
+	
+	/*
+	 * 
+	 * SUMMARY TABLES
+	 * 
+	 */
+
+	/*
+	 * Input params
+	 */
 	private void addInputParams(){
 		// species
 		addInputParam("species", "Species", species);
@@ -248,6 +366,25 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		result.addOutputItem(new Item(id,value,label,Item.TYPE.MESSAGE,Arrays.asList("INPUT_PARAM"),new HashMap<String,String>(),"Input data"));
 	}
 	
+	/*
+	 * Annotations count
+	 */
+	private void addAnnotationReport(FatiGO fatigo, String dbName){
+		DecimalFormat formatter = new DecimalFormat("#######.##");
+		double list1Percentage = ((double)(fatigo.getList1AnnotatedCounter())/(double)fatigo.getList1SizeBeforeDuplicates())*100.0;
+		double list2Percentage = ((double)(fatigo.getList2AnnotatedCounter())/(double)fatigo.getList2SizeBeforeDuplicates())*100.0;
+		String list1Message = fatigo.getList1AnnotatedCounter() + " of " + fatigo.getList1SizeAfterDuplicates() + " (" + formatter.format(list1Percentage) + "%) " + formatter.format(fatigo.getList1MeanAnnotationsPerId()) + " annotations/id";
+		String list2Message = fatigo.getList2AnnotatedCounter() + " of " + fatigo.getList2SizeAfterDuplicates() + " (" + formatter.format(list2Percentage) +"%) " + formatter.format(fatigo.getList2MeanAnnotationsPerId()) + " annotations/id";
+		annotationReport.append(dbName).append("\t").append(list1Message).append("\t").append(list2Message).append("\n");
+	}
+	private void saveAnnotationsReport() throws IOException{
+		IOUtils.write(outdir + "/annotations_per_db.txt", annotationReport.toString());
+		result.getOutputItems().add(1,new Item("annotations_per_db","annotations_per_db.txt","Id annotations per DB",Item.TYPE.FILE,Arrays.asList("TABLE","SUMMARY_TABLE"),new HashMap<String,String>(),"Summary"));
+	}
+	
+	/*
+	 * Duplicates management
+	 */
 	private void saveDuplicatesReport(FatiGO fatigo) throws IOException{
 		DecimalFormat formatter = new DecimalFormat("##.##");
 		// list 1
@@ -266,192 +403,6 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		IOUtils.write(outdir + "/duplicates.txt", duplicatesReport.toString());
 		result.getOutputItems().add(1,new Item("duplicates","duplicates.txt","Duplicates management",Item.TYPE.FILE,Arrays.asList("TABLE","SUMMARY_TABLE"),new HashMap<String,String>(),"Summary"));		
 	}
-		
-	private FatiGO doFatigo(List<String> idList1, List<String> idList2,FunctionalFilter filter,DBConnector dbConnector, List<String> significant) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException{
-		
-		// db attributes
-		FunctionalDbDescriptor filterInfo= new FunctionalDbDescriptor(filter);
-//		String name = getDBName(filter);
-//		String title = getDBTitle(filter);
-				
-		logger.println(filterInfo.getTitle() + "...");
-
-		// init test
-		FatiGO fatigo = null;
-		if(list2!=null) fatigo = new FatiGO(idList1, idList2, filter, dbConnector, testMode, duplicatesMode);
-		else if(isRestOfGenome()) fatigo = new FatiGO(idList1, filter, dbConnector);
-		
-		fatigo.setLogger(logger);
-		
-		// run test
-		fatigo.run();
-		
-		// save results
-		saveFatigoResults(fatigo,filterInfo);
-		
-//		// acum significant values
-//		if(fatigo.getResults()!=null){
-//			significant.addAll(testResultToStringList(fatigo.getSignificant(DEFAULT_PVALUE_THRESHOLD),false));
-//			significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
-//		}
-
-		//logger.println("...end of " + title);
-		logger.println("...finished");
-		
-		return fatigo;
-		
-	}
 	
-	private FatiGO doFatigoYourAnnotations(List<String> idList1, List<String> idList2,FeatureList<AnnotationItem> yourAnnotations, List<String> significant) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException{
-		
-		// db attributes
-		FunctionalDbDescriptor filterInfo = new FunctionalDbDescriptor("your_annotation","Your annotations", "your_annotations","Your annotations");
-//		String name = "your_annotations";
-//		String title = "Your annotations";					
-				
-		logger.println(filterInfo.getTitle() + "...");
-
-		// init test
-		FatiGO fatigo = null;
-		if(list2!=null) fatigo = new FatiGO(idList1, idList2, yourAnnotations, testMode, duplicatesMode);
-		//else if(isRestOfGenome()) fatigo = new FatiGO(idList1,yourAnnotations);
-		else fatigo = new FatiGO(idList1,yourAnnotations);
-		
-		// run test
-		fatigo.run();
-		
-		// save results
-		saveFatigoResults(fatigo,filterInfo);
-	
-//		// acum significant values
-//		if(fatigo.getResults()!=null){
-//			significant.addAll(testResultToStringList(fatigo.getSignificant(DEFAULT_PVALUE_THRESHOLD),false));
-//			significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
-//		}
-		
-		//logger.println("...end of " + title);
-		logger.println("...finished");
-		
-		return fatigo;
-	}
-		
-	private void saveFatigoResults(FatiGO fatigo, FunctionalDbDescriptor filterInfo) throws IOException{
-		
-		String fileName = filterInfo.getName() + ".txt";
-		String annotFileName = filterInfo.getName() + ".annot";
-		
-		// save statistic resultss		
-		if(fatigo.getResults()!=null){
-			
-			// save result table
-			List<String> testResultOutput = testResultToStringList(fatigo.getResults());
-			IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
-			//result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"All results"));
-			result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList(filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"All results"));
-			
-			// save table description
-			//result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"All results"));
-						
-			// save significant results
-			int numberOfSignificantTerms;
-			List<TwoListFisherTestResult> significant;
-			String formattedPValue;
-			for(int i=0; i<DEFAULT_PVALUES.length; i++){
-				formattedPValue = pvalueFormatter.format(DEFAULT_PVALUES[i]);
-				significant = fatigo.getSignificant(DEFAULT_PVALUES[i]);
-				if(significant!=null){
-					IOUtils.write(outdir + "/significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt", ListUtils.toString(significant,"\n"));					
-					numberOfSignificantTerms = significant.size();					
-				} else {
-					numberOfSignificantTerms = 0;
-				}
-				significantCount.get(i).append(filterInfo.getTitle()).append("\t").append(numberOfSignificantTerms).append("\n");
-				if(numberOfSignificantTerms>0){
-					if(filterInfo.getPrefix().equalsIgnoreCase("go")) {
-						try {
-							createGoGraph(significant,DEFAULT_PVALUES[i],filterInfo);						
-							Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"go_graph_" + filterInfo.getName() + "_" + formattedPValue + "_graphimage.png",filterInfo.getTitle() + " DAG (significant terms, pvalue<" + formattedPValue + ")",Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT,THUMBNAIL"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
-							item.setContext("pvalue==" + formattedPValue);
-							result.getOutputItems().add(4, item);
-						} catch(GoGraphException gge){
-							Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"Graph not found",filterInfo.getTitle() + " DAG (significant terms, pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
-							item.setContext("pvalue==" + formattedPValue);
-							result.getOutputItems().add(4, item);
-						}
-					}
-					Item item = new Item("significant_" + filterInfo.getName(),"significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt",filterInfo.getTitle() + " significant terms (pvalue<" + formattedPValue + ")",Item.TYPE.FILE,Arrays.asList("SIGNIFICANT","TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
-					item.setContext("pvalue==" + formattedPValue);
-					result.getOutputItems().add(4, item);
-				} else {
-					Item item = new Item("significant_" + filterInfo.getName(),"No significant terms for current pvalue " + formattedPValue,filterInfo.getTitle() + " significant terms (pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle()); 
-					item.setContext("pvalue==" + formattedPValue);
-					result.getOutputItems().add(4, item);
-				}
-				
-				
-			}			
-			//if(filterInfo.getPrefix().equalsIgnoreCase("go")) result.getOutputItems().add(4, new Item("go_graphsignificant_" + filterInfo.getName(),"go_graph_" + filterInfo.getName() + "_${pvalue}_graphimage.png",filterInfo.getTitle() + " DAG",Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT,THUMBNAIL"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle()));
-			//result.getOutputItems().add(4, new Item("significant_" + filterInfo.getName(),"significant_" + filterInfo.getName() + "_${pvalue}.txt",filterInfo.getTitle() + " significant terms",Item.TYPE.FILE,Arrays.asList("SIGNIFICANT","TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle()));
-			
-		}
-		
-		System.err.println("fatigo.getAnnotations():" + fatigo.getAnnotations().size());
-		if(fatigo.getAnnotations()!=null && fatigo.getAnnotations().size()>0){				
-			// save annotation
-			IOUtils.write(outdir + "/" + annotFileName, fatigo.getAnnotations().toString());
-			result.addOutputItem(new Item("annot_" + filterInfo.getName(),annotFileName,"Annotations for " + filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
-		} else {
-			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"no annotations found for input ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
-		}		
-	}
-	
-	private void createGoGraph(List<TwoListFisherTestResult> significant, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
-		String prefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue);
-		
-		// preparing association file
-		StringBuilder association = new StringBuilder();
-		String color;
-		for(TwoListFisherTestResult result: significant){			
-			color=""+ (result.getList1Percentage()/(result.getList1Percentage()+result.getList2Percentage()));
-			association.append(result.getTerm()).append("\t").append(result.getTerm()).append("\t").append(color).append("\n");
-		}
-		
-		try {
-			
-			// create graph directory
-			FileUtils.createDirectory(outdir + "/graphs");
-			
-			// save association file
-			IOUtils.write(outdir + "/graphs/" + prefix  + "_association.txt", association.toString());
-			
-			// namespace
-			String namespace = "b";
-			if(filterInfo.getName().contains("molecular_function")) namespace = "m";
-			if(filterInfo.getName().contains("cellular_component")) namespace = "c";
-			System.err.println("namespace: " + namespace);
-			
-			// init graph api
-			GetGraphApi graph = new GetGraphApi(outdir + "/graphs/",prefix,prefix  + "_association.txt",namespace,0,"byDesc",0.6,0,"orange");
-			
-			// setting server params
-			graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));				
-			graph.setDataBase(config.getProperty("BLAST2GO_HOST_NAME"),config.getProperty("BLAST2GO_DB_NAME"),config.getProperty("BLAST2GO_DB_USER"), config.getProperty("BLAST2GO_DB_PASSWORD"));
-			
-			// run
-			graph.run();
-			
-			// copy files
-			String imagePrefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue) + "_graphimage";
-			FileUtils.touch(new File(outdir + "/" + imagePrefix + ".png"));
-			FileUtils.copy(outdir + "/graphs/" + imagePrefix + ".png", outdir + "/" + imagePrefix + ".png");
-//			FileUtils.touch(new File(outdir + "/" + imagePrefix + ".png_thumb"));
-//			FileUtils.copy(outdir + "/graphs/" + imagePrefix + "small.jpg", outdir + "/" + imagePrefix + ".png_thumb");
-			
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new GoGraphException(e.getMessage());
-		}	
-	}
 	
 }
