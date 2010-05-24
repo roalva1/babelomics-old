@@ -3,11 +3,11 @@ package org.bioinfo.babelomics.tools.expression.differential;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
@@ -65,6 +65,12 @@ public class Correlation extends BabelomicsTool {
 			doubleVars.add(Double.parseDouble(str));
 		}
 
+		// input parameters
+		//
+		result.addOutputItem(new Item("test_input_param", test, "Test", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("correction_input_param", correction, "Multiple-test correction", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("class_input_param", className + ", values: " + ListUtils.toString(vars, ","), "Class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+
 
 		if ( "regression".equalsIgnoreCase(test) ) {
 			executeRegression();
@@ -98,7 +104,7 @@ public class Correlation extends BabelomicsTool {
 		Canvas heatmap = null, sigHeatmap = null;
 		try {
 			updateJobStatus("60", "generating heatmap");
-			heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "correlation", res.getCorrelations(), "adj. p-value", res.getAdjPValues());
+			//heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "correlation", res.getCorrelations(), "adj. p-value", res.getAdjPValues());
 			sigHeatmap = DiffExpressionUtils.generateSigHeatmap(dataset, className, columnOrder, "correlation", res.getCorrelations(), "adj. p-value", res.getAdjPValues(), pValue);
 		} catch (Exception e) {
 			printError("ioexception_executecorrelation_correlation", "error generating heatmaps for " + test + " test", e.toString(), e);
@@ -185,7 +191,7 @@ public class Correlation extends BabelomicsTool {
 		updateJobStatus("60", "generating heatmap");
 		Canvas heatmap = null, sigHeatmap = null;
 		try {
-			heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "slope", res.getSlopes(), "adj. p-value", res.getAdjPValues());
+			//heatmap = DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, rowOrder, "slope", res.getSlopes(), "adj. p-value", res.getAdjPValues());
 			sigHeatmap = DiffExpressionUtils.generateSigHeatmap(dataset, className, columnOrder, "slope", res.getSlopes(), "adj. p-value", res.getAdjPValues(), pValue);
 		} catch (Exception e) {
 			printError("ioexception_executecorrelation_correlation", "error generating heatmaps for " + test + " test", e.toString(), e);

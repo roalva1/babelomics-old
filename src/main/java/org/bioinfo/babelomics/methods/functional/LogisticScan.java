@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.bioinfo.babelomics.exception.EmptyAnnotationException;
 import org.bioinfo.babelomics.utils.RCommand;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
@@ -20,48 +21,37 @@ import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 
-public class LogisticScan {
-
-	public static final String ENVIRONMENT_VARIABLE = "BABELOMICS_HOME";
-	public static final String DEFAULT_BINARY = "/bin/logistic_univariate.r";
-	public static final String TMP_PATH = "/tmp";
+public class LogisticScan extends GeneSetAnalysis{
 	
+	// working paths
 	private String scriptPath;
+	private String workingDirectory;	
 	
-	public static final int ASCENDING_SORT = 1;
-	public static final int DESCENDING_SORT = 2;
-	
-	// input params
-	private List<String> idList;	
-	private List<Double> statistic;
-	private FeatureData rankedList;
-	private FunctionalFilter filter;
-	private DBConnector dbConnector;	
-	private int order;
-	private boolean isYourAnnotations;
-
 	// files
 	private String annotationFileName;
 	private String rankedListFileName;
 	private String outputFileName;
 	
-	// results
-	FeatureList<AnnotationItem> annotations;
-	List<GeneSetAnalysisTestResult> results;
 
-	
 	// Infrared annotation constructor
 	public LogisticScan(FeatureData rankedList, FunctionalFilter filter, DBConnector dbConnector, int order) {
 			
 		// params
 		this.rankedList = rankedList;
 		this.filter = filter;
-		this.dbConnector = dbConnector;		
+		this.dbConnector = dbConnector;
 		this.order = order;
 		this.isYourAnnotations = false;
-
-		init();
 	
+		// set analysis type id
+		this.method = LOGISTIC;
+		
+		// configure working paths
+		scriptPath = System.getenv("BABELOMICS_HOME") + "/bin/logistic_univariate.r";
+		workingDirectory = "/tmp";
+		initTemporalFiles();
+		
+		
 	}
 	
 	// Your annotations constructor
@@ -73,58 +63,42 @@ public class LogisticScan {
 		this.order = order;
 		this.isYourAnnotations = true;
 		
-		init();
+		// set analysis type id
+		this.method = LOGISTIC;
+		
+		// configure working paths
+		scriptPath = System.getenv("BABELOMICS_HOME") + "/bin/logistic_univariate.r";
+		workingDirectory = "/tmp";
+		initTemporalFiles();
 	
 	}
 	
-	
-	// init engine params
-	private void init(){
-		
-		// script
-		this.scriptPath = System.getenv(ENVIRONMENT_VARIABLE) + DEFAULT_BINARY;
-		
-		// files
-		this.annotationFileName = TMP_PATH + "/" + StringUtils.randomString(30) + "_annotations.txt";
-		this.rankedListFileName = TMP_PATH + "/" + StringUtils.randomString(30) + "_ranked_list.txt";
-		this.outputFileName = StringUtils.randomString(30) + "_result.txt";
-		
+	// init temporal files
+	private void initTemporalFiles(){
+		String random = StringUtils.randomString(30);
+		this.annotationFileName = random + "_annotations.txt";
+		this.rankedListFileName = random + "_ranked_list.txt";
+		this.outputFileName = random + "_result.txt";		
 	}
 	
-	public void prepare() throws InvalidIndexException{
-		
-		// id list
-		idList = rankedList.getDataFrame().getRowNames();
-		// statistic
-		statistic = ArrayUtils.toList(rankedList.getDataFrame().getColumnAsDoubleArray(0));
-		// order ranked list
-		int[] sortIndex = ListUtils.order(statistic);
-		ListUtils.ordered(idList,sortIndex);
-		ListUtils.ordered(statistic,sortIndex);
-		if(order==ASCENDING_SORT){
-			Collections.reverse(idList);
-			Collections.reverse(statistic);			
-		}		
-		
-	}
-	
-	public void run() throws InvalidIndexException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, IOException {
+	@Override
+	public void run() throws InvalidIndexException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, IOException, EmptyAnnotationException {
 				
 		// prepare list
 		prepare();
 		
 		// annotation		
-		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);		
+		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);
 	
 		// prepare files		
 		saveRankedList();
 		saveAnnotations();
 		
 		// RComand
-		RCommand rCommand = new RCommand(scriptPath,TMP_PATH);
+		RCommand rCommand = new RCommand(scriptPath,workingDirectory);
 		// input
-		rCommand.addParam("rankingfile",rankedListFileName);
-		rCommand.addParam("annotationfile",annotationFileName);
+		rCommand.addParam("rankingfile",workingDirectory + "/" + rankedListFileName);
+		rCommand.addParam("annotationfile",workingDirectory + "/" + annotationFileName);
 		// output
 		rCommand.addParam("outfile", outputFileName);
 
@@ -133,17 +107,16 @@ public class LogisticScan {
 		
 		// Load results
 		loadResults();
-			
-				
+
 	}
 		
 	
 	private void saveRankedList() throws IOException{
-		IOUtils.write(rankedListFileName, rankedList.toString());
+		IOUtils.write(workingDirectory + "/" + rankedListFileName, rankedList.toString());
 	}
 	
 	private void saveAnnotations() throws IOException{
-		IOUtils.write(annotationFileName, annotations.toString());
+		IOUtils.write(workingDirectory + "/" + annotationFileName, annotations.toString());
 	}
 	
 	private void loadResults() throws IOException{
@@ -152,8 +125,8 @@ public class LogisticScan {
 		results = new ArrayList<GeneSetAnalysisTestResult>();
 		
 		// load result file
-		FileUtils.checkFile(TMP_PATH + "/" + outputFileName);
-		String resultsContent = IOUtils.toString(TMP_PATH + "/" + outputFileName);
+		FileUtils.checkFile(workingDirectory + "/" + outputFileName);
+		String resultsContent = IOUtils.toString(workingDirectory + "/" + outputFileName);
 		List<String> terms = StringUtils.toList(resultsContent,"\n");
 		
 		// init params
@@ -166,42 +139,48 @@ public class LogisticScan {
 		List<String>list2Ids;
 		
 		// run rows
-		for(String row: terms){
-			System.err.println("row:" + row);
+		int termSize, termSizeInGenome;
+		List<String> genes;
+		for(String row: terms){		
 			if(!row.startsWith("#") && row.contains("\t")){
 				// split row
 				fields = row.split("\t");		
-				// params
+				// parse columns
 				term = fields[0];
 				size = Integer.parseInt(fields[1]);
 				if(fields[2].trim().equals("1")) converged = true;
 				else converged = false;
 				logRatio = Double.parseDouble(fields[3]);
-				adjPValue = Double.parseDouble(fields[4]);				
-				GeneSetAnalysisTestResult gseaTest = new GeneSetAnalysisTestResult(term,null,size,converged,logRatio,adjPValue);
+				adjPValue = Double.parseDouble(fields[4]);
+				// compute term sizes and gene list 
+				if(geneMap.containsKey(term)){
+					termSize = geneMap.get(term).size();
+					genes = geneMap.get(term);
+				} else {
+					termSize = 0;
+					genes = new ArrayList<String>();
+				}
+				if(termSizes!=null && termSizes.containsKey(term)){					
+					termSizeInGenome = termSizes.get(term);					
+				} else {
+					termSizeInGenome = 0;
+				}				
+				GeneSetAnalysisTestResult gseaTest = new GeneSetAnalysisTestResult(term,termSize,termSizeInGenome,genes,converged,logRatio,adjPValue);
 				results.add(gseaTest);
 			}
-		}		
-	}
-	
-//	private HashMap<String,String> getTermHash(){
-//		for(int i=0; i<annotations.size(); i++){
-//			
-//		}
-//	}
-	
-	
-	public List<GeneSetAnalysisTestResult> getSignificant(){
-		return getSignificant(TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD);
-	}
-	
-	public List<GeneSetAnalysisTestResult> getSignificant(double threshold){
-		List<GeneSetAnalysisTestResult> significant = new ArrayList<GeneSetAnalysisTestResult>();
-		for(GeneSetAnalysisTestResult result: this.results){			
-			if(result.getAdjPValue()<threshold) significant.add(result);
 		}
-		return significant;
 	}
+	
+	@Override
+	public List<String> resultListToStringList(List<GeneSetAnalysisTestResult> resultList, boolean header){
+		List<String> results = new ArrayList<String>();
+		if(header) results.add(GeneSetAnalysisTestResult.LogisticHeader());
+		for(int i=0; i<resultList.size(); i++){			
+			results.add(resultList.get(i).toLogisticString());
+		}
+		return results;
+	}
+	
 	
 	/**
 	 * @return the idList
@@ -257,6 +236,34 @@ public class LogisticScan {
 	 */
 	public void setResults(List<GeneSetAnalysisTestResult> results) {
 		this.results = results;
+	}
+
+	/**
+	 * @return the scriptPath
+	 */
+	public String getScriptPath() {
+		return scriptPath;
+	}
+
+	/**
+	 * @param scriptPath the scriptPath to set
+	 */
+	public void setScriptPath(String scriptPath) {
+		this.scriptPath = scriptPath;
+	}
+
+	/**
+	 * @return the workingDirectory
+	 */
+	public String getWorkingDirectory() {
+		return workingDirectory;
+	}
+
+	/**
+	 * @param workingDirectory the workingDirectory to set
+	 */
+	public void setWorkingDirectory(String workingDirectory) {
+		this.workingDirectory = workingDirectory;
 	}
 
 }

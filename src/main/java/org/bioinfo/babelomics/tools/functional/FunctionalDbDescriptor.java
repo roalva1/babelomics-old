@@ -3,9 +3,11 @@ package org.bioinfo.babelomics.tools.functional;
 import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
+import org.bioinfo.infrared.funcannot.filter.GOSlimFilter;
 import org.bioinfo.infrared.funcannot.filter.InterproFilter;
 import org.bioinfo.infrared.funcannot.filter.JasparFilter;
 import org.bioinfo.infrared.funcannot.filter.KeggFilter;
+import org.bioinfo.infrared.funcannot.filter.MiRnaTargetFilter;
 import org.bioinfo.infrared.funcannot.filter.OregannoFilter;
 import org.bioinfo.infrared.funcannot.filter.ReactomeFilter;
 
@@ -50,6 +52,13 @@ public class FunctionalDbDescriptor {
 				description+= " and terms have been filtered by using the keywords " + goFilter.getKeywords().toString();
 			}
 		}
+		// GOSlim GOA
+		else if(filter instanceof GOSlimFilter) {
+			title = "GOSlim GOA";
+			name = "go-slim";
+			prefix = "go-slim";
+			description = getDefaultDescription(filter, title);
+		}
 		// Kegg
 		else if(filter instanceof KeggFilter) {
 			KeggFilter keggFilter = (KeggFilter) filter;
@@ -80,6 +89,13 @@ public class FunctionalDbDescriptor {
 			title = "Biocarta";
 			name = "biocarta";
 			prefix = "biocarta";
+			description = getDefaultDescription(filter, title);
+		}
+		// miRNA target
+		else if(filter instanceof MiRnaTargetFilter) {
+			title = "miRNA target";
+			name = "mrina";
+			prefix = "mrina";
 			description = getDefaultDescription(filter, title);
 		}
 		// Jaspar

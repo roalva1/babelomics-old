@@ -134,14 +134,17 @@ public class DiffExpressionUtils {
 			}
 		}
 
-		if ( sigRowIndexes.size() != 0 && sigRowIndexes.size() != adjPValues.length ) {				
+		if ( sigRowIndexes.size() > 0  ) {				
 			List<Double> sigStatistics = ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes));
 			List<Double> sigAdjPValues = ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toArray(sigRowIndexes));
 
 			int[] sigRowOrder = ListUtils.order(sigStatistics, true);
 
-			Dataset sigDataset = dataset.filterRows(filterRowIndexes);
-			sigDataset.validate();
+			if ( filterRowIndexes.size() == 0 ) {
+				return DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, sigRowOrder, statisticsLabel, ListUtils.toArray(sigStatistics), adjPValuesLabel, ListUtils.toArray(sigAdjPValues));				
+			} else {
+				Dataset sigDataset = dataset.filterRows(filterRowIndexes);
+				sigDataset.validate();
 //			sigDataset.save("/tmp/sig_dataset.txt");
 //			System.out.println("column dimension = " + sigDataset.getColumnDimension());
 //			System.out.println("row dimension = " + sigDataset.getRowDimension());
@@ -151,7 +154,8 @@ public class DiffExpressionUtils {
 //			System.out.println("sig row indexes = " + ListUtils.toString(sigRowIndexes));
 
 
-			return DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, sigRowOrder, statisticsLabel, ListUtils.toArray(sigStatistics), adjPValuesLabel, ListUtils.toArray(sigAdjPValues));
+				return DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, sigRowOrder, statisticsLabel, ListUtils.toArray(sigStatistics), adjPValuesLabel, ListUtils.toArray(sigAdjPValues));
+			}
 		}
 		return null;
 	}

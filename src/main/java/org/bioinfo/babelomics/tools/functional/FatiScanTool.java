@@ -3,17 +3,22 @@ package org.bioinfo.babelomics.tools.functional;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.exception.EmptyAnnotationException;
+import org.bioinfo.babelomics.methods.functional.FatiGO;
 import org.bioinfo.babelomics.methods.functional.FatiScan;
+import org.bioinfo.babelomics.methods.functional.GeneSetAnalysis;
 import org.bioinfo.babelomics.methods.functional.GeneSetAnalysisTestResult;
 import org.bioinfo.babelomics.methods.functional.LogisticScan;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTest;
+import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
@@ -21,10 +26,14 @@ import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
+import org.bioinfo.infrared.funcannot.dbsql.AnnotationDBManager;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
+import org.bioinfo.tool.result.Item.TYPE;
+
+import es.blast2go.prog.graph.GoGraphException;
 
 public class FatiScanTool  extends FunctionalProfilingTool{
 		
@@ -36,7 +45,6 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 	private int outputFormat;
 	private int order;
 	
-	private List<String> significantDbs;
 	
 	public FatiScanTool(){
 		initOptions();
@@ -65,16 +73,18 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		super.prepare();
 
 		// method 
-		method = Method.Logistic;
+		method = Method.FatiScan;
 		
-		if(commandLine.hasOption("method") && commandLine.getOptionValue("method").equalsIgnoreCase("fatiscan")) {
-			method = Method.FatiScan;
+		if(commandLine.hasOption("method") && commandLine.getOptionValue("method").equalsIgnoreCase("logistic")) {
+			method = Method.Logistic;
 		}
 		
 		// ranked list		
 		rankedList = new FeatureData(new File(commandLine.getOptionValue("ranked-list")), true);
+		
 		// test
 		numberOfPartitions = Integer.parseInt(commandLine.getOptionValue("partitions","" + FatiScan.DEFAULT_NUMBER_OF_PARTITIONS));
+		
 		// output format
 		if(commandLine.hasOption("output-format") && commandLine.getOptionValue("output-format").equalsIgnoreCase("long")) {
 			outputFormat = FatiScan.LONG_FORMAT;
@@ -95,14 +105,13 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		try {
 			
 			// update status
-			jobStatus.addStatusMessage("10", "Preparing data");
-			significantDbs = new ArrayList<String>();
+			jobStatus.addStatusMessage("10", "Preparing data");			
 			
 			// infrared connector			
 			DBConnector dbConnector = new DBConnector(species, new File(babelomicsHomePath + "/conf/infrared.properties"));		
 			
 			// prepare params
-			prepare();			
+			prepare();	
 	
 			// run fatigo's
 			if(filterList.size()==0  && !isYourAnnotations){
@@ -112,65 +121,56 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				// save id lists
 				IOUtils.write(outdir + "/ranked_list.txt", rankedList.toString());
 				result.addOutputItem(new Item("ranked_list","ranked_list.txt","Ranked list",Item.TYPE.FILE,Arrays.asList("RANKED_LIST","CLEAN"),new HashMap<String,String>(),"Input data"));
-				
-				// ordered list
+								
+				// order ranked list and save genes and rank separately
 				FatiScan fatiscan = new FatiScan(rankedList,null,dbConnector,FatiScan.DEFAULT_NUMBER_OF_PARTITIONS,testMode,outputFormat,order);
-				fatiscan.prepare();
+				fatiscan.prepareLists();
 				IOUtils.write(outdir + "/id_list.txt", fatiscan.getIdList());
 				result.addOutputItem(new Item("id_list","id_list.txt","Id list (sorted)",Item.TYPE.FILE,Arrays.asList("IDLIST","SORTED"),new HashMap<String,String>(),"Input data"));
 				IOUtils.write(outdir + "/statistic.txt", ListUtils.toStringArray(fatiscan.getStatistic()));
 				result.addOutputItem(new Item("statistic","statistic.txt","Statistic (sorted)",Item.TYPE.FILE,Arrays.asList("STATISTIC","SORTED"),new HashMap<String,String>(),"Input data"));
 				
-				// significant terms
-				List<GeneSetAnalysisTestResult> significants = new ArrayList<GeneSetAnalysisTestResult>();				
-				List<String> significantOutput = new ArrayList<String>();
-					
+							
+				// significant count
+				significantCount = new ArrayList<StringBuilder>();
+				for(int i=0; i<DEFAULT_PVALUES.length; i++){
+					significantCount.add(new StringBuilder("#DB\tNº of significant terms\n"));
+				}
+				
+				// annotation report
+				annotationReport = new StringBuilder();
+				annotationReport.append("#DB").append("\t").append("Number of annotations").append("\n");
+				
 				
 				// do fatiscans
 				double progress = 20;
 				double inc = 60.0/filterList.size();
 				for(FunctionalFilter filter: filterList) {
-					doTest(rankedList,filter,dbConnector,significants,method);
-					// update status					
+					doTest(rankedList,filter,dbConnector,method);					
 					jobStatus.addStatusMessage("" + progress, "Executing test");
-					progress+=inc;
+					progress+=inc;					
 				}
 				
 				// update status					
 				jobStatus.addStatusMessage("90", "Executing test");
 				
 				if(isYourAnnotations){
-					doYourAnnotationsTest(rankedList,yourAnnotations,significants,method);
+					doYourAnnotationsTest(rankedList,yourAnnotations,method);
 				}
 				
 				// update status					
 				jobStatus.addStatusMessage("95", "Saving results");
 				
-				String tablePref = "";
-				System.err.println("significants: " + significants.size());
-				if(method==Method.Logistic){
-					tablePref = "LOGISTIC_";
-					significantOutput.addAll(LogisticResultToStringList(significants));
-				} else {
-					significantOutput.addAll(FatiScanResultToStringList(significants));					
-				}		
+				saveAnnotationsReport();
 				
-				// significant terms				
-				if(significants!=null && significants.size()>0){
-					
-					// Significant results must appear after than complete tables!!					
-					result.getOutputItems().add(1, new Item("significant","significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt","Significant terms",Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_" + tablePref + "TABLE",ListUtils.toString(significantDbs,",")),new HashMap<String,String>(),"Significant Results"));
-					IOUtils.write(outdir + "/significant_" + TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD + ".txt", ListUtils.toString(significantOutput,"\n"));
-					
-//					// FatiScan graph
-//					if(method==Method.FatiScan){
-//						FatiScanGraph.fatiScanGraph(significants,"Significant terms graph for all databases",outdir + "/significant_graph.png");
-//						result.addOutputItem(new Item("graph_alldbs","significant_graph.png","Significant term graph",Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Significant results (all databases together)"));
-//					}
-					
-				} else {
-					result.getOutputItems().add(1,new Item("graph_alldbs","No significant terms found","Significant term graph",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant results (all databases together)"));
-				}		
+				// save significant count table
+				for(int i=0; i<DEFAULT_PVALUES.length; i++){
+					IOUtils.write(outdir + "/significant_count_" + pvalueFormatter.format(DEFAULT_PVALUES[i]) + ".txt", significantCount.get(i).toString());
+				}
+				result.getOutputItems().add(3, new Item("significant","significant_count_${pvalue}.txt","Number of significant terms per DB",Item.TYPE.FILE,Arrays.asList("TABLE,SUMMARY_TABLE,SIGNIFICANT_COUNT_TABLE"),new HashMap<String,String>(),"Significant Results"));				
+				result.addMetaItem(new Item("flags","SHOW_PVALUES","",TYPE.MESSAGE));
+				
+				 
 			}
 					
 		}catch(Exception e){
@@ -189,158 +189,164 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 	 */
 	
 	
-	private void doTest(FeatureData rankedList,FunctionalFilter filter,DBConnector dbConnector, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidIndexException{
+	private void doTest(FeatureData rankedList,FunctionalFilter filter,DBConnector dbConnector, Method method) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 		
 		// db attributes
 		FunctionalDbDescriptor filterInfo = new FunctionalDbDescriptor(filter);
-//		String name = getDBName(filter);
-//		String title = getDBTitle(filter);
+
+		// get term sizes
+		AnnotationDBManager adbm = new AnnotationDBManager(dbConnector);
+		Map<String, Integer> termSizes = adbm.getAnnotationTermsSize(filterInfo.getPrefix());
 				
 		logger.info(filterInfo.getTitle() + "...\n");
 
-		if(method==Method.Logistic){
-			// init test
-			LogisticScan logistic = new LogisticScan(rankedList,filter,dbConnector,order);		
-			// run
-			logistic.run();
+		GeneSetAnalysis gsea;
+		
+		if(method==Method.Logistic){			
+			gsea = new LogisticScan(rankedList,filter,dbConnector,order);
+			((LogisticScan)gsea).setWorkingDirectory(outdir);
+		}else {
+			gsea = new FatiScan(rankedList,filter,dbConnector,numberOfPartitions,testMode,outputFormat,order);	
+		}
+			
+		// run
+		try{
+
+			// set term sizes
+			gsea.setTermSizes(termSizes);
+			
+			gsea.run();
+							
 			// save results
-			saveLogisticScanResults(logistic,filterInfo);
-			// acum significant values
-			significant.addAll(logistic.getSignificant());
-			significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
-		} else {
-			// init test
-			FatiScan fatiscan = new FatiScan(rankedList,filter,dbConnector,numberOfPartitions,testMode,outputFormat,order);		
-			// run
-			try{
-				fatiscan.run();
-				// save results
-				saveFatiScanResults(fatiscan,filterInfo);
-				// acum significant values
-				significant.addAll(fatiscan.getSignificant());
-				significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
-			} catch (EmptyAnnotationException ene){
-				result.addOutputItem(new Item("annot_" + filterInfo.getName(),"No annotation was found for " + filterInfo.getTitle() + " ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
-			}
+			saveGeneSetAnalysisResults(gsea,filterInfo);
+			
+		} catch (EmptyAnnotationException ene){
+			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"No annotation was found for " + filterInfo.getTitle() + " ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
+		} catch (Exception ene){
+			ene.printStackTrace();
+			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"Unexpected error was found while running analysis for " + filterInfo.getTitle() + " ids",filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"All results"));
 		}
 		
 		logger.info("...end of " + filterInfo.getTitle());
 		
 	}
 	
-	private void doYourAnnotationsTest(FeatureData rankedList, FeatureList<AnnotationItem> annotations, List<GeneSetAnalysisTestResult> significant, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidIndexException{
+	private void doYourAnnotationsTest(FeatureData rankedList, FeatureList<AnnotationItem> annotations, Method method) throws IOException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, InvalidIndexException{
 		
 		// db attributes
 		FunctionalDbDescriptor filterInfo = new FunctionalDbDescriptor("your_annotation","Your annotations", "your_annotations","Your annotations");
 		
 		logger.info(filterInfo.getTitle() + "...\n");
-		if(method==Method.Logistic){
-			// init test
-			LogisticScan logistic = new LogisticScan(rankedList, annotations,order);		
-			// run
-			logistic.run();				
+		
+		GeneSetAnalysis gsea;
+		
+		if(method==Method.Logistic){			
+			gsea = new LogisticScan(rankedList, annotations,order);
+		}else {
+			gsea = new FatiScan(rankedList, annotations,numberOfPartitions,testMode,outputFormat,order);
+		}
+		
+		// run
+		try{
+			
+			gsea.run();
+				
 			// save results
-			saveLogisticScanResults(logistic,filterInfo);
-			// acum significant values
-			significant.addAll(logistic.getSignificant());
-			significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
-		} else {
-			// init test
-			FatiScan fatiscan = new FatiScan(rankedList, annotations,numberOfPartitions,testMode,outputFormat,order);		
-			// run
-			try{
-				fatiscan.run();				
-				// save results
-				saveFatiScanResults(fatiscan,filterInfo);		
-				// acum significant values
-				significant.addAll(fatiscan.getSignificant());
-				significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
-			} catch (EmptyAnnotationException ene){
-				result.addOutputItem(new Item("annot_" + filterInfo.getName(),"No annotation was found for " + filterInfo.getTitle() + " ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
-			}
+			saveGeneSetAnalysisResults(gsea,filterInfo);
+			
+		} catch (EmptyAnnotationException ene){
+			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"No annotation was found for " + filterInfo.getTitle() + " ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
+		} catch (Exception ene){
+			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"Unexpected error was found while running analysis for " + filterInfo.getTitle() + " ids",filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"All results"));
 		}
 		
 		logger.info("...end of " + filterInfo.getTitle());
 		
 	}
 	
-	private void saveFatiScanResults(FatiScan fatiscan, FunctionalDbDescriptor fiterInfo) throws IOException{
+	private void saveGeneSetAnalysisResults(GeneSetAnalysis gsea, FunctionalDbDescriptor filterInfo) throws IOException{
 		
-		String fileName = fiterInfo.getName() + ".txt";
-		String annotFileName = fiterInfo.getName() + ".annot";
+		String fileName = filterInfo.getName() + ".txt";
+		String annotFileName = filterInfo.getName() + ".annot";
 		
-		// save statistic results					
-		List<String> testResultOutput = FatiScanResultToStringList(fatiscan.getResults());
-		
-		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
-		result.addOutputItem(new Item(fiterInfo.getName(),fileName,fiterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_TABLE",fiterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Database tests"));
+		// save statistic results				
+		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(gsea.resultsToStringList(),"\n"));
+		result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList(filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"All results"));
 						
-		// save annotation
-		IOUtils.write(outdir + "/" + annotFileName, fatiscan.getAnnotations().toString());
-		result.addOutputItem(new Item("annot_" + fiterInfo.getName(),annotFileName,"Annotations for " + fiterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
+		// save significant results
+		int numberOfSignificantTerms;
+		List<GeneSetAnalysisTestResult> significant;
+		String formattedPValue;
+		for(int i=0; i<DEFAULT_PVALUES.length; i++){
+			formattedPValue = pvalueFormatter.format(DEFAULT_PVALUES[i]);
+			significant = gsea.getSignificant(DEFAULT_PVALUES[i]);
+			if(significant!=null){
+				IOUtils.write(outdir + "/significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt", gsea.significantResultsToStringList(significant, DEFAULT_PVALUES[i]));					
+				numberOfSignificantTerms = significant.size();					
+			} else {
+				numberOfSignificantTerms = 0;
+			}
+			significantCount.get(i).append(filterInfo.getTitle()).append("\t").append(numberOfSignificantTerms).append("\n");
+			if(numberOfSignificantTerms>0){
+				// go graph
+				if(filterInfo.getPrefix().equalsIgnoreCase("go")) {
+					try {
+						createGseaGoGraph(significant,DEFAULT_PVALUES[i],filterInfo);						
+						Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"go_graph_" + filterInfo.getName() + "_" + formattedPValue + "_graphimage.png",filterInfo.getTitle() + " DAG (significant terms, pvalue<" + formattedPValue + ")",Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT,THUMBNAIL"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+						item.setContext("pvalue==" + formattedPValue);
+						result.getOutputItems().add(4, item);
+					} catch(GoGraphException gge){
+						Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"Graph not found",filterInfo.getTitle() + " DAG (significant terms, pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+						item.setContext("pvalue==" + formattedPValue);
+						result.getOutputItems().add(4, item);
+					}
+				}
+				// table
+				Item item = new Item("significant_" + filterInfo.getName(),"significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt",filterInfo.getTitle() + " significant terms (pvalue<" + formattedPValue + ")",Item.TYPE.FILE,Arrays.asList("SIGNIFICANT","TABLE",gsea.getMethod().toUpperCase() + "_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+				item.setContext("pvalue==" + formattedPValue);
+				result.getOutputItems().add(4, item);
+				
+			} else {
+				Item item = new Item("significant_" + filterInfo.getName(),"No significant terms for current pvalue " + formattedPValue,filterInfo.getTitle() + " significant terms (pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle()); 
+				item.setContext("pvalue==" + formattedPValue);
+				result.getOutputItems().add(4, item);
+			}
+			
+			
+		}			
 		
-		// save graph
-//		List<GeneSetAnalysisTestResult> significants = fatiscan.getSignificant();
-//		if(significants!=null && significants.size()>0){
-//			String graphFileName = name + "_graph.png"; 
-//			FatiScanGraph.fatiScanGraph(significants,"Significant terms graph for " + title,outdir + "/" +  graphFileName);			
-//			result.addOutputItem(new Item("graph_" + name,graphFileName,"Significant terms graph for " + title,Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Database tests"));
-//		} else {
-//			result.addOutputItem(new Item("graph_" + name,"No significant terms found","Significant terms graph for " + title,Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Database tests"));
-//		}
+		//annotations report
+		addAnnotationReport(gsea,filterInfo.getTitle());
 		
+		// save annotations
+		if(gsea.getAnnotations()!=null && gsea.getAnnotations().size()>0){
+			IOUtils.write(outdir + "/" + annotFileName, gsea.getAnnotations().toString());
+			result.addOutputItem(new Item("annot_" + filterInfo.getName(),annotFileName,"Annotations for " + filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
+		} else {
+			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"no annotations found for input ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
+		}	
+	
+	
 	}
 	
-	private void saveLogisticScanResults(LogisticScan logistic, FunctionalDbDescriptor fiterInfo) throws IOException{
 		
-		String fileName = fiterInfo.getName() + ".txt";
-		String annotFileName = fiterInfo.getName() + ".annot";
-		
-		// save statistic results					
-		List<String> testResultOutput = LogisticResultToStringList(logistic.getResults());
-		
-		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
-		result.addOutputItem(new Item(fiterInfo.getName(),fileName,fiterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("TABLE","FATISCAN_LOGISTIC_TABLE",fiterInfo.getPrefix().toUpperCase()),new HashMap<String,String>(),"Database tests"));
-						
-		// save annotation
-		IOUtils.write(outdir + "/" + annotFileName, logistic.getAnnotations().toString());
-		result.addOutputItem(new Item("annot_" + fiterInfo.getName(),annotFileName,"Annotations for " + fiterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
-		
-//		// save graph
-//		List<GeneSetAnalysisTestResult> significants = logistic.getSignificant();
-//		if(significants!=null && significants.size()>0){
-//			String graphFileName = name + "_graph.png"; 
-//			FatiScanGraph.fatiScanGraph(significants,"Significant terms graph for " + title,outdir + "/" +  graphFileName);			
-//			result.addOutputItem(new Item("graph_" + name,graphFileName,"Significant terms graph for " + title,Item.TYPE.IMAGE,Arrays.asList("FATISCAN"),new HashMap<String,String>(),"Database tests"));
-//		} else {
-//			result.addOutputItem(new Item("graph_" + name,"No significant terms found","Significant terms graph for " + title,Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Database tests"));
-//		}
-		
+
+	
+
+	
+	
+	/*
+	 * Annotations count
+	 */
+	private void addAnnotationReport(GeneSetAnalysis fatiscan, String dbName){
+		DecimalFormat formatter = new DecimalFormat("#######.##");
+		double list1Percentage = ((double)(fatiscan.getAnnotatedCounter())/(double)fatiscan.getIdList().size())*100.0;		
+		String listMessage = fatiscan.getAnnotatedCounter() + " of " + fatiscan.getIdList().size() + " (" + formatter.format(list1Percentage) + "%) " + formatter.format(fatiscan.getMeanAnnotationsPerId()) + " annotations/id";
+		annotationReport.append(dbName).append("\t").append(listMessage).append("\n");
 	}
-	
-	
-	protected List<String> FatiScanResultToStringList(List<GeneSetAnalysisTestResult> testResult){
-		return FatiScanResultToStringList(testResult,true);
-	}	
-	protected List<String> FatiScanResultToStringList(List<GeneSetAnalysisTestResult> testResult, boolean header){
-		List<String> result = new ArrayList<String>();
-		if(header) result.add(GeneSetAnalysisTestResult.fatiScanHeader());
-		for(int i=0; i<testResult.size(); i++){			
-			result.add(testResult.get(i).toFatiScanString());
-		}
-		return result;
-	}
-	
-	protected List<String> LogisticResultToStringList(List<GeneSetAnalysisTestResult> testResult){
-		return LogisticResultToStringList(testResult,true);
-	}	
-	protected List<String> LogisticResultToStringList(List<GeneSetAnalysisTestResult> testResult, boolean header){
-		List<String> result = new ArrayList<String>();
-		if(header) result.add(GeneSetAnalysisTestResult.LogisticHeader());
-		for(int i=0; i<testResult.size(); i++){			
-			result.add(testResult.get(i).toLogisticString());
-		}
-		return result;
+	private void saveAnnotationsReport() throws IOException{
+		IOUtils.write(outdir + "/annotations_per_db.txt", annotationReport.toString());
+		result.getOutputItems().add(1,new Item("annotations_per_db","annotations_per_db.txt","Id annotations per DB",Item.TYPE.FILE,Arrays.asList("TABLE","SUMMARY_TABLE"),new HashMap<String,String>(),"Summary"));
 	}
 	
 	
