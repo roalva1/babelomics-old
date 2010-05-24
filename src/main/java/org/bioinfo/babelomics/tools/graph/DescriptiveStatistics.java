@@ -32,6 +32,7 @@ import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 
 
 public class DescriptiveStatistics extends BabelomicsTool {
@@ -64,7 +65,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		
 		updateJobStatus("10", "init execution");
 		dataset = null;
-		className = commandLine.getOptionValue("classname", null);		
+		className = commandLine.getOptionValue("classname", null);
 		axeTitle = commandLine.getOptionValue("title", "");
 		axeTitle = axeTitle.replaceAll("_____", " ");
 		//axeTitle = ArrayUtils.toString(commandLine.getOptionValues("title")," ");
@@ -172,7 +173,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 
 	private void preloadSeries(HistogramChart hc,BoxPlotChart bp) {
 		try {
-			if (className!=null){
+			if (className!=null && className != "all_classes"){
 				dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
 				
 				values = dataset.getVariables().getByName(className).getLabels();
@@ -180,9 +181,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 					int[] colIndexByVariableValue = dataset.getColumnIndexesByVariableValue(className, str);
 					doubleVars = new ArrayList<Double>(colIndexByVariableValue.length);
 					DoubleMatrix matrixByVal =dataset.getSubMatrixByColumns(colIndexByVariableValue);
-					addSeries(matrixByVal, hc,bp, str);
-				
-					
+					addSeries(matrixByVal, hc,bp, str);	
 				}
 			}
 			else{
@@ -199,13 +198,52 @@ public class DescriptiveStatistics extends BabelomicsTool {
 
 	private void addSeries(DoubleMatrix matrixByVal, HistogramChart hc, BoxPlotChart bp, String label) {
 		String title = label==null?"":label;
+		int[] variablesByval = null;
+		List<String> samplesNames = dataset.getSampleNames();
+		if(label != null){
+			variablesByval = dataset.getColumnIndexesByVariableValue(className, label);	
+		}
 		if (hc != null){
-			hc.addSeries(matrixByVal.getColumn(0),title);
-			if(label==null) hc.removeLegend();			
+			if (matrixByVal.getRowDimension() != 0 && matrixByVal.getColumnDimension() != 0  ) {
+				for(int i=0; i < matrixByVal.getColumnDimension(); i++) {
+					String sampleName ="";
+					if(label != null){
+						sampleName = samplesNames.get(variablesByval[i]);
+						hc.addSeries(matrixByVal.getColumn(i), sampleName+"("+ label +")");
+					}
+					else{
+						sampleName = dataset.getSampleNames().get(i);
+						hc.addSeries(matrixByVal.getColumn(i), sampleName);	
+					}
+					
+				}
+			}
+			else{
+				hc.addSeries(matrixByVal.getColumn(0),title);	
+			}
+			
+			//hc.removeLegend();		
 		}
 		if(bp != null ){
-			bp.addSeries(matrixByVal.getColumn(0),title, "");
-			if(label==null) bp.removeLegend();
+			if (matrixByVal.getRowDimension() != 0 && matrixByVal.getColumnDimension() != 0  ) {
+				
+				for(int i=0; i < matrixByVal.getColumnDimension(); i++) {
+					String sampleName = "";
+					if(label != null){
+						sampleName = samplesNames.get(variablesByval[i]);
+						bp.addSeries(matrixByVal.getColumn(i),sampleName+"("+ label +")", "");
+					}else{
+						sampleName = dataset.getSampleNames().get(i);
+						bp.addSeries(matrixByVal.getColumn(i),sampleName, "");
+					}	
+				
+				}
+			}
+			else{
+				bp.addSeries(matrixByVal.getColumn(0),title, "");	
+			}
+			
+			//bp.removeLegend();
 		}
 	}
 	
