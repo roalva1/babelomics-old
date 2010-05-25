@@ -105,8 +105,8 @@ public class ClusteringUtils {
 			newickHPanel = new NewickPanel("", x, y, width, height);
 
 			newickHPanel.setNewick(hTree);
-//			newickHPanel.setLevelSeparation(cellSide);
-//			newickHPanel.setLeafSeparation(cellSide);
+			newickHPanel.setLevelSeparation(cellSide);
+			newickHPanel.setLeafSeparation(cellSide);
 			newickHPanel.setShowLabels(false);
 			newickHPanel.setVertical(false);
 		}
@@ -122,8 +122,8 @@ public class ClusteringUtils {
 			newickVPanel = new NewickPanel("", x, y, width, height);
 			
 			newickVPanel.setNewick(vTree);
-//			newickVPanel.setLevelSeparation(cellSide);
-//			newickVPanel.setLeafSeparation(cellSide);
+			newickVPanel.setLevelSeparation(cellSide);
+			newickVPanel.setLeafSeparation(cellSide);
 			newickVPanel.setShowLabels(false);
 			newickVPanel.setVertical(true);
 		}
