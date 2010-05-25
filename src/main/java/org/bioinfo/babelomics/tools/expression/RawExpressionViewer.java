@@ -176,7 +176,7 @@ public class RawExpressionViewer extends BabelomicsTool {
 			//
 			ExpressionUtils.createRawDataRObject(readingBinPath, rawFileNames, getSamples(rawFileNames), rawDataRObjectFile.getAbsolutePath(), "raw_data.Rout", outdir);			
 			if ( ! rawDataRObjectFile.exists() ) {
-				abort("errorcreatingreadingrobject_execute_rawexpressionviewer", "impossible to create R object from your raw files", "impossible to create R object from your raw files", "impossible to create R object from your raw files");				
+				abort("errorcreatingreadingrobject_execute_rawexpressionviewer", "Error", "Error reading your raw data files, please, check your input files", "Error reading your raw data files, please, check your input files");				
 			}
 
 			if ( "affy".equalsIgnoreCase(technology) ) {
