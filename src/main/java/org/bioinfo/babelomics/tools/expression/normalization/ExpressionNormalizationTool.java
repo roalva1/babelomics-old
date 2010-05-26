@@ -34,6 +34,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 	String technology = "";
 	List<String> rawFileNames = null;
 	File tmpDir = null;
+	String sampleInfoPath = "";
 
 	public ExpressionNormalizationTool() {
 		initOptions();
@@ -70,6 +71,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 	public void prepare() throws IOException {
 		outdir = outdir + "/";
 		tmpDir = new File(outdir + "tmp");
+		sampleInfoPath = tmpDir + "/sampleinfo.txt";
 		String compressedFileName = commandLine.getOptionValue("compressed-file", null);
 		String rawDirName = commandLine.getOptionValue("raw-dir", null);
 		List<String> tags = StringUtils.toList(commandLine.getOptionValue("compressed-file-tags", ""), ",");
@@ -234,8 +236,8 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		if ( new File(outdir + "/" + ExpressionUtils.getNormalizedFileName()).exists() && 
 				new File(outdir + "/" + ExpressionUtils.getFeatureDataFileName()).exists() ) {
 
-			file = new File(outdir + "/normalized_dataset.txt"); 			
-			ExpressionUtils.createDataset(outdir + "/" + ExpressionUtils.getNormalizedFileName(), outdir + "/" + ExpressionUtils.getFeatureDataFileName(), 1, file.getAbsolutePath());
+			file = new File(outdir + "/normalized_dataset.txt"); 
+			ExpressionUtils.createDataset(outdir + "/" + ExpressionUtils.getNormalizedFileName(), outdir + "/" + ExpressionUtils.getFeatureDataFileName(), 1, file.getAbsolutePath(), sampleInfoPath);
 
 			if ( file.exists() ) {				
 				String tags = "data,datamatrix,expression";
@@ -685,6 +687,10 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 	private void saveAsDataset(File file) throws IOException, InvalidIndexException {
 		Dataset dataset = new Dataset(file);
 		dataset.load();
+		if ( new File(sampleInfoPath).exists() ) {
+			String sampleInfo = ListUtils.toString(IOUtils.readLines(new File(sampleInfoPath)), "\n");
+			dataset.setVariables(sampleInfo);
+		}
 		dataset.save();
 	}
 
