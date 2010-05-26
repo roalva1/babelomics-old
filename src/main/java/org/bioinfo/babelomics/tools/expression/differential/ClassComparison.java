@@ -241,9 +241,12 @@ public class ClassComparison extends BabelomicsTool {
 			test = "log";
 			testLabel = "Log";
 			
+			columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
+			rowOrder = ListUtils.order(ArrayUtils.toList(logRes), true);
+			
 			dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
-			dataFrame.addColumn(test, ArrayUtils.toStringList(logRes));
-			dataFrame.setRowNames(subDataset.getFeatureNames());	
+			dataFrame.addColumn(test, ListUtils.ordered(ArrayUtils.toStringList(logRes), rowOrder));
+			dataFrame.setRowNames(ListUtils.ordered(subDataset.getFeatureNames(), rowOrder));	
 			featureData = new FeatureData(dataFrame);
 			file = new File(outdir + "/" + test + "_foldchange.txt");
 			IOUtils.write(file, dataFrame.toString(true, true));
@@ -254,8 +257,6 @@ public class ClassComparison extends BabelomicsTool {
 			
 			// generating heatmap
 			//
-			columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
-			rowOrder = ListUtils.order(ArrayUtils.toList(logRes), true);
 			heatmap = DiffExpressionUtils.generateHeatmap(subDataset, className, columnOrder, rowOrder, test + " fold-change", logRes, null, null);			
 			heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
 			try {
@@ -271,9 +272,12 @@ public class ClassComparison extends BabelomicsTool {
 			test = "diff";
 			testLabel = "Diff";
 			
+			columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
+			rowOrder = ListUtils.order(ArrayUtils.toList(logRes), true);
+
 			dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
-			dataFrame.addColumn(test, ArrayUtils.toStringList(diffRes));
-			dataFrame.setRowNames(subDataset.getFeatureNames());	
+			dataFrame.addColumn(test, ListUtils.ordered(ArrayUtils.toStringList(diffRes), rowOrder));
+			dataFrame.setRowNames(ListUtils.ordered(subDataset.getFeatureNames(), rowOrder));	
 			featureData = new FeatureData(dataFrame);
 			file = new File(outdir + "/" + test + "_foldchange.txt");
 			IOUtils.write(file, dataFrame.toString(true, true));
@@ -284,8 +288,6 @@ public class ClassComparison extends BabelomicsTool {
 			
 			// generating heatmap
 			//
-			columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
-			rowOrder = ListUtils.order(ArrayUtils.toList(logRes), true);
 			heatmap = DiffExpressionUtils.generateHeatmap(subDataset, className, columnOrder, rowOrder, test + " fold-change", diffRes, null, null);			
 			heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
 			try {
