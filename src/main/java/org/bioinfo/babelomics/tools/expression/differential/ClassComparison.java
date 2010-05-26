@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.bioinfo.babelomics.methods.expression.differential.Limma;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
@@ -225,26 +226,87 @@ public class ClassComparison extends BabelomicsTool {
 
 			updateJobStatus("80", "saving results");
 
-			DataFrame dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
+			String test, testLabel;
+			DataFrame dataFrame;
+			FeatureData featureData;
+			File file;
+			
+			int[] columnOrder;
+			int[] rowOrder;
+			Canvas heatmap;
+			String heatmapFilename;
+			
+			// log fold change
+			//
+			test = "log";
+			testLabel = "Log";
+			
+			dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
+			dataFrame.addColumn(test, ArrayUtils.toStringList(logRes));
+			dataFrame.setRowNames(subDataset.getFeatureNames());	
+			featureData = new FeatureData(dataFrame);
+			file = new File(outdir + "/" + test + "_foldchange.txt");
+			IOUtils.write(file, dataFrame.toString(true, true));
+			//featureData.save(file);
+			if ( file.exists() ) {
+				result.addOutputItem(new Item(test + "_foldchange", file.getName(), testLabel + " fold-change output file", TYPE.FILE, StringUtils.toList("TABLE," + test.toUpperCase() + "_FOLD_CHANGE_TABLE", ","), new HashMap<String, String>(2), testLabel + " fold-change.Output files"));											
+			}		
+			
+			// generating heatmap
+			//
+			columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
+			rowOrder = ListUtils.order(ArrayUtils.toList(logRes), true);
+			heatmap = DiffExpressionUtils.generateHeatmap(subDataset, className, columnOrder, rowOrder, test + " fold-change", logRes, null, null);			
+			heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
+			try {
+				heatmap.save(heatmapFilename);
+				if ( new File(heatmapFilename).exists() ) {
+					result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", testLabel + ". fold-change heatmap with all terms", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), testLabel + " fold-change.Heatmap image"));
+				}
+			} catch (IOException e) {
+				printError("ioexception_executet_classcomparison", "error generating heatmap", e.toString(), e);
+			}
 
-			dataFrame.addColumn("log", ArrayUtils.toStringList(logRes));
-			dataFrame.addColumn("diff", ArrayUtils.toStringList(diffRes));
+			
+			test = "diff";
+			testLabel = "Diff";
+			
+			dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
+			dataFrame.addColumn(test, ArrayUtils.toStringList(diffRes));
+			dataFrame.setRowNames(subDataset.getFeatureNames());	
+			featureData = new FeatureData(dataFrame);
+			file = new File(outdir + "/" + test + "_foldchange.txt");
+			IOUtils.write(file, dataFrame.toString(true, true));
+			//featureData.save(file);
+			if ( file.exists() ) {
+				result.addOutputItem(new Item(test + "_foldchange", file.getName(), testLabel + " fold-change output file", TYPE.FILE, StringUtils.toList("TABLE," + test.toUpperCase() + "_FOLD_CHANGE_TABLE", ","), new HashMap<String, String>(2), testLabel + " fold-change.Output files"));											
+			}		
+			
+			// generating heatmap
+			//
+			columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
+			rowOrder = ListUtils.order(ArrayUtils.toList(logRes), true);
+			heatmap = DiffExpressionUtils.generateHeatmap(subDataset, className, columnOrder, rowOrder, test + " fold-change", diffRes, null, null);			
+			heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
+			try {
+				heatmap.save(heatmapFilename);
+				if ( new File(heatmapFilename).exists() ) {
+					result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", testLabel + ". fold-change heatmap with all terms", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), testLabel + " fold-change.Heatmap image"));
+				}
+			} catch (IOException e) {
+				printError("ioexception_executet_classcomparison", "error generating heatmap", e.toString(), e);
+			}
 
-			dataFrame.setRowNames(subDataset.getFeatureNames());
+			
+			
 
-			FeatureData featureData = new FeatureData(dataFrame);
 
-			File file = new File(outdir + "/foldchange.txt");
-			featureData.save(file);
 //			if ( file.exists() ) {
 //				result.addOutputItem(new Item("foldchangefile", file.getName(), "Fold-change output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Fold-change output files"));							
 //			}
 //
 //			file = new File(outdir + "/foldchange_table.txt");
 //			IOUtils.write(file, dataFrame.toString(true, true));
-			if ( file.exists() ) {
-				result.addOutputItem(new Item("foldchangetable", file.getName(), "Fold-change output table", TYPE.FILE, StringUtils.toList("TABLE,FOLD_CHANGE_TABLE", ","), new HashMap<String, String>(2), "Fold-change output files"));											
-			}						
 
 			//DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
 
