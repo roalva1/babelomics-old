@@ -173,7 +173,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 
 	private void preloadSeries(HistogramChart hc,BoxPlotChart bp) {
 		try {
-			if (className!=null && className != "all_classes"){
+			if (className!=null && !className.equalsIgnoreCase("all_classes")){
 				dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
 				
 				values = dataset.getVariables().getByName(className).getLabels();
