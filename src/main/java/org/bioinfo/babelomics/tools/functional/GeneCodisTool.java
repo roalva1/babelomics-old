@@ -141,8 +141,7 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 			// infrared connector			
 			DBConnector dbConnector = new DBConnector(species, new File(babelomicsHomePath + "/conf/infrared.properties"));		
 			
-			// prepare params
-		
+			// prepare params		
 			prepare();
 			
 			GeneCodis genecodis = null;
@@ -186,18 +185,17 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 	
 	
 	private GeneCodis doTest(List<String> idList1, List<String> idList2,	FeatureList<AnnotationItem> yourAnnotations, DBConnector dbConnector) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, IOException {
-		GeneCodis genecodis = null;
+		
 		// db attributes
-		String name = "your_annotations";
-		String title = "Your annotations";
 		FunctionalDbDescriptor filterInfo = new FunctionalDbDescriptor("your_annotation","Your annotations", "your_annotations","Your annotations");
-		//File inputFile = new File(outdir + "/"+name+"_WellFormedInput");
+			
 		logger.println("Starting doing test your_annotations...");
 		
-		if(list2!=null) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, idList2, yourAnnotations, dbConnector, duplicatesMode, support, supportRandom,correction, test);
-		else if(isRestOfGenome()) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, yourAnnotations, dbConnector, duplicatesMode, support, supportRandom, correction, test);
+		GeneCodis genecodis = null;
+		if(list2!=null) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,filterInfo.getName(),idList1, idList2, yourAnnotations, dbConnector, duplicatesMode, support, supportRandom,correction, test);
+		else if(isRestOfGenome()) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,filterInfo.getName(),idList1, yourAnnotations, dbConnector, duplicatesMode, support, supportRandom, correction, test);
                                                  
-		runAndSave(genecodis, name, title, filterInfo);
+		runAndSave(genecodis,filterInfo);
 		
 		logger.println("addAnnotationReport...");
 		significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
@@ -207,37 +205,34 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 
 
 	private GeneCodis doTest(List<String> idList1, List<String> idList2, FunctionalFilter filter, DBConnector dbConnector) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, IOException{
-		GeneCodis genecodis = null;
-		// db attributes
-		String name = getDBName(filter);
-		String title = getDBTitle(filter);		
+
+		// db attributes				
 		FunctionalDbDescriptor filterInfo= new FunctionalDbDescriptor(filter);
+		
 		//File inputFile = new File(outdir + "/"+name+"_WellFormedInput");
 		logger.println("Starting doing test 2 list and filter...");
 		
-		if(list2!=null) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, idList2, filter, dbConnector, duplicatesMode, support, supportRandom,correction, test);
-		else if(isRestOfGenome()) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,name,idList1, filter, dbConnector, duplicatesMode, support, supportRandom, correction, test);
+		GeneCodis genecodis = null;
+		if(list2!=null) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,filterInfo.getName(),idList1, idList2, filter, dbConnector, duplicatesMode, support, supportRandom,correction, test);
+		else if(isRestOfGenome()) genecodis = new GeneCodis(babelomicsHomePath + "/bin/genecodis/genecodis_bin ",outdir,filterInfo.getName(),idList1, filter, dbConnector, duplicatesMode, support, supportRandom, correction, test);
 		
-		runAndSave(genecodis, name, title,filterInfo);
+		runAndSave(genecodis,filterInfo);
 		
 		significantDbs.add(filterInfo.getPrefix().toUpperCase() + "_TERM");
 		logger.println("addAnnotationReport...");
-		addAnnotationReport(genecodis,title);
+		addAnnotationReport(genecodis,filterInfo.getTitle());
 		
 		return genecodis;
 	}
 	
-	private void runAndSave(GeneCodis genecodis, String name, String title,FunctionalDbDescriptor filterInfo) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, IOException{
+	private void runAndSave(GeneCodis genecodis,FunctionalDbDescriptor filterInfo) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, IOException{
 		
-		logger.println("doing test...");
 		//run run...
 		genecodis.run();
-		logger.println("doing test OK...");
-		//save results
 		
-		logger.println("saveGenecodisResults...");
-		saveGenecodisResults(genecodis, name, title, filterInfo);
-		logger.println("OK...");
+		//save results		
+		saveGenecodisResults(genecodis,filterInfo);
+		
 	}
 	
 	private void addAnnotationReport(GeneCodis genecodis, String dbName){
@@ -257,104 +252,74 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 	}
 	
 	private void addInputParams(){
-		// species
-		logger.println("addInputParams for species........" + species);
-		addInputParam("species", "Species", species);
-		logger.println("ok");
-		// duplicates
 		
-		HashMap<Integer,String> duplicates = new HashMap<Integer, String>();
+		// species		
+		addInputParam("species", "Species", species);		
 		
+		// duplicates		
+		HashMap<Integer,String> duplicates = new HashMap<Integer, String>();		
 		duplicates.put(FatiGO.REMOVE_NEVER, "Never remove");
 		duplicates.put(FatiGO.REMOVE_EACH, "Remove separately on each list");
 		duplicates.put(FatiGO.REMOVE_REF, "Remove list 1 ids from list 2 (complementary list)");
 		duplicates.put(FatiGO.REMOVE_GENOME, "Remove list 1 ids from genome");
-		duplicates.put(FatiGO.REMOVE_ALL, "Remove all duplicates (owned and shared duplicates)");
-		logger.println("addInputParams duplicates........" + duplicates.get(duplicatesMode));
+		duplicates.put(FatiGO.REMOVE_ALL, "Remove all duplicates (owned and shared duplicates)");		
 		addInputParam("duplicates", "Duplicates management", duplicates.get(duplicatesMode));
-		// others params laterality
-		logger.println("addInputParams support........" + String.valueOf(support));
-		addInputParam("support", "Minimum number of genes", String.valueOf(support));
-		logger.println("addInputParams supportRandom........" + String.valueOf(supportRandom));
-		addInputParam("supportRandom", "Minimum number of genes for correcting p-values", String.valueOf(supportRandom));
-		logger.println("addInputParams test........" + test.toString());
-		addInputParam("test", "Statistical test", test.toString());
-		logger.println("addInputParams correction........" + correction.toString());
+		
+		// others params laterality		
+		addInputParam("support", "Minimum number of genes", String.valueOf(support));		
+		addInputParam("supportRandom", "Minimum number of genes for correcting p-values", String.valueOf(supportRandom));		
+		addInputParam("test", "Statistical test", test.toString());		
 		addInputParam("correction", "Correction", correction.toString());
+		
 	}	
 	private void addInputParam(String id, String label, String value){
 		result.addOutputItem(new Item(id,value,label,Item.TYPE.MESSAGE,Arrays.asList("INPUT_PARAM"),new HashMap<String,String>(),"Input params"));
 	}
 	
-	private void saveDuplicatesReport(GeneCodis genecodis) throws IOException{
-		logger.println("saveDuplicatesReport1........" );
-		DecimalFormat formatter = new DecimalFormat("##.##");
-		logger.println("ok........" );
-		// list 1
+	private void saveDuplicatesReport(GeneCodis genecodis) throws IOException{		
+		DecimalFormat formatter = new DecimalFormat("##.##");		
 		
-		logger.println("genecodis.getList1SizeBeforeDuplicates()........" +genecodis.getList1SizeBeforeDuplicates());
+		// list 1	
+		int list1Duplicates = genecodis.getList1SizeBeforeDuplicates()-genecodis.getList1SizeAfterDuplicates();		
+		double list1DuplicatesPercentage = (double)(list1Duplicates)/(double)genecodis.getList1SizeBeforeDuplicates();		
+		String list1DuplicatesMessage = list1Duplicates + " of " + genecodis.getList1SizeBeforeDuplicates() + " (" + formatter.format(list1DuplicatesPercentage) + "%)";		
 		
-		logger.println("genecodis.getList1SizeAfterDuplicates()........" +genecodis.getList1SizeAfterDuplicates());
-		
-		int list1Duplicates = genecodis.getList1SizeBeforeDuplicates()-genecodis.getList1SizeAfterDuplicates();
-		logger.println("saveDuplicatesReport2........" );
-		double list1DuplicatesPercentage = (double)(list1Duplicates)/(double)genecodis.getList1SizeBeforeDuplicates();
-		logger.println("saveDuplicatesReport3........" );
-		String list1DuplicatesMessage = list1Duplicates + " of " + genecodis.getList1SizeBeforeDuplicates() + " (" + formatter.format(list1DuplicatesPercentage) + "%)";
-		logger.println("saveDuplicatesReport4......." );
-		// list 2
-		logger.println("saveDuplicatesReport5........" );
-		int list2Duplicates = genecodis.getList2SizeBeforeDuplicates()-genecodis.getList2SizeAfterDuplicates();
-		logger.println("saveDuplicatesReport6........" );
-		double list2DuplicatesPercentage = (double)(list2Duplicates)/(double)genecodis.getList2SizeBeforeDuplicates();
-		logger.println("saveDuplicatesReport7........" );
+		// list 2		
+		int list2Duplicates = genecodis.getList2SizeBeforeDuplicates()-genecodis.getList2SizeAfterDuplicates();		
+		double list2DuplicatesPercentage = (double)(list2Duplicates)/(double)genecodis.getList2SizeBeforeDuplicates();		
 		String list2DuplicatesMessage = list2Duplicates + " of " + genecodis.getList2SizeBeforeDuplicates() + " (" + formatter.format(list2DuplicatesPercentage) + "%)";
-		logger.println("saveDuplicatesReport8........" );
-		// report
-		logger.println("saveDuplicatesReport9........" );
-		duplicatesReport = new StringBuilder();
-		logger.println("saveDuplicatesReport10........" );
-		duplicatesReport.append("#Detail").append("\t").append("List 1").append("\t").append(list2label).append("\n");
-		logger.println("saveDuplicatesReport11........" );
-		duplicatesReport.append("Number of duplicates").append("\t").append(list1DuplicatesMessage).append("\t").append(list2DuplicatesMessage).append("\n");
-		logger.println("saveDuplicatesReport12........" );
+		
+		// report		
+		duplicatesReport = new StringBuilder();		
+		duplicatesReport.append("#Detail").append("\t").append("List 1").append("\t").append(list2label).append("\n");		
+		duplicatesReport.append("Number of duplicates").append("\t").append(list1DuplicatesMessage).append("\t").append(list2DuplicatesMessage).append("\n");		
 		duplicatesReport.append("Number of finally used ids").append("\t").append(genecodis.getList1SizeAfterDuplicates()).append("\t").append(genecodis.getList2SizeAfterDuplicates()).append("\n");
-		logger.println("saveDuplicatesReport13........" );
 		IOUtils.write(outdir + "/duplicates.txt", duplicatesReport.toString());
-		logger.println("saveDuplicatesReport14........" );
 		result.addOutputItem(new Item("duplicates","duplicates.txt","Duplicates management",Item.TYPE.FILE,Arrays.asList("TABLE","SUMMARY_TABLE"),new HashMap<String,String>(),"Summary"));
-		logger.println("saveDuplicatesReport15........" );
+		
 	}
 	
-	private void saveGenecodisResults(GeneCodis genecodis,String name,String title, FunctionalDbDescriptor filterInfo) throws IOException{
-		String fileName = name + ".txt";
-		String annotFileName = name + ".annot";
+	private void saveGenecodisResults(GeneCodis genecodis,FunctionalDbDescriptor filterInfo) throws IOException{
+		
+		String fileName = filterInfo.getName() + ".txt";
+		String annotFileName = filterInfo.getName() + ".annot";
 		updateJobStatus("80", "saving results");
-		
-		//IOUtils.write(outdir + "/" +fileName, genecodis.getResults());
-		
+				
 		if (genecodis.getSignificantTerms()>0){
 			String correctionParam = (correction== correctionFactor.none)?"CORRECTEDNONE":"CORRECTED";
-			
-				result.addOutputItem(new Item(name+ "_concurrence.txt", name+ "_concurrence.txt", "Co-ocurrence annotations results", TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE_"+test.toString().toUpperCase()+"_"+correctionParam,filterInfo.getPrefix().toUpperCase() + "_TERM"), new HashMap<String, String>(), "Co-ocurrence annotations results"));
-				result.addOutputItem(new Item(name+ "_singular.txt", name+ "_singular.txt", "Singular annotations results", TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE_"+test.toString().toUpperCase()+"_"+correctionParam,filterInfo.getPrefix().toUpperCase() + "_TERM"), new HashMap<String, String>(), "Singular annotations results"));
-				
-//		result.addOutputItem(new Item(filterInfo.getName() + "_leyenda","TS = Number of annotated genes in the reference list (Total number of genes in the reference list);S = Number of annotated genes in the input list (Total number of genes in the input list);Hyp = Hypergeometric pValue; Hyp* = Corrected hypergeometric pValue ","",Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Co-ocurrence annotations results"));
-//		result.addOutputItem(new Item(filterInfo.getName() + "_leyenda","TS = Number of annotated genes in the reference list (Total number of genes in the reference list);S = Number of annotated genes in the input list (Total number of genes in the input list);Hyp = Hypergeometric pValue; Hyp* = Corrected hypergeometric pValue ","",Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Singular annotations results"));
-		result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Co-ocurrence annotations results"));
-		result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Singular annotations results"));
-
+			result.addOutputItem(new Item(filterInfo.getName() + "_concurrence.txt", filterInfo.getName() + "_concurrence.txt", "Co-ocurrence annotations results", TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE_"+test.toString().toUpperCase()+"_"+correctionParam,filterInfo.getPrefix().toUpperCase() + "_TERM"), new HashMap<String, String>(), "Co-ocurrence annotations results"));
+			result.addOutputItem(new Item(filterInfo.getName() + "_singular.txt", filterInfo.getName() + "_singular.txt", "Singular annotations results", TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE_"+test.toString().toUpperCase()+"_"+correctionParam,filterInfo.getPrefix().toUpperCase() + "_TERM"), new HashMap<String, String>(), "Singular annotations results"));				
+			result.addOutputItem(new Item(filterInfo.getName() + "_description", filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Co-ocurrence annotations results"));
+			result.addOutputItem(new Item(filterInfo.getName() + "_description", filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"Singular annotations results"));
 		}else if (genecodis.getSignificantTerms()==0){
-			result.addOutputItem(new Item(name+"_genecodis_file","no significant terms found","Annotations results ",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotations results"));
-		}		
-		else if (genecodis.getSignificantTerms()==-1){
-			result.addOutputItem(new Item(name+"_genecodis_file","Error running tool","Annotations results "+name,Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant terms"));
+			result.addOutputItem(new Item(filterInfo.getName() + "_genecodis_file","no significant terms found","Annotations results ",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotations results"));
+		} else if (genecodis.getSignificantTerms()==-1){
+			result.addOutputItem(new Item(filterInfo.getName() +"_genecodis_file","Error running tool","Annotations results " + filterInfo.getName(),Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant terms"));
 		}
-	
-		
+			
 		// save annotation
 		IOUtils.write(outdir + "/" + annotFileName, genecodis.getAnnotations().toString());
-		result.addOutputItem(new Item("annot_" + name,annotFileName,"Annotations for " + title,Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
+		result.addOutputItem(new Item("annot_" + filterInfo.getName(),annotFileName,"Annotations for " + filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
 					
 	}
 	

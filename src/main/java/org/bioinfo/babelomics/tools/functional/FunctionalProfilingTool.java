@@ -2,13 +2,17 @@ package org.bioinfo.babelomics.tools.functional;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
+import org.bioinfo.babelomics.methods.functional.GeneSetAnalysisTestResult;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.commons.io.utils.FileUtils;
+import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.exception.InvalidIndexException;
@@ -18,23 +22,37 @@ import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
 import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
+import org.bioinfo.infrared.funcannot.filter.GOSlimFilter;
 import org.bioinfo.infrared.funcannot.filter.InterproFilter;
 import org.bioinfo.infrared.funcannot.filter.JasparFilter;
 import org.bioinfo.infrared.funcannot.filter.KeggFilter;
+import org.bioinfo.infrared.funcannot.filter.MiRnaTargetFilter;
 import org.bioinfo.infrared.funcannot.filter.OregannoFilter;
 import org.bioinfo.infrared.funcannot.filter.ReactomeFilter;
 import org.bioinfo.math.stats.inference.FisherExactTest;
 import org.bioinfo.tool.OptionFactory;
 
+import es.blast2go.prog.GoSlim;
+import es.blast2go.prog.graph.GetGraphApi;
+import es.blast2go.prog.graph.GoGraphException;
+
 
 public abstract class FunctionalProfilingTool extends BabelomicsTool {
 
+	public final static double DEFAULT_PVALUE_THRESHOLD = 0.05;
+	public final static double[] DEFAULT_PVALUES = {0.1,0.05,0.01,0.005};
+	public DecimalFormat pvalueFormatter = new DecimalFormat("#.####");
+	
 //	// JT.2009.09.07
 //	private String removeDuplicates;
 	
 	// input data		
 	protected boolean restOfGenome;
 
+	// reports
+	protected StringBuilder duplicatesReport;
+	protected StringBuilder annotationReport;
+	
 	// test
 	protected int testMode;
 		
@@ -45,21 +63,26 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	protected boolean isYourAnnotations;
 	protected FeatureList<AnnotationItem> yourAnnotations;
 
+	protected List<StringBuilder> significantCount;
+	
 	@Override
 	public void initOptions() {
 
 		// commons options
 		getOptions().addOption(OptionFactory.createOption("fisher", "the Fisher test mode, valid values: less, greater, two_sided. By default, two_sided", false));
+		getOptions().addOption(OptionFactory.createOption("go-dag", "Compute DAG for significant GO terms", false));
 		
 		// GO biological process options
 		addGOOptions("bp");
 		addGOOptions("cc");
 		addGOOptions("mf");
 
+		addGenericOptions("go-slim");
 		addGenericOptions("interpro");
 		addGenericOptions("kegg");
 		addGenericOptions("reactome");
 		addGenericOptions("biocarta");
+		addGenericOptions("mirna");
 		addGenericOptions("jaspar");
 		addGenericOptions("oreganno");
 
@@ -117,17 +140,17 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			parseGODb(commandLine,"mf");
 		}
 
+		parseGenericDb(commandLine,"go-slim");
 		parseGenericDb(commandLine,"interpro");
 		parseGenericDb(commandLine,"kegg");
-		parseGenericDb(commandLine,"reactome");		
+		parseGenericDb(commandLine,"reactome");
 		parseGenericDb(commandLine,"biocarta");
+		parseGenericDb(commandLine,"mirna");
 		parseGenericDb(commandLine,"jaspar");
 		parseGenericDb(commandLine,"oreganno");
-		
-
-		
+				
 		// species must be provided if any db is selected
-		if(commandLine.hasOption("go-bp") || commandLine.hasOption("go-mf") || commandLine.hasOption("go-cc") || commandLine.hasOption("kegg") || commandLine.hasOption("biocarta")){
+		if(commandLine.hasOption("go-bp") || commandLine.hasOption("go-mf") || commandLine.hasOption("go-cc") || commandLine.hasOption("go-slim") || commandLine.hasOption("interpro") || commandLine.hasOption("kegg") || commandLine.hasOption("reactome") || commandLine.hasOption("biocarta") || commandLine.hasOption("mirna") || commandLine.hasOption("jaspar") || commandLine.hasOption("oreganno")){
 			if(!commandLine.hasOption("species")) throw new ParseException("species is mandatory if any database specified");
 		}
 		
@@ -188,6 +211,9 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		if(commandLine.hasOption(db)) {
 			FunctionalFilter filter = null;
 			
+			if(db.equalsIgnoreCase("go-slim")){
+				filter = new GOSlimFilter();			
+			}			
 			if(db.equalsIgnoreCase("interpro")){
 				filter = new InterproFilter();		
 			}
@@ -199,6 +225,9 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			}
 			if(db.equalsIgnoreCase("biocarta")){
 				filter = new BiocartaFilter();						
+			}
+			if(db.equalsIgnoreCase("mirna")){
+				filter = new MiRnaTargetFilter();
 			}
 			if(db.equalsIgnoreCase("jaspar")){
 				filter = new JasparFilter();						
@@ -217,72 +246,78 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		}
 	}
 
-	protected String getDBName(Filter filter){
-		String name = StringUtils.randomString();
-		if(filter instanceof GOFilter) {						
-			GOFilter goFilter = (GOFilter) filter.clone();
-			name = "go_" + goFilter.getNamespace() + "_" + goFilter.getMinLevel() + "_" + goFilter.getMaxLevel();
-		} else if(filter instanceof KeggFilter) {
-			name = "kegg";
-		} else if(filter instanceof InterproFilter) {
-			name = "interpro";
-		} else if(filter instanceof ReactomeFilter) {
-			name = "reactome";
-		} else if(filter instanceof BiocartaFilter) {
-			name = "biocarta";
-		} else if(filter instanceof JasparFilter) {
-			name = "jaspar";
-		} else if(filter instanceof OregannoFilter) {
-			name = "oreganno";
-		}
-		return name;
-	}
-	
-	protected String getDBPrefix(Filter filter){
-		String name = StringUtils.randomString();
-		if(filter instanceof GOFilter) {		
-			name = "go";
-		} else if(filter instanceof KeggFilter) {
-			name = "kegg";
-		} else if(filter instanceof InterproFilter) {
-			name = "interpro";
-		} else if(filter instanceof ReactomeFilter) {
-			name = "reactome";
-		} else if(filter instanceof BiocartaFilter) {
-			name = "biocarta";
-		} else if(filter instanceof JasparFilter) {
-			name = "jaspar";
-		} else if(filter instanceof OregannoFilter) {
-			name = "oreganno";
-		}
-		return name;
-	}
-	
-	protected String getDBTitle(Filter filter){
-		String title = "Untitled",levels;
-		if(filter instanceof GOFilter) {						
-			GOFilter goFilter = (GOFilter) filter.clone();
-			if(goFilter.getMinLevel()==goFilter.getMaxLevel()) {
-				levels = "(level " + goFilter.getMinLevel() + ")";
-			} else{
-				levels = "(levels from " + goFilter.getMinLevel() + " to " + goFilter.getMaxLevel() + ")"; 
-			}						
-			title = "GO " + goFilter.getNamespace().replace("_", " ") + " " + levels;
-		} else if(filter instanceof KeggFilter) {
-			title = "Kegg";
-		} else if(filter instanceof InterproFilter) {
-			title = "InterPro";
-		}  else if(filter instanceof ReactomeFilter) {
-			title = "Reactome";
-		}	else if(filter instanceof BiocartaFilter) {
-			title = "Biocarta";
-		}	else if(filter instanceof JasparFilter) {
-			title = "Jaspar";
-		}	else if(filter instanceof OregannoFilter) {
-			title = "Oreganno";
-		}	
-		return title;
-	}
+//	protected String getDBName(Filter filter){
+//		String name = StringUtils.randomString();
+//		if(filter instanceof GOFilter) {						
+//			GOFilter goFilter = (GOFilter) filter.clone();
+//			name = "go_" + goFilter.getNamespace() + "_" + goFilter.getMinLevel() + "_" + goFilter.getMaxLevel();
+//		} else if(filter instanceof GOSlimFilter) {
+//			name = "go-slim";
+//		} else if(filter instanceof KeggFilter) {
+//			name = "kegg";
+//		} else if(filter instanceof InterproFilter) {
+//			name = "interpro";
+//		} else if(filter instanceof ReactomeFilter) {
+//			name = "reactome";
+//		} else if(filter instanceof BiocartaFilter) {
+//			name = "biocarta";
+//		} else if(filter instanceof JasparFilter) {
+//			name = "jaspar";
+//		} else if(filter instanceof OregannoFilter) {
+//			name = "oreganno";
+//		}
+//		return name;
+//	}
+//	
+//	protected String getDBPrefix(Filter filter){
+//		String name = StringUtils.randomString();
+//		if(filter instanceof GOFilter) {		
+//			name = "go";
+//		} else if(filter instanceof GOSlimFilter) {
+//			name = "go-slim";
+//		} else if(filter instanceof KeggFilter) {
+//			name = "kegg";
+//		} else if(filter instanceof InterproFilter) {
+//			name = "interpro";
+//		} else if(filter instanceof ReactomeFilter) {
+//			name = "reactome";
+//		} else if(filter instanceof BiocartaFilter) {
+//			name = "biocarta";
+//		} else if(filter instanceof JasparFilter) {
+//			name = "jaspar";
+//		} else if(filter instanceof OregannoFilter) {
+//			name = "oreganno";
+//		}
+//		return name;
+//	}
+//	
+//	protected String getDBTitle(Filter filter){
+//		String title = "Untitled",levels;
+//		if(filter instanceof GOFilter) {						
+//			GOFilter goFilter = (GOFilter) filter.clone();
+//			if(goFilter.getMinLevel()==goFilter.getMaxLevel()) {
+//				levels = "(level " + goFilter.getMinLevel() + ")";
+//			} else{
+//				levels = "(levels from " + goFilter.getMinLevel() + " to " + goFilter.getMaxLevel() + ")"; 
+//			}						
+//			title = "GO " + goFilter.getNamespace().replace("_", " ") + " " + levels;
+//		} else if(filter instanceof KeggFilter) {
+//			title = "GOSlim GOA";
+//		} else if(filter instanceof KeggFilter) {
+//			title = "Kegg";
+//		} else if(filter instanceof InterproFilter) {
+//			title = "InterPro";
+//		}  else if(filter instanceof ReactomeFilter) {
+//			title = "Reactome";
+//		}	else if(filter instanceof BiocartaFilter) {
+//			title = "Biocarta";
+//		}	else if(filter instanceof JasparFilter) {
+//			title = "Jaspar";
+//		}	else if(filter instanceof OregannoFilter) {
+//			title = "Oreganno";
+//		}	
+//		return title;
+//	}
 
 	
 	protected List<String> testResultToStringList(List<TwoListFisherTestResult> testResult){
@@ -298,6 +333,70 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		return result;
 	}
 		
+	protected void createGoGraph(List<TwoListFisherTestResult> raw, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
+		List<GeneSetAnalysisTestResult> result = new ArrayList<GeneSetAnalysisTestResult>(raw.size());
+		for(TwoListFisherTestResult test: raw){			
+			GeneSetAnalysisTestResult gseaTest = new GeneSetAnalysisTestResult(test);
+			result.add(gseaTest);
+		}
+		createGseaGoGraph(result,pvalue,filterInfo);
+	}
+	
+	protected void createGseaGoGraph(List<GeneSetAnalysisTestResult> significant, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
+		String prefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue);
+		
+		// preparing association file
+		StringBuilder association = new StringBuilder();		
+		double ratio,intensity;
+		for(GeneSetAnalysisTestResult result: significant){			
+			
+			//color=""+ (result.getList1Percentage()/(result.getList1Percentage()+result.getList2Percentage()));
+			ratio = result.getAdjPValue()/pvalue;
+			if(result.getList1Percentage()> result.getList2Percentage()){
+				intensity = (0.5 + (1-ratio)/2.0);	
+			} else {
+				intensity = ratio/2.0;
+			}
+			//System.err.println(result.getList1Percentage() + ":" + result.getList2Percentage() + " " + result.getAdjPValue() + " " + intensity);
+			
+			association.append(result.getTerm()).append("\t").append(result.getTerm()).append("\t").append(intensity).append("\t").append(result.getAdjPValue()).append("\n");
+		}
+		
+		try {
+			
+			// create graph directory
+			FileUtils.createDirectory(outdir + "/graphs");
+			
+			// save association file
+			IOUtils.write(outdir + "/graphs/" + prefix  + "_association.txt", association.toString());
+			
+			// namespace
+			String namespace = "b";
+			if(filterInfo.getName().contains("molecular_function")) namespace = "m";
+			if(filterInfo.getName().contains("cellular_component")) namespace = "c";
+			System.err.println("namespace: " + namespace);
+			
+			// init graph api
+			GetGraphApi graph = new GetGraphApi(outdir + "/graphs/",prefix,prefix  + "_association.txt",namespace,0,"byDesc",0.6,0,"orange");
+			
+			// setting server params
+			graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));				
+			graph.setDataBase(config.getProperty("BLAST2GO_HOST_NAME"),config.getProperty("BLAST2GO_DB_NAME"),config.getProperty("BLAST2GO_DB_USER"), config.getProperty("BLAST2GO_DB_PASSWORD"));
+			
+			// run
+			graph.run();
+			
+			// copy files
+			String imagePrefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue) + "_graphimage";
+			FileUtils.touch(new File(outdir + "/" + imagePrefix + ".png"));
+			FileUtils.copy(outdir + "/graphs/" + imagePrefix + ".png", outdir + "/" + imagePrefix + ".png");			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new GoGraphException(e.getMessage());
+		}	
+	}
+	
 	
 	public void setRestOfGenome(boolean restOfGenome) {
 		this.restOfGenome = restOfGenome;

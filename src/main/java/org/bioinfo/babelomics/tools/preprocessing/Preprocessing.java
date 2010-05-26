@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,7 +17,6 @@ import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
-import org.bioinfo.data.dataset.SampleVariable;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
@@ -31,6 +31,7 @@ public class Preprocessing extends BabelomicsTool {
 	public void initOptions() {
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
 		options.addOption(OptionFactory.createOption("logarithm-base", "the logarithm base to apply transformation, possible values: e, 2 10 for log base 2, log base 2 and log base 10", false));
+		options.addOption(OptionFactory.createOption("exp", "the exponential function, possible values: e, 2, 10", false));
 		options.addOption(OptionFactory.createOption("merge-replicates", "method to merge replicates, valid values are: mean or median", false));
 		options.addOption(OptionFactory.createOption("filter-missing", "minimum percentage of existing values, from 0 to 100", false));
 		options.addOption(OptionFactory.createOption("impute-missing", "method to impute missing values, valid values are: zero, mean, median, knn", false));
@@ -47,26 +48,41 @@ public class Preprocessing extends BabelomicsTool {
 
 	@Override
 	public void execute() {
+		boolean preprocessed = false;
+		
 		Dataset dataset = null;
 
 		int kvalue = 15;
 		String imputeMethodMsg = "";
-		String logBase = commandLine.getOptionValue("logarithm-base", null);
-		String mergeMethod = commandLine.getOptionValue("merge-replicates", null);
-		String filterPercentage = commandLine.getOptionValue("filter-missing", null);
-		String imputeMethod = commandLine.getOptionValue("impute-missing", null);
-		String extractIds = commandLine.getOptionValue("extract-ids", null);
-		String filterFilename = commandLine.getOptionValue("gene-file-filter", null);
+		String logBase = commandLine.getOptionValue("logarithm-base", "none");
+		String exp = commandLine.getOptionValue("exp",  "none");
+		String mergeMethod = commandLine.getOptionValue("merge-replicates",  "none");
+		String filterPercentage = commandLine.getOptionValue("filter-missing",  "none");
+		String imputeMethod = commandLine.getOptionValue("impute-missing",  "none");
+		String extractIds = commandLine.getOptionValue("extract-ids",  "none");
+		String filterFilename = commandLine.getOptionValue("gene-file-filter",  "none");
 
 		int progress = 1;
 		int finalProgress = 3;
 		if ( logBase != null && !("none".equalsIgnoreCase(logBase)) ) finalProgress++;
+		if ( exp != null && !("none".equalsIgnoreCase(exp)) ) finalProgress++;
 		if ( mergeMethod != null && !("none".equalsIgnoreCase(mergeMethod)) ) finalProgress++;
 		if ( filterPercentage != null && !("none".equalsIgnoreCase(filterPercentage)) ) finalProgress++;
 		if ( imputeMethod != null && !("none".equalsIgnoreCase(imputeMethod)) ) finalProgress++; 
-		if ( extractIds != null ) finalProgress++; 
-		if ( filterFilename != null && new File(filterFilename).exists() ) finalProgress++; 
+		if ( extractIds != null && !("none".equalsIgnoreCase(extractIds)) ) finalProgress++; 
+		if ( filterFilename != null && !("none".equalsIgnoreCase(filterFilename)) && new File(filterFilename).exists() ) finalProgress++; 
 
+		
+		// input parameters
+		//
+		result.addOutputItem(new Item("log_input_param", logBase, "Logarithmic transformation", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("exp_input_param", exp, "Exponential function", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("merge_input_param", mergeMethod, "Merge replicates", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("filter_input_param", filterPercentage, "Filter missing values", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("impute_input_param", ("knn".equalsIgnoreCase(imputeMethod) ? ("knn, k-value = " + commandLine.getOptionValue("k-value", "15")) : imputeMethod) , "Impute missing values", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("filenamefilter_input_param", (filterFilename != null && !"none".equalsIgnoreCase(filterFilename) ? "none" : new File(filterFilename).getName()), "ID-file filter", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("extractid_input_param", "" + (extractIds != null && !extractIds.equalsIgnoreCase("none")), "Extract IDs", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		
 		imputeMethodMsg = imputeMethod;
 		if ( "knn".equalsIgnoreCase(imputeMethod) ) {
 			try {
@@ -135,6 +151,39 @@ public class Preprocessing extends BabelomicsTool {
 			}
 			logger.debug("end of executing logarithm base " + logBase + "\n");
 			progress++;
+			preprocessed = true;
+		}
+
+		// apply exponential
+		//
+		if ( exp != null && !("none".equalsIgnoreCase(exp)) ) {
+
+			try {
+				jobStatus.addStatusMessage(StringUtils.decimalFormat((double)progress*100/finalProgress, "##.00"), "applying exponential " + exp);
+			} catch (FileNotFoundException e) {
+				abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
+			}
+			logger.debug("executing exponential " + exp + "...\n");
+
+			try {
+				if ( dataset.getDoubleMatrix() == null ) { 
+					try {
+						dataset.load();
+					} catch (Exception e) {
+						abort("exception_logbase_execute_preprocessing", "Error loading dataset '" + datasetFile.getName() + "' before applying logarithm base " + logBase, e.toString(), StringUtils.getStackTrace(e));
+					}
+					dataset.validate();
+				}
+
+				dataset.setDoubleMatrix(dataset.getDoubleMatrix().applyExponential(exp));				
+				dataset.validate();					
+			} 
+			catch (CloneNotSupportedException e) {
+				abort("cloneexecption_exponential_execute_preprocessing", "exponential preprocessing error", e.toString(), StringUtils.getStackTrace(e));
+			}
+			logger.debug("end of executing exponential " + exp + "\n");
+			progress++;
+			preprocessed = true;
 		}
 
 		// merge replicated rows
@@ -164,6 +213,7 @@ public class Preprocessing extends BabelomicsTool {
 
 			logger.debug("end of merging replicated rows (" + mergeMethod + ")\n");
 			progress++;
+			preprocessed = true;
 		}
 
 
@@ -197,6 +247,7 @@ public class Preprocessing extends BabelomicsTool {
 			}
 			logger.debug("end of filtering missing values by percentage " + filterPercentage + "\n");
 			progress++;
+			preprocessed = true;
 		}
 
 
@@ -234,14 +285,15 @@ public class Preprocessing extends BabelomicsTool {
 			}	
 			logger.debug("end of imputing missing values (" + imputeMethodMsg + ")\n");
 			progress++;
+			preprocessed = true;
 		}
 
 		// extract ids
 		//
 		File idsFile = new File(outdir + "/id_list.txt");
-		if ( extractIds != null ) {
+		if ( extractIds != null && !("none".equalsIgnoreCase(extractIds)) ) {
 			try {
-				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "filtering by names");
+				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "extracting ids...");
 			} catch (FileNotFoundException e) {
 				abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 			}
@@ -323,6 +375,7 @@ public class Preprocessing extends BabelomicsTool {
 
 			logger.debug("end of filtering by names\n");
 			progress++;
+			preprocessed = true;
 		}
 
 
@@ -337,7 +390,7 @@ public class Preprocessing extends BabelomicsTool {
 
 
 		try {
-			if ( (finalProgress > 4) || (finalProgress == 4 && extractIds == null) ) {
+			if ( preprocessed ) {
 
 				File file = new File(this.getOutdir() + "/preprocessed.txt");
 				dataset.save(file);

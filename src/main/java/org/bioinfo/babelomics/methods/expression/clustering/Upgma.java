@@ -22,11 +22,9 @@ public class Upgma extends Cluster {
 	@Override
 	public MultipleTree run(boolean createClusterFiles) throws Exception {
 		MultipleTree nw = null;
-		
+
 		File inputFile = File.createTempFile("input", null);
 		File outputFile = File.createTempFile("output", null);
-
-		System.out.println("(infile, outfile) = (" + inputFile.getAbsolutePath() + ", " + outputFile.getAbsolutePath() + ")");
 		
 		List<String> lines = new ArrayList<String>(rowNames.size() + 1);
 		lines.add("#NAMES\t" + ListUtils.toString(colNames, "\t"));

@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Logger;
+import java.util.Map;
 
+import org.bioinfo.commons.log.Logger;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
@@ -33,12 +35,15 @@ public class FatiGO {
 	private Logger logger;
 	
 	// test
-	TwoListFisherTest fisher;
+	private TwoListFisherTest fisher;
 	
 	// results	
-	List<TwoListFisherTestResult> results;	
-	FeatureList<AnnotationItem> annotations;
+	private List<TwoListFisherTestResult> results;	
+	private FeatureList<AnnotationItem> annotations;
 
+	// Term sizes
+	private Map<String,Integer> termSizes;
+	
 	// summary
 	  // list 1
 	private int list1AnnotatedCounter;
@@ -133,10 +138,10 @@ public class FatiGO {
 		computeAnnotateds();
 		
 		// run test
-		fisher = new TwoListFisherTest();
+		fisher = new TwoListFisherTest();		
 		
 		logger.print("executing fisher test...");
-		fisher.test(list1, list2, annotations, testMode);
+		fisher.test(list1, list2, annotations, testMode,termSizes);
 		logger.println("OK");
 		
 		// get result
@@ -447,6 +452,20 @@ public class FatiGO {
 	 */
 	public void setList2MeanAnnotationsPerId(double list2MeanAnnotationsPerId) {
 		this.list2MeanAnnotationsPerId = list2MeanAnnotationsPerId;
+	}
+
+	/**
+	 * @return the termSizes
+	 */
+	public Map<String, Integer> getTermSizes() {
+		return termSizes;
+	}
+
+	/**
+	 * @param termSizes the termSizes to set
+	 */
+	public void setTermSizes(Map<String, Integer> termSizes) {
+		this.termSizes = termSizes;
 	}
 
 

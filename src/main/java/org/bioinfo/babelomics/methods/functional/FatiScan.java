@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bioinfo.babelomics.exception.EmptyAnnotationException;
 import org.bioinfo.commons.utils.ArrayUtils;
@@ -17,113 +18,88 @@ import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 
 
-public class FatiScan {
+public class FatiScan extends GeneSetAnalysis {
 
-	public static final int ASCENDING_SORT = 1;
-	public static final int DESCENDING_SORT = 2;
+
 	public static final int SHORT_FORMAT = 1;
 	public static final int LONG_FORMAT = 2;
 	public final static int DEFAULT_NUMBER_OF_PARTITIONS = 30;
 	
-	// input params
-	private List<String> idList;	
-	private List<Double> statistic;
-	private FeatureData rankedList;
-	private FunctionalFilter filter;
-	private DBConnector dbConnector;
+	// input params	
 	private int testMode;	
 	private int numberOfPartitions;
 	private int outputFormat;
-	private int order;
-	private boolean isYourAnnotations;
-	
-	
+		
 	// test
-	TwoListFisherTest fisher;
+	private TwoListFisherTest fisher;
+		
 	
-	// results
-	List<GeneSetAnalysisTestResult> results;	
-	FeatureList<AnnotationItem> annotations;
-
 	// Two list constructor
 	public FatiScan(FeatureData rankedList, FunctionalFilter filter, DBConnector dbConnector, int numberOfPartitions, int testMode, int outputFormat, int order) {
 		this.rankedList = rankedList;
 		this.filter = filter;
 		this.dbConnector = dbConnector;		
+		this.order = order;
+		this.isYourAnnotations = false;
+		// fatiscan specific
 		this.numberOfPartitions = numberOfPartitions;
 		this.testMode = testMode;
 		this.outputFormat = outputFormat;
-		this.order = order;
-		this.isYourAnnotations = false;
+		
+		// set analysis type id
+		this.method = FATISCAN;
 	}
 	
 	public FatiScan(FeatureData rankedList, FeatureList<AnnotationItem> annotations, int numberOfPartitions, int testMode, int outputFormat, int order) {
+		
 		this.rankedList = rankedList;
-		this.annotations = annotations;
+		this.annotations = annotations;		
+		this.order = order;
+		this.isYourAnnotations = true;
+		
+		// fatiscan specific
 		this.numberOfPartitions = numberOfPartitions;
 		this.testMode = testMode;
 		this.outputFormat = outputFormat;
-		this.order = order;
-		this.isYourAnnotations = true;
+		
+		// set analysis type id
+		this.method = FATISCAN;
 	}
 	
-	
-	public void prepare() throws InvalidIndexException{
-		
-		// id list
-		idList = rankedList.getDataFrame().getRowNames();//.getColumn(0);
-		System.err.println("idlist: " + idList.size());
-		//System.err.println("idlist: " + idList.subList(0, 20).toString());
-		// statistic		
-		statistic = ArrayUtils.toList(rankedList.getDataFrame().getColumnAsDoubleArray(0));
-		// order ranked list		
-		int[] sortIndex = ListUtils.order(statistic);
-		statistic = ListUtils.ordered(statistic,sortIndex);		
-		idList = ListUtils.ordered(idList,sortIndex);
-		//if(order==ASCENDING_SORT){
-		if(order==DESCENDING_SORT){
-			Collections.reverse(idList);
-			Collections.reverse(statistic);
-		}		
-		
-	}
-	
+	@Override
 	public void run() throws InvalidIndexException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, EmptyAnnotationException {
 				
 		// prepare list
 		prepare();
 		
-		// annotation		
-		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);
-		if(annotations==null || annotations.size()==0) throw new EmptyAnnotationException();
-		System.err.println("annotations:" + annotations.size());
-		results = new ArrayList<GeneSetAnalysisTestResult>();
-		
-		double inc = -(double)(statistic.get(0)-statistic.get(statistic.size()-1))/(numberOfPartitions+1);
-		System.err.println("inc: " + inc);
-		double acum = statistic.get(0) + inc;
-		
 		int thresholdPosition;
 		List<String> list1,list2;
-				
+		
+		double inc = -(double)(statistic.get(0)-statistic.get(statistic.size()-1))/(numberOfPartitions+1);		
+		double acum = statistic.get(0) + inc;
+		
+		// test each partition	
 		for(int i=0; i<numberOfPartitions; i++){
 			
 			thresholdPosition = getThresholdPosition(acum);
 			
 			System.err.println(i + ": threshold = " + acum + " (" + thresholdPosition + ") ");
 			
+			// top
 			list1 = idList.subList(0, thresholdPosition);
+			
 			if(thresholdPosition<(idList.size()-1)){
+				
+				// bottom
 				list2 = idList.subList(thresholdPosition + 1, idList.size()-1);
-				
-				//System.err.println("l1.size: " + list1.size() + "l2.size: " + list2.size());
-				
+		
 				// run test
 				fisher = new TwoListFisherTest();
-				fisher.test(list1, list2, annotations, testMode);
+				fisher.test(list1,list2,annotations,testMode,termSizes);
 			
 				// get result
 				results.addAll(toGeneSetAnalysisTestResult(fisher.getResults()));
+				
 			}
 						
 			acum+=inc;
@@ -153,9 +129,10 @@ public class FatiScan {
 		
 	}
 		
-	private List<GeneSetAnalysisTestResult> toGeneSetAnalysisTestResult(List<TwoListFisherTestResult> raw){
-		List<GeneSetAnalysisTestResult> result = new ArrayList<GeneSetAnalysisTestResult>(raw.size());
-		for(TwoListFisherTestResult test: raw){			
+	// from TwoListFisherTest result to GeneSetAnalysis result
+	private List<GeneSetAnalysisTestResult> toGeneSetAnalysisTestResult(List<TwoListFisherTestResult> twoListFisherTest){
+		List<GeneSetAnalysisTestResult> result = new ArrayList<GeneSetAnalysisTestResult>(twoListFisherTest.size());
+		for(TwoListFisherTestResult test: twoListFisherTest){			
 			GeneSetAnalysisTestResult gseaTest = new GeneSetAnalysisTestResult(test);
 			result.add(gseaTest);
 		}
@@ -165,43 +142,26 @@ public class FatiScan {
 	
 	private int getThresholdPosition(double acum){
 		int position = 0;
-		//System.err.println("acum: " + acum + " statistic.size: " + statistic.size());
 		for(int i=0; i<statistic.size(); i++){
-			//System.err.println("position: " + i + " acum: " + acum + " value: " + statistic.get(i) + " order: " + order);
 			if( (order==ASCENDING_SORT && statistic.get(i)>=acum) || (order==DESCENDING_SORT && statistic.get(i)<acum) ) {				
 				position = i;
 				break;
-			}			
+			}
 		}
 		return position;
 	}
 
-	public List<GeneSetAnalysisTestResult> getSignificant(){
-		return getSignificant(TwoListFisherTest.DEFAULT_PVALUE_THRESHOLD);
-	}
-	
-	public List<GeneSetAnalysisTestResult> getSignificant(double threshold){
-		List<GeneSetAnalysisTestResult> significant = new ArrayList<GeneSetAnalysisTestResult>();
-		for(GeneSetAnalysisTestResult result: this.results){			
-			if(result.getAdjPValue()<threshold) significant.add(result);
+
+	@Override	
+	public List<String> resultListToStringList(List<GeneSetAnalysisTestResult> resultList, boolean header){
+		List<String> results = new ArrayList<String>();
+		if(header) results.add(GeneSetAnalysisTestResult.fatiScanHeader());
+		for(int i=0; i<resultList.size(); i++){			
+			results.add(resultList.get(i).toFatiScanString());
 		}
-		return significant;
+		return results;
 	}
 	
-	/**
-	 * @return the idList
-	 */
-	public List<String> getIdList() {
-		return idList;
-	}
-
-	/**
-	 * @param idList the idList to set
-	 */
-	public void setIdList(List<String> idList) {
-		this.idList = idList;
-	}
-
 	/**
 	 * @return the statistic
 	 */
@@ -214,34 +174,6 @@ public class FatiScan {
 	 */
 	public void setStatistic(List<Double> statistic) {
 		this.statistic = statistic;
-	}
-
-	/**
-	 * @return the annotations
-	 */
-	public FeatureList<AnnotationItem> getAnnotations() {
-		return annotations;
-	}
-
-	/**
-	 * @param annotations the annotations to set
-	 */
-	public void setAnnotations(FeatureList<AnnotationItem> annotations) {
-		this.annotations = annotations;
-	}
-
-	/**
-	 * @return the results
-	 */
-	public List<GeneSetAnalysisTestResult> getResults() {
-		return results;
-	}
-
-	/**
-	 * @param results the results to set
-	 */
-	public void setResults(List<GeneSetAnalysisTestResult> results) {
-		this.results = results;
 	}
 
 }
