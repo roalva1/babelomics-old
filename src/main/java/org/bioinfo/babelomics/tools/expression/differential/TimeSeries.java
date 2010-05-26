@@ -96,45 +96,45 @@ public class TimeSeries extends BabelomicsTool {
 		// general info
 		outFiles = FileUtils.listFiles(outDirFile, ".*summary.*");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("summaryfile", f.getName(), "Significant genes for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "List of significant genes"));			
+			result.addOutputItem(new Item("summaryfile", f.getName(), "Significant genes for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "maSigPro output.List of significant genes"));			
 		}
 		if ( (outFile = new File(outdir + "/pvalues.txt")).exists() ) {
-			result.addOutputItem(new Item("pvaluesfile", outFile.getName(), "p-values file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "p-values and adjusted p-values of global model for all genes"));						
+			result.addOutputItem(new Item("pvaluesfile", outFile.getName(), "p-values file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional results.p-values and adjusted p-values of global model for all genes"));						
 		}
 		if ( (outFile = new File(outdir + "/influ_info.txt")).exists() ) {
-			result.addOutputItem(new Item("influinfofile", outFile.getName(), "Influence data file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Influence data (genes with influential values, possible outliers)"));						
+			result.addOutputItem(new Item("influinfofile", outFile.getName(), "Influence data file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional results.Influence data (genes with influential values, possible outliers)"));						
 		}
 //		if ( (outFile = new File(outdir + "/influ_data.png")).exists() ) {
-//			result.addOutputItem(new Item("infludataimg", outFile.getName(), "Influence data plot", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Influence data (genes with influential values, possible outliers)"));						
+//			result.addOutputItem(new Item("infludataimg", outFile.getName(), "Influence data plot", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional results.Influence data (genes with influential values, possible outliers)"));						
 //		}
 		
 		// model data
 		outFiles = FileUtils.listFiles(outDirFile, ".*coefficients\\.txt");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("sigcoeffile", f.getName(), "Significant coefficients for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Significant coefficients"));			
+			result.addOutputItem(new Item("sigcoeffile", f.getName(), "Significant coefficients for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional results.Significant coefficients"));			
 		}	
 		outFiles = FileUtils.listFiles(outDirFile, ".*sig\\.pvalues\\.txt");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("sigpvaluefile", f.getName(), "Significant p-values for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Significant p-values"));			
+			result.addOutputItem(new Item("sigpvaluefile", f.getName(), "Significant p-values for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional results.Significant p-values"));			
 		}
 		outFiles = FileUtils.listFiles(outDirFile, ".*profiles\\.txt");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("sigprofilefile", f.getName(), "Significant profiles for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Significant profiles"));			
+			result.addOutputItem(new Item("sigprofilefile", f.getName(), "Significant profiles for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional results.Significant profiles"));			
 		}
 		
 		
 		// visualization
 		outFiles = FileUtils.listFiles(outDirFile, ".*heatmap\\.png");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("heatmapimg", f.getName(),  "'" + getCleanName(f) + "' heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap plot"));			
+			result.addOutputItem(new Item("heatmapimg", f.getName(),  "'" + getCleanName(f) + "' heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional results.Heatmap plot"));			
 		}
 		outFiles = FileUtils.listFiles(outDirFile, ".*Groups\\.png");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("groupimg", f.getName(), "'" + getCleanName(f) + "' group", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Group plot"));			
+			result.addOutputItem(new Item("groupimg", f.getName(), "'" + getCleanName(f) + "' group", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "maSigPro output.Groups plot"));			
 		}
 		outFiles = FileUtils.listFiles(outDirFile, ".*Profiles\\.png");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("profileimg", f.getName(), "'" + getCleanName(f) + "' profile", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Profiles plot"));			
+			result.addOutputItem(new Item("profileimg", f.getName(), "'" + getCleanName(f) + "' profile", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional results.Profiles plot"));			
 		}				
 	}
 	

@@ -144,7 +144,9 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		File[] rawFiles = FileUtils.listFiles(tmpDir, "affy".equalsIgnoreCase(technology) ? ".+.cel" : ".+", true);
 		rawFileNames = new ArrayList<String>(rawFiles.length);
 		for(File file: rawFiles) {
-			rawFileNames.add(file.getAbsolutePath());
+			if ( !"sampleinfo.txt".equalsIgnoreCase(file.getName())) {
+				rawFileNames.add(file.getAbsolutePath());
+			}
 		}
 
 		// sanity check
