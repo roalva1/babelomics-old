@@ -330,6 +330,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		if(fatigo.getAnnotations()!=null && fatigo.getAnnotations().size()>0){				
 			IOUtils.write(outdir + "/" + annotFileName, fatigo.getAnnotations().toString());
 			result.addOutputItem(new Item("annot_" + filterInfo.getName(),annotFileName,"Annotations for " + filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
+			result.addOutputItem(new Item("annot_" + filterInfo.getName(),annotFileName,"Annotations for " + filterInfo.getTitle(),Item.TYPE.DATA,Arrays.asList("ANNOTATION","GENE-VS-ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
 		} else {
 			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"no annotations found for input ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
 		}		
