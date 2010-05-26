@@ -272,7 +272,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		// save result table
 		List<String> testResultOutput = testResultToStringList(fatigo.getResults());
 		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
-		result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList(filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"All results"));
+		result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("EXCEL",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"All results"));
 
 		// save table description
 		//result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"All results"));
@@ -286,8 +286,8 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			
 			// significant terms
 			significant = fatigo.getSignificant(DEFAULT_PVALUES[i]);
-			if(significant!=null){
-				IOUtils.write(outdir + "/significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt", ListUtils.toString(significant,"\n"));					
+			if(significant!=null && significant.size()>0){
+				IOUtils.write(outdir + "/significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt", significant.get(0).header() + "\n" + ListUtils.toString(significant,"\n"));					
 				numberOfSignificantTerms = significant.size();					
 			} else {
 				numberOfSignificantTerms = 0;
@@ -313,7 +313,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 					}
 				}
 				// table
-				Item item = new Item("significant_" + filterInfo.getName(),"significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt",filterInfo.getTitle() + " significant terms (pvalue<" + formattedPValue + ")",Item.TYPE.FILE,Arrays.asList("SIGNIFICANT","TABLE","FATIGO_TABLE",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+				Item item = new Item("significant_" + filterInfo.getName(),"significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt",filterInfo.getTitle() + " significant terms (pvalue<" + formattedPValue + ")",Item.TYPE.FILE,Arrays.asList("SIGNIFICANT","TABLE","FATIGO_TABLE","EXCEL",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
 				item.setContext("pvalue==" + formattedPValue);
 				result.getOutputItems().add(4, item);
 
@@ -330,7 +330,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		if(fatigo.getAnnotations()!=null && fatigo.getAnnotations().size()>0){				
 			IOUtils.write(outdir + "/" + annotFileName, fatigo.getAnnotations().toString());
 			result.addOutputItem(new Item("annot_" + filterInfo.getName(),annotFileName,"Annotations for " + filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
-			result.addOutputItem(new Item("annot_" + filterInfo.getName(),annotFileName,"Annotations for " + filterInfo.getTitle(),Item.TYPE.DATA,Arrays.asList("ANNOTATION","GENE-VS-ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
+			//result.addOutputItem(new Item("annot_" + filterInfo.getName(),annotFileName,"Annotations for " + filterInfo.getTitle(),Item.TYPE.DATA,Arrays.asList("ANNOTATION","GENE-VS-ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
 		} else {
 			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"no annotations found for input ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
 		}		
