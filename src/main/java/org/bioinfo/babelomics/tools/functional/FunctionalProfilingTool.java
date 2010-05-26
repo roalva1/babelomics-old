@@ -359,7 +359,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			}
 			//System.err.println(result.getList1Percentage() + ":" + result.getList2Percentage() + " " + result.getAdjPValue() + " " + intensity);
 			
-			association.append(result.getTerm()).append("\t").append(result.getTerm()).append("\t").append(intensity).append("\n");
+			association.append(result.getTerm()).append("\t").append(result.getTerm()).append("\t").append(intensity).append("\t").append(result.getAdjPValue()).append("\n");
 		}
 		
 		try {
