@@ -44,7 +44,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 	List<Double> doubleVars;
 	String correction;
 	String type;
-	 
+
 	@Override
 	public void initOptions() {
 		options.addOption(OptionFactory.createOption("datalist", "the feature data containig the ranked list"));
@@ -59,71 +59,61 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("height", "",false,true));
 	}
 
-	
+
 	@Override
 	protected void execute() {
-		
+
 		updateJobStatus("10", "init execution");
 		dataset = null;
 		className = commandLine.getOptionValue("classname", null);
 		axeTitle = commandLine.getOptionValue("title", "");
 		axeTitle = axeTitle.replaceAll("_____", " ");
 		//axeTitle = ArrayUtils.toString(commandLine.getOptionValues("title")," ");
-		
-		//System.err.println("axeTitle---------------"+axeTitle+" -------commandLine.getOptionValues----------"+commandLine.getOptionValues("title").length);
-		if(commandLine.getOptionValue("histogram",null)!=null){
-			BoxPlotChart bp = (commandLine.getOptionValue("boxplot", null) != null) ? new BoxPlotChart("Box-plot","", axeTitle):null;
-			HistogramChart hc = new HistogramChart("Histogram chart", axeTitle, "frec");
-			preloadSeries(hc,bp);
-			finishGraph(hc, bp);
-		}
-		
-		else if (commandLine.getOptionValue("boxplot",null)!=null){
-			 BoxPlotChart bp = new BoxPlotChart("Box-plot", "", "");
-			 preloadSeries(null,bp);
-			 finishGraph(null, bp);
-		}
-		
-		
-		else if(commandLine.getOptionValue("tree", null) != null){
-			 doTree();
-		}
-		
-		else if(commandLine.hasOption("pcaplot")){
-			
-				try {
-					doPcaPlot(babelomicsHomePath + "/bin/plots/pcaplot.r");
-				} catch (InvalidParameterException e) {
-					e.printStackTrace();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			
-		}
-		
 
+		try {
+			
+			if(commandLine.hasOption("histogram")){
+				BoxPlotChart bp = (commandLine.getOptionValue("boxplot", null) != null) ? new BoxPlotChart("Box-plot","", axeTitle):null;
+				HistogramChart hc = new HistogramChart("Histogram chart", axeTitle, "frec");
+				preloadSeries(hc,bp);
+				finishGraph(hc, bp);
+			}else 
+				if (commandLine.getOptionValue("boxplot")!=null){
+					BoxPlotChart bp = new BoxPlotChart("Box-plot", "", "");
+					preloadSeries(null,bp);
+					finishGraph(null, bp);
+				} else if(commandLine.getOptionValue("tree") != null){
+					doTree();
+				} else if(commandLine.hasOption("pcaplot")){
+					doPcaPlot(babelomicsHomePath + "/bin/plots/pcaplot.r");
+				}
+		} catch(IOException e) {
+			printError("DescriptiveStatistics", "An error occurred", e.toString(), e);
+		} catch(Exception e) {
+
+		}
 	}
 
 
 	private void doPcaPlot(String pcaPlotBinPath) throws InvalidParameterException, IOException  {
-		
+
 		String pcaplotFileName = "pca.png";
-		
+
 		List<String> env = new ArrayList<String>();
 		env.add("datafile=" + commandLine.getOptionValue("datalist"));		
 		env.add("outfile=" + this.getOutdir() + "/" + pcaplotFileName);
-//		Command cmd = new Command("/usr/local/R-292/bin/R CMD BATCH --verbose --no-save --no-restore " + pcaPlotBinPath + " " + this.getOutdir() + "/rLog.log", env);		
-//		System.out.println("command = " + cmd.getCommandLine());
-//		System.out.println("env = " + ListUtils.toString(env, " "));
-//		cmd.run();
-		
-//		System.out.println("out std = " + cmd.getOutput());
-//		System.out.println("out std = " + cmd.getStatus());
-//		System.out.println("out std = " + cmd.getException());
-//		System.out.println("out error = " + cmd.getError());
-		
+		//		Command cmd = new Command("/usr/local/R-292/bin/R CMD BATCH --verbose --no-save --no-restore " + pcaPlotBinPath + " " + this.getOutdir() + "/rLog.log", env);		
+		//		System.out.println("command = " + cmd.getCommandLine());
+		//		System.out.println("env = " + ListUtils.toString(env, " "));
+		//		cmd.run();
+
+		//		System.out.println("out std = " + cmd.getOutput());
+		//		System.out.println("out std = " + cmd.getStatus());
+		//		System.out.println("out std = " + cmd.getException());
+		//		System.out.println("out error = " + cmd.getError());
+
 		System.err.println("salidaPass1:");
-		
+
 		try {
 			jobStatus.addStatusMessage("" + ("40"), "preparing execution");
 		} catch (FileNotFoundException e) {
@@ -131,9 +121,9 @@ public class DescriptiveStatistics extends BabelomicsTool {
 		}
 		String classField = "";
 		updateJobStatus("40", "preparing execution");
-		
+
 		//dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
-		
+
 		File dataset = new File(commandLine.getOptionValue("datalist"));
 		FileUtils.checkFile(commandLine.getOptionValue("datalist"));
 		BufferedReader br = new BufferedReader(new FileReader(dataset.getAbsolutePath()));
@@ -145,59 +135,53 @@ public class DescriptiveStatistics extends BabelomicsTool {
 			attr = line.split("\t");
 			if(line.startsWith("#")) {
 				System.out.println(attr[0]);
-				}if(attr[0].indexOf("#NAMES") > -1) {
-					hasName=true;
-					RCommand rCommand = new RCommand(pcaPlotBinPath, this.getOutdir());
-					
-					if (className!=null){
-						rCommand.addParam("grupos", className);	
-					}
-					
-					rCommand.addParam("datafile", commandLine.getOptionValue("datalist"));
-					rCommand.addParam("outfile", this.getOutdir() + "/" + pcaplotFileName);
-					updateJobStatus("80", "exec");
-					rCommand.exec();
-					// saving results
-					//
-					updateJobStatus("90", "saving results");
-					result.addOutputItem(new Item("pca_plot", pcaplotFileName,"pca plot (png format)",TYPE.IMAGE, Arrays.asList("IMAGE","PCA_IMAGE"),new HashMap<String,String>(),"pca image"));
-					break;
+			}if(attr[0].indexOf("#NAMES") > -1) {
+				hasName=true;
+				RCommand rCommand = new RCommand(pcaPlotBinPath, this.getOutdir());
+
+				if (className!=null){
+					rCommand.addParam("grupos", className);	
 				}
-	}
+
+				rCommand.addParam("datafile", commandLine.getOptionValue("datalist"));
+				rCommand.addParam("outfile", this.getOutdir() + "/" + pcaplotFileName);
+				updateJobStatus("80", "exec");
+				rCommand.exec();
+				// saving results
+				//
+				updateJobStatus("90", "saving results");
+				result.addOutputItem(new Item("pca_plot", pcaplotFileName,"pca plot (png format)",TYPE.IMAGE, Arrays.asList("IMAGE","PCA_IMAGE"),new HashMap<String,String>(),"pca image"));
+				break;
+			}
+		}
 		br.close();
-		
+
 		if (!hasName)result.addOutputItem(new Item("pca_plot","PCA analisys can't be continue with you data. '#NAMES' variable doesn't found. This variable is used as 'id' to tag your samples in PCA analisys and plotting","PCA warning result",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"PCA warning result"));
-		
+
 	}
 
 
-	private void preloadSeries(HistogramChart hc,BoxPlotChart bp) {
-		try {
-			if (className!=null && !className.equalsIgnoreCase("all_classes")){
-				dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
-				
-				values = dataset.getVariables().getByName(className).getLabels();
-				for (String str: values){
-					int[] colIndexByVariableValue = dataset.getColumnIndexesByVariableValue(className, str);
-					doubleVars = new ArrayList<Double>(colIndexByVariableValue.length);
-					DoubleMatrix matrixByVal =dataset.getSubMatrixByColumns(colIndexByVariableValue);
-					addSeries(matrixByVal, hc,bp, str);	
-				}
+
+	private void preloadSeries(HistogramChart hc, BoxPlotChart bp) throws IOException {
+		dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
+		if (className != null && !className.equalsIgnoreCase("all_classes")){
+			values = dataset.getVariables().getByName(className).getLabels();
+			for (String str: values){
+				int[] colIndexByVariableValue = dataset.getColumnIndexesByVariableValue(className, str);
+				doubleVars = new ArrayList<Double>(colIndexByVariableValue.length);
+				DoubleMatrix matrixByVal =dataset.getSubMatrixByColumns(colIndexByVariableValue);
+				addSeries(matrixByVal, hc, bp, str);	
+
 			}
-			else{
-				dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
-				addSeries(dataset.getDoubleMatrix(),hc,bp, null);
-			}
-			
-		} catch (IOException e4) {
-			// TODO Auto-generated catch block
-			e4.printStackTrace();
+		}
+		else{
+			addSeries(dataset.getDoubleMatrix(),hc,bp, null);
 		}
 	}
 
 
 	private void addSeries(DoubleMatrix matrixByVal, HistogramChart hc, BoxPlotChart bp, String label) {
-		String title = label==null?"":label;
+		String title = (label == null) ? "" : label;
 		int[] variablesByval = null;
 		List<String> samplesNames = dataset.getSampleNames();
 		if(label != null){
@@ -215,18 +199,18 @@ public class DescriptiveStatistics extends BabelomicsTool {
 						sampleName = dataset.getSampleNames().get(i);
 						hc.addSeries(matrixByVal.getColumn(i), sampleName);	
 					}
-					
+
 				}
 			}
 			else{
 				hc.addSeries(matrixByVal.getColumn(0),title);	
 			}
-			
+
 			//hc.removeLegend();		
 		}
 		if(bp != null ){
 			if (matrixByVal.getRowDimension() != 0 && matrixByVal.getColumnDimension() != 0  ) {
-				
+
 				for(int i=0; i < matrixByVal.getColumnDimension(); i++) {
 					String sampleName = "";
 					if(label != null){
@@ -236,33 +220,33 @@ public class DescriptiveStatistics extends BabelomicsTool {
 						sampleName = dataset.getSampleNames().get(i);
 						bp.addSeries(matrixByVal.getColumn(i),sampleName, "");
 					}	
-				
+
 				}
 			}
 			else{
 				bp.addSeries(matrixByVal.getColumn(0),title, "");	
 			}
-			
+
 			//bp.removeLegend();
 		}
 	}
-	
+
 
 	private void finishGraph(HistogramChart hc, BoxPlotChart bp){
 		String imgFilename ="";
 		int progress = 1;
 		int finalProgress = 3;
-		
+
 		try {
 			jobStatus.addStatusMessage("" + (progress*100/finalProgress), "reading ranked list");
 		} catch (FileNotFoundException e) {
 			abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
-	
+
 		progress ++;
 		updateJobStatus(""+progress,"reading ok");
-		
-		
+
+
 		// Generate histogram
 		if (hc != null){
 			imgFilename = this.getOutdir() + "/histogram.png";
@@ -274,7 +258,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 			}
 			result.addOutputItem(new Item("histogram_image","histogram.png","histogram image (png format)",TYPE.IMAGE, Arrays.asList("IMAGE","HISTOGRAM_IMAGE"),new HashMap<String,String>(),"histogram image"));
 		}
-		
+
 		if (bp != null){
 			imgFilename = this.getOutdir() + "/boxplot.png";
 			try {
@@ -285,21 +269,21 @@ public class DescriptiveStatistics extends BabelomicsTool {
 			}
 			result.addOutputItem(new Item("boxplot_image","boxplot.png","boxplot image (png format)",TYPE.IMAGE, Arrays.asList("IMAGE","BOXPLOT_IMAGE"),new HashMap<String,String>(),"boxplot image"));
 		}
-		
-		
+
+
 		// Save histogram
 		progress++;
 		updateJobStatus(""+(progress*100/finalProgress),"saving graph");
-		
+
 	}
-	
+
 	private void doTree() {
 		try {
 			jobStatus.addStatusMessage("" + ("40"), "preparing execution");
 		} catch (FileNotFoundException e) {
 			abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
-		
+
 		updateJobStatus("40", "preparing execution");
 		NewickParser nwParser = new NewickParser();
 		MultipleTree tree;
@@ -312,7 +296,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 			} catch (FileNotFoundException e) {
 				abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 			}
-			
+
 			updateJobStatus("80", "saving");
 			result.addOutputItem(new Item("tree_image","tree.png","tree image (png format)",TYPE.IMAGE, Arrays.asList("IMAGE","TREE_IMAGE"),new HashMap<String,String>(),"tree image"));
 		} catch (IOException e) {

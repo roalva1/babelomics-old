@@ -104,17 +104,22 @@ public class DiffExpressionUtils {
 			}
 		}
 
+		List<String> aux = new ArrayList<String>();
 		DecimalFormat df = new DecimalFormat("##0.0000");
-		List<String> aux = new ArrayList<String>(infoList1.length);
-		for(int i=0 ; i<infoList1.length ; i++) {
-			aux.add(df.format(infoList1[i]));
+		if (infoList1 != null) {
+			aux.clear();
+			for(int i=0 ; i<infoList1.length ; i++) {
+				aux.add(df.format(infoList1[i]));
+			}
+			gridTrack.addInfo(new NamedArrayList(infoName1, ListUtils.ordered(aux, rowOrder)));
 		}
-		gridTrack.addInfo(new NamedArrayList(infoName1, ListUtils.ordered(aux, rowOrder)));
-		aux.clear();
-		for(int i=0 ; i<infoList2.length ; i++) {
-			aux.add(df.format(infoList2[i]));
+		if (infoList2 != null) {
+			aux.clear();
+			for(int i=0 ; i<infoList2.length ; i++) {
+				aux.add(df.format(infoList2[i]));
+			}
+			gridTrack.addInfo(new NamedArrayList(infoName2, ListUtils.ordered(aux, rowOrder)));
 		}
-		gridTrack.addInfo(new NamedArrayList(infoName2, ListUtils.ordered(aux, rowOrder)));
 
 		gridPanel.add(gridTrack);
 		canvas.addPanel(gridPanel);		
@@ -145,13 +150,13 @@ public class DiffExpressionUtils {
 			} else {
 				Dataset sigDataset = dataset.filterRows(filterRowIndexes);
 				sigDataset.validate();
-//			sigDataset.save("/tmp/sig_dataset.txt");
-//			System.out.println("column dimension = " + sigDataset.getColumnDimension());
-//			System.out.println("row dimension = " + sigDataset.getRowDimension());
-//			System.out.println("sig row indexes size = " + sigRowIndexes.size());
-//			System.out.println("sig statistics size = " + sigStatistics.size());
-//			System.out.println("sig adj p-values size = " + sigAdjPValues.size());
-//			System.out.println("sig row indexes = " + ListUtils.toString(sigRowIndexes));
+				//			sigDataset.save("/tmp/sig_dataset.txt");
+				//			System.out.println("column dimension = " + sigDataset.getColumnDimension());
+				//			System.out.println("row dimension = " + sigDataset.getRowDimension());
+				//			System.out.println("sig row indexes size = " + sigRowIndexes.size());
+				//			System.out.println("sig statistics size = " + sigStatistics.size());
+				//			System.out.println("sig adj p-values size = " + sigAdjPValues.size());
+				//			System.out.println("sig row indexes = " + ListUtils.toString(sigRowIndexes));
 
 
 				return DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, sigRowOrder, statisticsLabel, ListUtils.toArray(sigStatistics), adjPValuesLabel, ListUtils.toArray(sigAdjPValues));

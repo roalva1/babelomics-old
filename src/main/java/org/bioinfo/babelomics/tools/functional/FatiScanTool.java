@@ -280,7 +280,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		for(int i=0; i<DEFAULT_PVALUES.length; i++){
 			formattedPValue = pvalueFormatter.format(DEFAULT_PVALUES[i]);
 			significant = gsea.getSignificant(DEFAULT_PVALUES[i]);
-			if(significant!=null){
+			if(significant!=null && significant.size()>0){
 				IOUtils.write(outdir + "/significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt", gsea.significantResultsToStringList(significant, DEFAULT_PVALUES[i]));					
 				numberOfSignificantTerms = significant.size();					
 			} else {

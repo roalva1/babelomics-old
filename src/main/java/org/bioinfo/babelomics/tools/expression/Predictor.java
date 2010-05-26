@@ -30,7 +30,6 @@ import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 
-import weka.classifiers.trees.RandomForest;
 import weka.core.Attribute;
 import weka.core.Instances;
 
