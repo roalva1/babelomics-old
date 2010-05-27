@@ -30,7 +30,6 @@ import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 
-import weka.classifiers.trees.RandomForest;
 import weka.core.Attribute;
 import weka.core.Instances;
 
@@ -43,6 +42,10 @@ public class Predictor extends BabelomicsTool {
 
 	private List<GenericClassifier> selectedClassifiers;
 	private List<GenericClassifier> trainedClassifiers;
+	
+	private List<String> sampleNames;
+	private List<List<Double>> correctSampleRatio;
+	private List<String> bestClassiferParamList;
 
 	public Predictor() {		
 		initOptions();
@@ -196,6 +199,14 @@ public class Predictor extends BabelomicsTool {
 				abort("execute_predictor", "dataset " + datasetFile.getName() + "not found", "dataset " + datasetFile.getName() + "not found", "dataset " + datasetFile.getName() + "not found");
 			}
 
+			// init sample names
+			sampleNames = new ArrayList<String>(instances.numInstances());
+			for(int i=0; i<instances.numInstances(); i++){
+				sampleNames.add(instances.attribute("sample_name").value(i));
+			}
+			correctSampleRatio = new ArrayList<List<Double>>(30);
+			bestClassiferParamList = new ArrayList<String>(30);
+			
 			// classifiers
 			if(commandLine.hasOption("svm")) executeSvm(instances,test);
 			if(commandLine.hasOption("knn")) executeKnn(instances,test);
@@ -255,8 +266,30 @@ public class Predictor extends BabelomicsTool {
 				IOUtils.write(outdir + "/test_result.txt", testResultString.toString());
 				result.addOutputItem(new Item("test_result", "test_result.txt", "Test result table", TYPE.FILE, Arrays.asList("TABLE"), new HashMap<String, String>(),"Test"));
 			}
-			
-			
+						
+			// correct sample classification ratio
+			StringBuilder ratiosTable = new StringBuilder();
+			//// print header
+			ratiosTable.append("Sample").append("\t");
+			for(int j=0; j<bestClassiferParamList.size(); j++){
+				ratiosTable.append(bestClassiferParamList.get(j));
+				if(j<(bestClassiferParamList.size()-1)){
+					ratiosTable.append("\t");
+				}
+			}
+			ratiosTable.append("\n");
+			//// print values
+			for(int i=0; i<sampleNames.size(); i++){
+				ratiosTable.append(sampleNames.get(i)).append("\t");
+				for(int j=0; j<correctSampleRatio.size(); j++){
+					ratiosTable.append(correctSampleRatio.get(j).get(i));
+					if(j<(correctSampleRatio.size()-1)){
+						ratiosTable.append(", ");
+					}		
+				}
+				ratiosTable.append("\n");
+			}
+			IOUtils.write(outdir + "/ratios.txt", ratiosTable.toString());
 
 		} catch (Exception e) {
 			logger.error(e.getMessage());
@@ -287,22 +320,43 @@ public class Predictor extends BabelomicsTool {
 		// train
 		knn.train(instances);
 
-		// select best classifiers for testing
-		if(test!=null){
-			int[] best = knn.getBestClassifiers(numberOfBestSelectedClassifications);
-			trainedClassifiers.add(knn);
-			for(int i=0; i<best.length; i++){				 
-				Knn testKnn = new Knn(knn.getKnnValues()[best[i]]);
-				selectedClassifiers.add(testKnn);				
-			}
+		// select the best classifiers
+		int[] best = knn.getBestClassifiers(numberOfBestSelectedClassifications);
+		for(int i=0; i<best.length; i++){
+			System.err.println(i + "======" + best[i]);
 		}
+		bestClassiferParamList.addAll(ListUtils.subList(knn.getParamList(),best));
+		
+		// select best classifiers for testing		
+		if(test!=null){			
+			trainedClassifiers.add(knn);
+			for(int i=0; i<best.length; i++){
+				Knn testKnn = new Knn(knn.getKnnValues()[best[i]]);				
+				selectedClassifiers.add(testKnn);				
+			}			
+		}
+		
+		// acum correct classification sample ratios
+		double[][] ratios = knn.getEvaluationResultList().getCorrectClassificationRatio(sampleNames,best);		
+		addCorrectClassificationRatios(ratios);
 
+				
 		// save results
 		saveClassifierResults(knn);
 
 
 	}
 
+	private void addCorrectClassificationRatios(double[][] ratios){
+		for(int j=0; j<ratios[0].length; j++){
+			List<Double> singleRatio = new ArrayList<Double>(ratios.length);
+			for(int i=0; i<ratios.length; i++){			
+				singleRatio.add(ratios[i][j]);
+			}
+			correctSampleRatio.add(singleRatio);
+		}		
+	}
+	
 	private void executeSvm(Instances instances, Instances test) throws Exception {
 
 		// update status
@@ -497,4 +551,5 @@ public class Predictor extends BabelomicsTool {
 			abort("filenotfoundexception_executeknn_predictor", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
 		}
 	}
+	
 }

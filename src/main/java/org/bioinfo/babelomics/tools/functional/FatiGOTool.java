@@ -172,7 +172,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				
 				// run fatigo's
 				for(FunctionalFilter filter: filterList) {
-					fatigo = doFatigo(idList1,idList2,filter,dbConnector);					
+					fatigo = doFatigo(idList1,idList2,filter,dbConnector);
 				}				
 				if(isYourAnnotations){					
 					fatigo = doFatigoYourAnnotations(idList1, idList2, yourAnnotations);					
@@ -182,12 +182,14 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				if(duplicatesMode!=FatiGO.REMOVE_NEVER) saveDuplicatesReport(fatigo);
 				saveAnnotationsReport();
 				
-				// save significant count table
-				for(int i=0; i<DEFAULT_PVALUES.length; i++){
-					IOUtils.write(outdir + "/significant_count_" + pvalueFormatter.format(DEFAULT_PVALUES[i]) + ".txt", significantCount.get(i).toString());
+				if(numberOfResults>0){
+					// save significant count table
+					for(int i=0; i<DEFAULT_PVALUES.length; i++){
+						IOUtils.write(outdir + "/significant_count_" + pvalueFormatter.format(DEFAULT_PVALUES[i]) + ".txt", significantCount.get(i).toString());
+					}
+					result.getOutputItems().add(3, new Item("significant","significant_count_${pvalue}.txt","Number of significant terms per DB",Item.TYPE.FILE,Arrays.asList("TABLE,SUMMARY_TABLE,SIGNIFICANT_COUNT_TABLE"),new HashMap<String,String>(),"Significant Results"));				
+					result.addMetaItem(new Item("flags","SHOW_PVALUES","",TYPE.MESSAGE));
 				}
-				result.getOutputItems().add(3, new Item("significant","significant_count_${pvalue}.txt","Number of significant terms per DB",Item.TYPE.FILE,Arrays.asList("TABLE,SUMMARY_TABLE,SIGNIFICANT_COUNT_TABLE"),new HashMap<String,String>(),"Significant Results"));				
-				result.addMetaItem(new Item("flags","SHOW_PVALUES","",TYPE.MESSAGE));
 				
 			}
 		}catch(ParseException pe){
@@ -269,63 +271,66 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		String fileName = filterInfo.getName() + ".txt";
 		String annotFileName = filterInfo.getName() + ".annot";
 		
-		// save result table
-		List<String> testResultOutput = testResultToStringList(fatigo.getResults());
-		IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
-		result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("EXCEL",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"All results"));
-
-		// save table description
-		//result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"All results"));
-
-		// save significant results
-		int numberOfSignificantTerms;
-		List<TwoListFisherTestResult> significant;
-		String formattedPValue;
-		for(int i=0; i<DEFAULT_PVALUES.length; i++){
-			formattedPValue = pvalueFormatter.format(DEFAULT_PVALUES[i]);
+		if(fatigo.getResults()!=null && fatigo.getResults().size()>0){
 			
-			// significant terms
-			significant = fatigo.getSignificant(DEFAULT_PVALUES[i]);
-			if(significant!=null && significant.size()>0){
-				IOUtils.write(outdir + "/significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt", significant.get(0).header() + "\n" + ListUtils.toString(significant,"\n"));					
-				numberOfSignificantTerms = significant.size();					
-			} else {
-				numberOfSignificantTerms = 0;
-			}
+			numberOfResults++;
 			
-			// significant count
-			significantCount.get(i).append(filterInfo.getTitle()).append("\t").append(numberOfSignificantTerms).append("\n");
-			
-			
-			if(numberOfSignificantTerms>0){
+			// save result table
+			List<String> testResultOutput = testResultToStringList(fatigo.getResults());
+			IOUtils.write(outdir + "/" + fileName, ListUtils.toString(testResultOutput,"\n"));
+			result.addOutputItem(new Item(filterInfo.getName(),fileName,filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("EXCEL",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"All results"));
+	
+			// save table description
+			//result.addOutputItem(new Item(filterInfo.getName() + "_description",filterInfo.getDescription(),filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("MINI_COMMENT"),new HashMap<String,String>(),"All results"));
+	
+			// save significant results
+			int numberOfSignificantTerms;
+			List<TwoListFisherTestResult> significant;
+			String formattedPValue;
+			for(int i=0; i<DEFAULT_PVALUES.length; i++){
+				formattedPValue = pvalueFormatter.format(DEFAULT_PVALUES[i]);
 				
-				// go graph
-				if(filterInfo.getPrefix().equalsIgnoreCase("go")) {
-					try {
-						createGoGraph(significant,DEFAULT_PVALUES[i],filterInfo);						
-						Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"go_graph_" + filterInfo.getName() + "_" + formattedPValue + "_graphimage.png",filterInfo.getTitle() + " DAG (significant terms, pvalue<" + formattedPValue + ")",Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT,THUMBNAIL"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
-						item.setContext("pvalue==" + formattedPValue);
-						result.getOutputItems().add(4, item);
-					} catch(GoGraphException gge){
-						Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"Graph not found",filterInfo.getTitle() + " DAG (significant terms, pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
-						item.setContext("pvalue==" + formattedPValue);
-						result.getOutputItems().add(4, item);
-					}
+				// significant terms
+				significant = fatigo.getSignificant(DEFAULT_PVALUES[i]);
+				if(significant!=null && significant.size()>0){
+					IOUtils.write(outdir + "/significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt", significant.get(0).header() + "\n" + ListUtils.toString(significant,"\n"));					
+					numberOfSignificantTerms = significant.size();					
+				} else {
+					numberOfSignificantTerms = 0;
 				}
-				// table
-				Item item = new Item("significant_" + filterInfo.getName(),"significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt",filterInfo.getTitle() + " significant terms (pvalue<" + formattedPValue + ")",Item.TYPE.FILE,Arrays.asList("SIGNIFICANT","TABLE","FATIGO_TABLE","EXCEL",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
-				item.setContext("pvalue==" + formattedPValue);
-				result.getOutputItems().add(4, item);
-
-			} else {
-				Item item = new Item("significant_" + filterInfo.getName(),"No significant terms for current pvalue " + formattedPValue,filterInfo.getTitle() + " significant terms (pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle()); 
-				item.setContext("pvalue==" + formattedPValue);
-				result.getOutputItems().add(4, item);
-			}
-
-
-		}			
+				
+				// significant count
+				significantCount.get(i).append(filterInfo.getTitle()).append("\t").append(numberOfSignificantTerms).append("\n");
+				
+				
+				if(numberOfSignificantTerms>0){
+					
+					// go graph
+					if(filterInfo.getPrefix().equalsIgnoreCase("go")) {
+						try {
+							createGoGraph(significant,DEFAULT_PVALUES[i],filterInfo);						
+							Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"go_graph_" + filterInfo.getName() + "_" + formattedPValue + "_graphimage.png",filterInfo.getTitle() + " DAG (significant terms, pvalue<" + formattedPValue + ")",Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT,THUMBNAIL"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+							item.setContext("pvalue==" + formattedPValue);
+							result.getOutputItems().add(4, item);
+						} catch(GoGraphException gge){
+							Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"Graph not found",filterInfo.getTitle() + " DAG (significant terms, pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+							item.setContext("pvalue==" + formattedPValue);
+							result.getOutputItems().add(4, item);
+						}
+					}
+					// table
+					Item item = new Item("significant_" + filterInfo.getName(),"significant_" + filterInfo.getName() + "_" + formattedPValue + ".txt",filterInfo.getTitle() + " significant terms (pvalue<" + formattedPValue + ")",Item.TYPE.FILE,Arrays.asList("SIGNIFICANT","TABLE","FATIGO_TABLE","EXCEL",filterInfo.getPrefix().toUpperCase() + "_TERM"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+					item.setContext("pvalue==" + formattedPValue);
+					result.getOutputItems().add(4, item);
+	
+				} else {
+					Item item = new Item("significant_" + filterInfo.getName(),"No significant terms for current pvalue " + formattedPValue,filterInfo.getTitle() + " significant terms (pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle()); 
+					item.setContext("pvalue==" + formattedPValue);
+					result.getOutputItems().add(4, item);
+				}
 		
+			}			
+		}
 		// save annotations
 		if(fatigo.getAnnotations()!=null && fatigo.getAnnotations().size()>0){				
 			IOUtils.write(outdir + "/" + annotFileName, fatigo.getAnnotations().toString());
