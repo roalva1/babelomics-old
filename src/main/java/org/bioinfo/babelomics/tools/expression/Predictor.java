@@ -488,7 +488,7 @@ public class Predictor extends BabelomicsTool {
 
 		// feature selection
 		AbstractFeatureSelector featureSelector = null;
-		if(commandLine.hasOption("feature-selection")){
+		if(commandLine.hasOption("feature-selection") && !commandLine.getOptionValue("feature-selection").equalsIgnoreCase("none")){
 			String featureSelectionMethod = commandLine.getOptionValue("feature-selection"); 
 			if("cfs".equalsIgnoreCase(featureSelectionMethod)){
 				featureSelector = new CfsFeatureSelector();
