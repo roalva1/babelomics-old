@@ -216,8 +216,8 @@ public class Predictor extends BabelomicsTool {
 			//if(commandLine.hasOption("pam")) executePam(instances);
 
 			// save combined table
-			IOUtils.write(new File(outdir + "/combined_table.txt"), GenericClassifier.getResultsTableHeader() + "\n" +  combinedTable.toString());	
-			result.getOutputItems().add(0, new Item("combined_table", "combined_table.txt", " Combined results (best " + numberOfBestSelectedClassifications + " per classifier)", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR_COMBINED_TABLE"),new HashMap<String,String>(),"Summary",""));
+			IOUtils.write(new File(outdir + "/best_classifiers_table.txt"), GenericClassifier.getResultsTableHeader() + "\n" +  combinedTable.toString());	
+			result.getOutputItems().add(0, new Item("combined_table", "best_classifiers_table.txt", " Combined results (best " + numberOfBestSelectedClassifications + " per classifier)", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR_COMBINED_TABLE"),new HashMap<String,String>(),"Summary",""));
 
 			// test			
 			if(test!=null && selectedClassifiers.size()>0){
