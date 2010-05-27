@@ -17,14 +17,8 @@ import org.bioinfo.babelomics.utils.RCommand;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.chart.HistogramChart;
 import org.bioinfo.commons.io.utils.FileUtils;
-import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.utils.ArrayUtils;
-import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
-import org.bioinfo.data.dataset.SampleVariable;
-import org.bioinfo.data.dataset.Variable;
-import org.bioinfo.data.dataset.Variables;
 import org.bioinfo.data.format.io.exception.InvalidFileFormatException;
 import org.bioinfo.data.format.io.parser.NewickParser;
 import org.bioinfo.data.tree.multiway.MultipleTree;
@@ -33,8 +27,6 @@ import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 import org.jfree.chart.ChartUtilities;
-import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
-
 
 public class DescriptiveStatistics extends BabelomicsTool {
 	Dataset dataset;
@@ -165,8 +157,8 @@ public class DescriptiveStatistics extends BabelomicsTool {
 
 	private void preloadSeries(HistogramChart hc, BoxPlotChart bp) throws IOException {
 		dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
-		System.out.println("---------------------"+dataset.getVariables().getByName(className).getType());
 		if (className != null && !className.equalsIgnoreCase("all_classes") && "CATEGORICAL".equalsIgnoreCase(dataset.getVariables().getByName(className).getType()) ){
+			System.out.println("---------------------"+dataset.getVariables().getByName(className).getType());
 			values = dataset.getVariables().getByName(className).getLabels();
 			for (String str: values){
 				int[] colIndexByVariableValue = dataset.getColumnIndexesByVariableValue(className, str);
