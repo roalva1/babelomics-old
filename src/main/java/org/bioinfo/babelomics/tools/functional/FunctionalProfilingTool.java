@@ -35,6 +35,7 @@ import org.bioinfo.tool.OptionFactory;
 import es.blast2go.prog.GoSlim;
 import es.blast2go.prog.graph.GetGraphApi;
 import es.blast2go.prog.graph.GoGraphException;
+import es.blast2go.prog.graph.MakeGraphDot;
 
 
 public abstract class FunctionalProfilingTool extends BabelomicsTool {
@@ -64,6 +65,13 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	protected FeatureList<AnnotationItem> yourAnnotations;
 
 	protected List<StringBuilder> significantCount;
+	
+	// working
+	protected int numberOfResults;
+	
+	public FunctionalProfilingTool (){
+		this.numberOfResults = 0;
+	}
 	
 	@Override
 	public void initOptions() {
@@ -343,7 +351,8 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	}
 	
 	protected void createGseaGoGraph(List<GeneSetAnalysisTestResult> significant, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
-		String prefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue);
+		DecimalFormat pvalueLabelFormatter = new DecimalFormat("#.####E0");
+		String prefix = "go_graph_" + filterInfo.getName() + "_" + pvalueLabelFormatter.format(pvalue);
 		
 		// preparing association file
 		StringBuilder association = new StringBuilder();		
@@ -359,7 +368,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			}
 			//System.err.println(result.getList1Percentage() + ":" + result.getList2Percentage() + " " + result.getAdjPValue() + " " + intensity);
 			
-			association.append(result.getTerm()).append("\t").append(result.getTerm()).append("\t").append(intensity).append("\t").append(result.getAdjPValue()).append("\n");
+			association.append(result.getTerm()).append("\t").append(result.getTerm()).append("\t").append(intensity).append("\t").append("adj.pvalue=").append(pvalueFormatter.format(result.getAdjPValue())).append("\n");
 		}
 		
 		try {
@@ -377,10 +386,11 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			System.err.println("namespace: " + namespace);
 			
 			// init graph api
-			GetGraphApi graph = new GetGraphApi(outdir + "/graphs/",prefix,prefix  + "_association.txt",namespace,0,"byDesc",0.6,0,"orange");
+			GetGraphApi graph = new GetGraphApi(outdir + "/graphs/",prefix,prefix  + "_association.txt",namespace,0,MakeGraphDot.BYDESCWITHLABEL,0.6,0,"orange",6,filterInfo.getTitle());
+			
 			
 			// setting server params
-			graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));				
+			graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));		
 			graph.setDataBase(config.getProperty("BLAST2GO_HOST_NAME"),config.getProperty("BLAST2GO_DB_NAME"),config.getProperty("BLAST2GO_DB_USER"), config.getProperty("BLAST2GO_DB_PASSWORD"));
 			
 			// run

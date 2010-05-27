@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>es.blast2go</groupId>
 			<artifactId>blast2go</artifactId>
-			<version>babel</version>
+			<version>babel2</version>
 		</dependency>
 		<dependency>
 			<groupId>jdom</groupId>
