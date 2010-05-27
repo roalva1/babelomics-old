@@ -286,7 +286,7 @@ public class Predictor extends BabelomicsTool {
 				for(int j=0; j<correctSampleRatio.size(); j++){
 					ratiosTable.append(correctSampleRatio.get(j).get(i));
 					if(j<(correctSampleRatio.size()-1)){
-						ratiosTable.append(", ");
+						ratiosTable.append("\t");
 					}		
 				}
 				ratiosTable.append("\n");

@@ -119,7 +119,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			DBConnector dbConnector = new DBConnector(species, new File(babelomicsHomePath + "/conf/infrared.properties"));
 			
 			// prepare params
-			prepare();	
+			prepare();
 			FatiGO fatigo = null;
 			list2label = "List 2";
 			
@@ -138,7 +138,8 @@ public class FatiGOTool extends FunctionalProfilingTool{
 			} else if(chromosomes!=null) {
 				throw new ParseException("chromosomes comparison not yet implemented");
 			} else {
-				fatigo = new FatiGO(idList1, yourAnnotations);
+				fatigo = new FatiGO(idList1, yourAnnotations);				
+				idList2 = fatigo.getList2();				
 				list2label = "Rest of ids from your annotations (complementary list)";
 			}
 //			else {
@@ -173,7 +174,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				// run fatigo's
 				for(FunctionalFilter filter: filterList) {
 					fatigo = doFatigo(idList1,idList2,filter,dbConnector);
-				}				
+				}
 				if(isYourAnnotations){					
 					fatigo = doFatigoYourAnnotations(idList1, idList2, yourAnnotations);					
 				}
@@ -214,8 +215,10 @@ public class FatiGOTool extends FunctionalProfilingTool{
 
 		// init test
 		FatiGO fatigo = null;
-		if(list2!=null) fatigo = new FatiGO(idList1, idList2, filter, dbConnector, testMode, duplicatesMode);
+		//if(list2!=null) fatigo = new FatiGO(idList1, idList2, filter, dbConnector, testMode, duplicatesMode);
+		if(idList2!=null) fatigo = new FatiGO(idList1, idList2, filter, dbConnector, testMode, duplicatesMode);
 		else if(isRestOfGenome()) fatigo = new FatiGO(idList1, filter, dbConnector);
+		
 				
 		fatigo.setLogger(logger);
 		
@@ -259,7 +262,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		saveFatigoResults(fatigo,filterInfo);
 	
 		// annotation count
-		
+		addAnnotationReport(fatigo,filterInfo.getTitle());
 		
 		logger.println("...finished");
 		
