@@ -352,7 +352,8 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	
 	protected void createGseaGoGraph(List<GeneSetAnalysisTestResult> significant, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
 		DecimalFormat pvalueLabelFormatter = new DecimalFormat("#.####E0");
-		String prefix = "go_graph_" + filterInfo.getName() + "_" + pvalueLabelFormatter.format(pvalue);
+		String prefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue);
+		System.err.println("PREEEEEEEEEEEEEEEFFFFFFFFFFFFIIIIIIIXXXXXXXXXXX: " + prefix);
 		
 		// preparing association file
 		StringBuilder association = new StringBuilder();		
@@ -368,7 +369,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			}
 			//System.err.println(result.getList1Percentage() + ":" + result.getList2Percentage() + " " + result.getAdjPValue() + " " + intensity);
 			
-			association.append(result.getTerm()).append("\t").append(result.getTerm()).append("\t").append(intensity).append("\t").append("adj.pvalue=").append(pvalueFormatter.format(result.getAdjPValue())).append("\n");
+			association.append(result.getTerm()).append("\t").append(result.getTerm()).append("\t").append(intensity).append("\t").append("adj.pvalue=").append(pvalueLabelFormatter.format(result.getAdjPValue())).append("\n");
 		}
 		
 		try {

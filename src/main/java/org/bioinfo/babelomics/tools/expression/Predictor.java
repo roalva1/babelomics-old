@@ -17,6 +17,7 @@ import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.graphics.canvas.Canvas;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.mlpr.classifier.AbstractFeatureSelector;
 import org.bioinfo.mlpr.classifier.CfsFeatureSelector;
@@ -341,8 +342,8 @@ public class Predictor extends BabelomicsTool {
 		double[][] ratios = knn.getEvaluationResultList().getCorrectClassificationRatio(sampleNames,best);		
 		addCorrectClassificationRatios(ratios);
 		
-		knn.generateHeatmap(new Dataset(sampleNames,bestClassiferParamList,new DoubleMatrix(ratios)));
-				
+		Canvas canvas = knn.getEvaluationResultList().generateHeatmap(new Dataset(sampleNames,bestClassiferParamList,new DoubleMatrix(ratios)));
+		canvas.save(outdir + "/ratios.png");
 		// save results
 		saveClassifierResults(knn);
 
