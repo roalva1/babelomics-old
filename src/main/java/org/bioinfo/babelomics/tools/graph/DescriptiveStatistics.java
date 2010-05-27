@@ -23,6 +23,7 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.SampleVariable;
+import org.bioinfo.data.dataset.Variable;
 import org.bioinfo.data.dataset.Variables;
 import org.bioinfo.data.format.io.exception.InvalidFileFormatException;
 import org.bioinfo.data.format.io.parser.NewickParser;
@@ -164,7 +165,8 @@ public class DescriptiveStatistics extends BabelomicsTool {
 
 	private void preloadSeries(HistogramChart hc, BoxPlotChart bp) throws IOException {
 		dataset = new Dataset(new File(commandLine.getOptionValue("datalist")));
-		if (className != null && !className.equalsIgnoreCase("all_classes")){
+		System.out.println("---------------------"+dataset.getVariables().getByName(className).getType());
+		if (className != null && !className.equalsIgnoreCase("all_classes") && "CATEGORICAL".equalsIgnoreCase(dataset.getVariables().getByName(className).getType()) ){
 			values = dataset.getVariables().getByName(className).getLabels();
 			for (String str: values){
 				int[] colIndexByVariableValue = dataset.getColumnIndexesByVariableValue(className, str);

@@ -62,7 +62,7 @@ public class graphtest {
 			String outdir = "/tmp/pcaPlot";
 			new File(outdir).mkdir();
 			//String []args = { "--tool", "pca-plot","--log-level", "2", "--datalist", dataset,"--pcaplot","true","-class","EXAMPLE", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
-			String []args = { "--tool", "descriptive-statistics","--log-level", "2","--title", "hhhhhhh", "--datalist", dataset,"--boxplot","true","--classname","age", "-o", outdir, "--home","/opt/babelomics"};
+			String []args = { "--tool", "descriptive-statistics","--log-level", "2","--title", "hhhhhhh", "--datalist", dataset,"--boxplot","true","--classname","class", "-o", outdir, "--home","/opt/babelomics"};
 
 			System.out.println("----------------> " + args.toString());
 			
