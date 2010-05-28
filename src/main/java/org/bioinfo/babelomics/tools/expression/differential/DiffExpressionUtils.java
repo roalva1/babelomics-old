@@ -304,7 +304,7 @@ public class DiffExpressionUtils {
 			createFatiGoRedirectionFile(redirectionFile, topListFile, bottomListFile);
 			if ( redirectionFile.exists() ) {
 				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
-				result.addOutputItem(new Item(test + "_top_genome_fatigo", "", "Send top list vs genome to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
+				result.addOutputItem(new Item(test + "_top_genome_fatigo", "", "Send top list vs bottom list to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
 			}						
 		}
 		if (topListFile.exists()) {
