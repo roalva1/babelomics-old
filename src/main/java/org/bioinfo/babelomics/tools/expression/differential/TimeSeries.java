@@ -32,7 +32,7 @@ public class TimeSeries extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("degree", "Polynomial degree", false));
 		options.addOption(OptionFactory.createOption("q-value", "Q-value", false));
 		options.addOption(OptionFactory.createOption("correction", "Multiple testing adjustment", false));
-		options.addOption(OptionFactory.createOption("significance-level", "Significance levelfor model variable", false));
+		options.addOption(OptionFactory.createOption("significance-level", "Significance level for model variable", false));
 		options.addOption(OptionFactory.createOption("clustering-method", "Clustering method", false));
 		options.addOption(OptionFactory.createOption("k-value", "Number of clusters (k-value) for K-means clustering", false));
 	}
