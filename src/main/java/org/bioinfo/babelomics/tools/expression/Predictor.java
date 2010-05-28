@@ -342,8 +342,9 @@ public class Predictor extends BabelomicsTool {
 		double[][] ratios = knn.getEvaluationResultList().getCorrectClassificationRatio(sampleNames,best);		
 		addCorrectClassificationRatios(ratios);
 		
-		Canvas canvas = knn.getEvaluationResultList().generateHeatmap(new Dataset(sampleNames,bestClassiferParamList,new DoubleMatrix(ratios)));
+		Canvas canvas = knn.getEvaluationResultList().generateHeatmap(ratios,sampleNames,bestClassiferParamList);
 		canvas.save(outdir + "/ratios.png");
+		result.addOutputItem(new Item("ratios", "ratios.png", "Sample correct classification ratio (100% blue, 0% red)", TYPE.IMAGE, Arrays.asList(""), new HashMap<String, String>(),"Summary"));
 		// save results
 		saveClassifierResults(knn);
 

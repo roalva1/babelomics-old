@@ -387,7 +387,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			System.err.println("namespace: " + namespace);
 			
 			// init graph api
-			GetGraphApi graph = new GetGraphApi(outdir + "/graphs/",prefix,prefix  + "_association.txt",namespace,0,MakeGraphDot.BYDESCWITHLABEL,0.6,0,"orange",6,filterInfo.getTitle());
+			GetGraphApi graph = new GetGraphApi(outdir + "/graphs/",prefix,prefix  + "_association.txt",namespace,0,MakeGraphDot.BYDESCWITHLABEL,0.6,0,"orange",12,filterInfo.getTitle());
 			
 			
 			// setting server params
