@@ -16,6 +16,7 @@ import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.DataFrame;
+import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.graphics.canvas.Canvas;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.math.result.AnovaTestResult;
@@ -27,16 +28,21 @@ import org.bioinfo.math.stats.inference.FoldChangeTest;
 import org.bioinfo.math.stats.inference.TTest;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
+import org.bioinfo.tool.result.Result;
 import org.bioinfo.tool.result.Item.TYPE;
 
 public class ClassComparison extends BabelomicsTool {
 
 	private Dataset dataset;
 	private String test;
-	private String className;
-	private List<String> classValues;
+	private String className = null;
+	private List<String> classValues = null;
 	private String correction;
 	private double pValue = 0.05;
+	
+	private int minDisplay = 10;
+	private int maxDisplay = 500;
+	private String msg = "";
 
 	public ClassComparison() {
 		initOptions();
@@ -48,7 +54,8 @@ public class ClassComparison extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("class-name", "class"));
 		options.addOption(OptionFactory.createOption("class-values", "value"));
 		options.addOption(OptionFactory.createOption("test", "test: t, limma, anova, fold_change"));
-		options.addOption(OptionFactory.createOption("correction", "Multiple-test correction: fdr, bh, by, bonferroni, hochberg, hold"));
+		options.addOption(OptionFactory.createOption("correction", "Multiple-test correction: fdr, bh, by, bonferroni, hochberg, hold", false));
+		options.addOption(OptionFactory.createOption("p-value", "p-value for significative genes", false));
 		//options.addOption(OptionFactory.createOption("batch", "class class variable"));
 	}
 
@@ -57,43 +64,77 @@ public class ClassComparison extends BabelomicsTool {
 
 		List<String> values = null;
 		
-		// reading dataset
+		// init
 		//
-		dataset = initDataset(new File(commandLine.getOptionValue("dataset")));
-
 		test = commandLine.getOptionValue("test", null);
 		className = commandLine.getOptionValue("class-name", null);
 		values = (commandLine.hasOption("class-values") ? StringUtils.toList(commandLine.getOptionValue("class-values", null), ",") : null);
 		correction = commandLine.getOptionValue("correction", "fdr");
+		String pValueParam = commandLine.getOptionValue("p-value", "0.05");
+		String datasetParam = commandLine.getOptionValue("dataset");
 
-		if ( values == null ) {
-			values = ListUtils.unique(dataset.getVariables().getByName(className).getValues());
-		} else {
-			values = ListUtils.unique(values);
-			if ( values == null ) {
-				abort("classvaluesmissing_execute_classcomparison", "class values missing", "class values missing", "class values missing");				
+		if (className != null) {
+			if (values == null) {
+				values = ListUtils.unique(dataset.getVariables().getByName(className).getValues());
+			} else {
+				values = ListUtils.unique(values);
+			}
+		
+			classValues = new ArrayList<String>();
+			for(String val: values) {
+				if ( val != null && val.trim().length() > 0 ) {
+					classValues.add(val.trim());		
+				}
 			}
 		}
 		
-		classValues = new ArrayList<String>();
-		for(String val: values) {
-			if ( val != null && val.trim().length() > 0 ) {
-				classValues.add(val.trim());		
-			}
+		// input parameters
+		//		
+		result.addOutputItem(new Item("dataset_input_param", (datasetParam == null ? "" : new File(datasetParam).getName()), "Dataset file name", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));						
+		result.addOutputItem(new Item("test_input_param", test, "Test", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("class_input_param", (className == null ? "" : className) + " [" + ListUtils.toString(classValues, ", ") + "]", "Class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("correction_input_param", correction, "Multiple-test correction", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("pvalue_input_param", pValueParam, "p-value", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+
+		// check input parameters
+		//
+		if ( datasetParam == null ) {
+			abort("missingdataset_execute_classcomparison", "Missing dataset", "Missing dataset", "Missing dataset");
 		}
 
-		// sanity check
-		//
+		if ( className == null ) {
+			abort("classnamemissing_execute_classcomparison", "class name missing", "class name missing", "class name missing");				
+		}
+
+		if ( classValues == null ) {
+			abort("classvaluesmissing_execute_classcomparison", "class values missing", "class values missing", "class values missing");				
+		}
+
 		if ( test == null ) {
 			abort("testmissing_execute_classcomparison", "class comparison test missing", "class comparison test missing", "class comparison test missing");
 		}
 
-		// input parameters
-		//
-		result.addOutputItem(new Item("test_input_param", test, "Test", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-		result.addOutputItem(new Item("correction_input_param", correction, "Multiple-test correction", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-		result.addOutputItem(new Item("class_input_param", className + ", values: " + ListUtils.toString(classValues, ","), "Class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		try {
+			pValue = Double.parseDouble(pValueParam);
+			if (pValue > 1 || pValue < 0) {
+				pValue = 0.05;
+			}
+		} catch (NumberFormatException e) {
+			abort("pvalueinvalid_execute_classcomparison", "invalid p-value", "invalid p-value", "invalid p-value");			
+		}
 		
+		// reading dataset
+		//
+		File datasetFile = new File(datasetParam);
+		try {
+			dataset = new Dataset(datasetFile);
+			if (!dataset.load() && !dataset.validate()) {
+				abort("exception_execute_classcomparison", "Error", "Error loading dataset " + datasetFile.getName() + ": " + dataset.getMessages().getErrorString(""), "");				
+			}
+		} catch (Exception e) {
+			abort("exception_execute_clustering", "Error", "Error reading dataset " + datasetFile.getName(), "");
+		}		
+				
 		// executing test
 		//
 		updateJobStatus("40", "computing " + test);
@@ -136,72 +177,37 @@ public class ClassComparison extends BabelomicsTool {
 		try {
 			Dataset subDataset = dataset.getSubDataset(className, classValues);
 
+			// apply test and multiple test correction according
+			//
 			TTest tTest = new TTest();
 			TestResultList<TTestResult> res = tTest.tTest(sample1, sample2);
-
-			// apply multiple test correction according to input correction
 			DiffExpressionUtils.multipleTestCorrection(res, correction);
 
-			// generating heatmap
+			// create output file
 			//
-			updateJobStatus("60", "generating heatmap");
 			int[] columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
 			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
-			//Canvas heatmap = DiffExpressionUtils.generateHeatmap(subDataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());			
-			Canvas sigHeatmap = DiffExpressionUtils.generateSigHeatmap(subDataset, className, columnOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues(), pValue);
-
-			updateJobStatus("80", "saving results");
+			
 			DataFrame dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
-
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
-
 			dataFrame.setRowNames(ListUtils.ordered(subDataset.getFeatureNames(), rowOrder));
 
 			FeatureData featureData = new FeatureData(dataFrame);
-
 			File file = new File(outdir + "/t.txt");
 			featureData.save(file);
-//			if ( file.exists() ) {
-//				result.addOutputItem(new Item("tfile", file.getName(), "T-test output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "T-test output files"));							
-//			}
-//
-//			file = new File(outdir + "/t_table.txt");
-//			IOUtils.write(file, dataFrame.toString(true, true));
 			if ( file.exists() ) {
-				result.addOutputItem(new Item("ttable", file.getName(), "T-test output table", TYPE.FILE, StringUtils.toList("TABLE,DIFF_EXPRESSION_TABLE", ","), new HashMap<String, String>(2), "T-test output files"));											
+				result.addOutputItem(new Item("tfile", file.getName(), "T-test output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "T-test output files"));							
 			}
 
-			String sigHeatmapFilename = getOutdir() + "/" + test + "_heatmap_significative.png";
-			if ( sigHeatmap == null ) {
-				result.addOutputItem(new Item(test + "_heatmap_significative", "None significative terms", test.toUpperCase() + " heatmap with significative terms (p-value = " + pValue + ")", TYPE.TEXT, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
-			} else {
-				try {
-					sigHeatmap.save(sigHeatmapFilename);
-					if ( new File(sigHeatmapFilename).exists() ) {
-						result.addOutputItem(new Item(test + "_heatmap_significative", test + "_heatmap_significative.png", test.toUpperCase() + " heatmap with significative terms (p-value = " + pValue + ")", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
-					}
-				} catch (IOException e) {
-					printError("ioexception_executet_classcomparison", "error generating heatmap", e.toString(), e);
-				}
-			}
-
-//			String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
-//			try {
-//				heatmap.save(heatmapFilename);
-//				if ( new File(heatmapFilename).exists() ) {
-//					result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap with all terms", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
-//				}
-//			} catch (IOException e) {
-//				printError("ioexception_executet_classcomparison", "error generating heatmap", e.toString(), e);
-//			}
-
-			DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
-
+			// getting significative genes
+			//
+			DiffExpressionUtils.addSignificativeResults(subDataset, test, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues(), "p-value", res.getPValues(), null, null, className, columnOrder, pValue, maxDisplay, this);
+			DiffExpressionUtils.createFatiScanRedirection(dataFrame, test, "statistic", result, outdir);			
 		} catch (Exception e) {
 			e.printStackTrace();
-			abort("exception_executet_classcomparison", "error running t-test", "error running t-test: " + e.getMessage(), "error running t-test: " + e.getMessage());
+			abort("exception_executet_classcomparison", "ERROR", "Error running t-test", "");
 		}		
 	}
 
@@ -342,72 +348,36 @@ public class ClassComparison extends BabelomicsTool {
 		}
 
 		try {
-
 			Dataset subDataset = dataset.getSubDataset(className, classValues);
 
-			AnovaTest anova = new AnovaTest(matrix, vars);			
+			// apply test and multiple test correction according
+			//
+			AnovaTest anova = new AnovaTest(matrix, vars);
 			TestResultList<AnovaTestResult> res = anova.compute();
-
-			// apply multiple test correction according to input correction
 			DiffExpressionUtils.multipleTestCorrection(res, correction);
 
-			// generating heatmap
+			// create output file
 			//
-			updateJobStatus("60", "generating heatmap");
 			int[] columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
 			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
-			//Canvas heatmap = DiffExpressionUtils.generateHeatmap(subDataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());
-			Canvas sigHeatmap = DiffExpressionUtils.generateSigHeatmap(subDataset, className, columnOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues(), pValue);
-
-			updateJobStatus("80", "saving results");			
+			
 			DataFrame dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
-
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
-
 			dataFrame.setRowNames(ListUtils.ordered(subDataset.getFeatureNames(), rowOrder));
 
 			FeatureData featureData = new FeatureData(dataFrame);
-
-			File file = new File(outdir + "/anova.txt");
+			File file = new File(outdir + "/" + test + ".txt");
 			featureData.save(file);
-//			if ( file.exists() ) {
-//				result.addOutputItem(new Item("anovafile", file.getName(), "Anova output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Anova output files"));							
-//			}
-//
-//			file = new File(outdir + "/anova_table.txt");
-//			IOUtils.write(file, dataFrame.toString(true, true));
 			if ( file.exists() ) {
-				result.addOutputItem(new Item("anovatable", file.getName(), "Anova output table", TYPE.FILE, StringUtils.toList("TABLE,DIFF_EXPRESSION_TABLE", ","), new HashMap<String, String>(2), "Anova output files"));											
+				result.addOutputItem(new Item(test + "file", file.getName(), "Anova output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Anova output files"));							
 			}
 
-			String sigHeatmapFilename = getOutdir() + "/" + test + "_heatmap_significative.png";
-			if ( sigHeatmap == null ) {
-				result.addOutputItem(new Item(test + "_heatmap_significative", "None significative terms", test.toUpperCase() + " heatmap with significative terms (p-value = " + pValue + ")", TYPE.TEXT, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
-			} else {
-				try {
-					sigHeatmap.save(sigHeatmapFilename);
-					if ( new File(sigHeatmapFilename).exists() ) {
-						result.addOutputItem(new Item(test + "_heatmap_significative", test + "_heatmap_significative.png", test.toUpperCase() + " heatmap with significative terms (p-value = " + pValue + ")", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
-					}
-				} catch (IOException e) {
-					printError("ioexception_executet_classcomparison", "error generating heatmap", e.toString(), e);
-				}
-			}
-
-//			String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
-//			try {
-//				heatmap.save(heatmapFilename);
-//				if ( new File(heatmapFilename).exists() ) {
-//					result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
-//				}
-//			} catch (IOException e) {
-//				printError("ioexception_executeanova_classcomparison", "error generating heatmap", e.toString(), e);
-//			}
-
-			DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
-
+			// getting significative genes
+			//
+			DiffExpressionUtils.addSignificativeResults(subDataset, test, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues(), "p-value", res.getPValues(), null, null, className, columnOrder, pValue, maxDisplay, this);
+			DiffExpressionUtils.createFatiScanRedirection(dataFrame, test, "statistic", result, outdir);			
 		} catch (Exception e) {
 			e.printStackTrace();
 			abort("exception_executeanova_classcomparison", "error running anova", "error running anova: " + e.getMessage(), "error running anova: " + e.getMessage());
@@ -442,69 +412,33 @@ public class ClassComparison extends BabelomicsTool {
 		try {
 			Dataset subDataset = dataset.getSubDataset(className, classValues);
 
+			// apply test and multiple test correction according
+			//
 			TestResultList<LimmaTestResult> res = limma.compute();
-
-			// apply multiple test correction according to input correction
 			DiffExpressionUtils.multipleTestCorrection(res, correction);
 
-			// generating heatmap
+			// create output file
 			//
-			updateJobStatus("60", "generating heatmap");
 			int[] columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
 			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
-			//Canvas heatmap = DiffExpressionUtils.generateHeatmap(subDataset, className, columnOrder, rowOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues());
-			Canvas sigHeatmap = DiffExpressionUtils.generateSigHeatmap(subDataset, className, columnOrder, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues(), pValue);
-
-			updateJobStatus("80", "saving results");
+			
 			DataFrame dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
-
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
-			//dataFrame.addColumn("lod", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getLods()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
 			dataFrame.addColumn("adj. p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getAdjPValues()), rowOrder)));
-
 			dataFrame.setRowNames(ListUtils.ordered(subDataset.getFeatureNames(), rowOrder));
 
 			FeatureData featureData = new FeatureData(dataFrame);
-
-			File file = new File(outdir + "/limma.txt");
+			File file = new File(outdir + "/" + test + ".txt");
 			featureData.save(file);
-//			if ( file.exists() ) {
-//				result.addOutputItem(new Item("limmafile", file.getName(), "Limma output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Lima output files"));							
-//			}
-
-//			file = new File(outdir + "/limma_table.txt");
-//			IOUtils.write(file, dataFrame.toString(true, true));
 			if ( file.exists() ) {
-				result.addOutputItem(new Item("limmatable", file.getName(), "Limma output table", TYPE.FILE, StringUtils.toList("TABLE,DIFF_EXPRESSION_TABLE", ","), new HashMap<String, String>(2), "Lima output files"));											
-			}		
-
-			String sigHeatmapFilename = getOutdir() + "/" + test + "_heatmap_significative.png";
-			if ( sigHeatmap == null ) {
-				result.addOutputItem(new Item(test + "_heatmap_significative", "None significative terms", test.toUpperCase() + " heatmap with significative terms (p-value = " + pValue + ")", TYPE.TEXT, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
-			} else {
-				try {
-					sigHeatmap.save(sigHeatmapFilename);
-					if ( new File(sigHeatmapFilename).exists() ) {
-						result.addOutputItem(new Item(test + "_heatmap_significative", test + "_heatmap_significative.png", test.toUpperCase() + " heatmap with significative terms (p-value = " + pValue + ")", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
-					}
-				} catch (IOException e) {
-					printError("ioexception_executet_classcomparison", "error generating heatmap", e.toString(), e);
-				}
+				result.addOutputItem(new Item(test + "file", file.getName(), "Limma output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Limma output files"));							
 			}
 
-//			String heatmapFilename = getOutdir() + "/" + test + "_heatmap.png";
-//			try {
-//				heatmap.save(heatmapFilename);
-//				if ( new File(heatmapFilename).exists() ) {
-//					result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", test.toUpperCase() + " heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Heatmap image"));
-//				}
-//			} catch (IOException e) {
-//				printError("ioexception_executelimma_classcomparison", "error generating heatmap", e.toString(), e);
-//			}
-
-			DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
-
+			// getting significative genes
+			//
+			DiffExpressionUtils.addSignificativeResults(subDataset, test, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues(), "p-value", res.getPValues(), null, null, className, columnOrder, pValue, maxDisplay, this);
+			DiffExpressionUtils.createFatiScanRedirection(dataFrame, test, "statistic", result, outdir);			
 		} catch (Exception e) {
 			e.printStackTrace();
 			abort("exception_executelimma_classcomparison", "error running limma", "error running limma: " + e.toString(), "error running limma: " + e.toString());
