@@ -353,8 +353,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	protected void createGseaGoGraph(List<GeneSetAnalysisTestResult> significant, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
 		DecimalFormat pvalueLabelFormatter = new DecimalFormat("#.####E0");
 		String prefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue);
-		System.err.println("PREEEEEEEEEEEEEEEFFFFFFFFFFFFIIIIIIIXXXXXXXXXXX: " + prefix);
-		
+				
 		// preparing association file
 		StringBuilder association = new StringBuilder();		
 		double ratio,intensity;
