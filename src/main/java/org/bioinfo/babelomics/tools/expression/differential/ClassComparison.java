@@ -39,7 +39,8 @@ public class ClassComparison extends BabelomicsTool {
 	private List<String> classValues = null;
 	private String correction;
 	private double pValue = 0.05;
-	
+	private double foldChangeValue = 2;
+
 	private int minDisplay = 10;
 	private int maxDisplay = 500;
 	private String msg = "";
@@ -56,6 +57,7 @@ public class ClassComparison extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("test", "test: t, limma, anova, fold_change"));
 		options.addOption(OptionFactory.createOption("correction", "Multiple-test correction: fdr, bh, by, bonferroni, hochberg, hold", false));
 		options.addOption(OptionFactory.createOption("p-value", "p-value for significative genes", false));
+		options.addOption(OptionFactory.createOption("fold-change-value", "fold-change for significative genes", false));
 		//options.addOption(OptionFactory.createOption("batch", "class class variable"));
 	}
 
@@ -63,7 +65,7 @@ public class ClassComparison extends BabelomicsTool {
 	public void execute() {
 
 		List<String> values = null;
-		
+
 		// init
 		//
 		test = commandLine.getOptionValue("test", null);
@@ -71,6 +73,7 @@ public class ClassComparison extends BabelomicsTool {
 		values = (commandLine.hasOption("class-values") ? StringUtils.toList(commandLine.getOptionValue("class-values", null), ",") : null);
 		correction = commandLine.getOptionValue("correction", "fdr");
 		String pValueParam = commandLine.getOptionValue("p-value", "0.05");
+		String foldChangeValueParam = commandLine.getOptionValue("fold-change-value", "2");
 		String datasetParam = commandLine.getOptionValue("dataset");
 
 		if (className != null) {
@@ -79,7 +82,7 @@ public class ClassComparison extends BabelomicsTool {
 			} else {
 				values = ListUtils.unique(values);
 			}
-		
+
 			classValues = new ArrayList<String>();
 			for(String val: values) {
 				if ( val != null && val.trim().length() > 0 ) {
@@ -87,14 +90,18 @@ public class ClassComparison extends BabelomicsTool {
 				}
 			}
 		}
-		
+
 		// input parameters
 		//		
 		result.addOutputItem(new Item("dataset_input_param", (datasetParam == null ? "" : new File(datasetParam).getName()), "Dataset file name", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));						
 		result.addOutputItem(new Item("test_input_param", test, "Test", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("class_input_param", (className == null ? "" : className) + " [" + ListUtils.toString(classValues, ", ") + "]", "Class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("correction_input_param", correction, "Multiple-test correction", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-		result.addOutputItem(new Item("pvalue_input_param", pValueParam, "p-value", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		if ("fold-change".equalsIgnoreCase(test)) {
+			result.addOutputItem(new Item("fold_change_value_input_param", foldChangeValueParam, "Fold-change value", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		} else {
+			result.addOutputItem(new Item("pvalue_input_param", pValueParam, "p-value", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		}
 
 		// check input parameters
 		//
@@ -114,15 +121,24 @@ public class ClassComparison extends BabelomicsTool {
 			abort("testmissing_execute_classcomparison", "class comparison test missing", "class comparison test missing", "class comparison test missing");
 		}
 
-		try {
-			pValue = Double.parseDouble(pValueParam);
-			if (pValue > 1 || pValue < 0) {
+		if ("fold-change".equalsIgnoreCase(test)) {
+			try {
+				foldChangeValue = Double.parseDouble(foldChangeValueParam);
+			} catch (NumberFormatException e) {
+				foldChangeValue = 0.05;
+			}
+		} else {
+			try {
+				pValue = Double.parseDouble(pValueParam);
+				if (pValue > 1 || pValue < 0) {
+					pValue = 0.05;
+				}
+			} catch (NumberFormatException e) {
 				pValue = 0.05;
 			}
-		} catch (NumberFormatException e) {
-			abort("pvalueinvalid_execute_classcomparison", "invalid p-value", "invalid p-value", "invalid p-value");			
+			
 		}
-		
+
 		// reading dataset
 		//
 		File datasetFile = new File(datasetParam);
@@ -134,7 +150,7 @@ public class ClassComparison extends BabelomicsTool {
 		} catch (Exception e) {
 			abort("exception_execute_clustering", "Error", "Error reading dataset " + datasetFile.getName(), "");
 		}		
-				
+
 		// executing test
 		//
 		updateJobStatus("40", "computing " + test);
@@ -187,7 +203,7 @@ public class ClassComparison extends BabelomicsTool {
 			//
 			int[] columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
 			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
-			
+
 			DataFrame dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
@@ -232,24 +248,26 @@ public class ClassComparison extends BabelomicsTool {
 
 			updateJobStatus("80", "saving results");
 
+			//setFoldChangeResults(subDataset, "log", "Log", logRes, className);
+
 			String test, testLabel;
 			DataFrame dataFrame;
 			FeatureData featureData;
 			File file;
-			
+
 			int[] columnOrder;
 			int[] rowOrder;
 			Canvas heatmap;
 			String heatmapFilename;
-			
+
 			// log fold change
 			//
 			test = "log";
 			testLabel = "Log";
-			
+
 			columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
 			rowOrder = ListUtils.order(ArrayUtils.toList(logRes), true);
-			
+
 			dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
 			dataFrame.addColumn(test, ListUtils.ordered(ArrayUtils.toStringList(logRes), rowOrder));
 			dataFrame.setRowNames(ListUtils.ordered(subDataset.getFeatureNames(), rowOrder));	
@@ -260,7 +278,7 @@ public class ClassComparison extends BabelomicsTool {
 			if ( file.exists() ) {
 				result.addOutputItem(new Item(test + "_foldchange", file.getName(), testLabel + " fold-change output file", TYPE.FILE, StringUtils.toList("TABLE," + test.toUpperCase() + "_FOLD_CHANGE_TABLE", ","), new HashMap<String, String>(2), testLabel + " fold-change.Output files"));											
 			}		
-			
+
 			// generating heatmap
 			//
 			heatmap = DiffExpressionUtils.generateHeatmap(subDataset, className, columnOrder, rowOrder, test + " fold-change", logRes, null, null);			
@@ -274,10 +292,10 @@ public class ClassComparison extends BabelomicsTool {
 				printError("ioexception_executet_classcomparison", "error generating heatmap", e.toString(), e);
 			}
 
-			
+
 			test = "diff";
 			testLabel = "Diff";
-			
+
 			columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
 			rowOrder = ListUtils.order(ArrayUtils.toList(logRes), true);
 
@@ -291,7 +309,7 @@ public class ClassComparison extends BabelomicsTool {
 			if ( file.exists() ) {
 				result.addOutputItem(new Item(test + "_foldchange", file.getName(), testLabel + " fold-change output file", TYPE.FILE, StringUtils.toList("TABLE," + test.toUpperCase() + "_FOLD_CHANGE_TABLE", ","), new HashMap<String, String>(2), testLabel + " fold-change.Output files"));											
 			}		
-			
+
 			// generating heatmap
 			//
 			heatmap = DiffExpressionUtils.generateHeatmap(subDataset, className, columnOrder, rowOrder, test + " fold-change", diffRes, null, null);			
@@ -305,23 +323,148 @@ public class ClassComparison extends BabelomicsTool {
 				printError("ioexception_executet_classcomparison", "error generating heatmap", e.toString(), e);
 			}
 
-			
-			
-
-
-//			if ( file.exists() ) {
-//				result.addOutputItem(new Item("foldchangefile", file.getName(), "Fold-change output file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Fold-change output files"));							
-//			}
-//
-//			file = new File(outdir + "/foldchange_table.txt");
-//			IOUtils.write(file, dataFrame.toString(true, true));
-
-			//DiffExpressionUtils.addOutputLists(dataFrame, test, "statistic", result, outdir);
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			abort("exception_executefoldchange_classcomparison", "error running fold-change", "error running fold-change: " + e.getMessage(), "error running fold-change: " + e.getMessage());
 		}		
+	}
+
+
+	private void setFoldChangeResults(Dataset subDataset, String test, String testLabel, double[] res, String className) throws InvalidIndexException, IOException {
+
+		int[] columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
+		int[] rowOrder = ListUtils.order(ArrayUtils.toList(res), true);
+
+		DataFrame dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
+		dataFrame.addColumn(test, ListUtils.ordered(ArrayUtils.toStringList(res), rowOrder));
+		dataFrame.setRowNames(ListUtils.ordered(subDataset.getFeatureNames(), rowOrder));	
+		FeatureData featureData = new FeatureData(dataFrame);
+		File file = new File(outdir + "/" + test + "_foldchange.txt");
+		IOUtils.write(file, dataFrame.toString(true, true));
+		//featureData.save(file);
+		if ( file.exists() ) {
+			result.addOutputItem(new Item(test + "_foldchange", file.getName(), testLabel + " fold-change output file", TYPE.FILE, StringUtils.toList("TABLE," + test.toUpperCase() + "_FOLD_CHANGE_TABLE", ","), new HashMap<String, String>(2), testLabel + " fold-change.Output files"));											
+		}
+		
+		List<Double> orderedRes = ListUtils.ordered(ArrayUtils.toList(res), rowOrder);
+		int posValues = 0;
+		int negValues = 0;
+		for(int i=0 ; i<orderedRes.size() ; i++) {
+			if (Math.abs(orderedRes.get(i))>foldChangeValue) {
+				if (orderedRes.get(i)>0) {
+					posValues++;
+				} else {
+					negValues++;
+				}
+			}
+		}
+		
+//		if (posValues + negValues == 0) {
+//			result.addOutputItem(new Item("no_sig_results", "No significative results (fold-change value = " + foldChangeValue + ")", "Significative results", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));															
+//			return;
+//		}
+//		
+//		if (posValues + negValues > maxDisplay) {
+//			
+//		} else {
+//			for(int i=0 ; i<orderedRes.size() ; i++) {
+//				if (Math.abs(orderedRes.get(i))>foldChangeValue) {
+//					if (orderedRes.get(i)>0) {
+//						posValues++;
+//					} else {
+//						negValues++;
+//					}
+//				}
+//			}			
+//		}
+//		
+//		int halfDisplay = maxDisplay/2;
+//		for(int i=0 ; i<rowOrder.length ; i++) {
+//			if (i<nbToDisplay) {
+//				doubleMatrix.setRow(i, subDataset.getDoubleMatrix().getRow(sigOrder[i]));
+//				//System.out.println(subDataset.getFeatureNames().get(sigOrder[i]));
+//				sigRowIndexes.add(sigOrder[i]);
+//			}
+//		}
+//
+//
+//		int halfDisplay = maxDisplay/2;
+//		List<Integer> sigIndexes = new ArrayList<Integer>();
+//		for(int i=0 ; i<res.length ; i++) {
+//			if (Math.abs(res[i])>foldChangeValue) {
+//				if (res[i]>0) {
+//					if (posValues<halfDisplay) {
+//						posValues++;
+//					}
+//				}
+//			}
+//				
+//			}
+//		}
+//		int numberSigValues = (sigIndexes == null ? 0 : sigIndexes.size());
+//		if (numberSigValues > 0) {
+//
+//			//System.out.println("number of sig. values = " + numberSigValues);
+//
+//			int nbToDisplay = numberSigValues;
+//			if (numberSigValues > maxDisplay) {
+//				nbToDisplay = maxDisplay;
+//			}
+//
+//			//System.out.println("number to display = " + nbToDisplay);
+//
+//			int[] sigOrder = ListUtils.order(ArrayUtils.toList(adjPValues));
+//
+//			DoubleMatrix doubleMatrix = new DoubleMatrix(nbToDisplay, subDataset.getColumnDimension());
+//
+//			List<Integer> sigRowIndexes = new ArrayList<Integer>();
+//			System.out.println("feature names for sig");
+//			for(int i=0 ; i<sigOrder.length ; i++) {
+//				if (i<nbToDisplay) {
+//					doubleMatrix.setRow(i, subDataset.getDoubleMatrix().getRow(sigOrder[i]));
+//					//System.out.println(subDataset.getFeatureNames().get(sigOrder[i]));
+//					sigRowIndexes.add(sigOrder[i]);
+//				}
+//			}
+//
+//		
+//		Dataset sigDataset = null;
+//		DataFrame sigDataFrame = null;
+//		double[] sigRes = null;
+//		
+//		int nbToDisplay = res.length;
+//		if (nbToDisplay > maxDisplay) {
+//			result.addOutputItem(new Item("sig_results", "" + res.length + " (" + nbToDisplay + " most significative values will be displayed)", "Number of significative results", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), testLabel + " fold-change most significative results.Number of displayed items"));																				
+//			nbToDisplay = maxDisplay;
+//		} else {
+//			result.addOutputItem(new Item("sig_results", "" + nbToDisplay, "Number of significative results", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), testLabel + " fold-change most significative results.Number of displayed items"));
+//						
+//			sigDataset = subDataset;
+//			sigDataFrame = dataFrame;
+//			sigRes = res;
+//		}
+//		
+//		// adding table to results
+//		//
+//		file = new File(outdir + "/" + test + "_foldchange_table.txt");
+//		IOUtils.write(file, sigDataFrame.toString(true, true));
+//		if ( file.exists() ) {
+//			result.addOutputItem(new Item(test + "_table", file.getName(), "Most significative values table", TYPE.FILE, StringUtils.toList("TABLE,DIFF_EXPRESSION_TABLE", ","), new HashMap<String, String>(2), testLabel + " fold-change most significative results.Table"));											
+//		}
+//		
+//		// adding heatmap to results
+//		//
+//		Canvas heatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, test + " fold-change", sigRes, null, null);			
+//		String heatmapFilename = getOutdir() + "/" + test + "_foldchange_heatmap.png";
+//		try {
+//			heatmap.save(heatmapFilename);
+//			if ( new File(heatmapFilename).exists() ) {
+//				result.addOutputItem(new Item(test + "_heatmap", test + "_heatmap.png", testLabel + ". fold-change heatmap", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), testLabel + " fold-change most significative results.Heatmap image"));
+//			}
+//		} catch (IOException e) {
+//			printError("ioexception_executet_classcomparison", "error generating heatmap", e.toString(), e);
+//		}
+
 	}
 
 	/**
@@ -360,7 +503,7 @@ public class ClassComparison extends BabelomicsTool {
 			//
 			int[] columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
 			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
-			
+
 			DataFrame dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));
@@ -421,7 +564,7 @@ public class ClassComparison extends BabelomicsTool {
 			//
 			int[] columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
 			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
-			
+
 			DataFrame dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
 			dataFrame.addColumn("p-value", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getPValues()), rowOrder)));

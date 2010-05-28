@@ -131,11 +131,14 @@ public class RawExpressionViewer extends BabelomicsTool {
 				//
 
 				tmpDir = new File(rawDirName); 
-				File[] rawFiles = FileUtils.listFiles(new File(rawDirName), tags.contains("affymetrix") ? ".+.CEL" : ".+");
-				rawFileNames = new ArrayList<String>(rawFiles.length);
-				for(File file: rawFiles) {
-					rawFileNames.add(file.getAbsolutePath());
-				}
+			}
+			File[] rawFiles = FileUtils.listFiles(tmpDir, tags.contains("affymetrix") ? ".+.cel" : ".+", true);
+			rawFileNames = new ArrayList<String>(rawFiles.length);
+			for(File file: rawFiles) {
+			    if ( !"sampleinfo.txt".equalsIgnoreCase(file.getName())) {
+				rawFileNames.add(file.getAbsolutePath());
+				System.out.println("file: " + file.getName());
+			    }
 			}
 
 			// sanity check
