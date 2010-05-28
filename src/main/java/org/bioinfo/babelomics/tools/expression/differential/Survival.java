@@ -67,12 +67,14 @@ public class Survival extends BabelomicsTool {
 			censoredVars.add(Double.parseDouble(str));
 		}
 
+		int[] columnOrder = ListUtils.order(timeVars);
+
 		// input parameters
 		//
 		//result.addOutputItem(new Item("dataset_input_param", (datasetParam == null ? "" : new File(datasetParam).getName()), "Dataset file name", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));								
 		result.addOutputItem(new Item("test_input_param", test, "Test", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("correction_input_param", correction, "Multiple-test correction", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-		result.addOutputItem(new Item("timeclass_input_param", timeClass + " [" + ListUtils.toString(timeVars, ",") + "]", "Time class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("timeclass_input_param", timeClass + " [" + ListUtils.toString(ListUtils.ordered(timeVars, columnOrder), ",") + "]", "Time class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("censoredclass_input_param", censoredClass, "Censored class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("pvalue_input_param", pValueParam, "p-value", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		
@@ -80,6 +82,7 @@ public class Survival extends BabelomicsTool {
 			pValue = Double.parseDouble(pValueParam);
 			if (pValue > 1 || pValue < 0) {
 				pValue = 0.05;
+				printWarning("pvalueinvalid_execute_cox_survival", "Warning", "The p-value " + pValueParam + " has been set to " + pValue);
 			}
 		} catch (NumberFormatException e) {
 			abort("pvalueinvalid_execute_cox_survival", "invalid p-value", "invalid p-value", "invalid p-value");			
@@ -100,7 +103,6 @@ public class Survival extends BabelomicsTool {
 
 			// create output file
 			//
-			int[] columnOrder = ListUtils.order(timeVars);
 			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
 			
 			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
