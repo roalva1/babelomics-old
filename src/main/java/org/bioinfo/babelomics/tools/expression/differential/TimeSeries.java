@@ -37,19 +37,19 @@ public class TimeSeries extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("k-value", "Number of clusters (k-value) for K-means clustering", false));
 	}
 
-	
+
 	@Override
 	public void execute() {
 		String test = commandLine.getOptionValue("test", "masigpro");
 		executeMaSigPro();
 	}
-	
+
 	public void executeMaSigPro() {
-		
+
 		// reading dataset
 		//
 		Dataset dataset = initDataset(new File(commandLine.getOptionValue("dataset")));
-				
+
 		String continClass = commandLine.getOptionValue("contin-class", null);
 		String seriesClass = commandLine.getOptionValue("series-class", null);
 		int degree = Integer.parseInt(commandLine.getOptionValue("degree", "2"));
@@ -58,7 +58,7 @@ public class TimeSeries extends BabelomicsTool {
 		double alfa = Double.parseDouble(commandLine.getOptionValue("significance-level", "0.05"));
 		String clustering = commandLine.getOptionValue("clustering-method", "hclust");
 		int kvalue = Integer.parseInt(commandLine.getOptionValue("k-value", "9"));
-			
+
 		List<String> continVars = dataset.getVariables().getByName(continClass).getValues();
 		List<String> seriesVars = dataset.getVariables().getByName(seriesClass).getValues();
 
@@ -78,25 +78,40 @@ public class TimeSeries extends BabelomicsTool {
 		} catch (IOException e) {
 			abort("ioexception_execute_masigpro", "error writting intermediate file", e.toString(), StringUtils.getStackTrace(e));
 		}
-		
+
 		maSigPro masigpro = new maSigPro(babelomicsHomePath + "/bin/masigpro/masigpro.R");
 		masigpro.setInputFilename(inputFile.getAbsolutePath());
 		masigpro.setOutdir(outdir);
-		
+
 		masigpro.compute(degree, q, correction, alfa, clustering, kvalue);
-		
+
 		// saving data
 		//
 		updateJobStatus("80", "saving results");
 		File outDirFile = new File(outdir);
-		
+
 		File outFile = null;
 		File[] outFiles = null;
-		
+
 		// general info
 		outFiles = FileUtils.listFiles(outDirFile, ".*summary.*");
 		for (File f: outFiles) {
-			result.addOutputItem(new Item("summaryfile", f.getName(), "Significant genes for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "maSigPro output.List of significant genes"));			
+			File listFile = new File(f.getAbsolutePath() + ".id.list.txt");
+			try {
+				IOUtils.write(listFile, IOUtils.column(f, 0));
+				if (listFile.exists()) {
+					File redirectionFile = new File(f.getAbsoluteFile() + ".genoome.fatigo.redirection");		
+					DiffExpressionUtils.createFatiGoRedirectionFile(redirectionFile, listFile);
+					if ( redirectionFile.exists() ) {
+						String tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
+						result.addOutputItem(new Item("summaryfile", f.getName(), "Significant genes for '" + getCleanName(f) + "'", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "maSigPro output.List of significant genes"));
+					}						
+				} else {
+					result.addOutputItem(new Item("summaryfile", f.getName(), "Significant genes for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "maSigPro output.List of significant genes"));
+				}
+			} catch (Exception e) {
+				result.addOutputItem(new Item("summaryfile", f.getName(), "Significant genes for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "maSigPro output.List of significant genes"));				
+			}
 		}
 		if ( (outFile = new File(outdir + "/pvalues.txt")).exists() ) {
 			result.addOutputItem(new Item("pvaluesfile", outFile.getName(), "p-values file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional results.p-values and adjusted p-values of global model for all genes"));						
@@ -104,10 +119,10 @@ public class TimeSeries extends BabelomicsTool {
 		if ( (outFile = new File(outdir + "/influ_info.txt")).exists() ) {
 			result.addOutputItem(new Item("influinfofile", outFile.getName(), "Influence data file", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional results.Influence data (genes with influential values, possible outliers)"));						
 		}
-//		if ( (outFile = new File(outdir + "/influ_data.png")).exists() ) {
-//			result.addOutputItem(new Item("infludataimg", outFile.getName(), "Influence data plot", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional results.Influence data (genes with influential values, possible outliers)"));						
-//		}
-		
+		//		if ( (outFile = new File(outdir + "/influ_data.png")).exists() ) {
+		//			result.addOutputItem(new Item("infludataimg", outFile.getName(), "Influence data plot", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional results.Influence data (genes with influential values, possible outliers)"));						
+		//		}
+
 		// model data
 		outFiles = FileUtils.listFiles(outDirFile, ".*coefficients\\.txt");
 		for (File f: outFiles) {
@@ -121,8 +136,8 @@ public class TimeSeries extends BabelomicsTool {
 		for (File f: outFiles) {
 			result.addOutputItem(new Item("sigprofilefile", f.getName(), "Significant profiles for '" + getCleanName(f) + "'", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional results.Significant profiles"));			
 		}
-		
-		
+
+
 		// visualization
 		outFiles = FileUtils.listFiles(outDirFile, ".*heatmap\\.png");
 		for (File f: outFiles) {
@@ -137,8 +152,8 @@ public class TimeSeries extends BabelomicsTool {
 			result.addOutputItem(new Item("profileimg", f.getName(), "'" + getCleanName(f) + "' profile", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Additional results.Profiles plot"));			
 		}				
 	}
-	
-	
+
+
 	private String getCleanName(File file) {
 		String res = file.getName().replace(".txt", "").replace(".png", "");
 		res = res.replace("groups_", "").replace("summary", "").replace("_sig.profiles", "").replace("_sig.pvalues", "").replace("_coefficients", "");
@@ -146,5 +161,5 @@ public class TimeSeries extends BabelomicsTool {
 		res = res.replace("_", " ");
 		return res;
 	}
-	
+
 }

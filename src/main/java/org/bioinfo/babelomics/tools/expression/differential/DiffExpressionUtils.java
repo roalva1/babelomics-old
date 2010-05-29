@@ -267,6 +267,10 @@ public class DiffExpressionUtils {
 	}
 
 	public static void createFatiGoRedirection(List<String> names, double[] statistic, String test, Result result, String outDir) throws IOException, InvalidIndexException {
+		createFatiGoRedirection(names, statistic, test, result, outDir, "");		
+	}
+		
+	public static void createFatiGoRedirection(List<String> names, double[] statistic, String test, Result result, String outDir, String groupPrefix) throws IOException, InvalidIndexException {
 		// preparing top and bottom list
 		//
 		String tags;
@@ -304,7 +308,7 @@ public class DiffExpressionUtils {
 			createFatiGoRedirectionFile(redirectionFile, topListFile, bottomListFile);
 			if ( redirectionFile.exists() ) {
 				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
-				result.addOutputItem(new Item(test + "_top_genome_fatigo", "", "Send top list vs bottom list to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
+				result.addOutputItem(new Item(test + "_top_genome_fatigo", "", "Send top list vs bottom list to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), groupPrefix + "Continue processing"));
 			}						
 		}
 		if (topListFile.exists()) {
@@ -312,7 +316,7 @@ public class DiffExpressionUtils {
 			createFatiGoRedirectionFile(redirectionFile, topListFile);
 			if ( redirectionFile.exists() ) {
 				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
-				result.addOutputItem(new Item(test + "_top_genome_fatigo", "", "Send top list vs genome to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
+				result.addOutputItem(new Item(test + "_top_genome_fatigo", "", "Send top list vs genome to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), groupPrefix + "Continue processing"));
 			}			
 		}
 		if (bottomListFile.exists()) {
@@ -320,7 +324,7 @@ public class DiffExpressionUtils {
 			createFatiGoRedirectionFile(redirectionFile, bottomListFile);
 			if ( redirectionFile.exists() ) {
 				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
-				result.addOutputItem(new Item(test + "_bottom_genome_fatigo", "", "Send bottom list vs genome to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
+				result.addOutputItem(new Item(test + "_bottom_genome_fatigo", "", "Send bottom list vs genome to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), groupPrefix + "Continue processing"));
 			}						
 		}
 	}
@@ -369,8 +373,11 @@ public class DiffExpressionUtils {
 			}
 		}
 	}
-
 	public static void createFatiScanRedirection(DataFrame dataFrame, String test, String colName, Result result, String outDir) throws IOException, InvalidIndexException {
+		createFatiScanRedirection(dataFrame, test, colName, result, outDir, "");
+	}
+
+	public static void createFatiScanRedirection(DataFrame dataFrame, String test, String colName, Result result, String outDir, String groupPrefix) throws IOException, InvalidIndexException {
 		// preparing ranked list
 		//
 		String tags;
@@ -384,7 +391,7 @@ public class DiffExpressionUtils {
 				//				tags = "DATA,RANKED,REDIRECTION(" + redirectionFile.getName() + ":Send to FatiScan tool...)";
 				//				result.addOutputItem(new Item(test + "_ranked_list_file", rankedListFile.getName(), "Send ranked list to FatiScan tool", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
 				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiScan tool...)";
-				result.addOutputItem(new Item(test + "_fatiscan", "", "Send ranked list to FatiScan tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
+				result.addOutputItem(new Item(test + "_fatiscan", "", "Send ranked list to FatiScan tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), groupPrefix + "Continue processing"));
 			}
 		}				
 	}
@@ -525,18 +532,15 @@ public class DiffExpressionUtils {
 			}
 
 			if (numberSigValues > maxDisplay) {
-				tool.getResult().addOutputItem(new Item("sig_results", "" + numberSigValues + " (" + maxDisplay + " most significative values will be displayed)", "Number of significative results (p-value = " + pValue + ")", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));																				
+				tool.getResult().addOutputItem(new Item("sig_results", "" + numberSigValues + " (" + maxDisplay + " most significative values will be displayed)", "Number of significative results (adj. p-value = " + pValue + ")", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));																				
 			} else {
-				tool.getResult().addOutputItem(new Item("sig_results", "" + numberSigValues, "Number of significative results (p-value = " + pValue + ")", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));																									
+				tool.getResult().addOutputItem(new Item("sig_results", "" + numberSigValues, "Number of significative results (adj. p-value = " + pValue + ")", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));																									
 			}
 
 			Dataset sigDataset = new Dataset(subDataset.getSampleNames(), ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), doubleMatrix);
 			sigDataset.setVariables(subDataset.getVariables());
 			sigDataset.validate();
 			sigDataset.save(tool.getOutdir() + "/sig_dataset.txt");
-
-			List<Double> aux = ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes));
-			//System.out.println("list ---> " + ListUtils.toString(aux, "\n"));
 
 			int[] rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes)), true);		
 
@@ -557,7 +561,7 @@ public class DiffExpressionUtils {
 			File file = new File(tool.getOutdir() + "/" + test + "_sig_table.txt");
 			IOUtils.write(file, dataFrame.toString(true, true));
 			if ( file.exists() ) {
-				tool.getResult().addOutputItem(new Item(test + "_table", file.getName(), "Significative values table (p-value = " + pValue + ")", TYPE.FILE, StringUtils.toList("TABLE,DIFF_EXPRESSION_TABLE", ","), new HashMap<String, String>(2), "Significative results"));											
+				tool.getResult().addOutputItem(new Item(test + "_table", file.getName(), "Significative values table (adj, p-value = " + pValue + ")", TYPE.FILE, StringUtils.toList("TABLE,DIFF_EXPRESSION_TABLE", ","), new HashMap<String, String>(2), "Significative results"));											
 			}
 
 			// adding heatmap to results
@@ -575,7 +579,7 @@ public class DiffExpressionUtils {
 					File sigHeatmapFile = new File(tool.getOutdir() + "/" + test + "_heatmap_significative.png");
 					sigHeatmap.save(sigHeatmapFile.getAbsolutePath());
 					if (sigHeatmapFile.exists()) {
-						tool.getResult().addOutputItem(new Item(test + "_heatmap_significative", test + "_heatmap_significative.png", test.toUpperCase() + " heatmap with significative values (p-value = " + pValue + ")", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Significative results"));
+						tool.getResult().addOutputItem(new Item(test + "_heatmap_significative", test + "_heatmap_significative.png", test.toUpperCase() + " heatmap with significative values (adj. p-value = " + pValue + ")", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Significative results"));
 					}
 				} catch (IOException e) {
 					tool.printError("ioexception_executet_classcomparison", "ERROR", "Error saving heatmap image");

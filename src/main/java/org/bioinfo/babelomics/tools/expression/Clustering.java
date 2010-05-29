@@ -14,12 +14,13 @@ import org.bioinfo.babelomics.methods.expression.clustering.Som;
 import org.bioinfo.babelomics.methods.expression.clustering.Sota;
 import org.bioinfo.babelomics.methods.expression.clustering.Upgma;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.babelomics.tools.expression.differential.DiffExpressionUtils;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.data.format.io.exception.InvalidFileFormatException;
+import org.bioinfo.data.format.io.parser.NewickParser;
 import org.bioinfo.data.tree.multiway.MultipleTree;
 import org.bioinfo.data.tree.multiway.MultipleTreeUtils;
 import org.bioinfo.math.data.DoubleMatrix;
@@ -31,6 +32,8 @@ import org.bioinfo.tool.result.Item.TYPE;
 public class Clustering extends BabelomicsTool {
 
 
+	private int maxDisplay = 1000;
+	
 	public Clustering() {
 	}
 
@@ -55,15 +58,15 @@ public class Clustering extends BabelomicsTool {
 		int geneKvalue = 15;
 		Dataset dataset = null;
 
-		
+
 		// input parameters
 		//
 		List<String> aux = new ArrayList<String>();		
 		String datasetParam, methodParam, sampleKvalueParam = "5", geneKvalueParam = "15", distanceParam, sampleClusteringParam, geneClusteringParam;
-		
+
 		datasetParam = commandLine.getOptionValue("dataset");
 		result.addOutputItem(new Item("dataset_input_param", (datasetParam == null ? "" : new File(datasetParam).getName()), "Dataset file name", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));						
-		
+
 		aux.clear();
 		sampleClusteringParam = commandLine.getOptionValue("sample-clustering",  "true");
 		geneClusteringParam = commandLine.getOptionValue("gene-clustering",  "false");
@@ -90,14 +93,14 @@ public class Clustering extends BabelomicsTool {
 			}
 		}
 		result.addOutputItem(new Item("method_input_param", ListUtils.toString(aux, ","), "Method", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-		
+
 		distanceParam = commandLine.getOptionValue("distance", "euclidean");
 		result.addOutputItem(new Item("distance_input_param", distanceParam, "Distance", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 
-		
+
 		sampleClustering = Boolean.parseBoolean(sampleClusteringParam);
 		geneClustering = Boolean.parseBoolean(geneClusteringParam);
-				
+
 		if ( "kmeans".equalsIgnoreCase(methodParam) ) {
 			try {
 				sampleKvalue = Integer.parseInt(sampleKvalueParam);
@@ -153,9 +156,10 @@ public class Clustering extends BabelomicsTool {
 			abort("unknownclusteringmethod_execute_clustering", "Unknown clustering method '" + methodParam + "'", "Unknown clustering method '" + methodParam + "'", "Unknown clustering method '" + methodParam + "'");
 		}
 
+		File file;
 		List<String> tags = null;
 		MultipleTree nwGenes = null, nwSamples = null;
-
+		String nwGenesStr = null, nwSamplesStr = null;
 
 		if ( geneClustering ) {
 			try {
@@ -165,14 +169,20 @@ public class Clustering extends BabelomicsTool {
 			}
 
 			try {
-				nwGenes = runClustering(dataset.getDoubleMatrix(), dataset.getFeatureNames(), dataset.getSampleNames(), methodParam, distanceParam, geneKvalue, true);
+				nwGenesStr = runClustering(dataset.getDoubleMatrix(), dataset.getFeatureNames(), dataset.getSampleNames(), methodParam, distanceParam, geneKvalue, true);
 			} catch (Exception e) {
 				printError("exception_executesota_clustering", "Error", "Error running " + methodParam + " algorithm for genes");
 			}
 
+
 			tags = StringUtils.toList("data,newick", ",");
-			if ( nwGenes != null ) {
+			if (nwGenesStr != null && nwGenesStr.length() > 0) {
+				file = new File(outdir + "/genes.nw");
 				try {
+					IOUtils.write(file, nwGenesStr.toString());		
+					result.addOutputItem(new Item("gene_newick_file", "genes.nw", "Clusters of genes", TYPE.FILE, tags, new HashMap<String, String>(2), "Clusters in newick format"));
+
+					nwGenes = new NewickParser().parse(file);
 					String clusterFolder = outdir + "/clusters/";
 					new  File(clusterFolder).mkdir();
 					MultipleTreeUtils.saveClusters(nwGenes, "", clusterFolder);
@@ -193,12 +203,17 @@ public class Clustering extends BabelomicsTool {
 						}					
 					}
 
-					IOUtils.write(new File(this.getOutdir() + "/genes.nw"), nwGenes.toString());		
-					result.addOutputItem(new Item("gene_newick_file", "genes.nw", "Clusters of genes", TYPE.FILE, tags, new HashMap<String, String>(2), "Clusters in newick format"));
 				} catch (IOException e) {
-					printError("ioexception_executesota_clustering", "Error", "Error saving genes newick");
-					nwGenes = null;
-				}			
+					if (!file.exists()) {
+						printError("ioexception_execute_clustering", "Error", "Error generating genes newick");
+						nwGenes = null;
+					}
+				} catch (InvalidFileFormatException e) {
+					if (dataset.getFeatureNames().size()<=maxDisplay) {
+						printError("ioexception_execute_clustering", "Error", "Error newick format invalid, please, check your gene IDs");
+					}
+					//e.printStackTrace();
+				}
 			}
 		}
 
@@ -206,23 +221,32 @@ public class Clustering extends BabelomicsTool {
 			try {
 				jobStatus.addStatusMessage("60", "generating samples clusters");
 			} catch (FileNotFoundException e) {
-				printError("filenotfoundexception_execute_clustering", "Error", "Internal error updating job status file (file not found)");
+				//printError("filenotfoundexception_execute_clustering", "Error", "Internal error updating job status file (file not found)");
 			}
 
 			try {
-				nwSamples = runClustering(new DoubleMatrix(dataset.getDoubleMatrix().transpose().getData()), dataset.getSampleNames(), dataset.getFeatureNames(), methodParam, distanceParam, sampleKvalue);
+				nwSamplesStr = runClustering(new DoubleMatrix(dataset.getDoubleMatrix().transpose().getData()), dataset.getSampleNames(), dataset.getFeatureNames(), methodParam, distanceParam, sampleKvalue);
 			} catch (Exception e) {
+				e.printStackTrace();
 				printError("exception_execute" + methodParam + "_clustering", "Error", "Error running " + methodParam + " algorithm for samples");
 			}
 
 			tags = StringUtils.toList("data,newick", ",");
-			if ( nwSamples != null ) {
+			if (nwSamplesStr != null && nwSamplesStr.length() > 0) {
+				file = new File(outdir + "/samples.nw");
 				try {
-					IOUtils.write(new File(this.getOutdir() + "/samples.nw"), nwSamples.toString());
-					result.addOutputItem(new Item("sample_newick_file", "samples.nw", "Clusters of samples", TYPE.FILE, tags, new HashMap<String, String>(2), "Clusters in newick format"));
+					IOUtils.write(file, nwSamplesStr.toString());		
+					result.addOutputItem(new Item("sample_newick_file", file.getName(), "Clusters of samples", TYPE.FILE, tags, new HashMap<String, String>(2), "Clusters in newick format"));
+					
+					nwSamples = new NewickParser().parse(file);
+					
 				} catch (IOException e) {
-					printError("ioexception_execute" + methodParam + "_clustering", "Error", "Error saving samples newick");
-					nwSamples = null;
+					if (!file.exists()) {
+						printError("ioexception_execute" + methodParam + "_clustering", "Error", "Error saving samples newick");
+						nwSamples = null;
+					}
+				} catch (InvalidFileFormatException e) {
+					printError("ioexception_execute_clustering", "Error", "Error newick format invalid, please, check your sample names");
 				}			
 			}
 		}
@@ -284,7 +308,7 @@ public class Clustering extends BabelomicsTool {
 		//			}
 		//		}
 
-		if ( dataset.getRowDimension() <= 1000 ) {
+		if ( dataset.getRowDimension() <= maxDisplay ) {
 			int rowOrder[] = null;
 			int columnOrder[] = null;
 
@@ -333,7 +357,7 @@ public class Clustering extends BabelomicsTool {
 				}
 			}
 
-			printWarning("ioexception_execute" + methodParam + "_clustering", "Warning", "This release limits the tree images to 1000 genes");
+			printWarning("ioexception_execute" + methodParam + "_clustering", "Warning", "This release limits the heatmap in tree images to " + maxDisplay + " genes");
 		}
 
 
@@ -400,12 +424,12 @@ public class Clustering extends BabelomicsTool {
 	 * @return
 	 * @throws Exception
 	 */
-	private MultipleTree runClustering(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String method, String distance, int kvalue) throws Exception {
+	private String runClustering(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String method, String distance, int kvalue) throws Exception {
 		return runClustering(matrix, rowNames, colNames, method, distance, kvalue, false);
 	}
 
-	private MultipleTree runClustering(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String method, String distance, int kvalue, boolean createClusterFiles) throws Exception {
-		MultipleTree tree = null;
+	private String runClustering(DoubleMatrix matrix, List<String> rowNames, List<String> colNames, String method, String distance, int kvalue, boolean createClusterFiles) throws Exception {
+		String tree = null;
 
 		if ( "sota".equalsIgnoreCase(method) ) {
 			Sota sota = new Sota(matrix, rowNames, colNames, distance, babelomicsHomePath);

@@ -68,6 +68,7 @@ public class ClassComparisonTest {
 		}		
 	}
 
+	@Test
 	public void Test3() {
 	    
 		String dataset = "/mnt/commons/test/biodata/example/twoclasses100.txt";
@@ -75,7 +76,8 @@ public class ClassComparisonTest {
 		new File(outdir).mkdir();
 
 		System.out.println("----- two classes - fold change ------");
-		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "fold-change", "--class-name", "class", "--class-values", "basal,luminal", "--correction", "holm", "--home", System.getenv("BABELOMICS_HOME")};
+		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "fold-change", "--fold-change-value", "0.05", "--class-name", "class", "--class-values", "basal,luminal", "--correction", "holm", "--home", System.getenv("BABELOMICS_HOME")};
+		System.out.println(ArrayUtils.toString(args, " "));
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -100,7 +102,6 @@ public class ClassComparisonTest {
 		}		
 	}
 
-	@Test
 	public void Test5() {
 	    
 		String dataset = "/mnt/commons/test/biodata/example/multiclasses.txt";
