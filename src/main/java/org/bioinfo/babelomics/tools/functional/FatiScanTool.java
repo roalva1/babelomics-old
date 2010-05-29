@@ -212,13 +212,17 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		// run
 		try{
 
+			gsea.setLogger(logger);
+			
 			// set term sizes
 			gsea.setTermSizes(termSizes);
 			
 			gsea.run();
 							
+			logger.print("saving results...");
 			// save results
 			saveGeneSetAnalysisResults(gsea,filterInfo);
+			logger.println("OK");
 			
 		} catch (EmptyAnnotationException ene){
 			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"No annotation was found for " + filterInfo.getTitle() + " ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));

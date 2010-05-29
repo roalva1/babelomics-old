@@ -1,6 +1,7 @@
 package org.bioinfo.babelomics.tools.functional;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -97,6 +98,8 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		// your annotations
 		getOptions().addOption(OptionFactory.createOption("annotations", "Your own annotations",false,true));
 		
+		
+		
 	}
 
 
@@ -173,6 +176,8 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 				yourAnnotations.add(new AnnotationItem(ids.get(i),terms.get(i)));
 			}
 		}
+		
+		config.load(new FileInputStream(new File(babelomicsHomePath + "/conf/blast2go.properties")));
 		
 	}
 

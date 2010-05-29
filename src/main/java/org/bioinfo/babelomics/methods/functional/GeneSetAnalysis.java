@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bioinfo.babelomics.exception.EmptyAnnotationException;
+import org.bioinfo.commons.log.Logger;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
@@ -49,15 +50,28 @@ public abstract class GeneSetAnalysis {
 	// summary
 	private int annotatedCounter;
 	private double meanAnnotationsPerId;
+	private Logger logger;
 	
 	public void prepare() throws InvalidIndexException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, EmptyAnnotationException{
 				
+		// init logger
+		if (logger==null) logger = new Logger();
+		logger.setStdOutputActive(true);
+		
+		logger.print("preparing gene lists...");
 		prepareLists();
+		logger.println("OK");
 		
 		// annotation		
+		logger.print("getting annotations...");
 		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);
 		if(annotations==null || annotations.size()==0) throw new EmptyAnnotationException();
+		logger.println(annotations.size() + " annotations found...OK");
+		
+		logger.print("loading gene map...");
 		loadGeneMap();
+		logger.println("OK");
+		
 		results = new ArrayList<GeneSetAnalysisTestResult>();
 	}
 		
@@ -262,6 +276,20 @@ public abstract class GeneSetAnalysis {
 	 */
 	public void setMeanAnnotationsPerId(double meanAnnotationsPerId) {
 		this.meanAnnotationsPerId = meanAnnotationsPerId;
+	}
+
+	/**
+	 * @return the logger
+	 */
+	public Logger getLogger() {
+		return logger;
+	}
+
+	/**
+	 * @param logger the logger to set
+	 */
+	public void setLogger(Logger logger) {
+		this.logger = logger;
 	}
 	
 }
