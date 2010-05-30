@@ -69,6 +69,17 @@ public class Survival extends BabelomicsTool {
 
 		int[] columnOrder = ListUtils.order(timeVars);
 
+		try {
+			pValue = Double.parseDouble(pValueParam);
+			if (pValue > 1 || pValue < 0) {
+				pValue = 0.05;
+				printWarning("pvalueinvalid_execute_cox_survival", "Warning", "The adjusted p-value " + pValueParam + " has been set to " + pValue);
+			}
+		} catch (NumberFormatException e) {
+			pValue = 0.05;
+			printWarning("pvalueinvalid_execute_cox_survival", "Warning", "The adjusted p-value " + pValueParam + " has been set to " + pValue);
+		}
+
 		// input parameters
 		//
 		//result.addOutputItem(new Item("dataset_input_param", (datasetParam == null ? "" : new File(datasetParam).getName()), "Dataset file name", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));								
@@ -76,17 +87,8 @@ public class Survival extends BabelomicsTool {
 		result.addOutputItem(new Item("correction_input_param", correction, "Multiple-test correction", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("timeclass_input_param", timeClass + " [" + ListUtils.toString(ListUtils.ordered(timeVars, columnOrder), ",") + "]", "Time class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("censoredclass_input_param", censoredClass, "Censored class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-		result.addOutputItem(new Item("pvalue_input_param", pValueParam, "p-value", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("pvalue_input_param", pValueParam, "Adjusted p-value", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		
-		try {
-			pValue = Double.parseDouble(pValueParam);
-			if (pValue > 1 || pValue < 0) {
-				pValue = 0.05;
-				printWarning("pvalueinvalid_execute_cox_survival", "Warning", "The p-value " + pValueParam + " has been set to " + pValue);
-			}
-		} catch (NumberFormatException e) {
-			abort("pvalueinvalid_execute_cox_survival", "invalid p-value", "invalid p-value", "invalid p-value");			
-		}
 		
 		// cox test
 		//

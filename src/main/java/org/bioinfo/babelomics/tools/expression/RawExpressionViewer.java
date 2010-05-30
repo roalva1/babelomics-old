@@ -94,7 +94,7 @@ public class RawExpressionViewer extends BabelomicsTool {
 		if ( nbChannels == 0 ) {
 			abort("missingdata_execute_rawexpressionviewer", "missing number of channels", "missing number of channels", "missing number of channels");						
 		}
-		
+
 		// input parameters
 		//
 		result.addOutputItem(new Item("tech_input_param", ("affy".equalsIgnoreCase(technology) ? "affymetrix" : technology) + " (" + (nbChannels == 1 ? "one-channel" : "two-channels") + ")", "Technology", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
@@ -131,10 +131,13 @@ public class RawExpressionViewer extends BabelomicsTool {
 				//
 
 				tmpDir = new File(rawDirName); 
-				File[] rawFiles = FileUtils.listFiles(new File(rawDirName), tags.contains("affymetrix") ? ".+.CEL" : ".+");
-				rawFileNames = new ArrayList<String>(rawFiles.length);
-				for(File file: rawFiles) {
+			}
+			File[] rawFiles = FileUtils.listFiles(tmpDir, tags.contains("affymetrix") ? ".+.cel" : ".+", true);
+			rawFileNames = new ArrayList<String>(rawFiles.length);
+			for(File file: rawFiles) {
+				if ( !"sampleinfo.txt".equalsIgnoreCase(file.getName())) {
 					rawFileNames.add(file.getAbsolutePath());
+					System.out.println("file: " + file.getName());
 				}
 			}
 
@@ -162,7 +165,7 @@ public class RawExpressionViewer extends BabelomicsTool {
 			List<String> values = (nbChannels == 1) ? StringUtils.toList("F,B,features", ",") : StringUtils.toList("M,A,G,R,features", ",");
 
 			jobStatus.addStatusMessage("50", "creating R object and getting values: " + ListUtils.toString(values, ","));
-			
+
 			File rawDataRObjectFile = new File(outdir + "/raw_data.RData");		
 			File featuresFile = new File(outdir + "/features.txt");		
 			File fFile = new File(outdir + "/F.txt");		
@@ -194,27 +197,52 @@ public class RawExpressionViewer extends BabelomicsTool {
 
 				saveBoxPlot(fFile, true, "Foreground box-plot (in log 2 scale)", "fgboxplot", "Box-plots");
 
-				jobStatus.addStatusMessage("70", "generating intensity plots");
+
+				jobStatus.addStatusMessage("70", "generating ma plots");
+
+				if ( fFile.exists() ) {
+					ExpressionUtils.createMAPlot(maPlotBinPath, fFile.getAbsolutePath(), "MA_", true, "ma_plot.Rout", outdir);
+				}
+				addOutputItems(outdir, "MA_", "", "ma_plot", "MA plot (in log 2 scale)", "MA plots");				
+
+				jobStatus.addStatusMessage("80", "generating intensity plots");
+
 
 				AffymetrixExpressionUtils.createIntensityPlot(intensityPlotBinPath, rawDataRObjectFile.getAbsolutePath(), "intensity_", "intensity_plot.Rout", outdir);
 				addOutputItems(outdir, "intensity_", "png", "intensity_image", "Raw-data image (in log 2 scale)", "Intensity images");				
 
-//				if ( fFile.exists() ) {
-//					ExpressionUtils.createIntensityPlot(intensityPlotBinPath, fFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "fg_", true, "fg_intensity_plot.Rout", outdir);
-//					addOutputItems(outdir, "fg_", "png", "fg_intensity_image", "Foreground image (in log 2 scale)", "Intensity images");					
-//				}				
+				//				if ( fFile.exists() ) {
+				//					ExpressionUtils.createIntensityPlot(intensityPlotBinPath, fFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "fg_", true, "fg_intensity_plot.Rout", outdir);
+				//					addOutputItems(outdir, "fg_", "png", "fg_intensity_image", "Foreground image (in log 2 scale)", "Intensity images");					
+				//				}				
 
 			} else {
+				jobStatus.addStatusMessage("60", "generating box-plots");
+
+				saveBoxPlot(fFile, true, "Foreground box-plot (in log 2 scale)", "fgboxplot", "Box-plots");
+				saveBoxPlot(bFile, true, "Background box-plot (in log 2 scale)", "bgboxplot", "Box-plots");				
+				saveBoxPlot(mFile, false, "M-values box-plot (in log 2 scale)", "mboxplot", "Box-plots");				
+				saveBoxPlot(gFile, true, "Green-values box-plot (in log 2 scale)", "gboxplot", "Box-plots");				
+				saveBoxPlot(rFile, true, "Red-values box-plot (in log 2 scale)", "rboxplot", "Box-plots");				
+
+				// ma plots
+				//
+				jobStatus.addStatusMessage("70", "generating ma plots");
+
+				if ( nbChannels == 1 ) {
+					if ( fFile.exists() ) {
+						ExpressionUtils.createMAPlot(maPlotBinPath, fFile.getAbsolutePath(), "MA_", true, "ma_plot.Rout", outdir);
+					}
+				} else {
+					if ( mFile.exists() && aFile.exists() ) {
+						ExpressionUtils.createMAPlot(maPlotBinPath, mFile.getAbsolutePath(), aFile.getAbsolutePath(), "MA_", true, "ma_plot.Rout", outdir);
+					}
+				}
+				addOutputItems(outdir, "MA_", "png", "ma_plot", "MA plot (in log 2 scale)", "MA plots");			
+
+
 				if ( featuresFile.exists() ) {
-					jobStatus.addStatusMessage("60", "generating box-plots");
-
-					saveBoxPlot(fFile, true, "Foreground box-plot (in log 2 scale)", "fgboxplot", "Box-plots");
-					saveBoxPlot(bFile, true, "Background box-plot (in log 2 scale)", "bgboxplot", "Box-plots");				
-					saveBoxPlot(mFile, false, "M-values box-plot (in log 2 scale)", "mboxplot", "Box-plots");				
-					saveBoxPlot(gFile, true, "Green-values box-plot (in log 2 scale)", "gboxplot", "Box-plots");				
-					saveBoxPlot(rFile, true, "Red-values box-plot (in log 2 scale)", "rboxplot", "Box-plots");				
-
-					jobStatus.addStatusMessage("70", "generating intensity plots");
+					jobStatus.addStatusMessage("80", "generating intensity plots");
 
 					if ( fFile.exists() ) {
 						ExpressionUtils.createIntensityPlot(intensityPlotBinPath, fFile.getAbsolutePath(), featuresFile.getAbsolutePath(), "fg_", true, "fg_intensity_plot.Rout", outdir);
@@ -242,120 +270,100 @@ public class RawExpressionViewer extends BabelomicsTool {
 					}
 				}
 			}
+	} catch (FileNotFoundException e) {
+		printError("filenotfoundexception_execute_rawexpressionviewer", e.toString(), e.getMessage(), e);
+	} catch (IOException e) {
+		printError("ioexception_execute_rawexpressionviewer", e.toString(), e.getMessage(), e);
+	} catch (InvalidIndexException e) {
+		printError("ioexception_execute_rawexpressionviewer", e.toString(), e.getMessage(), e);
+	}
 
-			// ma plots
-			//
-			jobStatus.addStatusMessage("80", "generating ma plots");
-			
-			if ( nbChannels == 1 ) {
-				if ( fFile.exists() ) {
-					ExpressionUtils.createMAPlot(maPlotBinPath, fFile.getAbsolutePath(), "MA_", true, "ma_plot.Rout", outdir);
+}
+
+
+private void addOutputItems(String dir, String prefix, String suffix, String id, String label, String groupName) {
+	String sampleName;
+	String pattern = prefix + ".*" + suffix;
+	File [] files = FileUtils.listFiles(new File(dir), pattern);
+
+	System.out.println("addOutputItems...");
+	for (int i=0 ; i<files.length ; i++) {
+		//System.out.println("file " + i + " -> " + files[i].getName());
+
+		sampleName = files[i].getName().replace(prefix, "").replace(".png", "");
+		result.addOutputItem(new Item(id + "_" + i, files[i].getName(), label + " for " + sampleName, TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), groupName));
+	}
+}
+
+public void saveBoxPlot(File file, boolean log2, String title, String resultId, String group) throws IOException, InvalidIndexException {
+	if ( file.exists() ) {
+
+		File imgFile = new File(file.getAbsolutePath().replace(".txt", "_boxplot.png"));
+
+		System.err.println("saveBoxPlot, imgFile = " + imgFile.getName());
+
+		Dataset dataset = new Dataset(file, true);
+
+		System.err.println("saveBoxPlot, dataset loaded !!!");
+
+		BoxPlotChart bpc = new BoxPlotChart(title, "", "");
+		bpc.getLegend().setVisible(false);
+
+		if ( dataset.getColumnDimension() != 0 && dataset.getRowDimension() != 0 ) {
+			if ( log2 ) {
+
+				System.err.println("saveBoxPlot, dataset.getRowDimension() = " + dataset.getRowDimension());
+
+				double log2Value = Math.log(2);
+				double[]srcValues = null;
+				double[] values = new double[dataset.getRowDimension()];
+
+				for(int i=0; i<dataset.getColumnDimension(); i++) {
+					System.err.println("saveBoxPlot, applying log 2 to column " + i);
+					srcValues = dataset.getDoubleMatrix().getColumn(i);
+					for(int j=0; j<dataset.getRowDimension(); j++) {
+						values[j] = Math.log(srcValues[j]) / log2Value;		
+					}
+					System.err.println("saveBoxPlot, adding series, column " + i);
+					bpc.addSeries(values, "samples", dataset.getSampleNames().get(i));
 				}
 			} else {
-				if ( mFile.exists() && aFile.exists() ) {
-					ExpressionUtils.createMAPlot(maPlotBinPath, mFile.getAbsolutePath(), aFile.getAbsolutePath(), "MA_", true, "ma_plot.Rout", outdir);
+				for(int i=0; i<dataset.getColumnDimension(); i++) {
+					System.err.println("saveBoxPlot, adding series, column " + i);
+					bpc.addSeries(dataset.getDoubleMatrix().getColumn(i), "samples", dataset.getSampleNames().get(i));
 				}
 			}
-			if ( "affy".equalsIgnoreCase(technology) ) {
-				addOutputItems(outdir, "MA_", "", "ma_plot", "MA plot (in log 2 scale)", "MA plots");				
+		}
+		try {
+			System.err.println("saveBoxPlot, begin of saving png");
+			ChartUtilities.saveChartAsPNG(imgFile, bpc, 400, 256);
+			System.err.println("saveBoxPlot, end of saving png");
+			if ( imgFile.exists() ) {
+				result.addOutputItem(new Item(resultId, imgFile.getName(), title, TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), group));							
 			} else {
-				addOutputItems(outdir, "MA_", "png", "ma_plot", "MA plot (in log 2 scale)", "MA plots");			
+				printError("error saving " + title, "error saving " + title, "error saving " + title);
 			}
-
-		} catch (FileNotFoundException e) {
-			printError("filenotfoundexception_execute_rawexpressionviewer", e.toString(), e.getMessage(), e);
 		} catch (IOException e) {
-			printError("ioexception_execute_rawexpressionviewer", e.toString(), e.getMessage(), e);
-		} catch (InvalidIndexException e) {
-			printError("ioexception_execute_rawexpressionviewer", e.toString(), e.getMessage(), e);
-		}
-
-	}
-
-
-	private void addOutputItems(String dir, String prefix, String suffix, String id, String label, String groupName) {
-		String sampleName;
-		String pattern = prefix + ".*" + suffix;
-		File [] files = FileUtils.listFiles(new File(dir), pattern);
-
-		System.out.println("addOutputItems...");
-		for (int i=0 ; i<files.length ; i++) {
-			//System.out.println("file " + i + " -> " + files[i].getName());
-
-			sampleName = files[i].getName().replace(prefix, "").replace(".png", "");
-			result.addOutputItem(new Item(id + "_" + i, files[i].getName(), label + " for " + sampleName, TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), groupName));
+			e.printStackTrace();
+			printError("error generating " + title, "error generating " + title, "error generating " + title);
 		}
 	}
+}
 
-	public void saveBoxPlot(File file, boolean log2, String title, String resultId, String group) throws IOException, InvalidIndexException {
-		if ( file.exists() ) {
-			
-			File imgFile = new File(file.getAbsolutePath().replace(".txt", "_boxplot.png"));
-			
-			System.err.println("saveBoxPlot, imgFile = " + imgFile.getName());
-			
-			Dataset dataset = new Dataset(file, true);
-			
-			System.err.println("saveBoxPlot, dataset loaded !!!");
-			
-			BoxPlotChart bpc = new BoxPlotChart(title, "", "");
-			bpc.getLegend().setVisible(false);
 
-			if ( dataset.getColumnDimension() != 0 && dataset.getRowDimension() != 0 ) {
-				if ( log2 ) {
-
-					System.err.println("saveBoxPlot, dataset.getRowDimension() = " + dataset.getRowDimension());
-
-					double log2Value = Math.log(2);
-					double[]srcValues = null;
-					double[] values = new double[dataset.getRowDimension()];
-
-					for(int i=0; i<dataset.getColumnDimension(); i++) {
-						System.err.println("saveBoxPlot, applying log 2 to column " + i);
-						srcValues = dataset.getDoubleMatrix().getColumn(i);
-						for(int j=0; j<dataset.getRowDimension(); j++) {
-							values[j] = Math.log(srcValues[j]) / log2Value;		
-						}
-						System.err.println("saveBoxPlot, adding series, column " + i);
-						bpc.addSeries(values, "samples", dataset.getSampleNames().get(i));
-					}
-				} else {
-					for(int i=0; i<dataset.getColumnDimension(); i++) {
-						System.err.println("saveBoxPlot, adding series, column " + i);
-						bpc.addSeries(dataset.getDoubleMatrix().getColumn(i), "samples", dataset.getSampleNames().get(i));
-					}
-				}
-			}
-			try {
-				System.err.println("saveBoxPlot, begin of saving png");
-				ChartUtilities.saveChartAsPNG(imgFile, bpc, 400, 256);
-				System.err.println("saveBoxPlot, end of saving png");
-				if ( imgFile.exists() ) {
-					result.addOutputItem(new Item(resultId, imgFile.getName(), title, TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), group));							
-				} else {
-					printError("error saving " + title, "error saving " + title, "error saving " + title);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-				printError("error generating " + title, "error generating " + title, "error generating " + title);
-			}
+private List<String> getSamples(List<String> rawFileNames) {
+	int index;
+	File file;
+	List<String> samples = new ArrayList<String>(rawFileNames.size());
+	for(int i=0 ; i<rawFileNames.size() ; i++) {
+		file = new File(rawFileNames.get(i));
+		index = file.getName().lastIndexOf('.');
+		if ( (index > 0) && (index <= file.getName().length() - 2) ) {
+			samples.add(file.getName().substring(0, index));
+		} else {
+			samples.add("Sample_" + i);
 		}
 	}
-
-
-	private List<String> getSamples(List<String> rawFileNames) {
-		int index;
-		File file;
-		List<String> samples = new ArrayList<String>(rawFileNames.size());
-		for(int i=0 ; i<rawFileNames.size() ; i++) {
-			file = new File(rawFileNames.get(i));
-			index = file.getName().lastIndexOf('.');
-			if ( (index > 0) && (index <= file.getName().length() - 2) ) {
-				samples.add(file.getName().substring(0, index));
-			} else {
-				samples.add("Sample_" + i);
-			}
-		}
-		return samples;
-	}
+	return samples;
+}
 }
