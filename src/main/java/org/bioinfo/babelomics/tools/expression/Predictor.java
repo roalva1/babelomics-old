@@ -26,6 +26,7 @@ import org.bioinfo.mlpr.classifier.result.ClassificationResult;
 import org.bioinfo.mlpr.evaluation.KFoldCrossValidation;
 import org.bioinfo.mlpr.selection.AbstractFeatureSelector;
 import org.bioinfo.mlpr.selection.CfsFeatureSelector;
+import org.bioinfo.mlpr.selection.ListFeatureSelector;
 import org.bioinfo.mlpr.selection.PcaFeatureSelector;
 import org.bioinfo.mlpr.utils.InstancesBuilder;
 import org.bioinfo.tool.OptionFactory;
@@ -156,8 +157,14 @@ public class Predictor extends BabelomicsTool {
 			//if(commandLine.hasOption("naive-bayes")) executeNaiveBayes(instances);s
 
 			// save best classifiers table
-			IOUtils.write(new File(outdir + "/best_classifiers_table.txt"), GenericClassifier.getResultsTableHeader() + "\n" +  combinedTable.toString());	
-			result.getOutputItems().add(0, new Item("combined_table", "best_classifiers_table.txt", " Combined results (best " + numberOfBestSelectedClassifications + " per classifier)", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR_COMBINED_TABLE"),new HashMap<String,String>(),"Summary",""));
+			String header = GenericClassifier.getResultsTableHeader();
+			String featureSelectionTag = "";
+			if(commandLine.hasOption("feature-selection")) {
+				header = GenericClassifier.getFeatureSelectionResultsTableHeader();
+				featureSelectionTag = "_FEATURE_SELECTION";
+			}
+			IOUtils.write(new File(outdir + "/best_classifiers_table.txt"), header + "\n" +  combinedTable.toString());	
+			result.getOutputItems().add(0, new Item("combined_table", "best_classifiers_table.txt", " Combined results (best " + numberOfBestSelectedClassifications + " per classifier)", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR" + featureSelectionTag + "_TABLE"),new HashMap<String,String>(),"Summary",""));
 
 
 			// test			
@@ -181,17 +188,26 @@ public class Predictor extends BabelomicsTool {
 
 				// fill test result table 
 				List<String> sampleNames = new ArrayList<String>(testInstances.numInstances());
+				testInstances.setClassIndex(testInstances.numAttributes()-1);
+				
 				String predictedClass;
 				for(int i=0; i<selectedClassifiers.size(); i++){
+					
 					GenericClassifier testClassifier = selectedClassifiers.get(i);
-					testClassifier.build(instances);
-					testInstances.setClassIndex(testInstances.numAttributes()-1);
+										
+					System.err.println("getting  feature selector: " + testClassifier.getFeatureSelector().getSelectedAttributeNames());
+					
+					// execute (train and) test
 					List<ClassificationResult> testResult = testClassifier.test(instances, testInstances);
+					
+					// sample name column
 					if(i==0){
 						for(int j=0; j<testInstances.numInstances(); j++){
 							sampleNames.add(testResult.get(j).getInstanceName());
 						}
 					}
+					
+					// values
 					for(int j=0; j<testInstances.numInstances(); j++){
 						predictedClass = testResult.get(j).getClassName();
 						testResultTable.get(j).set(i,predictedClass);
@@ -212,7 +228,7 @@ public class Predictor extends BabelomicsTool {
 			savecorrectSampleRatioTable();
 
 		} catch(Exception e){
-
+			e.printStackTrace();
 		}
 
 	}
@@ -243,27 +259,32 @@ public class Predictor extends BabelomicsTool {
 
 		// select the best classifiers
 		int[] best = knn.getBestClassifiers(numberOfBestSelectedClassifications);
-		for(int i=0; i<best.length; i++){
-			System.err.println(i + "======" + best[i]);
-		}
 		bestClassiferParamList.addAll(ListUtils.subList(knn.getParamList(),best));
 
-		// select best classifiers for testing		
+		// select best classifiers for testing
 		if(test!=null){			
 			trainedClassifiers.add(knn);
-			for(int i=0; i<best.length; i++){
-				Knn testKnn = new Knn(knn.getKnnValues().get(best[i]));				
-				selectedClassifiers.add(testKnn);				
+			for(int i=0; i<best.length; i++){				
+				Knn testKnn;
+				if(knn.getFeatureSelector()!=null){
+					System.err.println("preparing knn:" + knn.getKnnValues().get(best[i]) + " features: " + knn.getSelectedFeatureList().get(best[i]));
+					ListFeatureSelector featureSelector = new ListFeatureSelector(knn.getSelectedFeatureList().get(best[i]));
+					testKnn = new Knn(knn.getKnnValues().get(best[i]),featureSelector);
+				} else {
+					testKnn = new Knn(knn.getKnnValues().get(best[i]));
+				}
+				selectedClassifiers.add(testKnn);
 			}			
 		}
 
 		// acum correct classification sample ratios
-		double[][] ratios = knn.getEvaluationResultList().getCorrectClassificationRatio(sampleNames,best);	
+		double[][] ratios = knn.getEvaluationResultList().getCorrectClassificationRatio(sampleNames,best);
 		addCorrectClassificationRatios(ratios);
 
-		Canvas canvas = knn.getEvaluationResultList().generateHeatmap(ratios,sampleNames,bestClassiferParamList);
-		canvas.save(outdir + "/ratios.png");
-		result.addOutputItem(new Item("ratios", "ratios.png", "Sample correct classification ratio (100% blue, 0% red)", TYPE.IMAGE, Arrays.asList(""), new HashMap<String, String>(),"Summary"));
+//		Canvas canvas = knn.getEvaluationResultList().generateHeatmap(ratios,sampleNames,bestClassiferParamList);
+//		canvas.save(outdir + "/ratios.png");
+//		result.addOutputItem(new Item("ratios", "ratios.png", "Sample correct classification ratio (100% blue, 0% red)", TYPE.IMAGE, Arrays.asList(""), new HashMap<String, String>(),"Summary"));
+		
 		// save results
 		saveClassifierResults(knn);
 
@@ -301,17 +322,33 @@ public class Predictor extends BabelomicsTool {
 		// train
 		svm.train(instances);
 
+		// select the best classifiers
+		int[] best = svm.getBestClassifiers(numberOfBestSelectedClassifications);
+		bestClassiferParamList.addAll(ListUtils.subList(svm.getParamList(),best));
+		
 		// select best classifiers for testing
-		if(test!=null){
-			int[] best = svm.getBestClassifiers(numberOfBestSelectedClassifications);	
-			for(int i=0; i<best.length; i++){				 
-				Svm testSvm = new Svm(svm.getCostValues()[best[i]]);
+		if(test!=null){			
+			trainedClassifiers.add(svm);
+			for(int i=0; i<best.length; i++){				
+				Svm testSvm;
+				if(svm.getFeatureSelector()!=null){
+					System.err.println("preparing svm:" + svm.getCostValues().get(best[i]) + " features: " + svm.getSelectedFeatureList().get(best[i]));
+					ListFeatureSelector featureSelector = new ListFeatureSelector(svm.getSelectedFeatureList().get(best[i]));
+					testSvm = new Svm(svm.getCostValues().get(best[i]),featureSelector);
+				} else {
+					testSvm = new Svm(svm.getCostValues().get(best[i]));
+				}
 				selectedClassifiers.add(testSvm);
-			}
+			}			
 		}
-
+		
+		// acum correct classification sample ratios
+		double[][] ratios = svm.getEvaluationResultList().getCorrectClassificationRatio(sampleNames,best);
+		addCorrectClassificationRatios(ratios);
+		
 		// save results
 		saveClassifierResults(svm);
+		
 	}
 
 	private void executeRandomForest(Instances instances, Instances test) throws Exception {
@@ -335,15 +372,31 @@ public class Predictor extends BabelomicsTool {
 		// train
 		randomForest.train(instances);
 
+		// select the best classifiers
+		int[] best = randomForest.getBestClassifiers(numberOfBestSelectedClassifications);
+		bestClassiferParamList.addAll(ListUtils.subList(randomForest.getParamList(),best));
+		
 		// select best classifiers for testing
-		if(test!=null){
-			int[] best = randomForest.getBestClassifiers(numberOfBestSelectedClassifications);			
-			for(int i=0; i<best.length; i++){				 
-				RForest testRandomForest = new RForest(randomForest.getNumTreesArray()[best[i]]);
+		if(test!=null){			
+			trainedClassifiers.add(randomForest);
+			for(int i=0; i<best.length; i++){				
+				RForest testRandomForest;
+				if(randomForest.getFeatureSelector()!=null){
+					System.err.println("preparing random forest:" + randomForest.getNumTreesValues().get(best[i]) + " features: " + randomForest.getSelectedFeatureList().get(best[i]));
+					ListFeatureSelector featureSelector = new ListFeatureSelector(randomForest.getSelectedFeatureList().get(best[i]));
+					testRandomForest = new RForest(randomForest.getNumTreesValues().get(best[i]),featureSelector);
+				} else {
+					testRandomForest = new RForest(randomForest.getNumTreesValues().get(best[i]));
+				}
 				selectedClassifiers.add(testRandomForest);
-			}
+				System.err.println("getting  feature selector: " + testRandomForest.getFeatureSelector().getSelectedAttributeNames());
+			}			
 		}
-
+		
+		// acum correct classification sample ratios
+		double[][] ratios = randomForest.getEvaluationResultList().getCorrectClassificationRatio(sampleNames,best);
+		addCorrectClassificationRatios(ratios);
+		
 		// save results
 		saveClassifierResults(randomForest);
 
@@ -372,9 +425,11 @@ public class Predictor extends BabelomicsTool {
 //		}
 
 		// classification table
+		String featureSelectionTag = "";
+		if(commandLine.hasOption("feature-selection")) featureSelectionTag = "_FEATURE_SELECTION";
 		try {
 			IOUtils.write(new File(outdir + "/" + name + "_table.txt"), classifier.getResultsTable(true));
-			result.addOutputItem(new Item(name + "_table", name + "_table.txt", name + " classifications", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR_TABLE"),new HashMap<String,String>(),name + " results",""));
+			result.addOutputItem(new Item(name + "_table", name + "_table.txt", name + " classifications", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR" + featureSelectionTag + "_TABLE"),new HashMap<String,String>(),name + " results",""));
 		} catch (IOException e) {
 			printError("ioexception_" + name + "_predictor", "Error saving " + name + " classifications table", "Error saving " + name + " classifications table");
 		}
@@ -412,7 +467,8 @@ public class Predictor extends BabelomicsTool {
 			// PCA 
 			else if("pca".equalsIgnoreCase(featureSelectionMethod)){
 				featureSelector = ((AbstractFeatureSelector)new PcaFeatureSelector());
-				classifier.setNumberOfFeatures(ArrayUtils.sequence(5,50,5));
+				classifier.initNumberOfFeaturesRange(instances.numAttributes()-2);
+				System.err.println("nnnnnnnn:" + instances.numAttributes());
 				logger.println("Setting PCA feature selector");
 			}
 			
