@@ -396,48 +396,52 @@ public class Preprocessing extends BabelomicsTool {
 				dataset.save(file);
 
 
-				if ( file.exists() ) {				
-					String tags = "data,datamatrix,expression";
+				if ( file.exists() ) {
+					
+					String tags = "datamatrix,expression";
+					result.addOutputItem(new Item("prepocessed_file", file.getName(), "Preprocessed file", TYPE.DATA, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Preprocessed data"));			
 
-
+					List<String> tagList = new ArrayList<String>();
 					File redirectionFile = new File(outdir + "/clustering.redirection");
 					createClusteringRedirectionFile(redirectionFile, file);
 					if ( redirectionFile.exists() ) {
-						tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Clustering tool...)";
+						tagList.add("REDIRECTION(" + redirectionFile.getName() + ":Send to Clustering tool...)");
 					}
 
 					if (dataset.getVariables() != null && dataset.getVariables().size() > 0 ) {
 						redirectionFile = new File(outdir + "/classcomparison.redirection");
 						createClassComparisonRedirectionFile(redirectionFile, file);
 						if ( redirectionFile.exists() ) {
-							tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Class-comparison tool...)";
+							tagList.add("REDIRECTION(" + redirectionFile.getName() + ":Send to Class-comparison tool...)");
 						}
 
 						redirectionFile = new File(outdir + "/correlation.redirection");
 						createCorrelationRedirectionFile(redirectionFile, file);
 						if ( redirectionFile.exists() ) {
-							tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Correlation tool...)";
+							tagList.add("REDIRECTION(" + redirectionFile.getName() + ":Send to Correlation tool...)");
 						}
 
 						redirectionFile = new File(outdir + "/classprediction.redirection");
 						createClassPredictionRedirectionFile(redirectionFile, file);
 						if ( redirectionFile.exists() ) {
-							tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to Class-prediction tool...)";
+							tagList.add("REDIRECTION(" + redirectionFile.getName() + ":Send to Class-prediction tool...)");
 						}
 					}
-
-					result.addOutputItem(new Item("prepocessed_file", file.getName(), "Preprocessed file", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Preprocessed data"));			
+					if (tagList.size() > 0) {
+						result.addOutputItem(new Item("prepocessed_file", file.getName(), "Preprocessed file", TYPE.FILE, tagList, new HashMap<String, String>(2), "Preprocessed data"));
+					}
 				}
 			}
 
 			if ( idsFile.exists() ) {				
-				String tags = "data,idlist";											
+				String tags = "idlist";											
+				result.addOutputItem(new Item("ids_file", idsFile.getName(), "File containing IDs", TYPE.DATA, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "ID list"));
 				File redirectionFile = new File(outdir + "/idconverter.redirection");
 				createIDConverterRedirectionFile(redirectionFile, idsFile);
 				if ( redirectionFile.exists() ) {
-					tags = tags + ",REDIRECTION(" + redirectionFile.getName() + ":Send to ID converter tool...)";
+					tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to ID converter tool...)";
+					result.addOutputItem(new Item("ids_file", idsFile.getName(), "File containing IDs", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "ID list"));
 				}
-				result.addOutputItem(new Item("ids_file", idsFile.getName(), "File containing IDs", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "ID list"));
 			}
 
 		} catch (IOException e) {

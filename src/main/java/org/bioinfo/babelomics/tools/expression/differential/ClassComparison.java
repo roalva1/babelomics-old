@@ -390,10 +390,23 @@ public class ClassComparison extends BabelomicsTool {
 			}
 		}
 		
+		file = new File(outdir + "/" + test +"_fold_change_significative_dataset.txt");
 		Dataset sigDataset = new Dataset(subDataset.getSampleNames(), ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), doubleMatrix);
 		sigDataset.setVariables(subDataset.getVariables());
 		sigDataset.validate();
-		sigDataset.save(outdir + "/" + test + "_sig_dataset.txt");
+		sigDataset.save(file);
+		if (file.exists()) {
+			String tags = "datamatrix,expression";
+			result.addOutputItem(new Item(test + "_sig_dataset", file.getName(), "Significative values dataset (fold-change value = " + foldChangeValue + ")", TYPE.DATA, StringUtils.toList(tags, ","), new HashMap<String, String>(2),  testLabel + " fold-change.Significative results"));											
+
+			File redirectionFile = new File(outdir + "/clustering.redirection");
+			DiffExpressionUtils.createClusteringRedirectionFile(redirectionFile, file);
+			if ( redirectionFile.exists() ) {
+				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to Clustering tool...)";
+				result.addOutputItem(new Item(test + "_sig_dataset", file.getName(), "Significative values dataset (fold-change value = " + foldChangeValue + ")", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2),  testLabel + " fold-change.Significative results"));											
+			}
+		}
+		
 		
 		rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(res), ListUtils.toArray(sigRowIndexes)), true);	
 		
@@ -412,7 +425,7 @@ public class ClassComparison extends BabelomicsTool {
 
 		// adding table to results
 		//
-		file = new File(outdir + "/" + test + "fold_change_sig_table.txt");
+		file = new File(outdir + "/" + test + "fold_change_significative_table.txt");
 		IOUtils.write(file, sigDataFrame.toString(true, true));
 		if ( file.exists() ) {
 			result.addOutputItem(new Item(test + "fold_change_table", file.getName(), "Significative values table (fold-change value = " + foldChangeValue + ")", TYPE.FILE, StringUtils.toList("TABLE," + test.toUpperCase() + "_FOLD_CHANGE_TABLE", ","), new HashMap<String, String>(2), testLabel + " fold-change.Significative results"));											
