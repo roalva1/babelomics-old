@@ -311,8 +311,10 @@ public class FatiGOTool extends FunctionalProfilingTool{
 					// go graph
 					if(filterInfo.getPrefix().equalsIgnoreCase("go")) {
 						try {
-							createGoGraph(significant,DEFAULT_PVALUES[i],filterInfo);						
-							Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"go_graph_" + filterInfo.getName() + "_" + formattedPValue + "_graphimage.png",filterInfo.getTitle() + " DAG (significant terms, pvalue<" + formattedPValue + ")",Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT,THUMBNAIL"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+							String limitMessage = "";
+							boolean outOfbounds = createGoGraph(significant,DEFAULT_PVALUES[i],filterInfo);
+							if(outOfbounds) limitMessage = " just most 100 significant terms";
+							Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"go_graph_" + filterInfo.getName() + "_" + formattedPValue + "_graphimage.png",filterInfo.getTitle() + " DAG (significant terms, pvalue<" + formattedPValue + ") " + limitMessage,Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT,THUMBNAIL"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
 							item.setContext("pvalue==" + formattedPValue);
 							result.getOutputItems().add(4, item);
 						} catch(GoGraphException gge){
@@ -380,8 +382,8 @@ public class FatiGOTool extends FunctionalProfilingTool{
 	 */
 	private void addAnnotationReport(FatiGO fatigo, String dbName){
 		DecimalFormat formatter = new DecimalFormat("#######.##");
-		double list1Percentage = ((double)(fatigo.getList1AnnotatedCounter())/(double)fatigo.getList1SizeBeforeDuplicates())*100.0;
-		double list2Percentage = ((double)(fatigo.getList2AnnotatedCounter())/(double)fatigo.getList2SizeBeforeDuplicates())*100.0;
+		double list1Percentage = ((double)(fatigo.getList1AnnotatedCounter())/(double)fatigo.getList1SizeAfterDuplicates())*100.0;
+		double list2Percentage = ((double)(fatigo.getList2AnnotatedCounter())/(double)fatigo.getList1SizeAfterDuplicates())*100.0;
 		String list1Message = fatigo.getList1AnnotatedCounter() + " of " + fatigo.getList1SizeAfterDuplicates() + " (" + formatter.format(list1Percentage) + "%) " + formatter.format(fatigo.getList1MeanAnnotationsPerId()) + " annotations/id";
 		String list2Message = fatigo.getList2AnnotatedCounter() + " of " + fatigo.getList2SizeAfterDuplicates() + " (" + formatter.format(list2Percentage) +"%) " + formatter.format(fatigo.getList2MeanAnnotationsPerId()) + " annotations/id";
 		annotationReport.append(dbName).append("\t").append(list1Message).append("\t").append(list2Message).append("\n");

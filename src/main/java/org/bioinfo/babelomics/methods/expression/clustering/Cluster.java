@@ -27,5 +27,7 @@ public abstract class Cluster {
 		this.home = home;
 	}
 
-	public abstract MultipleTree run(boolean createClusterFiles) throws Exception;
+	//public abstract MultipleTree run(boolean createClusterFiles) throws Exception;
+	public abstract String run(boolean createClusterFiles) throws Exception;
+
 }

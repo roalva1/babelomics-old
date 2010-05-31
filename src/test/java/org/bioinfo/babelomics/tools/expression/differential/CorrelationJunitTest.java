@@ -6,7 +6,7 @@ import org.bioinfo.babelomics.BabelomicsMain;
 import org.junit.Test;
 
 
-public class CorrelationTest {
+public class CorrelationJunitTest {
 
 	@Test
 	public void Test() {   
