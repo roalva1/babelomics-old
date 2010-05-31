@@ -566,7 +566,7 @@ public class DiffExpressionUtils {
 
 
 			int[] rowOrder = null;
-			if (isCox || isRegression || isCorrelation) {
+			if (isRegression || isCorrelation) {
 				rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toArray(sigRowIndexes)), true);				
 			} else {
 				rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes)), true);
