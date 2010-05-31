@@ -91,7 +91,7 @@ public class GoGraphViewerTool  extends BabelomicsTool{
 			if(config!=null){
 				
 				// init graph api
-				GetGraphApi graph = new GetGraphApi(outdir + "/",PREFIX,new File(associationFile).getName(),goDomain,idsPerNodeFilter,graphColoring,annotScoreParameter,annotScoreNodeFilter, "orange",12,"");
+				GetGraphApi graph = new GetGraphApi(outdir + "/",PREFIX,new File(associationFile).getName(),goDomain,idsPerNodeFilter,graphColoring,annotScoreParameter,annotScoreNodeFilter,"orange",12,"");
 				graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));				
 				graph.setDataBase(config.getProperty("BLAST2GO_HOST_NAME"),config.getProperty("BLAST2GO_DB_NAME"),config.getProperty("BLAST2GO_DB_USER"), config.getProperty("BLAST2GO_DB_PASSWORD"));
 				

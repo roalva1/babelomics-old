@@ -14,6 +14,7 @@ import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.exception.InvalidIndexException;
@@ -44,6 +45,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	public final static double DEFAULT_PVALUE_THRESHOLD = 0.05;
 	public final static double[] DEFAULT_PVALUES = {0.1,0.05,0.01,0.005};
 	public DecimalFormat pvalueFormatter = new DecimalFormat("#.####");
+	public final static int MAX_GOS = 100;
 	
 //	// JT.2009.09.07
 //	private String removeDuplicates;
@@ -346,23 +348,48 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		return result;
 	}
 		
-	protected void createGoGraph(List<TwoListFisherTestResult> raw, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
+	protected boolean createGoGraph(List<TwoListFisherTestResult> raw, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
 		List<GeneSetAnalysisTestResult> result = new ArrayList<GeneSetAnalysisTestResult>(raw.size());
 		for(TwoListFisherTestResult test: raw){			
 			GeneSetAnalysisTestResult gseaTest = new GeneSetAnalysisTestResult(test);
 			result.add(gseaTest);
 		}
-		createGseaGoGraph(result,pvalue,filterInfo);
+		return createGseaGoGraph(result,pvalue,filterInfo);
 	}
 	
-	protected void createGseaGoGraph(List<GeneSetAnalysisTestResult> significant, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
+	protected boolean createGseaGoGraph(List<GeneSetAnalysisTestResult> significants, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
+		boolean outOfBounds = false;
+		
 		DecimalFormat pvalueLabelFormatter = new DecimalFormat("#.####E0");
 		String prefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue);
 				
 		// preparing association file
 		StringBuilder association = new StringBuilder();		
 		double ratio,intensity;
-		for(GeneSetAnalysisTestResult result: significant){			
+		
+		// get pvalue rank
+		List<Double> pvalues = new ArrayList<Double>();
+		for(GeneSetAnalysisTestResult result: significants){
+			pvalues.add(result.getAdjPValue());
+		}		
+		int[] pvalueOrder = ListUtils.order(pvalues);
+		
+		// sort and filter		
+		List<GeneSetAnalysisTestResult> sortedSignificants = new ArrayList<GeneSetAnalysisTestResult>();
+		int pos;
+		for(int i=0; i<pvalueOrder.length; i++){
+			pos = pvalueOrder[i];
+			sortedSignificants.add(significants.get(pos));
+//			System.err.println(significants.get(pos).getAdjPValue());
+			if(i>MAX_GOS){
+				outOfBounds=true;
+				break;
+			}
+		}
+				
+		if(outOfBounds) System.err.println("max gos exceeded");
+		
+		for(GeneSetAnalysisTestResult result: sortedSignificants){			
 			
 			//color=""+ (result.getList1Percentage()/(result.getList1Percentage()+result.getList2Percentage()));
 			ratio = result.getAdjPValue()/pvalue;
@@ -410,6 +437,8 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			e.printStackTrace();
 			throw new GoGraphException(e.getMessage());
 		}	
+		
+		return outOfBounds;
 	}
 	
 	

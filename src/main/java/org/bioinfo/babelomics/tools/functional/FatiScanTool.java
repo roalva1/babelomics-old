@@ -295,8 +295,11 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				// go graph
 				if(filterInfo.getPrefix().equalsIgnoreCase("go")) {
 					try {
-						createGseaGoGraph(significant,DEFAULT_PVALUES[i],filterInfo);						
-						Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"go_graph_" + filterInfo.getName() + "_" + formattedPValue + "_graphimage.png",filterInfo.getTitle() + " DAG (significant terms, pvalue<" + formattedPValue + ")",Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT,THUMBNAIL"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+						String limitMessage = "";
+						boolean outOfbounds = createGseaGoGraph(significant,DEFAULT_PVALUES[i],filterInfo);
+						if(outOfbounds) limitMessage = " just most 100 significant terms";
+										
+						Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"go_graph_" + filterInfo.getName() + "_" + formattedPValue + "_graphimage.png",filterInfo.getTitle() + " DAG (significant terms, pvalue<" + formattedPValue + ") " + limitMessage,Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT,THUMBNAIL"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
 						item.setContext("pvalue==" + formattedPValue);
 						result.getOutputItems().add(4, item);
 					} catch(GoGraphException gge){
