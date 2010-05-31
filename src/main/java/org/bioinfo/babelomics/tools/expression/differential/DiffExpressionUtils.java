@@ -495,15 +495,22 @@ public class DiffExpressionUtils {
 			String statLabel, double[] statistics,
 			String adjPValLabel, double[] adjPValues, 
 			String pValLabel, double[] pValues,
-			String coeffLabel, double[] coeffValues,
+			String label1, double[] values1,
+			String label2, double[] values2,
 			String className, int[] columnOrder,
 			double pValue, int maxDisplay, BabelomicsTool tool) throws IOException, InvalidIndexException {
 
-		boolean isCox = false;
-		if ("cox".equalsIgnoreCase(test) && coeffLabel != null && coeffValues != null) {
+		boolean isCox = false, isRegression = false, isCorrelation = false;
+		if ("cox".equalsIgnoreCase(test) && label1 != null && values1 != null) {
 			isCox = true;
+		} else if (("pearson".equalsIgnoreCase(test) || "spearman".equalsIgnoreCase(test)) && label1 != null && values1 != null) {
+			isCorrelation = true;
+		} else if ("regression".equalsIgnoreCase(test) && label1 != null && values1 != null && label2 != null && values2 != null) {
+			isRegression = true;
 		}
 		System.out.println("is cox ? " + isCox);
+		System.out.println("is regression ? " + isRegression);
+		System.out.println("is correlation ? " + isCorrelation);
 
 		List<Integer> sigIndexes = getSigIndexes(adjPValues, pValue);
 		int numberSigValues = (sigIndexes == null ? 0 : sigIndexes.size());
@@ -538,7 +545,7 @@ public class DiffExpressionUtils {
 				tool.getResult().addOutputItem(new Item("sig_results", "" + numberSigValues, "Number of significative results (adj. p-value = " + pValue + ")", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));																									
 			}
 
-			// adding datasete to results
+			// adding dataset to results
 			//
 			File file = new File(tool.getOutdir() + "/" + test +"_significative_dataset.txt");
 			Dataset sigDataset = new Dataset(subDataset.getSampleNames(), ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), doubleMatrix);
@@ -558,12 +565,20 @@ public class DiffExpressionUtils {
 			}
 
 
-			int[] rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes)), true);		
+			int[] rowOrder = null;
+			if (isCox || isRegression || isCorrelation) {
+				rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toArray(sigRowIndexes)), true);				
+			} else {
+				rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes)), true);
+			}
 
 			DataFrame dataFrame = new DataFrame(sigDataset.getFeatureNames().size(), 0);
 			dataFrame.addColumn(statLabel, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes)), rowOrder)));
-			if (isCox) {
-				dataFrame.addColumn(coeffLabel, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(coeffValues), ListUtils.toArray(sigRowIndexes)), rowOrder)));				
+			if (isCox || isCorrelation) {
+				dataFrame.addColumn(label1, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toArray(sigRowIndexes)), rowOrder)));				
+			} else if (isRegression) {
+				dataFrame.addColumn(label1, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toArray(sigRowIndexes)), rowOrder)));				
+				dataFrame.addColumn(label2, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(values2), ListUtils.toArray(sigRowIndexes)), rowOrder)));								
 			}
 			dataFrame.addColumn(pValLabel, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(pValues), ListUtils.toArray(sigRowIndexes)), rowOrder)));
 			dataFrame.addColumn(adjPValLabel, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toArray(sigRowIndexes)), rowOrder)));
@@ -580,6 +595,10 @@ public class DiffExpressionUtils {
 				String table = "DIFF_EXPRESSION_TABLE";
 				if (isCox) {
 					table = "COX_TABLE";
+				} else if (isCorrelation) {
+					table = "CORRELATION_TABLE";
+				} else if (isRegression) {
+					table = "REGRESSION_TABLE";
 				}
 				tool.getResult().addOutputItem(new Item(test + "_table", file.getName(), "Significative values table (adj, p-value = " + pValue + ")", TYPE.FILE, StringUtils.toList("TABLE," + table, ","), new HashMap<String, String>(2), "Significative results"));											
 			}
@@ -587,8 +606,8 @@ public class DiffExpressionUtils {
 			// adding heatmap to results
 			//
 			Canvas sigHeatmap = null;
-			if (isCox) {
-				sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, coeffLabel, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(coeffValues), ListUtils.toArray(sigRowIndexes))), adjPValLabel, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toArray(sigRowIndexes))));
+			if (isCox || isCorrelation || isRegression) {
+				sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, label1, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toArray(sigRowIndexes))), adjPValLabel, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toArray(sigRowIndexes))));
 			} else {
 				sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, statLabel, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes))), adjPValLabel, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toArray(sigRowIndexes))));
 			}

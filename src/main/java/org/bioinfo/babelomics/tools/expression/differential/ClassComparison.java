@@ -218,7 +218,7 @@ public class ClassComparison extends BabelomicsTool {
 
 			// getting significative genes
 			//
-			DiffExpressionUtils.addSignificativeResults(subDataset, test, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues(), "p-value", res.getPValues(), null, null, className, columnOrder, pValue, maxDisplay, this);
+			DiffExpressionUtils.addSignificativeResults(subDataset, test, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues(), "p-value", res.getPValues(), null, null, null, null, className, columnOrder, pValue, maxDisplay, this);
 			DiffExpressionUtils.createFatiScanRedirection(dataFrame, test, "statistic", result, outdir);			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -503,7 +503,7 @@ public class ClassComparison extends BabelomicsTool {
 
 			// getting significative genes
 			//
-			DiffExpressionUtils.addSignificativeResults(subDataset, test, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues(), "p-value", res.getPValues(), null, null, className, columnOrder, pValue, maxDisplay, this);
+			DiffExpressionUtils.addSignificativeResults(subDataset, test, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues(), "p-value", res.getPValues(), null, null, null, null, className, columnOrder, pValue, maxDisplay, this);
 			DiffExpressionUtils.createFatiScanRedirection(dataFrame, test, "statistic", result, outdir);			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -564,7 +564,7 @@ public class ClassComparison extends BabelomicsTool {
 
 			// getting significative genes
 			//
-			DiffExpressionUtils.addSignificativeResults(subDataset, test, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues(), "p-value", res.getPValues(), null, null, className, columnOrder, pValue, maxDisplay, this);
+			DiffExpressionUtils.addSignificativeResults(subDataset, test, "statistic", res.getStatistics(), "adj. p-value", res.getAdjPValues(), "p-value", res.getPValues(), null, null, null, null, className, columnOrder, pValue, maxDisplay, this);
 			DiffExpressionUtils.createFatiScanRedirection(dataFrame, test, "statistic", result, outdir);			
 		} catch (Exception e) {
 			e.printStackTrace();
