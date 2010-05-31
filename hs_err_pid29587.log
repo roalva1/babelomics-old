@@ -1,0 +1,340 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=0x00007f58c7df94d2, pid=29587, tid=140019268208976
+#
+# JRE version: 6.0_16-b01
+# Java VM: Java HotSpot(TM) 64-Bit Server VM (14.2-b01 mixed mode linux-amd64 )
+# Problematic frame:
+# C  [libpthread.so.0+0x64d2]  pthread_create+0x112
+#
+# If you would like to submit a bug report, please visit:
+#   http://java.sun.com/webapps/bugreport/crash.jsp
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x0000000041a7f800):  JavaThread "main" [_thread_in_vm, id=29589, stack(0x00007f58c6ae4000,0x00007f58c6be5000)]
+
+siginfo:si_signo=SIGSEGV: si_errno=0, si_code=1 (SEGV_MAPERR), si_addr=0x0000000000000010
+
+Registers:
+RAX=0x0000000000000000, RBX=0xffffffffffffff80, RCX=0x0000000000000fff, RDX=0x0000000000000000
+RSP=0x00007f58c6be3590, RBP=0x0000000000100000, RSI=0x0000000000000001, RDI=0x00007f58c09a5950
+R8 =0x0000000000001000, R9 =0x0000000000000000, R10=0x0000000000100000, R11=0x0000000000010000
+R12=0x00007f58c800a230, R13=0x0000000000000007, R14=0x00007f58c822f040, R15=0x00007f58c6be3620
+RIP=0x00007f58c7df94d2, EFL=0x0000000000010283, CSGSFS=0x0000000000000033, ERR=0x0000000000000004
+  TRAPNO=0x000000000000000e
+
+Top of Stack: (sp=0x00007f58c6be3590)
+0x00007f58c6be3590:   00007f58882fc460 00007f58884a0000
+0x00007f58c6be35a0:   00007f58c7401130 00007f58c6be3620
+0x00007f58c6be35b0:   00007f58c6be3608 0000000000000000
+0x00007f58c6be35c0:   0000000000000000 00007f58c77308b5
+0x00007f58c6be35d0:   00007f58c6be3690 0000000000000003
+0x00007f58c6be35e0:   00007f58882fc460 00007f58c6be3620
+0x00007f58c6be35f0:   00007f58884a0000 00007f58c73fbac9
+0x00007f58c6be3600:   0000000000000018 00007f58c73f9888
+0x00007f58c6be3610:   00007f58884a0000 0000000000000018
+0x00007f58c6be3620:   0000000000000000 0000000000000001
+0x00007f58c6be3630:   0000000000000000 0000000000000000
+0x00007f58c6be3640:   0000000000100000 0000000000000000
+0x00007f58c6be3650:   0000000000000000 00007f58884a0000
+0x00007f58c6be3660:   00007f58c6be3690 00007f58884a0000
+0x00007f58c6be3670:   00007f58884a02b0 00007f58c729d910
+0x00007f58c6be3680:   0000000000000000 0000000000000000
+0x00007f58c6be3690:   00007f58c6be36c0 00007f58c74e5750
+0x00007f58c6be36a0:   00007f58884a0000 0000000041a7f800
+0x00007f58c6be36b0:   00007f58c6be37a8 0000000000000000
+0x00007f58c6be36c0:   00007f58c6be3730 00007f58c728d0dc
+0x00007f58c6be36d0:   0000000041a7c7b0 0000000041a80408
+0x00007f58c6be36e0:   0000000041a7f800 0000000041a7f800
+0x00007f58c6be36f0:   0000000041a7f800 000000b6c2c5eb44
+0x00007f58c6be3700:   0000000041a803d0 00007f588ec840a8
+0x00007f58c6be3710:   00007f588ec515f0 00007f588ec840a8
+0x00007f58c6be3720:   00007f58c6be37a8 0000000041a7f800
+0x00007f58c6be3730:   00007f58c6be3788 00007f58c2c54f50
+0x00007f58c6be3740:   00007f58c6be3730 00007f58c6be3748
+0x00007f58c6be3750:   0000000000000000 00007f58c6be37a8
+0x00007f58c6be3760:   00007f588ecf0488 0000000000000000
+0x00007f58c6be3770:   00007f588ec840a8 0000000000000000
+0x00007f58c6be3780:   00007f58c6be37a8 00007f58c6be3800 
+
+Instructions: (pc=0x00007f58c7df94d2)
+0x00007f58c7df94c2:   fb 48 8b 00 4c 39 e0 74 45 48 89 df 48 8d 58 80
+0x00007f58c7df94d2:   44 8b 8b 90 00 00 00 45 85 c9 7f e2 48 8b 93 58 
+
+Stack: [0x00007f58c6ae4000,0x00007f58c6be5000],  sp=0x00007f58c6be3590,  free space=1021k
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+C  [libpthread.so.0+0x64d2]  pthread_create+0x112
+
+[error occurred during error reporting (printing native stack), id 0xb]
+
+Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
+j  java.lang.Thread.start0()V+0
+j  java.lang.Thread.start()V+24
+j  java.lang.ApplicationShutdownHooks.runHooks()V+54
+j  java.lang.ApplicationShutdownHooks$1.run()V+0
+j  java.lang.Shutdown.runHooks()V+23
+j  java.lang.Shutdown.sequence()V+26
+j  java.lang.Shutdown.exit(I)V+96
+j  java.lang.Runtime.exit(I)V+14
+j  java.lang.System.exit(I)V+4
+j  org.codehaus.classworlds.Launcher.main([Ljava/lang/String;)V+6
+v  ~StubRoutines::call_stub
+
+---------------  P R O C E S S  ---------------
+
+Java Threads: ( => current thread )
+  0x0000000041d7f000 JavaThread "pool-1-thread-5" [_thread_blocked, id=29608, stack(0x00007f588d14c000,0x00007f588d24d000)]
+  0x0000000041d7e000 JavaThread "pool-1-thread-4" [_thread_blocked, id=29607, stack(0x00007f588d24d000,0x00007f588d34e000)]
+  0x0000000041e38800 JavaThread "pool-1-thread-3" [_thread_blocked, id=29606, stack(0x00007f588daa1000,0x00007f588dba2000)]
+  0x00007f5888727800 JavaThread "pool-1-thread-2" [_thread_blocked, id=29605, stack(0x00007f588dba2000,0x00007f588dca3000)]
+  0x00007f5888727000 JavaThread "pool-1-thread-1" [_thread_blocked, id=29604, stack(0x00007f588dca3000,0x00007f588dda4000)]
+  0x0000000041b0c000 JavaThread "Low Memory Detector" daemon [_thread_blocked, id=29598, stack(0x00007f588dee0000,0x00007f588dfe1000)]
+  0x0000000041b08800 JavaThread "CompilerThread1" daemon [_thread_blocked, id=29597, stack(0x00007f5885ee0000,0x00007f5885fe1000)]
+  0x0000000041b06000 JavaThread "CompilerThread0" daemon [_thread_blocked, id=29596, stack(0x00007f588dfe1000,0x00007f588e0e2000)]
+  0x0000000041b03800 JavaThread "Signal Dispatcher" daemon [_thread_blocked, id=29595, stack(0x00007f588e0e2000,0x00007f588e1e3000)]
+  0x0000000041ae0000 JavaThread "Finalizer" daemon [_thread_blocked, id=29594, stack(0x00007f588e222000,0x00007f588e323000)]
+  0x0000000041ade000 JavaThread "Reference Handler" daemon [_thread_blocked, id=29593, stack(0x00007f588e323000,0x00007f588e424000)]
+=>0x0000000041a7f800 JavaThread "main" [_thread_in_vm, id=29589, stack(0x00007f58c6ae4000,0x00007f58c6be5000)]
+
+Other Threads:
+  0x0000000041ad7800 VMThread [stack: 0x00007f588e424000,0x00007f588e525000] [id=29592]
+  0x0000000041b0e800 WatcherThread [stack: 0x00007f588dddf000,0x00007f588dee0000] [id=29599]
+
+VM state:not at safepoint (normal execution)
+
+VM Mutex/Monitor currently owned by a thread:  ([mutex/lock_event])
+[0x0000000041a7c7b0] Threads_lock - owner thread: 0x0000000041a7f800
+
+Heap
+ PSYoungGen      total 94400K, used 1657K [0x00007f58b32f0000, 0x00007f58c07e0000, 0x00007f58c2c40000)
+  eden space 87424K, 1% used [0x00007f58b32f0000,0x00007f58b348e738,0x00007f58b8850000)
+  from space 6976K, 0% used [0x00007f58b9740000,0x00007f58b9740000,0x00007f58b9e10000)
+  to   space 15296K, 0% used [0x00007f58b8850000,0x00007f58b8850000,0x00007f58b9740000)
+ PSOldGen        total 49920K, used 26062K [0x00007f5894040000, 0x00007f5897100000, 0x00007f58b32f0000)
+  object space 49920K, 52% used [0x00007f5894040000,0x00007f58959b3838,0x00007f5897100000)
+ PSPermGen       total 34560K, used 17500K [0x00007f588ec40000, 0x00007f5890e00000, 0x00007f5894040000)
+  object space 34560K, 50% used [0x00007f588ec40000,0x00007f588fd57020,0x00007f5890e00000)
+
+Dynamic libraries:
+40000000-40009000 r-xp 00000000 08:01 137650                             /opt/jdk1.6.0_16/bin/java
+40108000-4010a000 rwxp 00008000 08:01 137650                             /opt/jdk1.6.0_16/bin/java
+41a77000-42f05000 rwxp 41a77000 00:00 0                                  [heap]
+7f5878000000-7f5878ee3000 rwxp 7f5878000000 00:00 0 
+7f5878ee3000-7f587c000000 ---p 7f5878ee3000 00:00 0 
+7f5880000000-7f5880129000 rwxp 7f5880000000 00:00 0 
+7f5880129000-7f5884000000 ---p 7f5880129000 00:00 0 
+7f5885ee0000-7f5885ee3000 ---p 7f5885ee0000 00:00 0 
+7f5885ee3000-7f5885fe1000 rwxp 7f5885ee3000 00:00 0 
+7f5888000000-7f58896ae000 rwxp 7f5888000000 00:00 0 
+7f58896ae000-7f588c000000 ---p 7f58896ae000 00:00 0 
+7f588d0ed000-7f588d14c000 r-xs 00ba3000 08:01 139873                     /opt/jdk1.6.0_16/lib/tools.jar
+7f588d14c000-7f588d14f000 ---p 7f588d14c000 00:00 0 
+7f588d14f000-7f588d24d000 rwxp 7f588d14f000 00:00 0 
+7f588d24d000-7f588d250000 ---p 7f588d24d000 00:00 0 
+7f588d250000-7f588d34e000 rwxp 7f588d250000 00:00 0 
+7f588d34e000-7f588d362000 r-xp 00000000 08:01 7360                       /lib/libresolv-2.9.so
+7f588d362000-7f588d562000 ---p 00014000 08:01 7360                       /lib/libresolv-2.9.so
+7f588d562000-7f588d563000 r-xp 00014000 08:01 7360                       /lib/libresolv-2.9.so
+7f588d563000-7f588d564000 rwxp 00015000 08:01 7360                       /lib/libresolv-2.9.so
+7f588d564000-7f588d566000 rwxp 7f588d564000 00:00 0 
+7f588d566000-7f588d56b000 r-xp 00000000 08:01 7353                       /lib/libnss_dns-2.9.so
+7f588d56b000-7f588d76a000 ---p 00005000 08:01 7353                       /lib/libnss_dns-2.9.so
+7f588d76a000-7f588d76b000 r-xp 00004000 08:01 7353                       /lib/libnss_dns-2.9.so
+7f588d76b000-7f588d76c000 rwxp 00005000 08:01 7353                       /lib/libnss_dns-2.9.so
+7f588d76c000-7f588d76e000 r-xp 00000000 08:01 2439                       /lib/libnss_mdns4_minimal.so.2
+7f588d76e000-7f588d96d000 ---p 00002000 08:01 2439                       /lib/libnss_mdns4_minimal.so.2
+7f588d96d000-7f588d96e000 rwxp 00001000 08:01 2439                       /lib/libnss_mdns4_minimal.so.2
+7f588d98a000-7f588d99d000 r-xp 00000000 08:01 140696                     /opt/jdk1.6.0_16/jre/lib/amd64/libnet.so
+7f588d99d000-7f588da9e000 ---p 00013000 08:01 140696                     /opt/jdk1.6.0_16/jre/lib/amd64/libnet.so
+7f588da9e000-7f588daa1000 rwxp 00014000 08:01 140696                     /opt/jdk1.6.0_16/jre/lib/amd64/libnet.so
+7f588daa1000-7f588daa4000 ---p 7f588daa1000 00:00 0 
+7f588daa4000-7f588dba2000 rwxp 7f588daa4000 00:00 0 
+7f588dba2000-7f588dba5000 ---p 7f588dba2000 00:00 0 
+7f588dba5000-7f588dca3000 rwxp 7f588dba5000 00:00 0 
+7f588dca3000-7f588dca6000 ---p 7f588dca3000 00:00 0 
+7f588dca6000-7f588dda4000 rwxp 7f588dca6000 00:00 0 
+7f588dda4000-7f588dddf000 r-xs 002c7000 08:01 141530                     /opt/apache-maven-2.2.1/lib/maven-2.2.1-uber.jar
+7f588dddf000-7f588dde0000 ---p 7f588dddf000 00:00 0 
+7f588dde0000-7f588dee0000 rwxp 7f588dde0000 00:00 0 
+7f588dee0000-7f588dee3000 ---p 7f588dee0000 00:00 0 
+7f588dee3000-7f588dfe1000 rwxp 7f588dee3000 00:00 0 
+7f588dfe1000-7f588dfe4000 ---p 7f588dfe1000 00:00 0 
+7f588dfe4000-7f588e0e2000 rwxp 7f588dfe4000 00:00 0 
+7f588e0e2000-7f588e0e5000 ---p 7f588e0e2000 00:00 0 
+7f588e0e5000-7f588e1e3000 rwxp 7f588e0e5000 00:00 0 
+7f588e1e3000-7f588e222000 r-xp 00000000 08:01 12174                      /usr/lib/locale/en_US.utf8/LC_CTYPE
+7f588e222000-7f588e225000 ---p 7f588e222000 00:00 0 
+7f588e225000-7f588e323000 rwxp 7f588e225000 00:00 0 
+7f588e323000-7f588e326000 ---p 7f588e323000 00:00 0 
+7f588e326000-7f588e424000 rwxp 7f588e326000 00:00 0 
+7f588e424000-7f588e425000 ---p 7f588e424000 00:00 0 
+7f588e425000-7f588e5bb000 rwxp 7f588e425000 00:00 0 
+7f588e5bb000-7f588e751000 r-xs 02fb3000 08:01 140826                     /opt/jdk1.6.0_16/jre/lib/rt.jar
+7f588e751000-7f588e779000 rwxp 7f588e751000 00:00 0 
+7f588e779000-7f588e77a000 ---p 7f588e779000 00:00 0 
+7f588e77a000-7f588e87a000 rwxp 7f588e77a000 00:00 0 
+7f588e87a000-7f588e87b000 ---p 7f588e87a000 00:00 0 
+7f588e87b000-7f588e98c000 rwxp 7f588e87b000 00:00 0 
+7f588e98c000-7f588e9a5000 rwxp 7f588e98c000 00:00 0 
+7f588e9a5000-7f588e9be000 rwxp 7f588e9a5000 00:00 0 
+7f588e9be000-7f588ea9f000 rwxp 7f588e9be000 00:00 0 
+7f588ea9f000-7f588eab0000 rwxp 7f588ea9f000 00:00 0 
+7f588eab0000-7f588eac9000 rwxp 7f588eab0000 00:00 0 
+7f588eac9000-7f588eae2000 rwxp 7f588eac9000 00:00 0 
+7f588eae2000-7f588ebc2000 rwxp 7f588eae2000 00:00 0 
+7f588ebc2000-7f588ec2d000 rwxp 7f588ebc2000 00:00 0 
+7f588ec2d000-7f588ec3f000 rwxp 7f588ec2d000 00:00 0 
+7f588ec3f000-7f5890e00000 rwxp 7f588ec3f000 00:00 0 
+7f5890e00000-7f5894040000 rwxp 7f5890e00000 00:00 0 
+7f5894040000-7f5897100000 rwxp 7f5894040000 00:00 0 
+7f5897100000-7f58b32f0000 rwxp 7f5897100000 00:00 0 
+7f58b32f0000-7f58c07e0000 rwxp 7f58b32f0000 00:00 0 
+7f58c07e0000-7f58c08a5000 rwxp 7f58c07e0000 00:00 0 
+7f58c08a5000-7f58c08a8000 rwxp 7f58c08a5000 00:00 0 
+7f58c08a8000-7f58c09a6000 rwxp 7f58c08a8000 00:00 0 
+7f58c09a6000-7f58c09aa000 r-xs 00030000 08:06 7618                       /home/jtarraga/.m2/repository/org/codehaus/plexus/plexus-utils/1.5.1/plexus-utils-1.5.1.jar
+7f58c09aa000-7f58c09b3000 r-xs 00075000 08:06 7668                       /home/jtarraga/.m2/repository/org/apache/maven/surefire/surefire-api/2.4.3/surefire-api-2.4.3.jar
+7f58c09b3000-7f58c09b9000 r-xs 0003c000 08:06 7619                       /home/jtarraga/.m2/repository/org/apache/maven/surefire/surefire-booter/2.4.3/surefire-booter-2.4.3.jar
+7f58c0a90000-7f58c2c40000 rwxp 7f58c0a90000 00:00 0 
+7f58c2c44000-7f58c2ef4000 rwxp 7f58c2c44000 00:00 0 
+7f58c2ef4000-7f58c5c44000 rwxp 7f58c2ef4000 00:00 0 
+7f58c5c44000-7f58c5c52000 r-xp 00000000 08:01 140700                     /opt/jdk1.6.0_16/jre/lib/amd64/libzip.so
+7f58c5c52000-7f58c5d54000 ---p 0000e000 08:01 140700                     /opt/jdk1.6.0_16/jre/lib/amd64/libzip.so
+7f58c5d54000-7f58c5d57000 rwxp 00010000 08:01 140700                     /opt/jdk1.6.0_16/jre/lib/amd64/libzip.so
+7f58c5d57000-7f58c5d58000 rwxp 7f58c5d57000 00:00 0 
+7f58c5d58000-7f58c5d64000 r-xp 00000000 08:01 7354                       /lib/libnss_files-2.9.so
+7f58c5d64000-7f58c5f63000 ---p 0000c000 08:01 7354                       /lib/libnss_files-2.9.so
+7f58c5f63000-7f58c5f64000 r-xp 0000b000 08:01 7354                       /lib/libnss_files-2.9.so
+7f58c5f64000-7f58c5f65000 rwxp 0000c000 08:01 7354                       /lib/libnss_files-2.9.so
+7f58c5f65000-7f58c5f6f000 r-xp 00000000 08:01 7356                       /lib/libnss_nis-2.9.so
+7f58c5f6f000-7f58c616e000 ---p 0000a000 08:01 7356                       /lib/libnss_nis-2.9.so
+7f58c616e000-7f58c616f000 r-xp 00009000 08:01 7356                       /lib/libnss_nis-2.9.so
+7f58c616f000-7f58c6170000 rwxp 0000a000 08:01 7356                       /lib/libnss_nis-2.9.so
+7f58c6170000-7f58c6178000 r-xp 00000000 08:01 7352                       /lib/libnss_compat-2.9.so
+7f58c6178000-7f58c6377000 ---p 00008000 08:01 7352                       /lib/libnss_compat-2.9.so
+7f58c6377000-7f58c6378000 r-xp 00007000 08:01 7352                       /lib/libnss_compat-2.9.so
+7f58c6378000-7f58c6379000 rwxp 00008000 08:01 7352                       /lib/libnss_compat-2.9.so
+7f58c6379000-7f58c6380000 r-xp 00000000 08:01 140706                     /opt/jdk1.6.0_16/jre/lib/amd64/native_threads/libhpi.so
+7f58c6380000-7f58c6481000 ---p 00007000 08:01 140706                     /opt/jdk1.6.0_16/jre/lib/amd64/native_threads/libhpi.so
+7f58c6481000-7f58c6483000 rwxp 00008000 08:01 140706                     /opt/jdk1.6.0_16/jre/lib/amd64/native_threads/libhpi.so
+7f58c6483000-7f58c6484000 rwxp 7f58c6483000 00:00 0 
+7f58c6484000-7f58c649a000 r-xp 00000000 08:01 7351                       /lib/libnsl-2.9.so
+7f58c649a000-7f58c669a000 ---p 00016000 08:01 7351                       /lib/libnsl-2.9.so
+7f58c669a000-7f58c669b000 r-xp 00016000 08:01 7351                       /lib/libnsl-2.9.so
+7f58c669b000-7f58c669c000 rwxp 00017000 08:01 7351                       /lib/libnsl-2.9.so
+7f58c669c000-7f58c669e000 rwxp 7f58c669c000 00:00 0 
+7f58c669e000-7f58c66c7000 r-xp 00000000 08:01 140713                     /opt/jdk1.6.0_16/jre/lib/amd64/libjava.so
+7f58c66c7000-7f58c67c6000 ---p 00029000 08:01 140713                     /opt/jdk1.6.0_16/jre/lib/amd64/libjava.so
+7f58c67c6000-7f58c67cd000 rwxp 00028000 08:01 140713                     /opt/jdk1.6.0_16/jre/lib/amd64/libjava.so
+7f58c67cd000-7f58c67da000 r-xp 00000000 08:01 140715                     /opt/jdk1.6.0_16/jre/lib/amd64/libverify.so
+7f58c67da000-7f58c68d9000 ---p 0000d000 08:01 140715                     /opt/jdk1.6.0_16/jre/lib/amd64/libverify.so
+7f58c68d9000-7f58c68dc000 rwxp 0000c000 08:01 140715                     /opt/jdk1.6.0_16/jre/lib/amd64/libverify.so
+7f58c68dc000-7f58c68e3000 r-xp 00000000 08:01 7361                       /lib/librt-2.9.so
+7f58c68e3000-7f58c6ae2000 ---p 00007000 08:01 7361                       /lib/librt-2.9.so
+7f58c6ae2000-7f58c6ae3000 r-xp 00006000 08:01 7361                       /lib/librt-2.9.so
+7f58c6ae3000-7f58c6ae4000 rwxp 00007000 08:01 7361                       /lib/librt-2.9.so
+7f58c6ae4000-7f58c6ae7000 ---p 7f58c6ae4000 00:00 0 
+7f58c6ae7000-7f58c6be5000 rwxp 7f58c6ae7000 00:00 0 
+7f58c6be5000-7f58c6c69000 r-xp 00000000 08:01 7349                       /lib/libm-2.9.so
+7f58c6c69000-7f58c6e68000 ---p 00084000 08:01 7349                       /lib/libm-2.9.so
+7f58c6e68000-7f58c6e69000 r-xp 00083000 08:01 7349                       /lib/libm-2.9.so
+7f58c6e69000-7f58c6e6a000 rwxp 00084000 08:01 7349                       /lib/libm-2.9.so
+7f58c6e6a000-7f58c75c8000 r-xp 00000000 08:01 140738                     /opt/jdk1.6.0_16/jre/lib/amd64/server/libjvm.so
+7f58c75c8000-7f58c76c7000 ---p 0075e000 08:01 140738                     /opt/jdk1.6.0_16/jre/lib/amd64/server/libjvm.so
+7f58c76c7000-7f58c783f000 rwxp 0075d000 08:01 140738                     /opt/jdk1.6.0_16/jre/lib/amd64/server/libjvm.so
+7f58c783f000-7f58c787d000 rwxp 7f58c783f000 00:00 0 
+7f58c787d000-7f58c79e5000 r-xp 00000000 08:01 7345                       /lib/libc-2.9.so
+7f58c79e5000-7f58c7be5000 ---p 00168000 08:01 7345                       /lib/libc-2.9.so
+7f58c7be5000-7f58c7be9000 r-xp 00168000 08:01 7345                       /lib/libc-2.9.so
+7f58c7be9000-7f58c7bea000 rwxp 0016c000 08:01 7345                       /lib/libc-2.9.so
+7f58c7bea000-7f58c7bef000 rwxp 7f58c7bea000 00:00 0 
+7f58c7bef000-7f58c7bf1000 r-xp 00000000 08:01 7348                       /lib/libdl-2.9.so
+7f58c7bf1000-7f58c7df1000 ---p 00002000 08:01 7348                       /lib/libdl-2.9.so
+7f58c7df1000-7f58c7df2000 r-xp 00002000 08:01 7348                       /lib/libdl-2.9.so
+7f58c7df2000-7f58c7df3000 rwxp 00003000 08:01 7348                       /lib/libdl-2.9.so
+7f58c7df3000-7f58c7e0a000 r-xp 00000000 08:01 7359                       /lib/libpthread-2.9.so
+7f58c7e0a000-7f58c8009000 ---p 00017000 08:01 7359                       /lib/libpthread-2.9.so
+7f58c8009000-7f58c800a000 r-xp 00016000 08:01 7359                       /lib/libpthread-2.9.so
+7f58c800a000-7f58c800b000 rwxp 00017000 08:01 7359                       /lib/libpthread-2.9.so
+7f58c800b000-7f58c800f000 rwxp 7f58c800b000 00:00 0 
+7f58c800f000-7f58c802f000 r-xp 00000000 08:01 7342                       /lib/ld-2.9.so
+7f58c8035000-7f58c8036000 r-xs 00003000 08:06 7587                       /home/jtarraga/.m2/repository/org/codehaus/plexus/plexus-compiler-javac/1.5.3/plexus-compiler-javac-1.5.3.jar
+7f58c8036000-7f58c8038000 r-xs 00000000 08:06 7582                       /home/jtarraga/.m2/repository/org/codehaus/plexus/plexus-compiler-manager/1.5.3/plexus-compiler-manager-1.5.3.jar
+7f58c8038000-7f58c8039000 r-xs 00004000 08:06 7578                       /home/jtarraga/.m2/repository/org/codehaus/plexus/plexus-compiler-api/1.5.3/plexus-compiler-api-1.5.3.jar
+7f58c8039000-7f58c803b000 r-xs 0000b000 08:06 7368                       /home/jtarraga/.m2/repository/org/codehaus/plexus/plexus-interpolation/1.6/plexus-interpolation-1.6.jar
+7f58c803b000-7f58c803d000 r-xs 00007000 08:06 7258                       /home/jtarraga/.m2/repository/org/apache/maven/shared/maven-filtering/1.0-beta-2/maven-filtering-1.0-beta-2.jar
+7f58c803d000-7f58c8042000 r-xs 00039000 08:06 7257                       /home/jtarraga/.m2/repository/org/codehaus/plexus/plexus-utils/1.5.6/plexus-utils-1.5.6.jar
+7f58c8042000-7f58c804d000 rwxp 7f58c8042000 00:00 0 
+7f58c804d000-7f58c8102000 rwxp 7f58c804d000 00:00 0 
+7f58c8102000-7f58c8104000 rwxp 7f58c8102000 00:00 0 
+7f58c8104000-7f58c810b000 r-xp 00000000 08:01 140722                     /opt/jdk1.6.0_16/jre/lib/amd64/jli/libjli.so
+7f58c810b000-7f58c820c000 ---p 00007000 08:01 140722                     /opt/jdk1.6.0_16/jre/lib/amd64/jli/libjli.so
+7f58c820c000-7f58c820e000 rwxp 00008000 08:01 140722                     /opt/jdk1.6.0_16/jre/lib/amd64/jli/libjli.so
+7f58c820e000-7f58c820f000 rwxp 7f58c820e000 00:00 0 
+7f58c820f000-7f58c8211000 r-xs 00026000 08:06 7575                       /home/jtarraga/.m2/repository/org/codehaus/plexus/plexus-utils/1.0.4/plexus-utils-1.0.4.jar
+7f58c8211000-7f58c8213000 r-xs 00005000 08:06 706                        /home/jtarraga/.m2/repository/org/apache/maven/plugins/maven-jar-plugin/2.2/maven-jar-plugin-2.2.jar
+7f58c8213000-7f58c8214000 r-xs 00005000 08:06 694                        /home/jtarraga/.m2/repository/org/apache/maven/plugins/maven-surefire-plugin/2.4.3/maven-surefire-plugin-2.4.3.jar
+7f58c8214000-7f58c8215000 r-xs 00004000 08:06 676                        /home/jtarraga/.m2/repository/org/apache/maven/plugins/maven-compiler-plugin/2.0.2/maven-compiler-plugin-2.0.2.jar
+7f58c8215000-7f58c8217000 r-xs 00004000 08:06 422                        /home/jtarraga/.m2/repository/org/apache/maven/plugins/maven-resources-plugin/2.3/maven-resources-plugin-2.3.jar
+7f58c8217000-7f58c8218000 r-xp 7f58c8217000 00:00 0 
+7f58c8218000-7f58c821a000 r-xs 00008000 08:01 141517                     /opt/apache-maven-2.2.1/boot/classworlds-1.1.jar
+7f58c821a000-7f58c8221000 r-xs 00000000 08:01 2496                       /usr/lib/gconv/gconv-modules.cache
+7f58c8221000-7f58c8229000 rwxs 00000000 08:01 132135                     /tmp/hsperfdata_jtarraga/29587
+7f58c8229000-7f58c822a000 rwxp 7f58c8229000 00:00 0 
+7f58c822a000-7f58c822b000 r-xp 7f58c822a000 00:00 0 
+7f58c822b000-7f58c822e000 rwxp 7f58c822b000 00:00 0 
+7f58c822e000-7f58c822f000 r-xp 0001f000 08:01 7342                       /lib/ld-2.9.so
+7f58c822f000-7f58c8230000 rwxp 00020000 08:01 7342                       /lib/ld-2.9.so
+7fff046bf000-7fff046d4000 rwxp 7ffffffea000 00:00 0                      [stack]
+7fff047ff000-7fff04800000 r-xp 7fff047ff000 00:00 0                      [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+
+VM Arguments:
+jvm_args: -Dclassworlds.conf=/opt/maven/bin/m2.conf -Dmaven.home=/opt/maven 
+java_command: org.codehaus.classworlds.Launcher "test" "-Dmaven.test=ClassComparisonTest"
+Launcher Type: SUN_STANDARD
+
+Environment Variables:
+JAVA_HOME=/opt/java
+JRE_HOME=/opt/java/jre/
+PATH=/usr/bin/:/opt/tomcat/bin:/opt/java/bin:/opt/groovy/bin:/opt/maven/bin:/opt/eclipse:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
+LD_LIBRARY_PATH=/opt/jdk1.6.0_16/jre/lib/amd64/server:/opt/jdk1.6.0_16/jre/lib/amd64:/opt/jdk1.6.0_16/jre/../lib/amd64
+SHELL=/bin/bash
+DISPLAY=:1012
+
+Signal Handlers:
+SIGSEGV: [libjvm.so+0x6bddc0], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGBUS: [libjvm.so+0x6bddc0], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGFPE: [libjvm.so+0x594f90], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGPIPE: [libjvm.so+0x594f90], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGXFSZ: [libjvm.so+0x594f90], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGILL: [libjvm.so+0x594f90], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGUSR1: SIG_DFL, sa_mask[0]=0x00000000, sa_flags=0x00000000
+SIGUSR2: [libjvm.so+0x597750], sa_mask[0]=0x00000000, sa_flags=0x10000004
+SIGHUP: [libjvm.so+0x5974a0], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGINT: [libjvm.so+0x5974a0], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGTERM: [libjvm.so+0x5974a0], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGQUIT: [libjvm.so+0x5974a0], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+
+
+---------------  S Y S T E M  ---------------
+
+OS:5.0
+
+uname:Linux 2.6.28-18-generic #60-Ubuntu SMP Fri Mar 12 04:26:47 UTC 2010 x86_64
+libc:glibc 2.9 NPTL 2.9 
+rlimit: STACK 8192k, CORE 0k, NPROC infinity, NOFILE 1024, AS infinity
+load average:28.81 49.16 54.30
+
+CPU:total 2 (1 cores per cpu, 2 threads per core) family 15 model 4 stepping 1, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ht
+
+Memory: 4k page, physical 3055796k(837464k free), swap 0k(0k free)
+
+vm_info: Java HotSpot(TM) 64-Bit Server VM (14.2-b01) for linux-amd64 JRE (1.6.0_16-b01), built on Jul 31 2009 05:52:33 by "java_re" with gcc 3.2.2 (SuSE Linux)
+
+time: Sat May 29 10:25:56 2010
+elapsed time: 11077 seconds
+
