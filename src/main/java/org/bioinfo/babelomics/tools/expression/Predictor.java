@@ -3,6 +3,7 @@ package org.bioinfo.babelomics.tools.expression;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,7 +18,6 @@ import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
-import org.bioinfo.graphics.canvas.Canvas;
 import org.bioinfo.mlpr.classifier.GenericClassifier;
 import org.bioinfo.mlpr.classifier.Knn;
 import org.bioinfo.mlpr.classifier.RForest;
@@ -159,12 +159,12 @@ public class Predictor extends BabelomicsTool {
 			// save best classifiers table
 			String header = GenericClassifier.getResultsTableHeader();
 			String featureSelectionTag = "";
-			if(commandLine.hasOption("feature-selection")) {
+			if(commandLine.hasOption("feature-selection") && !commandLine.getOptionValue("feature-selection").equalsIgnoreCase("none")) {
 				header = GenericClassifier.getFeatureSelectionResultsTableHeader();
 				featureSelectionTag = "_FEATURE_SELECTION";
 			}
 			IOUtils.write(new File(outdir + "/best_classifiers_table.txt"), header + "\n" +  combinedTable.toString());	
-			result.getOutputItems().add(0, new Item("combined_table", "best_classifiers_table.txt", " Combined results (best " + numberOfBestSelectedClassifications + " per classifier)", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR" + featureSelectionTag + "_TABLE"),new HashMap<String,String>(),"Summary",""));
+			result.getOutputItems().add(0, new Item("combined_table", "best_classifiers_table.txt", " Combined results (best " + numberOfBestSelectedClassifications + " per classifier)", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR" + featureSelectionTag + "_TABLE"),new HashMap<String,String>(),"Train.Summary",""));
 
 
 			// test			
@@ -221,10 +221,10 @@ public class Predictor extends BabelomicsTool {
 					testResultString.append(sampleNames.get(i)).append("\t").append(ListUtils.toString(testResultTable.get(i))).append("\n");
 				}
 				IOUtils.write(outdir + "/test_result.txt", testResultString.toString());
-				result.addOutputItem(new Item("test_result", "test_result.txt", "Test result table", TYPE.FILE, Arrays.asList("TABLE"), new HashMap<String, String>(),"Test"));
+				result.addOutputItem(new Item("test_result", "test_result.txt", "Test result table", TYPE.FILE, Arrays.asList("TABLE"), new HashMap<String, String>(),"Test.Test result"));
 			}
 
-
+			//
 			savecorrectSampleRatioTable();
 
 		} catch(Exception e){
@@ -426,10 +426,10 @@ public class Predictor extends BabelomicsTool {
 
 		// classification table
 		String featureSelectionTag = "";
-		if(commandLine.hasOption("feature-selection")) featureSelectionTag = "_FEATURE_SELECTION";
+		if(commandLine.hasOption("feature-selection") && !commandLine.getOptionValue("feature-selection").equalsIgnoreCase("none")) featureSelectionTag = "_FEATURE_SELECTION";
 		try {
 			IOUtils.write(new File(outdir + "/" + name + "_table.txt"), classifier.getResultsTable(true));
-			result.addOutputItem(new Item(name + "_table", name + "_table.txt", name + " classifications", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR" + featureSelectionTag + "_TABLE"),new HashMap<String,String>(),name + " results",""));
+			result.addOutputItem(new Item(name + "_table", name + "_table.txt", name + " classifications", TYPE.FILE,Arrays.asList("TABLE","PREDICTOR" + featureSelectionTag + "_TABLE"),new HashMap<String,String>(),"Train." + name + " results",""));
 		} catch (IOException e) {
 			printError("ioexception_" + name + "_predictor", "Error saving " + name + " classifications table", "Error saving " + name + " classifications table");
 		}
@@ -438,7 +438,7 @@ public class Predictor extends BabelomicsTool {
 		try {
 			XYLineChart comparativeplot = classifier.getComparativeMetricsPlot();
 			comparativeplot.save(outdir + "/" + name + "_comparative_plot.png",500,350,"png");
-			result.addOutputItem(new Item(name + "_comparative_plot", name + "_comparative_plot.png", name + " comparative plot", TYPE.IMAGE, Arrays.asList(""),new HashMap<String,String>(),name + " results",""));
+			result.addOutputItem(new Item(name + "_comparative_plot", name + "_comparative_plot.png", name + " comparative plot", TYPE.IMAGE, Arrays.asList(""),new HashMap<String,String>(),"Train." + name + " results",""));
 		} catch (IOException e) {
 			printError("ioexception_" + name + "_predictor", "Error saving " + name + " comparative plot", "Error saving " + name + " comparative plot");
 			e.printStackTrace();
@@ -467,8 +467,7 @@ public class Predictor extends BabelomicsTool {
 			// PCA 
 			else if("pca".equalsIgnoreCase(featureSelectionMethod)){
 				featureSelector = ((AbstractFeatureSelector)new PcaFeatureSelector());
-				classifier.initNumberOfFeaturesRange(instances.numAttributes()-2);
-				System.err.println("nnnnnnnn:" + instances.numAttributes());
+				classifier.initNumberOfFeaturesRange(instances.numAttributes()-2);				
 				logger.println("Setting PCA feature selector");
 			}
 			
@@ -511,32 +510,70 @@ public class Predictor extends BabelomicsTool {
 	}
 	
 
-	private void savecorrectSampleRatioTable() throws IOException{		
+	private void savecorrectSampleRatioTable() throws IOException{
+		DecimalFormat percentageFormatter = new DecimalFormat("##.##");
+		
 		// correct sample classification ratio
 		StringBuilder ratiosTable = new StringBuilder();
-		//// print header
-		ratiosTable.append("Sample").append("\t");
+		StringBuilder ratiosHtmlTable = new StringBuilder();
+		
+		// print header
+		
+		ratiosTable.append("#Sample").append("\t");
+		ratiosHtmlTable.append("#Sample").append("\t");
+		
 		for(int j=0; j<bestClassiferParamList.size(); j++){
+			
 			ratiosTable.append(bestClassiferParamList.get(j));
+			ratiosHtmlTable.append(bestClassiferParamList.get(j));
+			
 			if(j<(bestClassiferParamList.size()-1)){
+				
 				ratiosTable.append("\t");
+				ratiosHtmlTable.append("\t");
+				
 			}
 		}
+		
 		ratiosTable.append("\n");
+		ratiosHtmlTable.append("\n");
+		
 		//// print values
 		for(int i=0; i<sampleNames.size(); i++){
+			
 			ratiosTable.append(sampleNames.get(i)).append("\t");
+			ratiosHtmlTable.append(sampleNames.get(i)).append("\t");
+			
 			for(int j=0; j<correctSampleRatio.size(); j++){
-				ratiosTable.append(correctSampleRatio.get(j).get(i));
+				
+				ratiosTable.append(percentageFormatter.format(correctSampleRatio.get(j).get(i)*100.0));
+				ratiosHtmlTable.append(renderCell(correctSampleRatio.get(j).get(i)));
+				
 				if(j<(correctSampleRatio.size()-1)){
+					
 					ratiosTable.append("\t");
+					ratiosHtmlTable.append("\t");
+					
 				}		
 			}
+			
 			ratiosTable.append("\n");
+			ratiosHtmlTable.append("\n");
+			
 		}
-		IOUtils.write(outdir + "/ratios.txt", ratiosTable.toString());	
+		IOUtils.write(outdir + "/ratios.txt", ratiosTable.toString());
+		IOUtils.write(outdir + "/ratios.html", ratiosHtmlTable.toString());
+		result.addOutputItem(new Item("ratios", "ratios.html", "Percentage of correct classification per sample/classifier", TYPE.FILE, Arrays.asList("TABLE", "NO_LINK"), new HashMap<String, String>(),"Train.Summary"));
 	}
 
+	private String renderCell(double percentage){
+		DecimalFormat percentageFormatter = new DecimalFormat("##.##");
+		double red = (1-percentage)*200.0;
+		double green = (percentage)*200.0;
+		String color = "color: rgb(" + (int)Math.floor(red) + "," + (int)Math.floor(green) + ",0)";		
+		return "<font style='font-weight: bold; " + color + "'>" + percentageFormatter.format(percentage*100.0) + "%</font>";
+	}
+	
 	private void loadInstances(File datasetFile) throws Exception{
 
 		// update status
