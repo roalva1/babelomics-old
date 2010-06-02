@@ -140,7 +140,7 @@ public class Snow extends BabelomicsTool {
 
 			// more information
 			//
-			title = label1 + ": " + config.getProperty("NUMBER_OF_COMPONENTS2") + " [" + config.getProperty("CONF_INTERVAL1") + "]";
+			title = label1 + ": " + config.getProperty("NUMBER_OF_COMPONENTS1") + " [" + config.getProperty("CONF_INTERVAL1") + "]";
 			if (f2 != null) {
 				title += ", " + label2 + ": " + config.getProperty("NUMBER_OF_COMPONENTS2") + " [" + config.getProperty("CONF_INTERVAL2") + "]";
 			}
