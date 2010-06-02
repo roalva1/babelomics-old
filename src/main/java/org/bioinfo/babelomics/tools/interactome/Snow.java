@@ -189,7 +189,7 @@ public class Snow extends BabelomicsTool {
 			
 			//			result.addOutputItem(new Item("List_file", filename, "MARMITE output file", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Results"));
 			
-			addResultSnowViewer("swnowviewr", "Snow viewer applet (requires Java support)", "Snow viewer", "subnetwork1.xml", baseDir);
+			addResultSnowViewer("swnowviewer", "Snow viewer applet (requires Java support)", "Snow viewer", "subnetwork1.xml", baseDir);
 
 
 		} catch (InvalidParameterException e) {
@@ -215,10 +215,13 @@ public class Snow extends BabelomicsTool {
 	private void addResultSnowViewer(String name, String label, String groupName, String fileName, String baseDir) throws IOException {
 		File outFile = copyFile(fileName, baseDir);
 		if ( outFile != null && outFile.exists() ) {
-			String url = "SnowViewer?filename=" + fileName;
+			String url = "SnowViewer?filename=" + fileName + "&width=600&height=600";
 			//String url = "http://beta.babelomics.bioinfo.cipf.es/SnowViewer?filename=" + fileName;
 			//http://beta.babelomics.bioinfo.cipf.es/SnowViewer?filename=subnetwork1.xml&jobid=262&sessionid=7tySrwJgNRM0tyGOnj9N3eT2BCTsEC8Qw3StPMwwz1WfsFyt1zoIqR6lPa7fnv54
 			result.addOutputItem(new Item(name, url, label, TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), groupName));
+			
+			url = "SnowViewer?filename=" + fileName;
+			result.addOutputItem(new Item(name + "_new_window", url, "Open applet in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), groupName));
 		}
 	}
 
