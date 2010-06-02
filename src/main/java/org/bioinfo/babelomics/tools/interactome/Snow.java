@@ -3,6 +3,7 @@ package org.bioinfo.babelomics.tools.interactome;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.bioinfo.babelomics.exception.InvalidParameterException;
@@ -97,39 +98,95 @@ public class Snow extends BabelomicsTool {
 			String title;
 			Config config = new Config(outdir + "/output.properties");
 			System.err.println("BET: " + config.getProperty("INTERACTOME.BETWEENNESS.PVALUE"));
+
+						
 			// interactome images
 			//
-			title = (config == null) ? "" : "p-value = " + config.getProperty("INTERACTOME.BETWEENNESS.PVALUE") + ", side = " + config.getProperty("INTERACTOME.BETWEENNESS.SIDE");  
-			addResultImage("interactome_betweenness_image", "Interactome betweenness : " + title, "Interactome images", "interactome_betweenness.png", baseDir);
-			title = (config == null) ? "" : "p-value = " + config.getProperty("INTERACTOME.COEFFICIENT.PVALUE") + ", side = " + config.getProperty("INTERACTOME.COEFFICIENT.SIDE");  
-			addResultImage("interactome_coefficient_image", "Interactome coefficient : " + title, "Interactome images", "interactome_coefficient.png", baseDir);
-			title = (config == null) ? "" : "p-value = " + config.getProperty("INTERACTOME.CONNECTIONS.PVALUE") + ", side = " + config.getProperty("INTERACTOME.CONNECTIONS.SIDE");  
-			addResultImage("interactome_connections_image", "Interactome connections : " + title, "Interactome images", "interactome_connections.png", baseDir);
+			
+			if (config==null) {
+				abort("exception_execute_snow", "Error", "Internal error accessing to Snow server, please, try later or contact us", "");
+			}
+
+			String mode = config.getProperty("MODE");
+			String label1 = config.getProperty("LABEL1"), label2 = "Interactome";
+			if (!"one-list".equalsIgnoreCase(mode)) {
+				label2 = config.getProperty("LABEL2");
+			}
+			
+			title = label1 + ("greater".equalsIgnoreCase(config.getProperty("INTERACTOME.BETWEENNESS.SIDE")) ? " > " : " < ") + label2 + ", p-value = " + config.getProperty("INTERACTOME.BETWEENNESS.PVALUE");
+			addResultImage("interactome_betweenness_image", "Betweenness : " + title, "Network parameters evaluation.List's role within interactome of reference", "interactome_betweenness.png", baseDir);
+
+			title = label1 + ("greater".equalsIgnoreCase(config.getProperty("INTERACTOME.CONNECTIONS.SIDE")) ? " > " : " < ") + label2 + ", p-value = " + config.getProperty("INTERACTOME.CONNECTIONS.PVALUE");
+			addResultImage("interactome_connections_image", "Connections : " + title, "Network parameters evaluation.List's role within interactome of reference", "interactome_connections.png", baseDir);
+
+			title = label1 + ("greater".equalsIgnoreCase(config.getProperty("INTERACTOME.COEFFICIENT.SIDE")) ? " > " : " < ") + label2 + ", p-value = " + config.getProperty("INTERACTOME.COEFFICIENT.PVALUE");
+			addResultImage("interactome_coefficient_image", "Clustering coefficient : " + title, "Network parameters evaluation.List's role within interactome of reference", "interactome_coefficient.png", baseDir);
 
 			// network images
 			//
-			title = (config == null) ? "" : "p-value = " + config.getProperty("NETWORK.BETWEENNESS.PVALUE") + ", side = " + config.getProperty("NETWORK.BETWEENNESS.SIDE");  
-			addResultImage("network_betweenness_image", "Network betweenness : " + title, "Network images", "network_betweenness.png", baseDir);
-			title = (config == null) ? "" : "p-value = " + config.getProperty("NETWORK.COEFFICIENT.PVALUE") + ", side = " + config.getProperty("NETWORK.COEFFICIENT.SIDE");  
-			addResultImage("network_coefficient_image", "Network coefficient : " + title, "Network images", "network_coefficient.png", baseDir);
-			title = (config == null) ? "" : "p-value = " + config.getProperty("NETWORK.CONNECTIONS.PVALUE") + ", side = " + config.getProperty("NETWORK.CONNECTIONS.SIDE");  
-			addResultImage("network_connections_image", "Network connections : " + title, "Network images", "network_connections.png", baseDir);
+			label2 = "Random";
+			if (!"one-list".equalsIgnoreCase(mode)) {
+				label2 = config.getProperty("LABEL2");
+			}
+			
+			title = label1 + ("greater".equalsIgnoreCase(config.getProperty("NETWORK.BETWEENNESS.SIDE")) ? " > " : " < ") + label2 + ", p-value = " + config.getProperty("NETWORK.BETWEENNESS.PVALUE");
+			addResultImage("network_betweenness_image", "Betweenness : " + title, "Network parameters evaluation.Minimal connected network topological evaluation", "network_betweenness.png", baseDir);
+
+			title = label1 + ("greater".equalsIgnoreCase(config.getProperty("NETWORK.CONNECTIONS.SIDE")) ? " > " : " < ") + label2 + ", p-value = " + config.getProperty("NETWORK.CONNECTIONS.PVALUE");
+			addResultImage("network_connections_image", "Network connections : " + title, "Network parameters evaluation.Minimal connected network topological evaluation", "network_connections.png", baseDir);
+
+			title = label1 + ("greater".equalsIgnoreCase(config.getProperty("NETWORK.COEFFICIENT.SIDE")) ? " > " : " < ") + label2 + ", p-value = " + config.getProperty("NETWORK.COEFFICIENT.PVALUE");
+			addResultImage("network_coefficient_image", "Clustering coefficient : " + title, "Network parameters evaluation.Minimal connected network topological evaluation", "network_coefficient.png", baseDir);
+
+			// more information
+			//
+			title = label1 + ": " + config.getProperty("NUMBER_OF_COMPONENTS2") + " [" + config.getProperty("CONF_INTERVAL1") + "]";
+			if (f2 != null) {
+				title += ", " + label2 + ": " + config.getProperty("NUMBER_OF_COMPONENTS2") + " [" + config.getProperty("CONF_INTERVAL2") + "]";
+			}
+			result.addOutputItem(new Item("number_of_components", title, "Number of components [95% confidence interval]", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Network parameters evaluation.Minimal connected network topological evaluation.More information"));						
+
+			title = label1 + ": " + config.getProperty("NUMBER_OF_COMPONENTS_MORE1");
+			if (f2 != null) {
+				title += ", " + label2 + ": " + config.getProperty("NUMBER_OF_COMPONENTS_MORE2");				
+			}
+			result.addOutputItem(new Item("number_of_components_more", title, "Number of components with more than 1 node", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Network parameters evaluation.Minimal connected network topological evaluation.More information"));						
+
+			title = label1 + ": " + config.getProperty("NUMBER_OF_BICOMPONENTS1");
+			if (f2 != null) {
+				title += ", " + label2 + ": " + config.getProperty("NUMBER_OF_BICOMPONENTS2");				
+			}
+			result.addOutputItem(new Item("number_of_bicomponents", title, "Number of Bicomponents", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Network parameters evaluation.Minimal connected network topological evaluation.More information"));						
+
+			title = label1 + ": " + config.getProperty("ARTICULATION_POINTS1");
+			if (f2 != null) {
+				title += ", " + label2 + ": " + config.getProperty("ARTICULATION_POINTS2");				
+			}
+			result.addOutputItem(new Item("number_of_articulation_points", title, "Articulation points", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Network parameters evaluation.Minimal connected network topological evaluation.More information"));						
+
 
 			// list #1 files
-			//
-			addResultFile("list1_bicomp_file", "BiComponents & subnetwork parameters", "List #1 results", "List1_bicomp.txt", baseDir);
-			addResultFile("list1_comp_file", "Components & subnetwork parameters", "List #1 results", "List1_comp.txt", baseDir);
-			addResultFile("list1_paths_file", "Shortest paths found with a maximun of 1 external proteins introduced", "List #1 results", "List1_paths.txt", baseDir);
-			addResultFile("list1_art_file", "BiComponents & articulation points", "List #1 results", "List1_art_points.txt", baseDir);
+			//Prots/Genes parameters/info in whole interactome
+			
+			addResultFile("list1_int_param_file", "Prots/Genes parameters/info in whole interactome", "Topological and functional information.List #1", "List1_int_param.txt", baseDir);			
+			addResultFile("list1_input_file", "Prots/Genes from list #1 in network", "Topological and functional information.List #1", "List1_input.txt", baseDir);			
+			addResultFile("list1_external_file", "External proteins introduced to the network", "Topological and functional information.List #1", "List1_external.txt", baseDir);			
+			addResultFile("list1_paths_file", "Found shortest paths", "Topological and functional information.List #1", "List1_paths.txt", baseDir);
+			addResultFile("list1_comp_file", "Components information", "Topological and functional information.List #1", "List1_comp.txt", baseDir);
+			addResultFile("list1_bicomp_file", "Bicomponents information", "Topological and functional information.List #1", "List1_bicomp.txt", baseDir);
+			addResultFile("list1_art_file", "Articulation points", "Topological and functional information.List #1", "List1_art_points.txt", baseDir);
 
 
 			if ( f2 != null ) {
-				addResultFile("list2_bicomp_file", "BiComponents & subnetwork parameters", "List #2 results", "List2_bicomp.txt", baseDir);
-				addResultFile("list2_comp_file", "Components & subnetwork parameters", "List #2 results", "List2_comp.txt", baseDir);
-				addResultFile("list2_paths_file", "Shortest paths found with a maximun of 1 external proteins introduced", "List #2 results", "List2_paths.txt", baseDir);
-				addResultFile("list2_art_file", "BiComponents & articulation points", "List #2 results", "List2_art_points.txt", baseDir);
+				addResultFile("list2_int_param_file", "Prots/Genes parameters/info in whole interactome", "Topological and functional information.List #2", "List2_int_param.txt", baseDir);			
+				addResultFile("list2_input_file", "Prots/Genes from list #1 in network", "Topological and functional information.List #2", "List2_input.txt", baseDir);			
+				addResultFile("list2_external_file", "External proteins introduced to the network", "Topological and functional information.List #2", "List2_external.txt", baseDir);			
+				addResultFile("list2_paths_file", "Found shortest paths", "Topological and functional information.List #2", "List2_paths.txt", baseDir);
+				addResultFile("list2_comp_file", "Components information", "Topological and functional information.List #2", "List2_comp.txt", baseDir);
+				addResultFile("list2_bicomp_file", "Bicomponents information", "Topological and functional information.List #2", "List2_bicomp.txt", baseDir);
+				addResultFile("list2_art_file", "Articulation points", "Topological and functional information.List #2", "List2_art_points.txt", baseDir);
 			}
-
+			
 			//			result.addOutputItem(new Item("List_file", filename, "MARMITE output file", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Results"));
 			
 			addResultSnowViewer("swnowviewr", "Snow viewer applet (requires Java support)", "Snow viewer", "subnetwork1.xml", baseDir);
