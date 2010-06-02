@@ -114,13 +114,13 @@ public class Snow extends BabelomicsTool {
 			}
 			
 			title = label1 + ("greater".equalsIgnoreCase(config.getProperty("INTERACTOME.BETWEENNESS.SIDE")) ? " > " : " < ") + label2 + ", p-value = " + config.getProperty("INTERACTOME.BETWEENNESS.PVALUE");
-			addResultImage("interactome_betweenness_image", "Betweenness : " + title, "Network parameters evaluation.List's role within interactome of reference", "interactome_betweenness.png", baseDir);
+			addResultImage("interactome_betweenness_image", "Betweenness : " + title, "Network parameters evaluation.List role within interactome of reference", "interactome_betweenness.png", baseDir);
 
 			title = label1 + ("greater".equalsIgnoreCase(config.getProperty("INTERACTOME.CONNECTIONS.SIDE")) ? " > " : " < ") + label2 + ", p-value = " + config.getProperty("INTERACTOME.CONNECTIONS.PVALUE");
-			addResultImage("interactome_connections_image", "Connections : " + title, "Network parameters evaluation.List's role within interactome of reference", "interactome_connections.png", baseDir);
+			addResultImage("interactome_connections_image", "Connections : " + title, "Network parameters evaluation.List role within interactome of reference", "interactome_connections.png", baseDir);
 
 			title = label1 + ("greater".equalsIgnoreCase(config.getProperty("INTERACTOME.COEFFICIENT.SIDE")) ? " > " : " < ") + label2 + ", p-value = " + config.getProperty("INTERACTOME.COEFFICIENT.PVALUE");
-			addResultImage("interactome_coefficient_image", "Clustering coefficient : " + title, "Network parameters evaluation.List's role within interactome of reference", "interactome_coefficient.png", baseDir);
+			addResultImage("interactome_coefficient_image", "Clustering coefficient : " + title, "Network parameters evaluation.List role within interactome of reference", "interactome_coefficient.png", baseDir);
 
 			// network images
 			//
