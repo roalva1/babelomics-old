@@ -706,6 +706,10 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 	public void saveBoxPlot(File file, boolean log2, String title, String resultId, String group) throws IOException, InvalidIndexException {
 		File imgFile = new File(file.getAbsolutePath().replace(".txt", ".png"));
 		Dataset dataset = new Dataset(file, true);
+		if (!dataset.load() && !dataset.validate()) {
+			abort("exception_execute_clustering", "Error", "Error loading dataset " + file.getName() + ": " + ListUtils.toString(dataset.getMessages().getErrorMessages(),". "), "");				
+		}
+		//Dataset dataset = new Dataset(file, true);
 		BoxPlotChart bpc = new BoxPlotChart(title, "", "");
 		bpc.getLegend().setVisible(false);
 
@@ -724,7 +728,14 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 				}
 			} else {
 				for(int i=0; i<dataset.getColumnDimension(); i++) {
-					bpc.addSeries(dataset.getDoubleMatrix().getColumn(i), "samples", dataset.getSampleNames().get(i));
+					try {
+						bpc.addSeries(dataset.getDoubleMatrix().getColumn(i), "samples", dataset.getSampleNames().get(i));
+					} catch (Exception e) {
+						System.out.println("***** file name: " + file.getAbsolutePath());
+						System.out.println("***** is dataset.getDoubleMarix is null ? " + (dataset.getDoubleMatrix()==null));
+						System.out.println("***** is column " + i + " null ? " + (dataset.getDoubleMatrix().getColumn(i) == null));
+						System.out.println("***** is sample " + i + " null ? " + (dataset.getSampleNames() == null || dataset.getSampleNames().get(i) == null));
+					}
 				}
 			}
 		}
