@@ -437,7 +437,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			
 			
 			// setting server params
-			graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));		
+			graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));
 			graph.setDataBase(config.getProperty("BLAST2GO_HOST_NAME"),config.getProperty("BLAST2GO_DB_NAME"),config.getProperty("BLAST2GO_DB_USER"), config.getProperty("BLAST2GO_DB_PASSWORD"));
 			
 			// run
@@ -445,8 +445,12 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			
 			// copy files
 			String imagePrefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue) + "_graphimage";
+				// png
 			FileUtils.touch(new File(outdir + "/" + imagePrefix + ".png"));
-			FileUtils.copy(outdir + "/graphs/" + imagePrefix + ".png", outdir + "/" + imagePrefix + ".png");			
+			FileUtils.copy(outdir + "/graphs/" + imagePrefix + ".png", outdir + "/" + imagePrefix + ".png");
+				// svg
+			FileUtils.touch(new File(outdir + "/" + imagePrefix + ".png.svg"));
+			FileUtils.copy(outdir + "/graphs/" + imagePrefix + ".svg", outdir + "/" + imagePrefix + ".png.svg");
 
 		} catch (Exception e) {
 			e.printStackTrace();
