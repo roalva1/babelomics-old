@@ -27,6 +27,7 @@ import org.bioinfo.babelomics.tools.genomic.genotype.StratificationTool;
 import org.bioinfo.babelomics.tools.graph.DescriptiveStatistics;
 import org.bioinfo.babelomics.tools.graph.GoGraphViewerTool;
 import org.bioinfo.babelomics.tools.interactome.Snow;
+import org.bioinfo.babelomics.tools.interactome.Snow2;
 import org.bioinfo.babelomics.tools.preprocessing.CreateAnnotation;
 import org.bioinfo.babelomics.tools.preprocessing.IDConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
@@ -197,6 +198,10 @@ public class BabelomicsFactory {
 		
 		if(toolName.equalsIgnoreCase("snow")) {
 			return new Snow();
+		}
+		
+		if(toolName.equalsIgnoreCase("snow2")) {
+			return new Snow2();
 		}
 
 		if(toolName.equalsIgnoreCase("blast2go")) {
