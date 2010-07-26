@@ -9,6 +9,7 @@ import org.bioinfo.babelomics.BabelomicsMain;
 import org.bioinfo.commons.io.TextFileReader;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.math.stats.inference.KolmogorovSmirnovTest;
+import org.junit.Test;
 
 public class Snow2Test {
 	
@@ -113,7 +114,7 @@ public class Snow2Test {
 		
 	
 	}
-//	@Test
+	@Test
 	public void Test() {
 		
 //		#1:If you have sif-file and you want to create a .topo file from the full sif-file (obviously no randoms)
@@ -137,7 +138,7 @@ public class Snow2Test {
 //		String []args = {"--tool", "snow2", "-o","/opt/babelomics/", "--sif-file", "/opt/babelomics/sce_alldb_proteins_interactome_nr.sif", "--randoms", "2", "--random-size", "50", "--home", System.getenv("BABELOMICS_HOME")};
 
 //		Case: We want to do an statistic Kolmogorov test 
-		String []args = {"--tool", "snow2", "-o","/home/ralonso/appl/babelomics/", "--sif-file", "/home/ralonso/appl/babelomics/hsa/proteins/hsa_alldb_proteins_interactome_nr.sif", "--file-topo-values", "/home/ralonso/appl/babelomics/hsa/proteins/protein_interactome_params.hsa_alldb_proteins_interactome_nr", "--node-file1", "/home/ralonso/appl/babelomics/hsa/proteins/Ejemplo5/crs1_block559_uniprot.txt", "--randoms", "1", "--random-size", "1","--home", System.getenv("BABELOMICS_HOME")};
+		String []args = {"--tool", "snow2", "-o","/home/ralonso/appl/babelomics/", "--sif-file", "/home/ralonso/appl/babelomics/sce/proteins/sce_alldb_proteins_interactome_nr.sif", "--file-topo-values", "/home/ralonso/appl/babelomics/sce/proteins/protein_interactome_params.sce_alldb_proteins_interactome_nr", "--node-file1", "/home/ralonso/appl/babelomics/sce/proteins/Ejemplo2/UPYDOWN_HOM_list_uniq", "--randoms", "1", "--random-size", "1","--home", System.getenv("BABELOMICS_HOME")};
 
 		try {
 			for(int i=0; i < args.length; i++)
