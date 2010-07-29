@@ -116,7 +116,7 @@ public class IDConverter extends BabelomicsTool {
 				
 				// save results
 				//
-				String fileName = "alls.txt";
+				String fileName = "all.txt";
 				IOUtils.write(new File(outdir + "/" + fileName), alls);
 				result.addOutputItem(new Item("All IDs", fileName, "ID conversion", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Results in a single file"));
 				

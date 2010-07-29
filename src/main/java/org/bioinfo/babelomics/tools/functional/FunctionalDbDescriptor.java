@@ -62,7 +62,7 @@ public class FunctionalDbDescriptor {
 		// Kegg
 		else if(filter instanceof KeggFilter) {
 			KeggFilter keggFilter = (KeggFilter) filter;
-			title = "Kegg";
+			title = "KEGG";
 			name = "kegg";
 			prefix = "kegg";
 			description = getDefaultDescription(filter, title);
@@ -94,20 +94,20 @@ public class FunctionalDbDescriptor {
 		// miRNA target
 		else if(filter instanceof MiRnaTargetFilter) {
 			title = "miRNA target";
-			name = "mrina";
-			prefix = "mrina";
+			name = "mirna";
+			prefix = "mirna";
 			description = getDefaultDescription(filter, title);
 		}
 		// Jaspar
 		else if(filter instanceof JasparFilter) {
-			title = "Jaspar";
+			title = "Jaspar TFBS";
 			name = "jaspar";
 			prefix = "jaspar";
 			description = getDefaultDescription(filter, title);
 		}
 		// Oreganno
 		else if(filter instanceof OregannoFilter) {
-			title = "Oreganno";
+			title = "ORegAnno";
 			name = "oreganno";
 			prefix = "oreganno";
 			description = getDefaultDescription(filter, title);

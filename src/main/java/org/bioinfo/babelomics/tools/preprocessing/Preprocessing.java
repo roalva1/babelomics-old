@@ -34,6 +34,7 @@ public class Preprocessing extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("exp", "the exponential function, possible values: e, 2, 10", false));
 		options.addOption(OptionFactory.createOption("merge-replicates", "method to merge replicates, valid values are: mean or median", false));
 		options.addOption(OptionFactory.createOption("filter-missing", "minimum percentage of existing values, from 0 to 100", false));
+		options.addOption(OptionFactory.createOption("min_perc_int", "minimum percentage of existing values, from 0 to 100", false));
 		options.addOption(OptionFactory.createOption("impute-missing", "method to impute missing values, valid values are: zero, mean, median, knn", false));
 		options.addOption(OptionFactory.createOption("kvalue", "kvalue for knn impute method, default 15", false));
 		options.addOption(OptionFactory.createOption("extract-ids", "This option will extract the IDs (first column) in the dataset", false));
@@ -58,6 +59,7 @@ public class Preprocessing extends BabelomicsTool {
 		String exp = commandLine.getOptionValue("exp",  "none");
 		String mergeMethod = commandLine.getOptionValue("merge-replicates",  "none");
 		String filterPercentage = commandLine.getOptionValue("filter-missing",  "none");
+		String minFilterPercentage = commandLine.getOptionValue("min_perc_int","0"); 
 		String imputeMethod = commandLine.getOptionValue("impute-missing",  "none");
 		String extractIds = commandLine.getOptionValue("extract-ids",  "none");
 		String filterFilename = commandLine.getOptionValue("gene-file-filter",  "none");
@@ -237,7 +239,7 @@ public class Preprocessing extends BabelomicsTool {
 			}
 
 			try {
-				double perc = Double.parseDouble(filterPercentage);					
+				double perc = Double.parseDouble(minFilterPercentage);					
 
 				dataset = dataset.filterRowsByPercOfMissingValues(perc);
 				dataset.validate();
