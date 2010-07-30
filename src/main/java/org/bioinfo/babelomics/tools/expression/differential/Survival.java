@@ -51,23 +51,20 @@ public class Survival extends BabelomicsTool {
 		String censoredClass = commandLine.getOptionValue("censored-class", null);
 		String correction = commandLine.getOptionValue("correction", "fdr");
 		String pValueParam = commandLine.getOptionValue("p-value", "0.05");
-
-		if ( ! "cox".equalsIgnoreCase(test) ) {
-			abort("unknowntest_execute_survival", "unknown test (" + test + ")", "unknown test (" + test + ")", "unknown test (" + test + ")");
-		}
 		
-		List<String> vars = dataset.getVariables().getByName(timeClass).getValues();
-		List<Double> timeVars = new ArrayList<Double>(vars.size());
-		for(String str: vars) {
-			timeVars.add(Double.parseDouble(str));
-		}
-		vars = dataset.getVariables().getByName(censoredClass).getValues();
-		List<Double> censoredVars = new ArrayList<Double>(vars.size());
-		for(String str: vars) {
-			censoredVars.add(Double.parseDouble(str));
+		List<String> timeValues = null;
+		try {
+			timeValues = dataset.getVariables().getByName(timeClass).getValues();
+		} catch (Exception e) {
+			timeValues = new ArrayList<String>();
 		}
 
-		int[] columnOrder = ListUtils.order(timeVars);
+		List<String> censoredValues = null;
+		try {
+			censoredValues = dataset.getVariables().getByName(censoredClass).getValues();
+		} catch (Exception e) {
+			censoredValues = new ArrayList<String>();
+		}
 
 		try {
 			pValue = Double.parseDouble(pValueParam);
@@ -85,9 +82,50 @@ public class Survival extends BabelomicsTool {
 		//result.addOutputItem(new Item("dataset_input_param", (datasetParam == null ? "" : new File(datasetParam).getName()), "Dataset file name", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));								
 		result.addOutputItem(new Item("test_input_param", test, "Test", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("correction_input_param", correction, "Multiple-test correction", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-		result.addOutputItem(new Item("timeclass_input_param", timeClass + " [" + ListUtils.toString(ListUtils.ordered(timeVars, columnOrder), ",") + "]", "Time class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-		result.addOutputItem(new Item("censoredclass_input_param", censoredClass, "Censored class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("timeclass_input_param", timeClass + " [" + (timeValues.size() > 0 ? ListUtils.toString(timeValues, ",") : "") + "]", "Time class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("censoredclass_input_param", censoredClass + " [" + (censoredValues.size() > 0 ? ListUtils.toString(censoredValues, ",") : "") + "]", "Censored class", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("pvalue_input_param", pValueParam, "Adjusted p-value", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		
+		
+		if ( ! "cox".equalsIgnoreCase(test) ) {
+			abort("unknowntest_execute_survival", "unknown test (" + test + ")", "unknown test (" + test + ")", "unknown test (" + test + ")");
+		}
+
+		String aux = "";
+		List<Double> timeVars = new ArrayList<Double>();
+		if (timeValues.size()>0) {
+			try {
+				for(int i=0 ; i<timeValues.size() ; i++) {
+					aux = timeValues.get(i);
+					timeVars.add(Double.parseDouble(aux));
+				}
+			} catch (NumberFormatException e) {
+				abort("exception_execute_survival", "Error", "Invalid time-class value: " + aux + ". Time-class values must be numeric for " + test + " test", "");
+			}
+		} else {
+			abort("exception_execute_survival", "Error", "Missing time-class values for class " + timeClass, "");			
+		}
+		
+		//vars = dataset.getVariables().getByName(censoredClass).getValues();
+		List<Double> censoredVars = new ArrayList<Double>();
+		if (censoredValues.size()>0) {
+			try {
+				for(int i=0 ; i<censoredValues.size() ; i++) {
+					aux = censoredValues.get(i);
+					if ("1".equalsIgnoreCase(aux) || "0".equalsIgnoreCase(aux)) {
+						censoredVars.add(Double.parseDouble(aux));
+					} else {
+						abort("exception_execute_survival", "Error", "Invalid censored-class value: " + aux + ". Censored-class values must be 0 or 1 for " + test + " test", "");
+					}
+				}
+			} catch (NumberFormatException e) {
+				abort("exception_execute_survival", "Error", "Invalid censored-class value: " + aux + ". Censored-class values must be 0 or 1 for " + test + " test", "");		}
+		} else {
+			abort("exception_execute_survival", "Error", "Missing censored-class values for class " + censoredClass, "");			
+		}
+
+		int[] columnOrder = ListUtils.order(timeVars);
+		
 		
 		
 		// cox test

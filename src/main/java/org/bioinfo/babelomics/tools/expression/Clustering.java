@@ -68,7 +68,7 @@ public class Clustering extends BabelomicsTool {
 		result.addOutputItem(new Item("dataset_input_param", (datasetParam == null ? "" : new File(datasetParam).getName()), "Dataset file name", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));						
 
 		aux.clear();
-		sampleClusteringParam = commandLine.getOptionValue("sample-clustering",  "true");
+		sampleClusteringParam = commandLine.getOptionValue("sample-clustering",  "false");
 		geneClusteringParam = commandLine.getOptionValue("gene-clustering",  "false");
 
 		if (Boolean.parseBoolean(sampleClusteringParam)) {
@@ -144,7 +144,15 @@ public class Clustering extends BabelomicsTool {
 			}
 		} catch (Exception e) {
 			abort("exception_execute_clustering", "Error", "Error reading dataset " + datasetFile.getName(), "");
-		}		
+		}
+				
+		if (dataset.getAttributes() != null && dataset.getAttributes().containsKey("NUMBER_MISSING_VALUES")) {
+			abort("exception_execute_clustering", "Error", "Your data contain missing values, please, go to the Preprocessing tool in order to impute missing values", "");
+		}
+		
+		if (dataset.getAttributes() != null && dataset.getAttributes().containsKey("DUPLICATED_FEATURES") ) {
+			abort("exception_execute_clustering", "Error", "Your data contain duplicated names, please, go to the Preprocessing tool in order to remove these duplicated names", "");			
+		}
 
 		//		if(commandLine.hasOption("sample-filter") || commandLine.hasOption("feature-filter")) {
 		//			dataset = dataset.getSubDataset(commandLine.getOptionValue("sample-filter"), "4", commandLine.getOptionValue("feature-filter"), ""); 
