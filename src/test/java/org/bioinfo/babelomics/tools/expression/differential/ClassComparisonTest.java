@@ -12,7 +12,6 @@ import org.junit.Test;
 
 public class ClassComparisonTest {
 	
-	@Test
 	public void notest() {
 	}
 
@@ -31,6 +30,7 @@ public class ClassComparisonTest {
 		}		
 	}
 
+	@Test
 	public void Test1() {
 	    
 		String dataset = "/mnt/commons/test/biodata/example/twoclasses.txt";
@@ -39,6 +39,7 @@ public class ClassComparisonTest {
 
 		System.out.println("----- two classes - limma ------");
 		String []args = {"--tool", "class-comparison", "--dataset", dataset, "-o", outdir, "--test", "limma", "--class-name", "class", "--class-values", "basal,luminal", "--correction", "bonferroni", "--home", System.getenv("BABELOMICS_HOME")};
+		System.out.println(ArrayUtils.toString(args, " "));
 		
 		try {
 			BabelomicsMain.main(args); 
@@ -68,7 +69,6 @@ public class ClassComparisonTest {
 		}		
 	}
 
-	@Test
 	public void Test3() {
 	    
 		String dataset = "/mnt/commons/test/biodata/example/twoclasses100.txt";
