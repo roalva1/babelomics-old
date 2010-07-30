@@ -50,7 +50,7 @@ public abstract class GeneSetAnalysis {
 	// summary
 	private int annotatedCounter;
 	private double meanAnnotationsPerId;
-	private Logger logger;
+	protected Logger logger;
 	
 	public void prepare() throws InvalidIndexException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, EmptyAnnotationException{
 				

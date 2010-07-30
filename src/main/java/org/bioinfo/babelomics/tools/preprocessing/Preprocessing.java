@@ -67,6 +67,7 @@ public class Preprocessing extends BabelomicsTool {
 		String exp = commandLine.getOptionValue("exp",  "none");
 		String mergeMethod = commandLine.getOptionValue("merge-replicates",  "none");
 		String filterPercentage = commandLine.getOptionValue("filter-missing",  "none");
+		String minFilterPercentage = commandLine.getOptionValue("min_perc_int","0"); 
 		String imputeMethod = commandLine.getOptionValue("impute-missing",  "none");
 		String extractIds = commandLine.getOptionValue("extract-ids",  "none");
 		String filterFilename = commandLine.getOptionValue("gene-file-filter",  "none");
@@ -253,7 +254,7 @@ public class Preprocessing extends BabelomicsTool {
 			}
 
 			try {
-				double perc = Double.parseDouble(filterPercentage);					
+				double perc = Double.parseDouble(minFilterPercentage);					
 
 				dataset = dataset.filterRowsByPercOfMissingValues(perc);
 				dataset.validate();
