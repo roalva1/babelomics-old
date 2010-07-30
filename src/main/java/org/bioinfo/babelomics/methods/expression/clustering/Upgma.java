@@ -20,7 +20,7 @@ public class Upgma extends Cluster {
 	}
 	
 	@Override
-	public MultipleTree run(boolean createClusterFiles) throws Exception {
+	public String run(boolean createClusterFiles) throws Exception {
 		MultipleTree nw = null;
 
 		File inputFile = File.createTempFile("input", null);
@@ -44,11 +44,13 @@ public class Upgma extends Cluster {
 		System.out.println(sp.getRunnableProcess().getOutput());
 		
 		if ( outputFile.exists() && outputFile.getTotalSpace() > 0 ) {
-			nw = new NewickParser().parse(IOUtils.toString(outputFile));
+			//nw = new NewickParser().parse(IOUtils.toString(outputFile));
+			return IOUtils.toString(outputFile);
 		} else {
-			throw new Exception("Impossible to generate newick");
+			return null;
+			//throw new Exception("Impossible to generate newick");
 		}
 		
-		return nw;
+		//return nw;
 	}	
 }

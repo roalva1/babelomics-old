@@ -1,10 +1,13 @@
 package org.bioinfo.babelomics.tools.functional;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
@@ -13,13 +16,12 @@ import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
-import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
-import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.bioinfo.infrared.funcannot.filter.GOSlimFilter;
@@ -32,9 +34,9 @@ import org.bioinfo.infrared.funcannot.filter.ReactomeFilter;
 import org.bioinfo.math.stats.inference.FisherExactTest;
 import org.bioinfo.tool.OptionFactory;
 
-import es.blast2go.prog.GoSlim;
 import es.blast2go.prog.graph.GetGraphApi;
 import es.blast2go.prog.graph.GoGraphException;
+import es.blast2go.prog.graph.MakeGraphDot;
 
 
 public abstract class FunctionalProfilingTool extends BabelomicsTool {
@@ -42,6 +44,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	public final static double DEFAULT_PVALUE_THRESHOLD = 0.05;
 	public final static double[] DEFAULT_PVALUES = {0.1,0.05,0.01,0.005};
 	public DecimalFormat pvalueFormatter = new DecimalFormat("#.####");
+	public final static int MAX_GOS = 100;
 	
 //	// JT.2009.09.07
 //	private String removeDuplicates;
@@ -64,6 +67,13 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	protected FeatureList<AnnotationItem> yourAnnotations;
 
 	protected List<StringBuilder> significantCount;
+	
+	// working
+	protected int numberOfResults;
+	
+	public FunctionalProfilingTool (){
+		this.numberOfResults = 0;
+	}
 	
 	@Override
 	public void initOptions() {
@@ -88,6 +98,8 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 
 		// your annotations
 		getOptions().addOption(OptionFactory.createOption("annotations", "Your own annotations",false,true));
+		
+		
 		
 	}
 
@@ -156,15 +168,33 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		
 		// your annotations
 		if(commandLine.hasOption("annotations") && !commandLine.getOptionValue("annotations").equalsIgnoreCase("") && !commandLine.getOptionValue("annotations").equalsIgnoreCase("none")) {
-			isYourAnnotations = true;			
-			FeatureData annotations = new FeatureData(new File(commandLine.getOptionValue("annotations")), true);
-			List<String> ids = annotations.getDataFrame().getRowNames();
-			List<String> terms = annotations.getDataFrame().getColumn(0);
-			yourAnnotations = new FeatureList<AnnotationItem>(ids.size());// FeatureData(new File(cmdLine.getOptionValue("annotations")), true);
-			for(int i=0; i<ids.size(); i++){
-				yourAnnotations.add(new AnnotationItem(ids.get(i),terms.get(i)));
+			isYourAnnotations = true;
+			FileUtils.checkFile(new File(commandLine.getOptionValue("annotations")));
+			
+			// read annotation file
+			List<String> annots = IOUtils.readLines(commandLine.getOptionValue("annotations"));
+			
+			// init annotation object
+			yourAnnotations = new FeatureList<AnnotationItem>(annots.size());
+			
+			// init map to detect duplicated annotations
+			Map<String,Boolean> uniqAnnots = new HashMap<String, Boolean>();
+			
+			// read annotations
+			String[] fields;
+			for(String annot: annots){
+				if(!uniqAnnots.containsKey(annot)){
+					if(!annot.startsWith("#") && annot.contains("\t")){
+						fields = annot.split("\t");
+						yourAnnotations.add(new AnnotationItem(fields[0],fields[1]));
+						uniqAnnots.put(annot, true);
+					}
+				}
 			}
+		
 		}
+		
+		config.load(new FileInputStream(new File(babelomicsHomePath + "/conf/blast2go.properties")));
 		
 	}
 
@@ -333,22 +363,48 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		return result;
 	}
 		
-	protected void createGoGraph(List<TwoListFisherTestResult> raw, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
+	protected boolean createGoGraph(List<TwoListFisherTestResult> raw, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
 		List<GeneSetAnalysisTestResult> result = new ArrayList<GeneSetAnalysisTestResult>(raw.size());
 		for(TwoListFisherTestResult test: raw){			
 			GeneSetAnalysisTestResult gseaTest = new GeneSetAnalysisTestResult(test);
 			result.add(gseaTest);
 		}
-		createGseaGoGraph(result,pvalue,filterInfo);
+		return createGseaGoGraph(result,pvalue,filterInfo);
 	}
 	
-	protected void createGseaGoGraph(List<GeneSetAnalysisTestResult> significant, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
-		String prefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue);
+	protected boolean createGseaGoGraph(List<GeneSetAnalysisTestResult> significants, double pvalue, FunctionalDbDescriptor filterInfo) throws GoGraphException{
+		boolean outOfBounds = false;
 		
+		DecimalFormat pvalueLabelFormatter = new DecimalFormat("#.####E0");
+		String prefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue);
+				
 		// preparing association file
 		StringBuilder association = new StringBuilder();		
 		double ratio,intensity;
-		for(GeneSetAnalysisTestResult result: significant){			
+		
+		// get pvalue rank
+		List<Double> pvalues = new ArrayList<Double>();
+		for(GeneSetAnalysisTestResult result: significants){
+			pvalues.add(result.getAdjPValue());
+		}		
+		int[] pvalueOrder = ListUtils.order(pvalues);
+		
+		// sort and filter		
+		List<GeneSetAnalysisTestResult> sortedSignificants = new ArrayList<GeneSetAnalysisTestResult>();
+		int pos;
+		for(int i=0; i<pvalueOrder.length; i++){
+			pos = pvalueOrder[i];
+			sortedSignificants.add(significants.get(pos));
+//			System.err.println(significants.get(pos).getAdjPValue());
+			if(i>MAX_GOS){
+				outOfBounds=true;
+				break;
+			}
+		}
+				
+		if(outOfBounds) System.err.println("max gos exceeded");
+		
+		for(GeneSetAnalysisTestResult result: sortedSignificants){			
 			
 			//color=""+ (result.getList1Percentage()/(result.getList1Percentage()+result.getList2Percentage()));
 			ratio = result.getAdjPValue()/pvalue;
@@ -359,7 +415,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			}
 			//System.err.println(result.getList1Percentage() + ":" + result.getList2Percentage() + " " + result.getAdjPValue() + " " + intensity);
 			
-			association.append(result.getTerm()).append("\t").append(result.getTerm()).append("\t").append(intensity).append("\t").append(result.getAdjPValue()).append("\n");
+			association.append(result.getTerm()).append("\t").append(result.getTerm()).append("\t").append(intensity).append("\t").append("adj.pvalue=").append(pvalueLabelFormatter.format(result.getAdjPValue())).append("\n");
 		}
 		
 		try {
@@ -377,10 +433,11 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			System.err.println("namespace: " + namespace);
 			
 			// init graph api
-			GetGraphApi graph = new GetGraphApi(outdir + "/graphs/",prefix,prefix  + "_association.txt",namespace,0,"byDesc",0.6,0,"orange");
+			GetGraphApi graph = new GetGraphApi(outdir + "/graphs/",prefix,prefix  + "_association.txt",namespace,0,MakeGraphDot.BYDESCWITHLABEL,0.6,0,"orange",12,filterInfo.getTitle());
+			
 			
 			// setting server params
-			graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));				
+			graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));
 			graph.setDataBase(config.getProperty("BLAST2GO_HOST_NAME"),config.getProperty("BLAST2GO_DB_NAME"),config.getProperty("BLAST2GO_DB_USER"), config.getProperty("BLAST2GO_DB_PASSWORD"));
 			
 			// run
@@ -388,13 +445,19 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			
 			// copy files
 			String imagePrefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue) + "_graphimage";
+				// png
 			FileUtils.touch(new File(outdir + "/" + imagePrefix + ".png"));
-			FileUtils.copy(outdir + "/graphs/" + imagePrefix + ".png", outdir + "/" + imagePrefix + ".png");			
+			FileUtils.copy(outdir + "/graphs/" + imagePrefix + ".png", outdir + "/" + imagePrefix + ".png");
+				// svg
+			FileUtils.touch(new File(outdir + "/" + imagePrefix + ".png.svg"));
+			FileUtils.copy(outdir + "/graphs/" + imagePrefix + ".svg", outdir + "/" + imagePrefix + ".png.svg");
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new GoGraphException(e.getMessage());
 		}	
+		
+		return outOfBounds;
 	}
 	
 	

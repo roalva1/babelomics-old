@@ -91,7 +91,7 @@ public class GoGraphViewerTool  extends BabelomicsTool{
 			if(config!=null){
 				
 				// init graph api
-				GetGraphApi graph = new GetGraphApi(outdir + "/",PREFIX,new File(associationFile).getName(),goDomain,idsPerNodeFilter,graphColoring,annotScoreParameter,annotScoreNodeFilter, "orange");
+				GetGraphApi graph = new GetGraphApi(outdir + "/",PREFIX,new File(associationFile).getName(),goDomain,idsPerNodeFilter,graphColoring,annotScoreParameter,annotScoreNodeFilter,"orange",12,"");
 				graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));				
 				graph.setDataBase(config.getProperty("BLAST2GO_HOST_NAME"),config.getProperty("BLAST2GO_DB_NAME"),config.getProperty("BLAST2GO_DB_USER"), config.getProperty("BLAST2GO_DB_PASSWORD"));
 				
@@ -125,11 +125,11 @@ public class GoGraphViewerTool  extends BabelomicsTool{
 		result.addOutputItem(new Item("imageJpgsmall", PREFIX + "_graphimagesmall.jpg", "Graph as JPG image (low resolution)", Item.TYPE.IMAGE, "Images"));
 		result.addOutputItem(new Item("imageJpg", PREFIX + "_graphimage.jpg", "Graph as JPG image (high resolution)", Item.TYPE.FILE, "Images"));
 		result.addOutputItem(new Item("imagePng", PREFIX + "_graphimage.png", "Graph as PNG", Item.TYPE.FILE, "Images"));
-		result.addOutputItem(new Item("imageSVG", PREFIX + "_graphimage.svg", "Graph as SVG", Item.TYPE.FILE, Arrays.asList("GO_GRAPH_VIZ_JNLP"), new HashMap<String, String>(), "Images"));
+		result.addOutputItem(new Item("imageSVG", PREFIX + "_graphimage.svg", "Graph as SVG", Item.TYPE.FILE, Arrays.asList(""), new HashMap<String, String>(), "Images"));		
 		// jnlp link
-		//result.addOutputItem(new Item("jnlplink",config.get("JNLP_DOWNLOADER_HOST_NAME")+"b2g.jnlp", "Link to interactive GoGraphViz applicacion (open with Java-Web-Start)", Item.TYPE.LINK, Arrays.asList("INCLUDE_REFS"), new HashMap<String, String>(),"Images"));
+		result.addOutputItem(new Item("jnlp_link", PREFIX + "_graphimage.svg", "Click here to open the graph with GOGraphViz (Java Web-Start Application)", Item.TYPE.FILE, Arrays.asList("GO_GRAPH_VIZ_JNLP"), new HashMap<String, String>(), "Interactive Graph Visualisation"));
 		// graph as text		
-		result.addOutputItem(new Item("graphTxt", PREFIX + "_graph.txt", "Graph as textual representation",  Item.TYPE.FILE, "Graph as text"));
+		result.addOutputItem(new Item("graphTxt", PREFIX + "_graph.txt", "Graph as textual representation",  Item.TYPE.FILE, "Images"));
 	}
 
 	private void fillFailedResultXML(String message) {

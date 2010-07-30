@@ -56,12 +56,13 @@ public class graphtest {
 			//String dataset = "/mnt/commons/test/fatiscanmini2.txt";
 			
 			//String dataset = "/opt/babelomics/example/multiclasses_data2.txt";
-			String dataset = "/opt/babelomics/example/dataset_example4.txt";
+			String dataset = "/tmp/rma.summary.txt";
+			//String dataset = "/opt/babelomics/example/correlation.txt";
 			//String dataset = "/mnt/commons/test/biodata/newick1.nw";
 			String outdir = "/tmp/pcaPlot";
 			new File(outdir).mkdir();
 			//String []args = { "--tool", "pca-plot","--log-level", "2", "--datalist", dataset,"--pcaplot","true","-class","EXAMPLE", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
-			String []args = { "--tool", "descriptive-statistics","--log-level", "2","--title", "hhhhhhh", "--datalist", dataset,"--histogram","true", "-o", outdir, "--home","/opt/babelomics"};
+			String []args = { "--tool", "descriptive-statistics","--log-level", "2","--title", "hhhhhhh", "--datalist", dataset,"--boxplot","true","--classname","class", "-o", outdir, "--home","/opt/babelomics"};
 
 			System.out.println("----------------> " + args.toString());
 			

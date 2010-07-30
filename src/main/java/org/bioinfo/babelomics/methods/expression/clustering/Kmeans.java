@@ -25,8 +25,8 @@ public class Kmeans extends Cluster {
 	}
 
 	@Override
-	public MultipleTree run(boolean createClusterFiles) throws Exception {
-		MultipleTree nw = null;
+	public String run(boolean createClusterFiles) throws Exception {
+		//MultipleTree nw = null;
 		
 		File tmpDir = null; 
 		if ( outdir == null) {
@@ -87,12 +87,14 @@ public class Kmeans extends Cluster {
 				IOUtils.write(tmpDir + "/rownames.txt", rowNames);
 			}
 //			System.out.println("newick " + sb.toString());
-			nw = new NewickParser().parse(sb.toString());
+			//nw = new NewickParser().parse(sb.toString());
+			return sb.toString();
 		} else {
-			throw new Exception("Impossible to generate newick");
+			return null;
+			//throw new Exception("Impossible to generate newick");
 		}
 		
-		return nw;
+		//return nw;
 	}
 	
 	private int getDistance(String distance) {

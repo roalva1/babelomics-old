@@ -24,7 +24,6 @@ public class ClusteringTest {
 	public void notest() {		
 	}
 
-	@Test
 	public void Test() {
 		//String dataset = "/mnt/commons/test/biodata/example/cyano.txt";
 		String dataset = "/mnt/commons/test/biodata/example/preprocessed.txt";
@@ -90,4 +89,24 @@ public class ClusteringTest {
 			e.printStackTrace();
 		}
 	}	
+	
+
+	@Test
+	public void Test4() {
+		String dataset = "//mnt/commons/babelomics/tests/clustering/hypoxia_norm.txt";
+		//String dataset = "/mnt/commons/test/biodata/example/merged_normalized_data.txt";
+		String outdir = "/tmp/ClusteringTest";
+		new File(outdir).mkdir();
+
+		String []args = { "--tool", "clustering","--log-level", "2", "--dataset", dataset, "-o", outdir, "--method", "upgma", "--sample-clustering", "true", "--distance", "pearson", "--home", System.getenv("BABELOMICS_HOME")};
+
+		System.out.println("----- clustering : UPGMA ----------------> " + Arrays.toString(args));
+		
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}	
+	
 }

@@ -23,7 +23,7 @@ public class Som extends Cluster {
 	}
 
 	@Override
-	public MultipleTree run(boolean createClusterFiles) throws Exception {
+	public String run(boolean createClusterFiles) throws Exception {
 		MultipleTree nw = null;
 
 		File tmpDir = File.createTempFile("input", ".dir");
@@ -83,12 +83,14 @@ public class Som extends Cluster {
 			}
 			sb.append("(").append(ListUtils.toString(map.get(keys.get(i)), ",")).append("));");
 			//			System.out.println("newick " + sb.toString());
-			nw = new NewickParser().parse(sb.toString());
+			//nw = new NewickParser().parse(sb.toString());
+			return sb.toString();
 		} else {
-			throw new Exception("Impossible to generate newick");
+			return null;
+			//throw new Exception("Impossible to generate newick");
 		}
 
-		return nw;
+		//return nw;
 	}
 
 	private int getDistance(String distance) {

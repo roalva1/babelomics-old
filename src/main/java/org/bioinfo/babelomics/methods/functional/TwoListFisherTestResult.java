@@ -9,6 +9,7 @@ public class TwoListFisherTestResult {
 	
 	private DecimalFormat percentageFormatter = new DecimalFormat("##.##");
 	private DecimalFormat pvalueFormatter = new DecimalFormat("#.#####E0");
+	private DecimalFormat oddsFormatter = new DecimalFormat("######.#####E0");
 	
 	private String term;
 	private int termSize;
@@ -68,8 +69,13 @@ public class TwoListFisherTestResult {
 		out.append(ListUtils.toString(this.list1Ids,",")).append("\t");
 		out.append(ListUtils.toString(this.list2Ids,",")).append("\t");
 		double oddsRatioLog = Math.log(oddsRatio);
-		if(new Double(oddsRatioLog).isInfinite()) out.append(Double.MAX_VALUE).append("\t");
-		else out.append(oddsRatioLog).append("\t");
+		double odds;
+		if(oddsRatioLog == Double.POSITIVE_INFINITY){
+			odds=Double.MAX_VALUE/10000;
+		} else if(oddsRatioLog == Double.NEGATIVE_INFINITY){
+			odds=-Double.MAX_VALUE/10000;			
+		} else odds=oddsRatioLog;		
+		out.append(oddsFormatter.format(odds)).append("\t");
 		out.append(pvalueFormatter.format(this.pValue)).append("\t");
 		out.append(pvalueFormatter.format(this.adjPValue));
 		return out.toString();

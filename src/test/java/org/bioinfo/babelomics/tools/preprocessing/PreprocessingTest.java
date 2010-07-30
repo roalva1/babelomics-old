@@ -27,6 +27,26 @@ public class PreprocessingTest {
 	}
 	
 
+	@Test
+	public void Test0() {
+		String dataset = "/mnt/commons/babelomics/tests/preprocessing/maria.jaime1000.txt";
+		String outdir = "/tmp/PreprocessingTest";
+		new File(outdir).mkdir();
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir,"--merge-replicates", "mean", "--home", System.getenv("BABELOMICS_HOME")};
+
+		System.out.println("----------------> " + Arrays.toString(args));
+		
+		try {
+			BabelomicsMain.main(args); 
+			//System.out.println("input dataset:\n" + IOUtils.toString(new File(dataset)));
+			//System.out.println("output dataset:\n" + IOUtils.toString(new File(outdir + "/preprocessed.txt")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+			//System.out.println(e.toString());
+		}
+	}	
+
 	public void Test() {
 		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
 		String outdir = "/tmp/PreprocessingTest";
@@ -86,7 +106,6 @@ public class PreprocessingTest {
 		}
 	}	
 
-	@Test
 	public void Test3() {
 		//String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
 		String dataset = "/mnt/commons/test/biodata/example/datamatrix_with_nan.txt";

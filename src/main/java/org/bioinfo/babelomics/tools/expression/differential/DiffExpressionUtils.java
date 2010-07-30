@@ -8,14 +8,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
 import org.bioinfo.data.dataset.FeatureData;
-import org.bioinfo.data.dataset.SampleVariable;
-import org.bioinfo.data.dataset.Variables;
 import org.bioinfo.data.list.DataFrame;
 import org.bioinfo.data.list.NamedArrayList;
 import org.bioinfo.data.list.exception.InvalidIndexException;
@@ -23,6 +22,7 @@ import org.bioinfo.graphics.canvas.Canvas;
 import org.bioinfo.graphics.canvas.feature.ScoreFeature;
 import org.bioinfo.graphics.canvas.panel.GridPanel;
 import org.bioinfo.graphics.canvas.track.GridTrack;
+import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.math.result.TestResult;
 import org.bioinfo.math.result.TestResultList;
 import org.bioinfo.math.stats.MultipleTestCorrection;
@@ -266,6 +266,136 @@ public class DiffExpressionUtils {
 		}
 	}
 
+	public static void createFatiGoRedirection(List<String> names, double[] statistic, String test, Result result, String outDir) throws IOException, InvalidIndexException {
+		createFatiGoRedirection(names, statistic, test, result, outDir, "");		
+	}
+
+	public static void createFatiGoRedirection(List<String> names, double[] statistic, String test, Result result, String outDir, String groupPrefix) throws IOException, InvalidIndexException {
+		// preparing top and bottom list
+		//
+		String tags;
+
+		int size = names.size();
+		if (size != statistic.length) {
+			throw new InvalidIndexException("mismatch size, names size = " + names.size() + " and statistic size = " + statistic.length);
+		}
+
+		//		for(int i=0 ; i<size ; i++) {
+		//			System.out.println(names.get(i) + "\t" + statistic[i]);
+		//		}
+
+		List<String> topNames = new ArrayList<String> ();
+		List<String> bottomNames = new ArrayList<String> ();
+		for(int i=0 ; i<size ; i++) {
+			if (statistic[i] > 0) {
+				topNames.add(names.get(i));
+			} else {
+				bottomNames.add(names.get(i));
+			}
+		}
+
+		File topListFile = 	new File(outDir + "/" + test + "_top_list.txt");
+		if ( topNames.size() > 0 ) {
+			IOUtils.write(topListFile, topNames);
+		}
+		File bottomListFile = new File(outDir + "/" + test + "_bottom_list.txt");			
+		if ( bottomNames.size() > 0 ) {
+			IOUtils.write(bottomListFile, bottomNames);		
+		}
+
+		if (topListFile.exists() && bottomListFile.exists()) {
+			File redirectionFile = new File(outDir + "/" + test + "_top_bottom.fatigo.redirection");		
+			createFatiGoRedirectionFile(redirectionFile, topListFile, bottomListFile);
+			if ( redirectionFile.exists() ) {
+				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
+				result.addOutputItem(new Item(test + "_top_genome_fatigo", "", "Send top list vs bottom list to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), groupPrefix + "Continue processing"));
+			}						
+		}
+		if (topListFile.exists()) {
+			File redirectionFile = new File(outDir + "/" + test + "_top_genome.fatigo.redirection");		
+			createFatiGoRedirectionFile(redirectionFile, topListFile);
+			if ( redirectionFile.exists() ) {
+				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
+				result.addOutputItem(new Item(test + "_top_genome_fatigo", "", "Send top list vs genome to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), groupPrefix + "Continue processing"));
+			}			
+		}
+		if (bottomListFile.exists()) {
+			File redirectionFile = new File(outDir + "/" + test + "_bottom_genome.fatigo.redirection");		
+			createFatiGoRedirectionFile(redirectionFile, bottomListFile);
+			if ( redirectionFile.exists() ) {
+				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
+				result.addOutputItem(new Item(test + "_bottom_genome_fatigo", "", "Send bottom list vs genome to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), groupPrefix + "Continue processing"));
+			}						
+		}
+	}
+
+	public static void createFatiGoRedirectionFile(File redirectionFile, File listFile) {
+		List<String> redirectionInputs = new ArrayList<String>();
+		if ( listFile.exists() ) {
+			redirectionInputs.add("comparison=list2genome");
+
+			redirectionInputs.add("list1_wum_data=true");
+			redirectionInputs.add("list1_databox=" + listFile.getName() + " (list from job $JOB_NAME)");
+			redirectionInputs.add("list1=$JOB_FOLDER/" + listFile.getName());
+			redirectionInputs.add("tool=fatigo");
+			redirectionInputs.add("jobname=fatigo");
+			redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
+			try {
+				IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public static void createFatiGoRedirectionFile(File redirectionFile, File topListFile, File bottomListFile) {
+
+		List<String> redirectionInputs = new ArrayList<String>();
+
+		if ( topListFile.exists() && bottomListFile.exists() ) {
+			redirectionInputs.add("comparison=list2list");
+
+			redirectionInputs.add("list1_wum_data=true");
+			redirectionInputs.add("list1_databox=" + topListFile.getName() + " (top list from job $JOB_NAME)");
+			redirectionInputs.add("list1=$JOB_FOLDER/" + topListFile.getName());
+
+			redirectionInputs.add("list2_wum_data=true");
+			redirectionInputs.add("list2_databox=" + bottomListFile.getName() + " (bottom list from job $JOB_NAME)");
+			redirectionInputs.add("list2=$JOB_FOLDER/" + bottomListFile.getName());
+
+			redirectionInputs.add("tool=fatigo");
+			redirectionInputs.add("jobname=fatigo");
+			redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
+			try {
+				IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	public static void createFatiScanRedirection(DataFrame dataFrame, String test, String colName, Result result, String outDir) throws IOException, InvalidIndexException {
+		createFatiScanRedirection(dataFrame, test, colName, result, outDir, "");
+	}
+
+	public static void createFatiScanRedirection(DataFrame dataFrame, String test, String colName, Result result, String outDir, String groupPrefix) throws IOException, InvalidIndexException {
+		// preparing ranked list
+		//
+		String tags;
+		File redirectionFile;
+		File rankedListFile = new File(outDir + "/" + test + "_ranked_list.txt");
+		DiffExpressionUtils.generateRankedList(dataFrame.getRowNames(), dataFrame.getColumn(colName), colName, rankedListFile);
+		if ( rankedListFile.exists() ) {
+			redirectionFile = new File(outDir + "/fatiscan.redirection");
+			createFatiScanRedirectionFile(redirectionFile, rankedListFile);
+			if ( redirectionFile.exists() ) {
+				//				tags = "DATA,RANKED,REDIRECTION(" + redirectionFile.getName() + ":Send to FatiScan tool...)";
+				//				result.addOutputItem(new Item(test + "_ranked_list_file", rankedListFile.getName(), "Send ranked list to FatiScan tool", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
+				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiScan tool...)";
+				result.addOutputItem(new Item(test + "_fatiscan", "", "Send ranked list to FatiScan tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), groupPrefix + "Continue processing"));
+			}
+		}				
+	}
+
 	public static void createFatiScanRedirectionFile(File redirectionFile, File rankedListFile) {
 		List<String> redirectionInputs = new ArrayList<String>();
 		redirectionInputs.add("tool=fatiscan");
@@ -278,7 +408,6 @@ public class DiffExpressionUtils {
 		try {
 			IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}
@@ -317,8 +446,207 @@ public class DiffExpressionUtils {
 		try {
 			IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}
+
+	public static DataFrame getSigDataFrame(DataFrame dataFrame, double pValue, int maxSize) {
+		DataFrame df = new DataFrame();
+		//		for(int i=0 ; i<adjPValues.length ; i++) {
+		//			if ( adjPValues[i] <= pValue ) { 
+		//				sigRowIndexes.add(i);
+		//			}
+		//		}
+		return df;
+	}
+
+	public static int getNumberOfSigValues(double[] adjPValues, double pValue) {
+		int count = 0;
+		for(int i=0 ; i<adjPValues.length ; i++) {
+			if ( adjPValues[i] <= pValue ) { 
+				count++;
+			}
+		}
+		return count;
+	}
+
+	public static List<Integer> getSigIndexes(double[] adjPValues, double pValue) {
+		List<Integer> indexes = new ArrayList<Integer>();
+		for(int i=0 ; i<adjPValues.length ; i++) {
+			if ( adjPValues[i] <= pValue ) { 
+				indexes.add(i);
+			}
+		}
+		return indexes;
+	}
+
+	public static List<Integer> getNoSigIndexes(double[] adjPValues, double pValue) {
+		List<Integer> indexes = new ArrayList<Integer>();
+		for(int i=0 ; i<adjPValues.length ; i++) {
+			if ( adjPValues[i] > pValue ) { 
+				indexes.add(i);
+			}
+		}
+		return indexes;
+	}
+
+
+	public static void addSignificativeResults(Dataset subDataset, String test,
+			String statLabel, double[] statistics,
+			String adjPValLabel, double[] adjPValues, 
+			String pValLabel, double[] pValues,
+			String label1, double[] values1,
+			String label2, double[] values2,
+			String className, int[] columnOrder,
+			double pValue, int maxDisplay, BabelomicsTool tool) throws IOException, InvalidIndexException {
+
+		boolean isCox = false, isRegression = false, isCorrelation = false;
+		if ("cox".equalsIgnoreCase(test) && label1 != null && values1 != null) {
+			isCox = true;
+		} else if (("pearson".equalsIgnoreCase(test) || "spearman".equalsIgnoreCase(test)) && label1 != null && values1 != null) {
+			isCorrelation = true;
+		} else if ("regression".equalsIgnoreCase(test) && label1 != null && values1 != null && label2 != null && values2 != null) {
+			isRegression = true;
+		}
+		System.out.println("is cox ? " + isCox);
+		System.out.println("is regression ? " + isRegression);
+		System.out.println("is correlation ? " + isCorrelation);
+
+		List<Integer> sigIndexes = getSigIndexes(adjPValues, pValue);
+		int numberSigValues = (sigIndexes == null ? 0 : sigIndexes.size());
+		if (numberSigValues > 0) {
+
+			//System.out.println("number of sig. values = " + numberSigValues);
+
+			int nbToDisplay = numberSigValues;
+			if (numberSigValues > maxDisplay) {
+				nbToDisplay = maxDisplay;
+			}
+
+			//System.out.println("number to display = " + nbToDisplay);
+
+			int[] sigOrder = ListUtils.order(ArrayUtils.toList(adjPValues));
+
+			DoubleMatrix doubleMatrix = new DoubleMatrix(nbToDisplay, subDataset.getColumnDimension());
+
+			List<Integer> sigRowIndexes = new ArrayList<Integer>();
+			System.out.println("feature names for sig");
+			for(int i=0 ; i<sigOrder.length ; i++) {
+				if (i<nbToDisplay) {
+					doubleMatrix.setRow(i, subDataset.getDoubleMatrix().getRow(sigOrder[i]));
+					//System.out.println(subDataset.getFeatureNames().get(sigOrder[i]));
+					sigRowIndexes.add(sigOrder[i]);
+				}
+			}
+
+			if (numberSigValues > maxDisplay) {
+				tool.getResult().addOutputItem(new Item("sig_results", "" + numberSigValues + " (" + maxDisplay + " most significative values will be displayed)", "Number of significative results (adj. p-value = " + pValue + ")", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));																				
+			} else {
+				tool.getResult().addOutputItem(new Item("sig_results", "" + numberSigValues, "Number of significative results (adj. p-value = " + pValue + ")", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));																									
+			}
+
+			// adding dataset to results
+			//
+			File file = new File(tool.getOutdir() + "/" + test +"_significative_dataset.txt");
+			Dataset sigDataset = new Dataset(subDataset.getSampleNames(), ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), doubleMatrix);
+			sigDataset.setVariables(subDataset.getVariables());
+			sigDataset.validate();
+			sigDataset.save(file);
+			if (file.exists()) {
+				String tags = "datamatrix,expression";
+				tool.getResult().addOutputItem(new Item(test + "_sig_dataset", file.getName(), "Significative values dataset (adj. p-value = " + pValue + ")", TYPE.DATA, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Significative results"));											
+
+				File redirectionFile = new File(tool.getOutdir() + "/clustering.redirection");
+				createClusteringRedirectionFile(redirectionFile, file);
+				if ( redirectionFile.exists() ) {
+					tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to Clustering tool...)";
+					tool.getResult().addOutputItem(new Item(test + "_sig_dataset", file.getName(), "Significative values dataset (adj. p-value = " + pValue + ")", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Significative results"));											
+				}
+			}
+
+
+			int[] rowOrder = null;
+			if (isRegression || isCorrelation) {
+				rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toArray(sigRowIndexes)), true);				
+			} else {
+				rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes)), true);
+			}
+
+			DataFrame dataFrame = new DataFrame(sigDataset.getFeatureNames().size(), 0);
+			dataFrame.addColumn(statLabel, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes)), rowOrder)));
+			if (isCox || isCorrelation) {
+				dataFrame.addColumn(label1, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toArray(sigRowIndexes)), rowOrder)));				
+			} else if (isRegression) {
+				dataFrame.addColumn(label1, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toArray(sigRowIndexes)), rowOrder)));				
+				dataFrame.addColumn(label2, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(values2), ListUtils.toArray(sigRowIndexes)), rowOrder)));								
+			}
+			dataFrame.addColumn(pValLabel, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(pValues), ListUtils.toArray(sigRowIndexes)), rowOrder)));
+			dataFrame.addColumn(adjPValLabel, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toArray(sigRowIndexes)), rowOrder)));
+			dataFrame.setRowNames(ListUtils.ordered(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), rowOrder));
+
+			//System.out.println("names from data frame :\n" + ListUtils.toString(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), "\n"));
+			//System.out.println("names from data set   :\n" + ListUtils.toString(sigDataset.getFeatureNames(), "\n"));
+
+			// adding table to results
+			//
+			file = new File(tool.getOutdir() + "/" + test + "_significative_table.txt");
+			IOUtils.write(file, dataFrame.toString(true, true));
+			if ( file.exists() ) {
+				String table = "DIFF_EXPRESSION_TABLE";
+				if (isCox) {
+					table = "COX_TABLE";
+				} else if (isCorrelation) {
+					table = "CORRELATION_TABLE";
+				} else if (isRegression) {
+					table = "REGRESSION_TABLE";
+				}
+				tool.getResult().addOutputItem(new Item(test + "_table", file.getName(), "Significative values table (adj, p-value = " + pValue + ")", TYPE.FILE, StringUtils.toList("TABLE," + table, ","), new HashMap<String, String>(2), "Significative results"));											
+			}
+
+			// adding heatmap to results
+			//
+			Canvas sigHeatmap = null;
+			if (isCox || isCorrelation || isRegression) {
+				sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, label1, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toArray(sigRowIndexes))), adjPValLabel, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toArray(sigRowIndexes))));
+			} else {
+				sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, statLabel, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes))), adjPValLabel, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toArray(sigRowIndexes))));
+			}
+			if (sigHeatmap == null) {
+				tool.printError("ioexception_executet_classcomparison", "ERROR", "Error generating heatmap image");
+			} else {
+				try {
+					File sigHeatmapFile = new File(tool.getOutdir() + "/" + test + "_significative_heatmap.png");
+					sigHeatmap.save(sigHeatmapFile.getAbsolutePath());
+					if (sigHeatmapFile.exists()) {
+						tool.getResult().addOutputItem(new Item(test + "_significative_heatmap", sigHeatmapFile.getName(), test.toUpperCase() + " heatmap with significative values (adj. p-value = " + pValue + ")", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Significative results"));
+					}
+				} catch (IOException e) {
+					tool.printError("ioexception_executet_classcomparison", "ERROR", "Error saving heatmap image");
+				}
+			}
+
+			createFatiGoRedirection(dataFrame.getRowNames(), dataFrame.getColumnAsDoubleArray(statLabel), test, tool.getResult(), tool.getOutdir());
+		} else {
+			tool.getResult().addOutputItem(new Item("no_sig_results", "No significative results (p-value = " + pValue + ")", "Significative results", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));															
+		}	
+	}
+
+	public static void createClusteringRedirectionFile(File redirectionFile, File fileToRedirect) {
+		List<String> redirectionInputs = new ArrayList<String>();
+		redirectionInputs.add("tool=clustering");
+		redirectionInputs.add("jobname=clustering");
+		redirectionInputs.add("jobdescription=redirected from job $JOB_NAME");
+		redirectionInputs.add("dataset_databox=" + fileToRedirect.getName() + " (from job $JOB_NAME)");
+		redirectionInputs.add("dataset=$JOB_FOLDER/" + fileToRedirect.getName());
+		redirectionInputs.add("dataset_wum_data=true");
+		redirectionInputs.add("method=upgma");
+		redirectionInputs.add("gene_clustering=true");
+		redirectionInputs.add("distance=euclidean");
+		try {
+			IOUtils.write(redirectionFile.getAbsolutePath(), redirectionInputs);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

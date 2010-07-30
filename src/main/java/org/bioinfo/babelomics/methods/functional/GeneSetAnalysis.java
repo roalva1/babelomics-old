@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bioinfo.babelomics.exception.EmptyAnnotationException;
+import org.bioinfo.commons.log.Logger;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
@@ -49,15 +50,28 @@ public abstract class GeneSetAnalysis {
 	// summary
 	private int annotatedCounter;
 	private double meanAnnotationsPerId;
+	private Logger logger;
 	
 	public void prepare() throws InvalidIndexException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, EmptyAnnotationException{
 				
+		// init logger
+		if (logger==null) logger = new Logger();
+		logger.setStdOutputActive(true);
+		
+		logger.print("preparing gene lists...");
 		prepareLists();
+		logger.println("OK");
 		
 		// annotation		
+		logger.print("getting annotations...");
 		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);
 		if(annotations==null || annotations.size()==0) throw new EmptyAnnotationException();
+		logger.println(annotations.size() + " annotations found...OK");
+		
+		logger.print("loading gene map...");
 		loadGeneMap();
+		logger.println("OK");
+		
 		results = new ArrayList<GeneSetAnalysisTestResult>();
 	}
 		
@@ -86,19 +100,27 @@ public abstract class GeneSetAnalysis {
 		annotatedCounter = 0;
 		HashMap<String,Integer> listAnnotations = new HashMap<String, Integer>();		
 		for(String id: idList){
-			listAnnotations.put(id, 0);			
+			listAnnotations.put(id, 0);
 		}
 		
 		// process annotations
 		System.err.println("loading geneMap (found " + annotations.size() + " annotations)");
 		geneMap = new HashMap<String, List<String>>();
 		int count;
+		
 		for(AnnotationItem annotation:annotations){
+//			System.err.print("annotation: " + annotation.getFunctionalTermId());
+//			System.err.println(annotation.getId());
+//			System.err.println("listAnnotations.get(annotation.getId()): " + annotation.getId() + " : " + listAnnotations.get(annotation.getId()));
 			if(!geneMap.containsKey(annotation.getFunctionalTermId())){
 				geneMap.put(annotation.getFunctionalTermId(), new ArrayList<String>());
 			}
 			geneMap.get(annotation.getFunctionalTermId()).add(annotation.getId());
-			count = listAnnotations.get(annotation.getId()) + 1;
+			if(listAnnotations.containsKey(annotation.getId())){
+				count = listAnnotations.get(annotation.getId()) + 1;				
+			} else {
+				count = 0;
+			}
 			listAnnotations.put(annotation.getId(), count);		
 		}
 		System.err.println("loading geneMap (found " + annotations.size() + " annotations)");
@@ -262,6 +284,20 @@ public abstract class GeneSetAnalysis {
 	 */
 	public void setMeanAnnotationsPerId(double meanAnnotationsPerId) {
 		this.meanAnnotationsPerId = meanAnnotationsPerId;
+	}
+
+	/**
+	 * @return the logger
+	 */
+	public Logger getLogger() {
+		return logger;
+	}
+
+	/**
+	 * @param logger the logger to set
+	 */
+	public void setLogger(Logger logger) {
+		this.logger = logger;
 	}
 	
 }

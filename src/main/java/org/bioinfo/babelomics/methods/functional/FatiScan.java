@@ -75,7 +75,7 @@ public class FatiScan extends GeneSetAnalysis {
 		int thresholdPosition;
 		List<String> list1,list2;
 		
-		double inc = -(double)(statistic.get(0)-statistic.get(statistic.size()-1))/(numberOfPartitions+1);		
+		double inc = -(double)(statistic.get(0)-statistic.get(statistic.size()-1))/(numberOfPartitions+1);
 		double acum = statistic.get(0) + inc;
 		
 		// test each partition	
@@ -107,6 +107,7 @@ public class FatiScan extends GeneSetAnalysis {
 		}
 
 		if(outputFormat == SHORT_FORMAT) {
+			System.err.println("shorting term list...");
 			HashMap<String,GeneSetAnalysisTestResult> resultsMap = new HashMap<String,GeneSetAnalysisTestResult>();
 			// unique term
 			for(GeneSetAnalysisTestResult testResult: results){
@@ -119,6 +120,7 @@ public class FatiScan extends GeneSetAnalysis {
 					resultsMap.put(testResult.getTerm(), testResult);
 				}
 			}
+			System.err.println("end of shorting...");
 			// update results
 			results.clear();
 			results.addAll(resultsMap.values());

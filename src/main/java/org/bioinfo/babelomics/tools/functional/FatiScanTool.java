@@ -212,13 +212,17 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		// run
 		try{
 
+			gsea.setLogger(logger);
+			
 			// set term sizes
 			gsea.setTermSizes(termSizes);
 			
 			gsea.run();
 							
+			logger.print("saving results...");
 			// save results
 			saveGeneSetAnalysisResults(gsea,filterInfo);
+			logger.println("OK");
 			
 		} catch (EmptyAnnotationException ene){
 			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"No annotation was found for " + filterInfo.getTitle() + " ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
@@ -258,6 +262,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"No annotation was found for " + filterInfo.getTitle() + " ids","Annotations for " + filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Annotation files"));
 		} catch (Exception ene){
 			result.addOutputItem(new Item("annot_" + filterInfo.getName(),"Unexpected error was found while running analysis for " + filterInfo.getTitle() + " ids",filterInfo.getTitle(),Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"All results"));
+			ene.printStackTrace();
 		}
 		
 		logger.info("...end of " + filterInfo.getTitle());
@@ -291,12 +296,14 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				// go graph
 				if(filterInfo.getPrefix().equalsIgnoreCase("go")) {
 					try {
-						createGseaGoGraph(significant,DEFAULT_PVALUES[i],filterInfo);						
-						Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"go_graph_" + filterInfo.getName() + "_" + formattedPValue + "_graphimage.png",filterInfo.getTitle() + " DAG (significant terms, pvalue<" + formattedPValue + ")",Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT,THUMBNAIL"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+						String limitMessage = "";
+						boolean outOfbounds = createGseaGoGraph(significant,DEFAULT_PVALUES[i],filterInfo);
+						if(outOfbounds) limitMessage = " just most 100 significant terms";										
+						Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"go_graph_" + filterInfo.getName() + "_" + formattedPValue + "_graphimage.png",filterInfo.getTitle() + " DAG (significant terms, pvalue<" + formattedPValue + ") " + limitMessage,Item.TYPE.IMAGE,Arrays.asList("SIGNIFICANT,THUMBNAIL,GO_GRAPH_VIZ_JNLP"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
 						item.setContext("pvalue==" + formattedPValue);
 						result.getOutputItems().add(4, item);
 					} catch(GoGraphException gge){
-						Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"Graph not found",filterInfo.getTitle() + " DAG (significant terms, pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
+						Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"Graph not found",filterInfo.getTitle() + " DAG (significant terms, pvalue<" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
 						item.setContext("pvalue==" + formattedPValue);
 						result.getOutputItems().add(4, item);
 					}
@@ -307,7 +314,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				result.getOutputItems().add(4, item);
 				
 			} else {
-				Item item = new Item("significant_" + filterInfo.getName(),"No significant terms for current pvalue " + formattedPValue,filterInfo.getTitle() + " significant terms (pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle()); 
+				Item item = new Item("significant_" + filterInfo.getName(),"No significant terms for current pvalue " + formattedPValue,filterInfo.getTitle() + " significant terms (pvalue<" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("WARNING"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle()); 
 				item.setContext("pvalue==" + formattedPValue);
 				result.getOutputItems().add(4, item);
 			}
