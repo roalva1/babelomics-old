@@ -51,7 +51,8 @@ public class Snow2 extends BabelomicsTool {
 		options.addOptionGroup(groupFiles);
 		
 		options.addOption(OptionFactory.createOption("file-topo-values", "An input file containing topological values", false, true));
-		
+		options.addOption(OptionFactory.createOption("side", "side for kolmogorov and wilkoxon test. Can be two.sided(default), less or greater", false, true));
+		options.addOption(OptionFactory.createOption("images", "Print the images for the statistics", false, false));
 		
 	}
 
@@ -67,6 +68,8 @@ public class Snow2 extends BabelomicsTool {
 			boolean json = commandLine.hasOption("json");
 			boolean dot = commandLine.hasOption("dot"); 
 			boolean svg = commandLine.hasOption("svg");
+			boolean images = commandLine.hasOption("images");
+			String side = "two.sided";
 
 			logger.debug("reading proteins list...");
 			if(commandLine.hasOption("node-list")) {
@@ -113,15 +116,19 @@ public class Snow2 extends BabelomicsTool {
 				}
 				// #6:If you want to generate statistics a sif-file, topological file and a list of proteins 
 				else if(commandLine.hasOption("file-topo-values") && nodeList1 != null && commandLine.hasOption("randoms") &&  commandLine.hasOption("random-size") && nodeList2 == null){
+					if(commandLine.hasOption("side"))
+						side = commandLine.getOptionValue("side");
 					FileUtils.checkFile(new File(commandLine.getOptionValue("file-topo-values")));
 					inputFileValues = new File(commandLine.getOptionValue("file-topo-values"));
-					ProteinNetwork.statisticsTest(inputFileValues, interactomeGraph, nodeList1, Integer.parseInt(commandLine.getOptionValue("randoms")), Integer.parseInt(commandLine.getOptionValue("random-size")),  null);
+					ProteinNetwork.statisticsTest(inputFileValues, interactomeGraph, nodeList1, Integer.parseInt(commandLine.getOptionValue("randoms")), Integer.parseInt(commandLine.getOptionValue("random-size")),  null, side, images);
 				}
 				// #7:If you want to generate statistics a sif-file, topological file and 2 lists of proteins 
 				else if(commandLine.hasOption("file-topo-values") && nodeList1 != null && nodeList2 != null && !commandLine.hasOption("randoms") &&  !commandLine.hasOption("random-size")){
+					if(commandLine.hasOption("side"))
+						side = commandLine.getOptionValue("side");
 					FileUtils.checkFile(new File(commandLine.getOptionValue("file-topo-values")));
 					inputFileValues = new File(commandLine.getOptionValue("file-topo-values"));
-					ProteinNetwork.statisticsTest(inputFileValues, interactomeGraph, nodeList1, Integer.MIN_VALUE, Integer.MIN_VALUE, nodeList2);
+					ProteinNetwork.statisticsTest(inputFileValues, interactomeGraph, nodeList1, Integer.MIN_VALUE, Integer.MIN_VALUE, nodeList2, side, images);
 				}
 			}
 			// #5:If you have file-topo-values and you want to create a .mcn file from a given node-list but with the values of the o-file-topo-values

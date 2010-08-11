@@ -31,6 +31,7 @@ import org.bioinfo.babelomics.tools.interactome.Snow2;
 import org.bioinfo.babelomics.tools.preprocessing.CreateAnnotation;
 import org.bioinfo.babelomics.tools.preprocessing.IDConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
+import org.bioinfo.babelomics.tools.variation.Ped;
 
 
 public class BabelomicsFactory {
@@ -232,8 +233,14 @@ public class BabelomicsFactory {
 		if(toolName.equalsIgnoreCase("pca-plot")) {
 			return new DescriptiveStatistics();
 		}
-		
-
+		/*
+		 * **************************************************************************************************
+		 * *****	Variation tools	*************************************************************
+		 * **************************************************************************************************
+		 */
+		if(toolName.equalsIgnoreCase("ped")) {
+			return new Ped();
+		}
 		return null;
 	}
 
