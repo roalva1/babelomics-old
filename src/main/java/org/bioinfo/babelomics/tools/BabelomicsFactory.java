@@ -31,7 +31,7 @@ import org.bioinfo.babelomics.tools.interactome.Snow2;
 import org.bioinfo.babelomics.tools.preprocessing.CreateAnnotation;
 import org.bioinfo.babelomics.tools.preprocessing.IDConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
-import org.bioinfo.babelomics.tools.variation.Ped;
+import org.bioinfo.babelomics.tools.variation.Plonk;
 
 
 public class BabelomicsFactory {
@@ -235,11 +235,11 @@ public class BabelomicsFactory {
 		}
 		/*
 		 * **************************************************************************************************
-		 * *****	Variation tools	*************************************************************
+		 * *****	Variation tools	*************************************************************************
 		 * **************************************************************************************************
 		 */
-		if(toolName.equalsIgnoreCase("ped")) {
-			return new Ped();
+		if(toolName.equalsIgnoreCase("plonk")) {
+			return new Plonk();
 		}
 		return null;
 	}

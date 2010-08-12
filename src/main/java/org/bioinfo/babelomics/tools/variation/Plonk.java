@@ -2,37 +2,22 @@ package org.bioinfo.babelomics.tools.variation;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Type;
 import java.util.List;
 
-import org.apache.commons.cli.CommandLine;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.data.graph.edge.AbstractEdge;
+import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.variation.data.converter.Converter;
 import org.bioinfo.variation.data.core.DataSet;
 import org.bioinfo.variation.data.core.MapFile;
 import org.bioinfo.variation.data.core.PedFile;
 import org.bioinfo.variation.data.core.PedMap;
-import org.bioinfo.variation.data.core.filter.Filter;
-import org.bioinfo.variation.data.core.filter.Snp.BasePairPosSnpFilter;
-import org.bioinfo.variation.data.core.filter.Snp.ChromosomeSnpFilter;
-import org.bioinfo.variation.data.core.filter.Snp.GeneticDistanceSnpFilter;
-import org.bioinfo.variation.data.core.filter.Snp.RegionSnpFilter;
-import org.bioinfo.variation.data.core.filter.Snp.SnpFilter;
-import org.bioinfo.variation.data.core.filter.Snp.SnpIdSnpFilter;
-import org.bioinfo.variation.data.core.filter.individual.FamilyIndividualFilter;
-import org.bioinfo.variation.data.core.filter.individual.FounderIndividualFilter;
-import org.bioinfo.variation.data.core.filter.individual.IDIndividualFilter;
-import org.bioinfo.variation.data.core.filter.individual.MaternalIndividualFilter;
-import org.bioinfo.variation.data.core.filter.individual.PaternalIndividualFilter;
-import org.bioinfo.variation.data.core.filter.individual.PhenotypeIndividualFilter;
-import org.bioinfo.variation.data.core.filter.individual.SexIndividualFilter;
+import org.bioinfo.variation.data.core.filter.Snp.*;
+import org.bioinfo.variation.data.core.filter.individual.*;
 
-public class Ped extends BabelomicsTool {
+public class Plonk extends BabelomicsTool {
 
 	private File inputPedFile, inputMapFile, inputSnpFile;
 	private File outputPedFile, outputMapFile, outputFile;
@@ -67,8 +52,9 @@ public class Ped extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("phenotype", "Filter by phenotype", false, true));
 		options.addOption(OptionFactory.createOption("sex", "Filter by sex", false, true));
 
-		options.addOption(OptionFactory.createOption("format", "Format to a tped or a proper ped file. Args are ped or tped.", false, true));
-		
+		options.addOption(OptionFactory.createOption("format", "Format to a tped or a proper ped file. Args are either ped or tped.", false, true));
+		options.addOption(OptionFactory.createOption("snp-format", "Format the genotype from a ped file to the desirable format.", false, true));
+
 	}
 
 	@Override
@@ -86,6 +72,7 @@ public class Ped extends BabelomicsTool {
 			
 			PedFile pedFile = new PedFile(inputPedFile.getAbsolutePath());
 			MapFile mapFile = new MapFile(inputMapFile.getAbsolutePath());
+			pedFile.setGenotypeFormat(1, 2);
 			ds = new DataSet(pedFile, mapFile);
 			
 			if(commandLine.hasOption("input-snp-file")){
@@ -145,7 +132,12 @@ public class Ped extends BabelomicsTool {
 				ds.filter(filter);
 			}
 			Converter c = new Converter(ds);
-c.toPed();
+			if(commandLine.hasOption("snp-format")){
+				List<String> snpFormat = StringUtils.toList(commandLine.getOptionValue("snp-format"), ",");
+				c.toPed(commandLine.getOptionValue("output-ped-file"), Integer.parseInt(snpFormat.get(0)), Integer.parseInt(snpFormat.get(1)));
+			}
+//			ds.
+//			c.toPed();
 //			System.out.println(ds.getPedfile();
 //			System.out.println(ds.snpIndexesToString(ds.getSnpIndex()));
 			
