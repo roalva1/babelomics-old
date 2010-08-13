@@ -50,7 +50,7 @@ public class Preprocessing extends BabelomicsTool {
 	public void execute() {
 		boolean preprocessed = false;
 		
-		Dataset dataset = null;
+		Dataset dataset = null; //, auxDataset = null;
 
 		int kvalue = 15;
 		String imputeMethodMsg = "";
@@ -207,6 +207,9 @@ public class Preprocessing extends BabelomicsTool {
 
 			try {
 				dataset = dataset.mergeReplicatedFeatures(mergeMethod);
+//				auxDataset = dataset.mergeReplicatedFeatures(mergeMethod);
+//				auxDataset.save("/tmp/PreprocessingTest/newdataset.txt");
+//				dataset = auxDataset;
 			} catch (Exception e) {
 				abort("exception_mergereplicated_execute_preprocessing", "Error merging replicated rows with method " + mergeMethod, e.toString(), StringUtils.getStackTrace(e));
 			}

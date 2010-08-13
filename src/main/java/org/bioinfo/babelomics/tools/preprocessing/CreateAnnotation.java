@@ -140,6 +140,7 @@ public class CreateAnnotation extends FunctionalProfilingTool {
 					}
 
 					result.addOutputItem(new Item(name, name + ".txt", filterInfo.getTitle() + " annotation table", Item.TYPE.FILE, StringUtils.toList("TABLE,ANNOTATION_TABLE", ","), new HashMap<String, String>(), "Annotation tables"));
+					result.addOutputItem(new Item(name + "_data", name + ".txt", filterInfo.getTitle() + " annotation table", Item.TYPE.DATA, StringUtils.toList("annotation", ","), new HashMap<String, String>(), ""));
 					//result.addOutputItem(new Item(name, name + ".txt", getDBTitle(filter) + " annotation: ", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Results"));					
 				}
 			}

@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
@@ -16,12 +18,10 @@ import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
-import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.BiocartaFilter;
-import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.bioinfo.infrared.funcannot.filter.GOSlimFilter;
@@ -34,7 +34,6 @@ import org.bioinfo.infrared.funcannot.filter.ReactomeFilter;
 import org.bioinfo.math.stats.inference.FisherExactTest;
 import org.bioinfo.tool.OptionFactory;
 
-import es.blast2go.prog.GoSlim;
 import es.blast2go.prog.graph.GetGraphApi;
 import es.blast2go.prog.graph.GoGraphException;
 import es.blast2go.prog.graph.MakeGraphDot;
@@ -169,14 +168,30 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		
 		// your annotations
 		if(commandLine.hasOption("annotations") && !commandLine.getOptionValue("annotations").equalsIgnoreCase("") && !commandLine.getOptionValue("annotations").equalsIgnoreCase("none")) {
-			isYourAnnotations = true;			
-			FeatureData annotations = new FeatureData(new File(commandLine.getOptionValue("annotations")), true);
-			List<String> ids = annotations.getDataFrame().getRowNames();
-			List<String> terms = annotations.getDataFrame().getColumn(0);
-			yourAnnotations = new FeatureList<AnnotationItem>(ids.size());// FeatureData(new File(cmdLine.getOptionValue("annotations")), true);
-			for(int i=0; i<ids.size(); i++){
-				yourAnnotations.add(new AnnotationItem(ids.get(i),terms.get(i)));
+			isYourAnnotations = true;
+			FileUtils.checkFile(new File(commandLine.getOptionValue("annotations")));
+			
+			// read annotation file
+			List<String> annots = IOUtils.readLines(commandLine.getOptionValue("annotations"));
+			
+			// init annotation object
+			yourAnnotations = new FeatureList<AnnotationItem>(annots.size());
+			
+			// init map to detect duplicated annotations
+			Map<String,Boolean> uniqAnnots = new HashMap<String, Boolean>();
+			
+			// read annotations
+			String[] fields;
+			for(String annot: annots){
+				if(!uniqAnnots.containsKey(annot)){
+					if(!annot.startsWith("#") && annot.contains("\t")){
+						fields = annot.split("\t");
+						yourAnnotations.add(new AnnotationItem(fields[0],fields[1]));
+						uniqAnnots.put(annot, true);
+					}
+				}
 			}
+		
 		}
 		
 		config.load(new FileInputStream(new File(babelomicsHomePath + "/conf/blast2go.properties")));
@@ -422,7 +437,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			
 			
 			// setting server params
-			graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));		
+			graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));
 			graph.setDataBase(config.getProperty("BLAST2GO_HOST_NAME"),config.getProperty("BLAST2GO_DB_NAME"),config.getProperty("BLAST2GO_DB_USER"), config.getProperty("BLAST2GO_DB_PASSWORD"));
 			
 			// run
@@ -430,8 +445,12 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			
 			// copy files
 			String imagePrefix = "go_graph_" + filterInfo.getName() + "_" + pvalueFormatter.format(pvalue) + "_graphimage";
+				// png
 			FileUtils.touch(new File(outdir + "/" + imagePrefix + ".png"));
-			FileUtils.copy(outdir + "/graphs/" + imagePrefix + ".png", outdir + "/" + imagePrefix + ".png");			
+			FileUtils.copy(outdir + "/graphs/" + imagePrefix + ".png", outdir + "/" + imagePrefix + ".png");
+				// svg
+			FileUtils.touch(new File(outdir + "/" + imagePrefix + ".png.svg"));
+			FileUtils.copy(outdir + "/graphs/" + imagePrefix + ".svg", outdir + "/" + imagePrefix + ".png.svg");
 
 		} catch (Exception e) {
 			e.printStackTrace();
