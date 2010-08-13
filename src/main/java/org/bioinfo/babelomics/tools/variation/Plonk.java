@@ -52,8 +52,9 @@ public class Plonk extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("phenotype", "Filter by phenotype", false, true));
 		options.addOption(OptionFactory.createOption("sex", "Filter by sex", false, true));
 
-		options.addOption(OptionFactory.createOption("format", "Format to a tped or a proper ped file. Args are either ped or tped.", false, true));
+		options.addOption(OptionFactory.createOption("parser", "Parser to a tped or a proper ped file. Args are either ped or tped.", false, true));
 		options.addOption(OptionFactory.createOption("snp-format", "Format the genotype from a ped file to the desirable format.", false, true));
+		options.addOption(OptionFactory.createOption("html", "Statistics to html", false, true));
 
 	}
 
@@ -132,9 +133,19 @@ public class Plonk extends BabelomicsTool {
 				ds.filter(filter);
 			}
 			Converter c = new Converter(ds);
-			if(commandLine.hasOption("snp-format")){
+			if(commandLine.hasOption("snp-format") && !commandLine.hasOption("parser")){
 				List<String> snpFormat = StringUtils.toList(commandLine.getOptionValue("snp-format"), ",");
 				c.toPed(commandLine.getOptionValue("output-ped-file"), Integer.parseInt(snpFormat.get(0)), Integer.parseInt(snpFormat.get(1)));
+			}
+			if(commandLine.hasOption("parser")){
+				if(commandLine.getOptionValue("parser").equals("ped")){
+					c.toPed(commandLine.getOptionValue("output-file"));
+					c.toMap(commandLine.getOptionValue("output-file"));
+				}
+				else if(commandLine.getOptionValue("parser").equals("tped")){
+					c.toTped(commandLine.getOptionValue("output-file"));
+					c.toTfam(commandLine.getOptionValue("output-file"));
+				}
 			}
 //			ds.
 //			c.toPed();

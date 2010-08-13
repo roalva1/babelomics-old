@@ -15,8 +15,10 @@ public class PlonkTest {
 //				"--ch","17","--from-base","41419601","--to-base","41419605","--home", System.getenv("BABELOMICS_HOME")};
 //		String []args = {"--tool", "plonk", "-o", "/home/ralonso/ped/", "--input-ped-file", "/home/ralonso/ped/test01.ped", "--input-map-file", "/home/ralonso/ped/test.map", 
 //				"--family", "2", "--home", System.getenv("BABELOMICS_HOME")};
+//		String []args = {"--tool", "plonk", "-o", "/home/ralonso/ped/", "--input-ped-file", "/home/ralonso/ped/test.ped", "--input-map-file", "/home/ralonso/ped/test.map", 
+//				"--snp-format", "0,1", "--output-ped-file","/home/ralonso/ped/test01.ped","--home", System.getenv("BABELOMICS_HOME")};
 		String []args = {"--tool", "plonk", "-o", "/home/ralonso/ped/", "--input-ped-file", "/home/ralonso/ped/test.ped", "--input-map-file", "/home/ralonso/ped/test.map", 
-				"--snp-format", "0,1", "--output-ped-file","/home/ralonso/ped/test01.ped","--home", System.getenv("BABELOMICS_HOME")};
+				"parser", "tped", "--output-file","/home/ralonso/ped/test","--home", System.getenv("BABELOMICS_HOME")};
 
 		try {
 //			for(int i=0; i < args.length; i++)
