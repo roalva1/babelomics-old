@@ -9,6 +9,7 @@ import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.tool.OptionFactory;
+import org.bioinfo.variation.data.analysis.DataAnalysis;
 import org.bioinfo.variation.data.converter.Converter;
 import org.bioinfo.variation.data.core.DataSet;
 import org.bioinfo.variation.data.core.MapFile;
@@ -40,7 +41,9 @@ public class Plonk extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("input-base-file", "An input file with bases separeted by line", false, true));
 		options.addOption(OptionFactory.createOption("input-ch-file", "An input file with chromosomes separeted by line", false, true));
 		options.addOption(OptionFactory.createOption("input-gd-file", "An input file with genetic ditances separeted by line", false, true));
+		
 		options.addOption(OptionFactory.createOption("input-gd-file", "An input file with genetic ditances separeted by line", false, true));
+		
 		options.addOption(OptionFactory.createOption("ch", "A chromosome for region filter", false, true));
 		options.addOption(OptionFactory.createOption("from-base", "Region filter: from base", false, true));
 		options.addOption(OptionFactory.createOption("to-base", "Region filter: to base", false, true));
@@ -55,6 +58,7 @@ public class Plonk extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("parser", "Parser to a tped or a proper ped file. Args are either ped or tped.", false, true));
 		options.addOption(OptionFactory.createOption("snp-format", "Format the genotype from a ped file to the desirable format.", false, true));
 		options.addOption(OptionFactory.createOption("html", "Statistics to html", false, true));
+		options.addOption(OptionFactory.createOption("stats", "Statistics", false, false));
 
 	}
 
@@ -73,7 +77,7 @@ public class Plonk extends BabelomicsTool {
 			
 			PedFile pedFile = new PedFile(inputPedFile.getAbsolutePath());
 			MapFile mapFile = new MapFile(inputMapFile.getAbsolutePath());
-			pedFile.setGenotypeFormat(1, 2);
+//			pedFile.setGenotypeFormat(1, 2);
 			ds = new DataSet(pedFile, mapFile);
 			
 			if(commandLine.hasOption("input-snp-file")){
@@ -132,23 +136,30 @@ public class Plonk extends BabelomicsTool {
 				SexIndividualFilter filter = new SexIndividualFilter(commandLine.getOptionValue("sex"));
 				ds.filter(filter);
 			}
-			Converter c = new Converter(ds);
-			if(commandLine.hasOption("snp-format") && !commandLine.hasOption("parser")){
-				List<String> snpFormat = StringUtils.toList(commandLine.getOptionValue("snp-format"), ",");
-				c.toPed(commandLine.getOptionValue("output-ped-file"), Integer.parseInt(snpFormat.get(0)), Integer.parseInt(snpFormat.get(1)));
+			if(commandLine.hasOption("stats")){
+				DataAnalysis da = new DataAnalysis(ds);
+				da.doSummary();
+				da.PrintSummary();
 			}
-			if(commandLine.hasOption("parser")){
-				if(commandLine.getOptionValue("parser").equals("ped")){
-					c.toPed(commandLine.getOptionValue("output-file"));
-					c.toMap(commandLine.getOptionValue("output-file"));
-				}
-				else if(commandLine.getOptionValue("parser").equals("tped")){
-					c.toTped(commandLine.getOptionValue("output-file"));
-					c.toTfam(commandLine.getOptionValue("output-file"));
-				}
+			
+			Converter converter = new Converter(ds);
+//			c.toTped(commandLine.getOptionValue("output-file"));
+			List<String> snpFormat = null;
+			if(commandLine.hasOption("snp-format"))
+				snpFormat = StringUtils.toList(commandLine.getOptionValue("snp-format"), ",");
+			
+			if(commandLine.hasOption("parser") && commandLine.getOptionValue("parser").equals("tped") && snpFormat != null){
+				converter.toTped(commandLine.getOptionValue("output-file")+".tped",pedFile, mapFile,Integer.parseInt(snpFormat.get(0)), Integer.parseInt(snpFormat.get(1)));
+				converter.toTfam(commandLine.getOptionValue("output-file"));
 			}
-//			ds.
-//			c.toPed();
+			else if(commandLine.hasOption("parser") && commandLine.getOptionValue("parser").equals("tped") && snpFormat == null){
+				converter.toTped(commandLine.getOptionValue("output-file")+".tped",pedFile, mapFile);
+				converter.toTfam(commandLine.getOptionValue("output-file"));
+			}
+			else if(!commandLine.hasOption("parser") && snpFormat != null)
+				converter.toPed(commandLine.getOptionValue("output-ped-file"), Integer.parseInt(snpFormat.get(0)), Integer.parseInt(snpFormat.get(1)));
+			else if(!commandLine.hasOption("parser") && snpFormat == null)
+				converter.toPed();
 //			System.out.println(ds.getPedfile();
 //			System.out.println(ds.snpIndexesToString(ds.getSnpIndex()));
 			
