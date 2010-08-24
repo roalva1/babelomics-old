@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bioinfo.babelomics.exception.EmptyAnnotationException;
+import org.bioinfo.commons.log.Logger;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
@@ -24,18 +25,22 @@ public class FatiScan extends GeneSetAnalysis {
 	public static final int SHORT_FORMAT = 1;
 	public static final int LONG_FORMAT = 2;
 	public final static int DEFAULT_NUMBER_OF_PARTITIONS = 30;
+	public static final int REMOVE_NEVER = 0;
+	public static final int REMOVE_DUPLICATES = 1;
+	
 	
 	// input params	
 	private int testMode;	
 	private int numberOfPartitions;
 	private int outputFormat;
+	private int duplicatesMode;
 		
 	// test
 	private TwoListFisherTest fisher;
 		
 	
 	// Two list constructor
-	public FatiScan(FeatureData rankedList, FunctionalFilter filter, DBConnector dbConnector, int numberOfPartitions, int testMode, int outputFormat, int order) {
+	public FatiScan(FeatureData rankedList, FunctionalFilter filter, DBConnector dbConnector, int numberOfPartitions, int testMode, int outputFormat, int order, int duplicatesMode) {
 		this.rankedList = rankedList;
 		this.filter = filter;
 		this.dbConnector = dbConnector;		
@@ -48,9 +53,10 @@ public class FatiScan extends GeneSetAnalysis {
 		
 		// set analysis type id
 		this.method = FATISCAN;
+		this.duplicatesMode = duplicatesMode; 
 	}
 	
-	public FatiScan(FeatureData rankedList, FeatureList<AnnotationItem> annotations, int numberOfPartitions, int testMode, int outputFormat, int order) {
+	public FatiScan(FeatureData rankedList, FeatureList<AnnotationItem> annotations, int numberOfPartitions, int testMode, int outputFormat, int order, int duplicatesMode) {
 		
 		this.rankedList = rankedList;
 		this.annotations = annotations;		
@@ -64,11 +70,22 @@ public class FatiScan extends GeneSetAnalysis {
 		
 		// set analysis type id
 		this.method = FATISCAN;
+		this.duplicatesMode = duplicatesMode;
 	}
 	
 	@Override
 	public void run() throws InvalidIndexException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, EmptyAnnotationException {
+		
+		if(logger==null) logger = new Logger("Fatiscan");
 				
+		// duplicates managing
+		logger.print("removing duplicates...");		
+		removeDuplicates();		
+		logger.println("OK");
+		
+		logger.print("removing duplicates...");		
+		removeDuplicates();		
+		logger.println("OK");
 		// prepare list
 		prepare();
 		
@@ -140,6 +157,17 @@ public class FatiScan extends GeneSetAnalysis {
 		}
 		return result;
 	}
+	
+	
+	public void removeDuplicates(){
+		
+		// each list
+		if(duplicatesMode==REMOVE_DUPLICATES){			
+			this.rankedList = (FeatureData) ListUtils.unique(this.rankedList.getDataFrame().getRowNames());
+		}
+		
+	}
+	
 	
 	
 	private int getThresholdPosition(double acum){
