@@ -100,19 +100,27 @@ public abstract class GeneSetAnalysis {
 		annotatedCounter = 0;
 		HashMap<String,Integer> listAnnotations = new HashMap<String, Integer>();		
 		for(String id: idList){
-			listAnnotations.put(id, 0);			
+			listAnnotations.put(id, 0);
 		}
 		
 		// process annotations
 		System.err.println("loading geneMap (found " + annotations.size() + " annotations)");
 		geneMap = new HashMap<String, List<String>>();
 		int count;
+		
 		for(AnnotationItem annotation:annotations){
+//			System.err.print("annotation: " + annotation.getFunctionalTermId());
+//			System.err.println(annotation.getId());
+//			System.err.println("listAnnotations.get(annotation.getId()): " + annotation.getId() + " : " + listAnnotations.get(annotation.getId()));
 			if(!geneMap.containsKey(annotation.getFunctionalTermId())){
 				geneMap.put(annotation.getFunctionalTermId(), new ArrayList<String>());
 			}
 			geneMap.get(annotation.getFunctionalTermId()).add(annotation.getId());
-			count = listAnnotations.get(annotation.getId()) + 1;
+			if(listAnnotations.containsKey(annotation.getId())){
+				count = listAnnotations.get(annotation.getId()) + 1;				
+			} else {
+				count = 0;
+			}
 			listAnnotations.put(annotation.getId(), count);		
 		}
 		System.err.println("loading geneMap (found " + annotations.size() + " annotations)");

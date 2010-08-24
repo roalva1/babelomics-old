@@ -195,7 +195,7 @@ public class Predictor extends BabelomicsTool {
 					
 					GenericClassifier testClassifier = selectedClassifiers.get(i);
 										
-					System.err.println("getting  feature selector: " + testClassifier.getFeatureSelector().getSelectedAttributeNames());
+					//System.err.println("getting  feature selector: " + testClassifier.getFeatureSelector().getSelectedAttributeNames());
 					
 					// execute (train and) test
 					List<ClassificationResult> testResult = testClassifier.test(instances, testInstances);
