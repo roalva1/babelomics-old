@@ -77,13 +77,14 @@ public class ExpressionNormalizationToolTest {
 		}
 	}	
 
+	@Test
 	public void Test4() {
 		String outDirName = "/tmp/AgilentExpression2CNormalizationTest2";
 		new File(outDirName).mkdir();
 		String dataset = "/mnt/commons/test/biodata/example/GSE11968_RAW/agilent.zip";
 		String tags = "agilent,two-channels";
 		
-		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", tags, "-o", outDirName, "--bg-correction", "normexp", "--wa-normalization", "loess", "--ba-normalization", "quantiles", "--home", System.getenv("BABELOMICS_HOME")};
+		String []args = { "--tool", "agilent-expression-two-colors-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", tags, "-o", outDirName, "--bg-correction", "normexp", "--wa-normalization", "loess", "--ba-normalization", "quantiles", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("command line parameters --> " + Arrays.toString(args));
 		try {
@@ -94,7 +95,6 @@ public class ExpressionNormalizationToolTest {
 		}
 	}	
 	
-	@Test
 	public void Test5() {
 		String dataset = "/mnt/commons/test/biodata/example/cel.zip";
 		String outdir = "/tmp/AffyExpressionNormalizationTest";
