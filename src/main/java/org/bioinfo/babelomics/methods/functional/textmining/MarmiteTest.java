@@ -1,5 +1,6 @@
 package org.bioinfo.babelomics.methods.functional.textmining;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,7 @@ public class MarmiteTest {
 	
 	List<String> validEntities;
 
-	public TestResultList<KolmogorovSmirnovTestResult> run (List<String> list1, List<String> list2, String bioentity, int scoreFilter) throws InvalidParameterException {
+	public TestResultList<KolmogorovSmirnovTestResult> run (List<String> list1, List<String> list2, String bioentity, int scoreFilter) throws InvalidParameterException, IOException {
 		
 		geneList1 = list1;
 		geneList2 = list2;
