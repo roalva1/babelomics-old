@@ -141,7 +141,7 @@ public class Snow2  extends BabelomicsTool{
 
 		try {
 		
-			String folderInteractions = "/opt/babelomics/data/interactions/";
+			String folderInteractions = "/mnt/commons/babelomics/tests/snow2/data/intereactions/";
 			SimpleUndirectedGraph<ProteinVertex, DefaultEdge> interactomeGraph;
 			if(commandLine.hasOption("sif-file") ){
 				inputFile = new File(commandLine.getOptionValue("sif-file"));
