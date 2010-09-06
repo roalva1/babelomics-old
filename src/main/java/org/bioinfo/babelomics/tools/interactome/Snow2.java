@@ -16,6 +16,9 @@ import org.bioinfo.data.graph.SimpleUndirectedGraph;
 import org.bioinfo.data.graph.Subgraph;
 import org.bioinfo.data.graph.alg.Calc;
 import org.bioinfo.data.graph.edge.DefaultEdge;
+import org.bioinfo.data.graph.files.Dot;
+import org.bioinfo.data.graph.files.Json;
+import org.bioinfo.data.graph.files.Svg;
 import org.bioinfo.networks.protein.InteractomeParser;
 import org.bioinfo.networks.protein.KSTest;
 import org.bioinfo.networks.protein.ProteinNetwork;
@@ -53,9 +56,9 @@ public class Snow2  extends BabelomicsTool{
 		options.addOption(OptionFactory.createOption("intermediate", "If there is this argument, it will create the network with 1 intermediate", false, false));
 		options.addOption(OptionFactory.createOption("no-number-components", "If there is this argument, it won't calculate the number of components", false, false));
 		options.addOption(OptionFactory.createOption("bicomponents", "If there is this argument, it will calculate the number of bicomponents", false, false));
-		options.addOption(OptionFactory.createOption("dot", "It will create an output .dot file", false, true));
-		options.addOption(OptionFactory.createOption("json", "It will create an output .json file", false, true));
-		options.addOption(OptionFactory.createOption("svg", "It will create an output .svg and .dot file", false, true));
+		options.addOption(OptionFactory.createOption("dot", "It will create an output .dot file", false, false));
+		options.addOption(OptionFactory.createOption("json", "It will create an output .json file", false, false));
+		options.addOption(OptionFactory.createOption("svg", "It will create an output .svg and .dot file", false, false));
 		options.addOption(OptionFactory.createOption("o-sif-topo-file", "Create a full topological file from a sif file", false));
 		options.addOption(OptionFactory.createOption("o-file", "If there is this argument, it will create an output .cmp file for the information of each component", false, true));
 		options.addOption(OptionFactory.createOption("side", "side for kolmogorov and wilkoxon test. Can be two.sided(by default), less or greater", false, true));
@@ -76,6 +79,8 @@ public class Snow2  extends BabelomicsTool{
 	@Override
 	protected void execute() {
 		
+		subProteinNetwork1 = null;
+		subProteinNetwork2 = null;
 		subProteinNetworkRandoms = new ArrayList<ProteinNetwork>();
 		noNumberOfComponents = commandLine.hasOption("no-number-components");
 		bicomponents = commandLine.hasOption("bicomponents");
@@ -83,7 +88,10 @@ public class Snow2  extends BabelomicsTool{
 		dot = commandLine.hasOption("dot");
 		svg = commandLine.hasOption("svg");
 		json = commandLine.hasOption("json");
-		outputFileName = outdir+commandLine.getOptionValue("o-file");
+		String oFile = "result";
+		if(commandLine.hasOption("o-file"))
+			 oFile = commandLine.getOptionValue("o-file");
+		outputFileName = outdir+oFile;
 		
 		if(json)
 			result.addOutputItem(new Item("json", outputFileName+".json", "Json file", Item.TYPE.FILE, Arrays.asList("json"),new HashMap<String,String>(),"Output data"));
@@ -210,16 +218,30 @@ public class Snow2  extends BabelomicsTool{
 			else
 				System.err.println("Not correct arguments for statistic test");
 			if(json){
-				IOUtils.write(outputFileName+".json", proteinNetwork.getInteractomeGraph().toJson());
+				Json<ProteinVertex, DefaultEdge> json = new Json<ProteinVertex, DefaultEdge>();
+				if(subProteinNetwork1 != null)
+					IOUtils.write(outputFileName+"1.json", json.toJson(subProteinNetwork1.getInteractomeGraph()));
+				if(subProteinNetwork2 != null)
+					IOUtils.write(outputFileName+"2.json", json.toJson(subProteinNetwork2.getInteractomeGraph()));
 			}
 			if(dot && !svg){
-				IOUtils.write(outputFileName+".dot", proteinNetwork.getInteractomeGraph().toDot());
+				Dot<ProteinVertex, DefaultEdge> dot = new Dot<ProteinVertex, DefaultEdge>();
+				if(subProteinNetwork1 != null)
+					IOUtils.write(outputFileName+"1.dot", dot.toDot(subProteinNetwork1.getInteractomeGraph()));
+				if(subProteinNetwork2 != null)
+					IOUtils.write(outputFileName+"2.dot", dot.toDot(subProteinNetwork2.getInteractomeGraph()));
 			}	
 			else if(!dot && svg){
-				createSVGFile(outputFileName+".dot");
+				if(subProteinNetwork1 != null)
+					createSVGFile(subProteinNetwork1, outputFileName+"1.dot", 1);
+				if(subProteinNetwork2 != null)
+					createSVGFile(subProteinNetwork2, outputFileName+"2.dot", 2);
 			}
 			else if(dot && svg){
-				createSVGFile(outputFileName+".dot");
+				if(subProteinNetwork1 != null)
+					createSVGFile(subProteinNetwork1, outputFileName+"1.dot",1);
+				if(subProteinNetwork2 != null)
+					createSVGFile(subProteinNetwork2, outputFileName+"2.dot",2);
 			}
 			
 				
@@ -229,9 +251,11 @@ public class Snow2  extends BabelomicsTool{
 			
 	}
 	
-	private void createSVGFile(String sourceDotFile) throws IOException{
-		IOUtils.write(sourceDotFile, proteinNetwork.getInteractomeGraph().toDot());
-		IOUtils.write(commandLine.getOptionValue("o-svg-file")+".svg", proteinNetwork.getInteractomeGraph().toSVG(sourceDotFile));
+	private void createSVGFile(ProteinNetwork proteinNetwork, String sourceDotFile, int node) throws IOException{
+		Dot<ProteinVertex, DefaultEdge> dot = new Dot<ProteinVertex, DefaultEdge>();
+		Svg svg = new Svg();
+		IOUtils.write(sourceDotFile, dot.toDot(proteinNetwork.getInteractomeGraph()));
+		IOUtils.write(outputFileName+node+".svg", svg.toSvg(sourceDotFile));
 	}
 	private void createImages(String fileName, List<Double> list1, String legend1, List<Double> list2, String legend2) throws IOException{
 		BoxPlotChart bpc = new BoxPlotChart("", "", "");
@@ -398,6 +422,7 @@ public class Snow2  extends BabelomicsTool{
 		
 		ProteinNetwork subProteinNetwork = createSubnet(subgraph);
 		
+		sbTopo.append(getTopologicalValues(subProteinNetwork, node));
 		IOUtils.write(outputFileName+"_sn_nodeFile"+node+"_topo.txt", sbTopo.toString());
 		result.addOutputItem(new Item("sn_nodeFile"+node+"_topo", outputFileName+"_sn_nodeFile"+node+"_topo.txt", "Subnet topo values", Item.TYPE.FILE, Arrays.asList("subnet","topological"),new HashMap<String,String>(),"Output data"));
 		

@@ -6,7 +6,7 @@ import org.junit.Test;
 public class Snow2Test {
 
 	
-	@Test
+//	@Test
 	public void Test1() {
 
 		//Comando de Alicia
@@ -25,21 +25,15 @@ public class Snow2Test {
 				"--intermediate",
 				"--images",
 				"--home", System.getenv("BABELOMICS_HOME")};
-		try {
-//			for(String arg : args)
-//				System.out.println(arg);
-			BabelomicsMain.main(args);
-				
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		main(args);
+		
 	}
 	
 	//@Test
 	public void Test2() {
 
 		//Comando de Alicia
-		String []args2 = {
+		String []args = {
 				"--tool", "snow2", 
 				"-o", "/tmp/",  
 				"-s", "/mnt/commons/babelomics/tests/snow2/ej1/sce_alldb_proteins_interactome_nr.sif", 
@@ -58,8 +52,33 @@ public class Snow2Test {
 				"--home", System.getenv("BABELOMICS_HOME")};
 		String comando = "./babelomics.sh --tool snow2 -o /tmp/ -s /home/ralonso/appl/babelomics/sce/proteins/sce_alldb_proteins_interactome_nr.sif -t /home/ralonso/appl/babelomics/sce/proteins/sce_alldb_proteins_interactome_nr_topo.txt --randoms 1000 --randoms-size 50 --o-topo-file /home/ralonso/appl/babelomics/sce/proteins/Ejemplo1/result --o-means-file /home/ralonso/appl/babelomics/sce/proteins/Ejemplo1/result --node-file1 /home/ralonso/appl/babelomics/sce/proteins/Ejemplo1/UPYDOWN_HET_list_uniq --o-components-file /home/ralonso/appl/babelomics/sce/proteins/Ejemplo1/result --o-stats-file /home/ralonso/appl/babelomics/sce/proteins/Ejemplo1/result --side less";
 
+		main(args);
+	}
+	
+	@Test
+	public void DotSvgJsonTest() {
+
+		String []args = {
+				"--tool", "snow2", 
+				"-o", "/tmp/ej8/",  
+				"-s", "/mnt/commons/babelomics/tests/snow2/ej8/ej8.sif",
+				"-t", "/mnt/commons/babelomics/tests/snow2/ej8/ej8.topo",
+				"--node-file1","/mnt/commons/babelomics/tests/snow2/ej8/list1",
+				"--node-file2","/mnt/commons/babelomics/tests/snow2/ej8/list2",
+//				"--dot",
+				"--svg",
+				"--json",
+				"--side","greater",
+				"--home", System.getenv("BABELOMICS_HOME")};
+
+		main(args);
+	}
+	
+	public void main(String []args){
 		try {
-			BabelomicsMain.main(args2);
+//			for(String arg : args)
+//				System.out.println(arg);
+			BabelomicsMain.main(args);
 				
 		} catch (Exception e) {
 			e.printStackTrace();
