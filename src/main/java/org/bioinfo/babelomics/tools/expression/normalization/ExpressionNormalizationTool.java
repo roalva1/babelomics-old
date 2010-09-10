@@ -18,7 +18,7 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
-import org.bioinfo.data.dataset.DatasetUtils;
+//import org.bioinfo.data.dataset.DatasetUtils;
 import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.io.file.compress.CompressFactory;
 import org.bioinfo.io.file.compress.GenericCompressManager;
@@ -260,7 +260,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 				result.addOutputItem(new Item("normalized", file.getName(), "Feature data ", TYPE.FILE, StringUtils.toList("idlist", ","), new HashMap<String, String>(2), "Normalization output files"));
 				
 				file = new File(outdir + "/normalized_dataset.gff3"); 
-				DatasetUtils.dataset2Gff3(outdir + "/normalized_dataset.txt", file.getAbsolutePath());
+			//	DatasetUtils.dataset2Gff3(outdir + "/normalized_dataset.txt", file.getAbsolutePath());
 				if ( file.exists() ) {
 					result.addOutputItem(new Item("gff3", file.getName(), "GFF3 format", TYPE.FILE, StringUtils.toList("gff", ","), new HashMap<String, String>(2), "Normalization output files"));
 				}
