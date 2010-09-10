@@ -67,8 +67,9 @@ public class Snow2Test {
 				"--node-file1","/mnt/commons/babelomics/tests/snow2/ej8/list1",
 				"--node-file2","/mnt/commons/babelomics/tests/snow2/ej8/list2",
 //				"--dot",
+				"--o-file", "result",
 				"--intermediate",
-				"--svg",
+				"--svg","dot",
 				"--json",
 				"--side","greater",
 				"--home", System.getenv("BABELOMICS_HOME")};
@@ -76,7 +77,7 @@ public class Snow2Test {
 		main(args);
 	}
 	
-	@Test
+	//@Test
 	public void DotSvgJsonTestAlicia() {
 
 		String []args = {
@@ -85,15 +86,39 @@ public class Snow2Test {
 				"-o", "/tmp/ej1/",  
 //				"-s", "/mnt/commons/babelomics/tests/snow2/ej1/sce_alldb_proteins_interactome_nr.sif", 
 //				"-t", "/home/ralonso/appl/babelomics/sce/proteins/sce_alldb_proteins_interactome_nr_topo.txt",
-				"--randoms", "10",
-				"--randoms-size","2", 
+				"--randoms", "1",
+				"--randoms-size","1", 
 				"--o-file","result",
-				"--node-file1","/mnt/commons/babelomics/tests/snow2/ej1/UPYDOWN_HET_list_uniq",
-//				"--node-file2","/mnt/commons/babelomics/tests/snow2/ej1/list2",
+//				"--node-file1","/mnt/commons/babelomics/tests/snow2/ej1/UPYDOWN_HET_list_uniq",
+				"--node-file1","/mnt/commons/babelomics/tests/snow2/ej1/list2",
 				"--species","sce",
 				"--side", "less",
+//				"--intermediate",
+				"--svg", "dot",
+				"--json",
+				"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
+	}
+	
+	@Test
+	public void testSnow() {
+
+		String []args = {
+				
+				"--tool", "snow2", 
+				"-o", "/tmp/3_1/",  
+//				"-s", "/mnt/commons/babelomics/tests/snow2/ej1/sce_alldb_proteins_interactome_nr.sif", 
+//				"-t", "/home/ralonso/appl/babelomics/sce/proteins/sce_alldb_proteins_interactome_nr_topo.txt",
+				"--randoms", "1",
+				"--randoms-size","5", 
+				"--o-file","result",
+//				"--node-file1","/mnt/commons/babelomics/tests/snow2/ej1/UPYDOWN_HET_list_uniq",
+				"--node-file1","/mnt/commons/babelomics/tests/snow2/ej3_1/listSmall",
+				"--species","hsa",
+				"--type","genes",
+				"--side", "less",
 				"--intermediate",
-				"--svg",
+//				"--svg", "dot",
 				"--json",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
