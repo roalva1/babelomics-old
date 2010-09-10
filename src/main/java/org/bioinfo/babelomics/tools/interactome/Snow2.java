@@ -24,17 +24,19 @@ import org.bioinfo.networks.protein.ProteinVertex;
 import org.bioinfo.networks.protein.WilcoxonTest;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
+import org.bioinfo.tool.result.Item.TYPE;
 import org.jfree.chart.plot.PlotOrientation;
 
 public class Snow2  extends BabelomicsTool{
 
-//	private List<String> nodeList1, nodeList2;
+	//	private List<String> nodeList1, nodeList2;
 	private File inputFile;
+	private String interactome;
 	private String outputFileName;
 	private ProteinNetwork proteinNetwork;
 	private ProteinNetwork subProteinNetwork1, subProteinNetwork2;
 	private List<ProteinNetwork> subProteinNetworkRandoms;
-//	private String imagesFile;
+	//	private String imagesFile;
 	private boolean noNumberOfComponents;
 	private boolean bicomponents;
 	private boolean images;
@@ -42,12 +44,15 @@ public class Snow2  extends BabelomicsTool{
 	private boolean svg;
 	private boolean json;
 
+	private String wBinPath;
+
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("sif-file","s", "An input file containing a SIF interactome", false));
+		options.addOption(OptionFactory.createOption("interactome", "Interactome: hsa, sce or own (for you own interactome)", true));
+		options.addOption(OptionFactory.createOption("sif-file", "An input file containing a SIF interactome", false));
 		options.addOption(OptionFactory.createOption("topo-file","t", "An input file containing topological values", false, true));
-		options.addOption(OptionFactory.createOption("node-file1","n", "An input file containing a node per line", false));
-		options.addOption(OptionFactory.createOption("node-file2", "An input file containing a node per line", false));
+		options.addOption(OptionFactory.createOption("list1", "An input file containing a node per line", false));
+		options.addOption(OptionFactory.createOption("list2", "An input file containing a node per line", false));
 		options.addOption(OptionFactory.createOption("randoms", "Number of randoms", false, true));
 		options.addOption(OptionFactory.createOption("randoms-size", "Size of randoms", false, true));
 		options.addOption(OptionFactory.createOption("intermediate", "If there is this argument, it will create the network with 1 intermediate", false, false));
@@ -57,25 +62,24 @@ public class Snow2  extends BabelomicsTool{
 		options.addOption(OptionFactory.createOption("json", "It will create an output .json file", false, true));
 		options.addOption(OptionFactory.createOption("svg", "It will create an output .svg and .dot file", false, true));
 		options.addOption(OptionFactory.createOption("o-sif-topo-file", "Create a full topological file from a sif file", false));
-		options.addOption(OptionFactory.createOption("o-file", "If there is this argument, it will create an output .cmp file for the information of each component", false, true));
+		options.addOption(OptionFactory.createOption("o-name", "If there is this argument, it will create an output .cmp file for the information of each component", false, true));
 		options.addOption(OptionFactory.createOption("side", "side for kolmogorov and wilkoxon test. Can be two.sided(by default), less or greater", false, true));
 		options.addOption(OptionFactory.createOption("images", "Print the images for the statistics", false, false));
-		
-		
-		
-		
-		
-//		result.addOutputItem(new Item("o-means-file", exp, "Exponential function", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-//		result.addOutputItem(new Item("o-topo-file", mergeMethod, "Merge replicates", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-//		result.addOutputItem(new Item("o-components-file", filterPercentage, "Filter missing values", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-//		result.addOutputItem(new Item("impute_input_param", ("knn".equalsIgnoreCase(imputeMethod) ? ("knn, k-value = " + commandLine.getOptionValue("k-value", "15")) : imputeMethod) , "Impute missing values", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-//		result.addOutputItem(new Item("filenamefilter_input_param", (filterFilename != null && !"none".equalsIgnoreCase(filterFilename) ? "none" : new File(filterFilename).getName()), "ID-file filter", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-//		result.addOutputItem(new Item("extractid_input_param", "" + (extractIds != null && !extractIds.equalsIgnoreCase("none")), "Extract IDs", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-	
+
+
+
+		//		result.addOutputItem(new Item("o-means-file", exp, "Exponential function", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		//		result.addOutputItem(new Item("o-topo-file", mergeMethod, "Merge replicates", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		//		result.addOutputItem(new Item("o-components-file", filterPercentage, "Filter missing values", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		//		result.addOutputItem(new Item("impute_input_param", ("knn".equalsIgnoreCase(imputeMethod) ? ("knn, k-value = " + commandLine.getOptionValue("k-value", "15")) : imputeMethod) , "Impute missing values", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		//		result.addOutputItem(new Item("filenamefilter_input_param", (filterFilename != null && !"none".equalsIgnoreCase(filterFilename) ? "none" : new File(filterFilename).getName()), "ID-file filter", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		//		result.addOutputItem(new Item("extractid_input_param", "" + (extractIds != null && !extractIds.equalsIgnoreCase("none")), "Extract IDs", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+
 	}
 	@Override
 	protected void execute() {
-		
+		wBinPath = babelomicsHomePath + "/bin/snow/wilcoxtest.r";
+		 
 		subProteinNetworkRandoms = new ArrayList<ProteinNetwork>();
 		noNumberOfComponents = commandLine.hasOption("no-number-components");
 		bicomponents = commandLine.hasOption("bicomponents");
@@ -83,108 +87,134 @@ public class Snow2  extends BabelomicsTool{
 		dot = commandLine.hasOption("dot");
 		svg = commandLine.hasOption("svg");
 		json = commandLine.hasOption("json");
-		outputFileName = outdir+commandLine.getOptionValue("o-file");
-		
-		if(json)
-			result.addOutputItem(new Item("json", outputFileName+".json", "Json file", Item.TYPE.FILE, Arrays.asList("json"),new HashMap<String,String>(),"Output data"));
-		if(dot)
-			result.addOutputItem(new Item("dot", outputFileName+".dot", "Dot file", Item.TYPE.FILE, Arrays.asList("dot"),new HashMap<String,String>(),"Output data"));
-		if(svg)
-			result.addOutputItem(new Item("svg", outputFileName+".svg", "SVG file", Item.TYPE.FILE, Arrays.asList("svg"),new HashMap<String,String>(),"Output data"));
-		
-		//Analysis one list
-		if(commandLine.hasOption("randoms") && !commandLine.hasOption("node-file2")){
-			result.addOutputItem(new Item("list_inter_kol", outputFileName+"_list_inter_kol.txt", "List-Inter kolmogorov", Item.TYPE.FILE, Arrays.asList("stats, kolmogorov"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("list_inter_wil", outputFileName+"_list_inter_wil.txt", "List-Inter Wilcoxon", Item.TYPE.FILE, Arrays.asList("stats, wilcoxon"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("sn_random_kol", outputFileName+"_sn_random_kol.txt", "List-Inter kolmogorov", Item.TYPE.FILE, Arrays.asList("stats, kolmogorov"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("sn_random_wil", outputFileName+"_sn_random_wil.txt", "List-Inter Wilcoxon", Item.TYPE.FILE, Arrays.asList("stats, wilcoxon"),new HashMap<String,String>(),"Output data"));
-			
-			result.addOutputItem(new Item("image_list_inter_relBet", outputFileName+"_list_inter_relBet", "Image list inter relbet", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("image_list_inter_conn", outputFileName+"_list_inter_conn", "Image list inter conn", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("image_list_inter_clust", outputFileName+"_list_inter_clust", "Image list inter clust", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("image_sn_random_relBet", outputFileName+"_sn_random_relBet", "Image subnet random relbet", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("image_sn_random_conn", outputFileName+"_sn_random_conn", "Image subnet random conn", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("image_sn_random_clust", outputFileName+"_sn_random_clust", "Image subnet random clust", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
+		outputFileName = outdir + "/" + commandLine.getOptionValue("o-name");
 
+		String interactomeMsg = "Homo sapiens";
+		interactome = commandLine.getOptionValue("interactome");
+		if ("hsa".equalsIgnoreCase(interactome)) {
+			interactomeMsg = "Homo sapiens";
+		} else if ("sce".equalsIgnoreCase(interactome)) {
+			interactomeMsg = "Saccharomyce cerevisiae";
+		} else if ("own".equalsIgnoreCase(interactome)) {
+			interactomeMsg = new File(commandLine.getOptionValue("sif-file")).getName();
+		} else {
+			interactomeMsg = "unknown";
 		}
-		
-		//Analysis two lists
-		else if(commandLine.hasOption("node-file1") && commandLine.hasOption("node-file2")){
-				
-		
-			result.addOutputItem(new Item("list1_list2_kol", outputFileName+"_list1_list2_kol.txt", "List1-List2 kolmogorov", Item.TYPE.FILE, Arrays.asList("stats, kolmogorov"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("list1_list2_wil", outputFileName+"_list1_list2_wil.txt", "List1-List2 Wilcoxon", Item.TYPE.FILE, Arrays.asList("stats, wilcoxon"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("sn1_sn2_kol", outputFileName+"_sn1_sn2_kol.txt", "Subnet1-Subnet2 kolmogorov", Item.TYPE.FILE, Arrays.asList("stats, kolmogorov"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("sn1_sn2_wil", outputFileName+"_sn1_sn2_wil.txt", "Subnet1-Subnet2 Wilcoxon", Item.TYPE.FILE, Arrays.asList("stats, wilcoxon"),new HashMap<String,String>(),"Output data"));
-		
-			result.addOutputItem(new Item("image_list1_list2_relBet", outputFileName+"_list1_list2_relBet", "Image list1-list2 inter relbet", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("image_list1_list2_conn", outputFileName+"_list1_list2_conn", "Image list1-list2 conn", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("image_list1_list2_clust", outputFileName+"_list1_list2_clust", "Image list1-list2 clust", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("image_sn1_sn2_relBet", outputFileName+"_sn1_sn2_relBet", "Image subnet1-subnet2 random relbet", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("image_sn1_sn2_conn", outputFileName+"_sn1_sn2_conn", "Image subnet1-subnet2 conn", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("image_sn1_sn2_clust", outputFileName+"_sn1_sn2_clust", "Image subnet1-subnet2 clust", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
-		}
+		result.addOutputItem(new Item("interactome_param", interactomeMsg, "Interactome", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+
+		//		//Analysis one list
+		//		if(commandLine.hasOption("randoms") && !commandLine.hasOption("list2")){
+		//			result.addOutputItem(new Item("list_inter_kol", outputFileName+"_list_inter_kol.txt", "List-Inter kolmogorov", Item.TYPE.FILE, Arrays.asList("stats, kolmogorov"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("list_inter_wil", outputFileName+"_list_inter_wil.txt", "List-Inter Wilcoxon", Item.TYPE.FILE, Arrays.asList("stats, wilcoxon"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("sn_random_kol", outputFileName+"_sn_random_kol.txt", "List-Inter kolmogorov", Item.TYPE.FILE, Arrays.asList("stats, kolmogorov"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("sn_random_wil", outputFileName+"_sn_random_wil.txt", "List-Inter Wilcoxon", Item.TYPE.FILE, Arrays.asList("stats, wilcoxon"),new HashMap<String,String>(),"Output data"));
+		//			
+		//			result.addOutputItem(new Item("image_list_inter_relBet", outputFileName+"_list_inter_relBet", "Image list inter relbet", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("image_list_inter_conn", outputFileName+"_list_inter_conn", "Image list inter conn", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("image_list_inter_clust", outputFileName+"_list_inter_clust", "Image list inter clust", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("image_sn_random_relBet", outputFileName+"_sn_random_relBet", "Image subnet random relbet", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("image_sn_random_conn", outputFileName+"_sn_random_conn", "Image subnet random conn", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("image_sn_random_clust", outputFileName+"_sn_random_clust", "Image subnet random clust", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
 		//
-		if(commandLine.hasOption("randoms")){
-			int randoms = Integer.parseInt(commandLine.getOptionValue("randoms"));
-			result.addOutputItem(new Item("randoms means", outputFileName+"_sn_1-"+(randoms)+"_means.txt", "Random: means", Item.TYPE.FILE, Arrays.asList("randoms","means"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("randoms topo", outputFileName+"_sn_1-"+(randoms)+"_topo.txt", "Random: topological values", Item.TYPE.FILE, Arrays.asList("randoms","topological"),new HashMap<String,String>(),"Output data"));
-			result.addOutputItem(new Item("randoms components", outputFileName+"_sn_1-"+(randoms)+"_comp.txt", "Randoms: components", Item.TYPE.FILE, Arrays.asList("randoms","components"),new HashMap<String,String>(),"Output data"));
-		}
-		
-		
+		//		}
+		//		
+		//		//Analysis two lists
+		//		else if(commandLine.hasOption("list1") && commandLine.hasOption("list2")){
+		//				
+		//		
+		//			result.addOutputItem(new Item("list1_list2_kol", outputFileName+"_list1_list2_kol.txt", "List1-List2 kolmogorov", Item.TYPE.FILE, Arrays.asList("stats, kolmogorov"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("list1_list2_wil", outputFileName+"_list1_list2_wil.txt", "List1-List2 Wilcoxon", Item.TYPE.FILE, Arrays.asList("stats, wilcoxon"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("sn1_sn2_kol", outputFileName+"_sn1_sn2_kol.txt", "Subnet1-Subnet2 kolmogorov", Item.TYPE.FILE, Arrays.asList("stats, kolmogorov"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("sn1_sn2_wil", outputFileName+"_sn1_sn2_wil.txt", "Subnet1-Subnet2 Wilcoxon", Item.TYPE.FILE, Arrays.asList("stats, wilcoxon"),new HashMap<String,String>(),"Output data"));
+		//		
+		//			result.addOutputItem(new Item("image_list1_list2_relBet", outputFileName+"_list1_list2_relBet", "Image list1-list2 inter relbet", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("image_list1_list2_conn", outputFileName+"_list1_list2_conn", "Image list1-list2 conn", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("image_list1_list2_clust", outputFileName+"_list1_list2_clust", "Image list1-list2 clust", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("image_sn1_sn2_relBet", outputFileName+"_sn1_sn2_relBet", "Image subnet1-subnet2 random relbet", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("image_sn1_sn2_conn", outputFileName+"_sn1_sn2_conn", "Image subnet1-subnet2 conn", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("image_sn1_sn2_clust", outputFileName+"_sn1_sn2_clust", "Image subnet1-subnet2 clust", Item.TYPE.FILE, Arrays.asList("image"),new HashMap<String,String>(),"Output data"));
+		//		}
+
+		//
+		//		if(commandLine.hasOption("randoms")){
+		//			int randoms = Integer.parseInt(commandLine.getOptionValue("randoms"));
+		//			
+		//			result.addOutputItem(new Item("randoms means", outputFileName+"_sn_1-"+(randoms)+"_means.txt", "Random: means", Item.TYPE.FILE, Arrays.asList("randoms","means"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(neoutputFileName+"_sn_1-"+(randoms)+"_means.txt"w Item("randoms topo", outputFileName+"_sn_1-"+(randoms)+"_topo.txt", "Random: topological values", Item.TYPE.FILE, Arrays.asList("randoms","topological"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("randoms components", outputFileName+"_sn_1-"+(randoms)+"_comp.txt", "Randoms: components", Item.TYPE.FILE, Arrays.asList("randoms","components"),new HashMap<String,String>(),"Output data"));
+		//		}
+
+
 		String side = "two.sided";
-		if(commandLine.hasOption("side"))
+		if(commandLine.hasOption("side")) {
 			side = commandLine.getOptionValue("side");
+		}
+		result.addOutputItem(new Item("side_param", side, "Side for kolmogorov and wilkoxon test", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+
 
 		ProteinNetworkToFile file = new ProteinNetworkToFile();
 
 		try {
-		
-			String folderInteractions = "/mnt/commons/babelomics/tests/snow2/data/intereactions/";
-			SimpleUndirectedGraph<ProteinVertex, DefaultEdge> interactomeGraph;
-			if(commandLine.hasOption("sif-file") ){
-				inputFile = new File(commandLine.getOptionValue("sif-file"));
-				logger.debug("checking if inputFile exist...");
-				FileUtils.checkFile(inputFile);
-				interactomeGraph = InteractomeParser.parseFromSifFile(commandLine.getOptionValue("sif-file") );
+
+			String folderInteractions = this.babelomicsHomePath + "/conf/interactions/";
+			//String folderInteractions = "/mnt/commons/babelomics/tests/snow2/data/interactions/";
+			SimpleUndirectedGraph<ProteinVertex, DefaultEdge> interactomeGraph = null;
+
+			if (interactome.equals("sce")) {
+				interactomeGraph = InteractomeParser.parseFromSifFile(folderInteractions+"sce_alldb_proteins_interactome_nr.sif");
 				proteinNetwork = new ProteinNetwork(interactomeGraph);
-			}
-			else{
-				
-				if(species.equals("sce"))
-					interactomeGraph = InteractomeParser.parseFromSifFile(folderInteractions+"sce_alldb_proteins_interactome_nr.sif");
-				else if(species.equals("hsa"))
-					interactomeGraph = InteractomeParser.parseFromSifFile(folderInteractions+"hsa_alldb_proteins_interactome_nr.sif");
-				else{
-					System.err.println("Unknown specie");
-					return;
+				proteinNetwork.loadTopologicalValues(folderInteractions+"sce_alldb_proteins_interactome_nr_topo.txt");
+			} else if (interactome.equals("hsa")) {
+				interactomeGraph = InteractomeParser.parseFromSifFile(folderInteractions+"hsa_alldb_proteins_interactome_nr.sif");
+				proteinNetwork = new ProteinNetwork(interactomeGraph);
+				proteinNetwork.loadTopologicalValues(folderInteractions+"hsa_alldb_proteins_interactome_nr_topo.txt");
+			} else if (interactome.equals("own")){
+				if(commandLine.hasOption("sif-file") ){
+					inputFile = new File(commandLine.getOptionValue("sif-file"));
+					logger.debug("checking if inputFile exist...");
+					FileUtils.checkFile(inputFile);
+					interactomeGraph = InteractomeParser.parseFromSifFile(commandLine.getOptionValue("sif-file") );
+					proteinNetwork = new ProteinNetwork(interactomeGraph);
+				} else {
+					System.err.println("Missing custom interactome");
+					return;					
 				}
-				proteinNetwork = new ProteinNetwork(interactomeGraph);
-					
+			} else {
+				System.err.println("Unknown interactome");
+				return;
 			}
+
 			if(commandLine.hasOption("topo-file") ){
 				FileUtils.checkFile(new File(commandLine.getOptionValue("topo-file")));
 				proteinNetwork.loadTopologicalValues(commandLine.getOptionValue("topo-file"));
 			}
-			else{
-				if(species.equals("sce"))
-					proteinNetwork.loadTopologicalValues(folderInteractions+"sce_alldb_proteins_interactome_nr_topo.txt");
-				else if(species.equals("hsa"))
-					proteinNetwork.loadTopologicalValues(folderInteractions+"hsa_alldb_proteins_interactome_nr_topo.txt");
-				else{
-					System.err.println("Unknown specie");
-					return;
-				}
+
+			//			proteinNetwork = new ProteinNetwork(interactomeGraph);
+
+			//System.out.println("************************ specie = " + species);
+			//			if(commandLine.hasOption("topo-file") ){
+			//				FileUtils.checkFile(new File(commandLine.getOptionValue("topo-file")));
+			//				proteinNetwork.loadTopologicalValues(commandLine.getOptionValue("topo-file"));
+			//			}
+			//			else{
+			//				if(interactome.equals("sce")) {
+			//					proteinNetwork.loadTopologicalValues(folderInteractions+"sce_alldb_proteins_interactome_nr_topo.txt");
+			//				} else if(interactome.equals("hsa")) {
+			//					//System.out.println("************************ " + folderInteractions+"hsa_alldb_proteins_interactome_nr_topo.txt");
+			//					proteinNetwork.loadTopologicalValues(folderInteractions+"hsa_alldb_proteins_interactome_nr_topo.txt");
+			//				} else {
+			//					System.err.println("Unknown specie");
+			//					return;
+			//				}
+			//				//result.addOutputItem(new Item("specie_param", ("hsa".equalsIgnoreCase(species) ? "Homo sapiens" : "Saccharomyces cerevisiae"), "Specie", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+			//			}
+
+			if(commandLine.hasOption("list1")) {
+				subProteinNetwork1 = createNodeFile(commandLine.getOptionValue("list1"), 1);
 			}
-			
-			
-			
-			if(commandLine.hasOption("node-file1")) {
-				subProteinNetwork1 = createNodeFile(commandLine.getOptionValue("node-file1"), 1);
-			}
-			if(commandLine.hasOption("node-file2")) {
-				subProteinNetwork2 = createNodeFile(commandLine.getOptionValue("node-file2"), 2);
+
+			if(commandLine.hasOption("list2") && !"none".equalsIgnoreCase(commandLine.getOptionValue("list2"))) {
+				subProteinNetwork2 = createNodeFile(commandLine.getOptionValue("list2"), 2);
 			}
 			if(commandLine.hasOption("o-sif-topo-file")) {
 				proteinNetwork.calcTopologicalValues();
@@ -202,13 +232,22 @@ public class Snow2  extends BabelomicsTool{
 					randomSize = Integer.parseInt(commandLine.getOptionValue("randoms-size"));
 				}
 				createRandoms(randoms, randomSize);
+				result.addOutputItem(new Item("randoms_param", ""+randoms, "Number of randoms", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+				result.addOutputItem(new Item("randoms_size_param", ""+randomSize, "Size of randoms", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 			}
-			if(commandLine.hasOption("randoms") && !commandLine.hasOption("node-file2"))
+
+			result.addOutputItem(new Item("no_number_components_param", (commandLine.hasOption("no-number-components") ? "yes" : "no"), "Calculate the number of components", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+			result.addOutputItem(new Item("bicomponents_param", (commandLine.hasOption("bicomponents") ? "yes" : "no"), "Calculate the number of bicomponents", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+			result.addOutputItem(new Item("intermediate_param", (commandLine.hasOption("intermediate") ? "yes" : "no"), "Create the network with 1 intermediate", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+
+			if(commandLine.hasOption("randoms") && (!commandLine.hasOption("list2") || "none".equalsIgnoreCase(commandLine.getOptionValue("list2")))) {
 				statsOneListAnalysis(side);
-			else if(commandLine.hasOption("node-file1") && commandLine.hasOption("node-file2"))
+			} else if(commandLine.hasOption("list1") && commandLine.hasOption("list2") && !"none".equalsIgnoreCase(commandLine.getOptionValue("list2")))
 				statsTwoListsAnalisys(side);
 			else
 				System.err.println("Not correct arguments for statistic test");
+
+
 			if(json){
 				IOUtils.write(outputFileName+".json", proteinNetwork.getInteractomeGraph().toJson());
 			}
@@ -221,61 +260,91 @@ public class Snow2  extends BabelomicsTool{
 			else if(dot && svg){
 				createSVGFile(outputFileName+".dot");
 			}
-			
-				
+
+			File f = null;
+			if(json) {
+				f = new File(outputFileName+".json");
+				if (f.exists()) {
+					result.addOutputItem(new Item("json_param", f.getName(), "Json format", Item.TYPE.FILE, Arrays.asList("json"),new HashMap<String,String>(),"Interactions graph"));
+				}
+			}
+			if(dot) {
+				f = new File(outputFileName+".dot");
+				if (f.exists()) {
+					result.addOutputItem(new Item("dot_param", f.getName(), "Dot format", Item.TYPE.FILE, Arrays.asList("dot"),new HashMap<String,String>(),"Interactions graph"));
+				}
+			}
+			if(svg) {
+				f = new File(outputFileName+".svg");
+				if (f.exists()) {
+					result.addOutputItem(new Item("svg_param", f.getName(), "SVG format", Item.TYPE.FILE, Arrays.asList("svg"),new HashMap<String,String>(),"Interactions graph"));
+				}
+			}
+
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-			
+
 	}
-	
+
 	private void createSVGFile(String sourceDotFile) throws IOException{
+		System.out.println("----------> sourceDotFile = " + sourceDotFile);
+		System.out.println("----------> outputFileName = " + outputFileName);
 		IOUtils.write(sourceDotFile, proteinNetwork.getInteractomeGraph().toDot());
-		IOUtils.write(commandLine.getOptionValue("o-svg-file")+".svg", proteinNetwork.getInteractomeGraph().toSVG(sourceDotFile));
+		IOUtils.write(outputFileName+".svg", proteinNetwork.getInteractomeGraph().toSVG(sourceDotFile));
 	}
-	private void createImages(String fileName, List<Double> list1, String legend1, List<Double> list2, String legend2) throws IOException{
+	private void createImages(String fileName, List<Double> list1, String legend1, List<Double> list2, String legend2, String itemName, String itemLabel, String itemGroup) throws IOException{
+		File f = new File(fileName + ".png");
 		BoxPlotChart bpc = new BoxPlotChart("", "", "");
 		bpc.getLegend().setVisible(true);
 		bpc.addSeries(list2, legend2, legend2);
 		bpc.addSeries(list1, legend1, legend1);
 		bpc.setOrientation(PlotOrientation.HORIZONTAL);
-		bpc.save(fileName+".png");
+		bpc.save(f.getAbsolutePath());
+		
+		result.addOutputItem(new Item(itemName, f.getName(), itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));		
 	}
 	private void statsOneListAnalysis(String side) throws IOException{
 		// 1st Analysis
-		
+		File f = null;
 		WilcoxonTest wTest = new WilcoxonTest();
-		List<String> list = IOUtils.readLines(commandLine.getOptionValue("node-file1"));
-		
-		
+		List<String> list = IOUtils.readLines(commandLine.getOptionValue("list1"));
+
+
 		List<Double> relBetInter = proteinNetwork.getBetRelList();
 		List<Double> relBetList1 = new ArrayList<Double>();
-		
+
 		List<Double> connInter = proteinNetwork.getConnList();
 		List<Double> connList1 = new ArrayList<Double>();
-		
+
 		List<Double> clustInter = proteinNetwork.getClustList();
 		List<Double> clustList1 = new ArrayList<Double>();
 
 		createTopoFilterList(list, relBetList1, connList1, clustList1);
 
 		String toWrite = formatStatsFile(relBetList1, relBetInter, connList1, connInter, clustList1, clustInter, side);
-		
-		IOUtils.write(outputFileName+"_list_inter_kol.txt", toWrite);
-		wTest.test(outputFileName+"_list_inter_wil.txt", side, "list1", "inter", relBetList1, relBetInter, connList1, connInter, clustList1, clustInter);
-			
+
+		f = new File(outputFileName+"_list_inter_kol.txt");
+		IOUtils.write(f.getAbsoluteFile(), toWrite);
+		result.addOutputItem(new Item("list_inter_kol_param", f.getName(), "List-inter", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test"));
+
+		wTest.test(wBinPath, outputFileName+"_list_inter_wil.txt", side, "list1", "inter", relBetList1, relBetInter, connList1, connInter, clustList1, clustInter);
+		f = new File(outputFileName+"_list_inter_wil.txt");
+		result.addOutputItem(new Item("list_inter_wil_param", f.getName(), "List-inter", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+
 		if(images){
-			createImages(outputFileName+"_list_inter_relBet", relBetList1, "list1", relBetInter, "inter");
-			createImages(outputFileName+"_list_inter_conn", connList1, "list1", connInter, "inter");
-			createImages(outputFileName+"_list_inter_clust", clustList1, "list1", clustInter, "inter");
+			createImages(outputFileName+"_list_inter_relBet", relBetList1, "list1", relBetInter, "inter", "list_inter_relBet", "relBet", "Images.List vs inter");
+			createImages(outputFileName+"_list_inter_conn", connList1, "list1", connInter, "inter", "list_inter_conn", "conn", "Images.List vs inter");
+			createImages(outputFileName+"_list_inter_clust", clustList1, "list1", clustInter, "inter", "list_inter_clust", "clust", "Images.List vs inter");
 		}
 		//2nd Analysis
 		List<Double> relBetSubnet1 = subProteinNetwork1.getBetRelList();
 		List<Double> relBetRandoms = new ArrayList<Double>();
-		
+
 		List<Double> connSubnet1 = subProteinNetwork1.getConnList();
 		List<Double> connRandoms = new ArrayList<Double>();
-		
+
 		List<Double> clustSubnet1 = subProteinNetwork1.getClustList();
 		List<Double> clustRandoms = new ArrayList<Double>();
 
@@ -284,62 +353,67 @@ public class Snow2  extends BabelomicsTool{
 			connRandoms.add(proteinNetwork.getMeanConnections());
 			clustRandoms.add(proteinNetwork.getMeanClust());
 		}
-		
+
 		toWrite = formatStatsFile(relBetSubnet1, relBetRandoms, connSubnet1, connRandoms, clustSubnet1, clustRandoms, side);
-		IOUtils.write(outputFileName+"_sn_random_kol.txt", toWrite);		
-		wTest.test(outputFileName+"_sn_random_wil.txt", side, "sn1", "rnd", relBetSubnet1, relBetRandoms, connSubnet1, connRandoms, clustSubnet1, clustRandoms);
+		f = new File(outputFileName+"_sn_random_kol.txt");
+		IOUtils.write(f.getAbsoluteFile(), toWrite);
+		result.addOutputItem(new Item("sn_random_kol_param", f.getName(), "Subnet random", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test"));
+		
+		f = new File(outputFileName+"_sn_random_wil.txt");
+		wTest.test(wBinPath, f.getAbsolutePath(), side, "sn1", "rnd", relBetSubnet1, relBetRandoms, connSubnet1, connRandoms, clustSubnet1, clustRandoms);
+		result.addOutputItem(new Item("sn_random_wil_param", f.getName(), "Subnet random", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
 		if(images){
-			createImages(outputFileName+"_sn_random_relBet", relBetSubnet1, "subnet1", relBetRandoms, "randoms");
-			createImages(outputFileName+"_sn_random_conn", connSubnet1, "subnet1", connRandoms, "randoms");
-			createImages(outputFileName+"_sn_random_clust", clustSubnet1, "subnet1", clustRandoms, "randoms");
+			createImages(outputFileName+"_sn_random_relBet", relBetSubnet1, "subnet1", relBetRandoms, "randoms", "sn_random_relBet", "relBet", "Images.Subnet random");
+			createImages(outputFileName+"_sn_random_conn", connSubnet1, "subnet1", connRandoms, "randoms", "sn_random_conn", "conn", "Images.Subnet random");
+			createImages(outputFileName+"_sn_random_clust", clustSubnet1, "subnet1", clustRandoms, "randoms", "sn_random_clust", "clust", "Images.Subnet random");
 		}
 	}
 	private void statsTwoListsAnalisys(String side) throws IOException{
 		// 1st Analysis
-		
+
 		WilcoxonTest wTest = new WilcoxonTest();
-		List<String> list1 = IOUtils.readLines(commandLine.getOptionValue("node-file1"));
-		List<String> list2 = IOUtils.readLines(commandLine.getOptionValue("node-file2"));
-		
+		List<String> list1 = IOUtils.readLines(commandLine.getOptionValue("list1"));
+		List<String> list2 = IOUtils.readLines(commandLine.getOptionValue("list2"));
+
 		List<Double> relBetList1 = new ArrayList<Double>();
 		List<Double> connList1 = new ArrayList<Double>();
 		List<Double> clustList1 = new ArrayList<Double>();
 		List<Double> relBetList2 = new ArrayList<Double>();
 		List<Double> connList2 = new ArrayList<Double>();
 		List<Double> clustList2 = new ArrayList<Double>();
-		
-		
+
+
 		createTopoFilterList(list1, relBetList1, connList1, clustList1);
 		createTopoFilterList(list2, relBetList2, connList2, clustList2);
-		
+
 		String toWrite = formatStatsFile(relBetList1, relBetList2, connList1, connList2, clustList1, clustList2, side);
 		IOUtils.write(outputFileName+"_list1_list2_kol.txt", toWrite);
-		wTest.test(outputFileName+"_list1_list2_wil.txt", side, "list1", "list2", relBetList1, relBetList2, connList1, connList2, clustList1, clustList2);
+		wTest.test(wBinPath, outputFileName+"_list1_list2_wil.txt", side, "list1", "list2", relBetList1, relBetList2, connList1, connList2, clustList1, clustList2);
 		if(images){
-			createImages(outputFileName+"_list1_list2_relBet", relBetList1, "list1", relBetList2, "list2");
-			createImages(outputFileName+"_list1_list2_conn", connList1, "list1", connList2, "list2");
-			createImages(outputFileName+"_list1_list2_clust", clustList1, "list1", clustList2, "list2");
+			createImages(outputFileName+"_list1_list2_relBet", relBetList1, "list1", relBetList2, "list2", "list1_list2_relBet", "relBet", "Images.List1 vs List2");
+			createImages(outputFileName+"_list1_list2_conn", connList1, "list1", connList2, "list2", "list1_list2_conn", "conn", "Images.List1 vs List2");
+			createImages(outputFileName+"_list1_list2_clust", clustList1, "list1", clustList2, "list2", "list1_list2_clust", "clust", "Images.List1 vs List2");
 		}
-		
+
 		//2nd Analysis
 		List<Double> relBetSubnet1 = subProteinNetwork1.getBetRelList();
 		List<Double> relBetSubnet2 = subProteinNetwork2.getBetRelList();
-		
+
 		List<Double> connSubnet1 = subProteinNetwork1.getConnList();
 		List<Double> connSubnet2 = subProteinNetwork2.getConnList();
-		
+
 		List<Double> clustSubnet1 = subProteinNetwork1.getClustList();
 		List<Double> clustSubnet2 = subProteinNetwork2.getClustList();
-		
+
 		toWrite = formatStatsFile(relBetSubnet1, relBetSubnet2, connSubnet1, connSubnet2, clustSubnet1, clustSubnet2, side);
 		IOUtils.write(outputFileName+"_sn1_sn2_kol.txt", toWrite);		
-		wTest.test(outputFileName+"_sn1_sn2_wil.txt", side, "sn1", "sn2", relBetSubnet1, relBetSubnet2, connSubnet1, connSubnet2, clustSubnet1, clustSubnet2);
+		wTest.test(wBinPath, outputFileName+"_sn1_sn2_wil.txt", side, "sn1", "sn2", relBetSubnet1, relBetSubnet2, connSubnet1, connSubnet2, clustSubnet1, clustSubnet2);
 		if(images){
-			createImages(outputFileName+"_sn1_sn2_relBet", relBetSubnet1, "subnet1", relBetSubnet2, "subnet2");
-			createImages(outputFileName+"_sn1_sn2_conn", connSubnet1, "subnet1", connSubnet2, "subnet2");
-			createImages(outputFileName+"_sn1_sn2_clust", clustSubnet1, "subnet1", clustSubnet2, "subnet2");
+			createImages(outputFileName+"_sn1_sn2_relBet", relBetSubnet1, "subnet1", relBetSubnet2, "subnet2", "sn1_sn2_relBet", "relBet", "Images.Subnet1 vs Subnet2");
+			createImages(outputFileName+"_sn1_sn2_conn", connSubnet1, "subnet1", connSubnet2, "subnet2", "sn1_sn2_conn", "conn", "Images.Subnet1 vs Subnet2");
+			createImages(outputFileName+"_sn1_sn2_clust", clustSubnet1, "subnet1", clustSubnet2, "subnet2", "sn1_sn2_clust", "clust", "Images.Subnet1 vs Subnet2");
 		}
-	
+
 	}
 	private String formatStatsFile(List<Double> relBetList1, List<Double> relBetList2, List<Double> connList1, List<Double> connList2, List<Double> clustList1, List<Double> clustList2, String side) throws IOException{
 		KSTest kstest = new KSTest();
@@ -361,12 +435,12 @@ public class Snow2  extends BabelomicsTool{
 		StringBuilder sbMeans = createMeansHeader();
 		StringBuilder sbTopo = createTopoHeader();
 		StringBuilder sbComponents =createComponentsHeader();
-		
+
 		for(int i=1; i<=randoms; i++){
 			SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), randomSize);
 			if(commandLine.hasOption("intermediate"))
 				subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.OneIntermediate(proteinNetwork.getInteractomeGraph(), subgraph);
-			
+
 			ProteinNetwork subProteinNetwork = createSubnet(subgraph);
 			sbTopo.append(getTopologicalValues(subProteinNetwork, i)).append(System.getProperty("line.separator"));
 			sbMeans.append(getTopologicalMeanValues(subProteinNetwork, i)).append(System.getProperty("line.separator"));
@@ -376,14 +450,27 @@ public class Snow2  extends BabelomicsTool{
 			}
 			subProteinNetworkRandoms.add(subProteinNetwork);
 		}
-		randomFilesToString(sbMeans, outputFileName+"_sn_1-"+(randoms)+"_means.txt");
-		randomFilesToString(sbTopo,outputFileName+"_sn_1-"+(randoms)+"_topo.txt");
-		randomFilesToString(sbComponents,outputFileName+"_sn_1-"+(randoms)+"_comp.txt");
-	}
-	
-	
-	private ProteinNetwork createNodeFile(String nodeFile, int node) throws IOException{
 		
+		//			result.addOutputItem(new Item("randoms means", outputFileName+"_sn_1-"+(randoms)+"_means.txt", "Random: means", Item.TYPE.FILE, Arrays.asList("randoms","means"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("randoms topo", outputFileName+"_sn_1-"+(randoms)+"_topo.txt", "Random: topological values", Item.TYPE.FILE, Arrays.asList("randoms","topological"),new HashMap<String,String>(),"Output data"));
+		//			result.addOutputItem(new Item("randoms components", outputFileName+"_sn_1-"+(randoms)+"_comp.txt", "Randoms: components", Item.TYPE.FILE, Arrays.asList("randoms","components"),new HashMap<String,String>(),"Output data"));
+
+		File f = new File(outputFileName+"_sn_1-"+(randoms)+"_topo.txt");
+		randomFilesToString(sbTopo, f.getAbsolutePath());
+		result.addOutputItem(new Item("randoms_topo_param", f.getName(), "Topografical values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Randoms results"));
+		
+		f = new File(outputFileName+"_sn_1-"+(randoms)+"_means.txt");
+		randomFilesToString(sbMeans, f.getAbsolutePath());
+		result.addOutputItem(new Item("randoms_means_param", f.getName(), "Means values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Randoms results"));
+		
+		f = new File(outputFileName+"_sn_1-"+(randoms)+"_comp.txt");
+		randomFilesToString(sbComponents, f.getAbsolutePath());
+		result.addOutputItem(new Item("randoms_means_param", f.getName(), "Components values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Randoms results"));
+	}
+
+
+	private ProteinNetwork createNodeFile(String nodeFile, int node) throws IOException{
+		File f;
 		FileUtils.checkFile(new File(nodeFile));
 		List<String> list = IOUtils.readLines(nodeFile);
 		logger.debug("nodes read: " + list.toString());
@@ -392,25 +479,28 @@ public class Snow2  extends BabelomicsTool{
 		StringBuilder sbTopo = createTopoHeader();
 		StringBuilder sbComponents = createComponentsHeader();
 		SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), toProteinVertex(list));
-		
+
 		if(commandLine.hasOption("intermediate"))
 			subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.OneIntermediate(proteinNetwork.getInteractomeGraph(), subgraph);
-		
-		ProteinNetwork subProteinNetwork = createSubnet(subgraph);
-		
-		IOUtils.write(outputFileName+"_sn_nodeFile"+node+"_topo.txt", sbTopo.toString());
-		result.addOutputItem(new Item("sn_nodeFile"+node+"_topo", outputFileName+"_sn_nodeFile"+node+"_topo.txt", "Subnet topo values", Item.TYPE.FILE, Arrays.asList("subnet","topological"),new HashMap<String,String>(),"Output data"));
-		
-		sbMeans.append(getTopologicalMeanValues(subProteinNetwork, node));
-		IOUtils.write(outputFileName+"_sn_nodeFile"+node+"_means.txt", sbMeans.toString());
-		result.addOutputItem(new Item("sn_nodeFile"+node+"_means", outputFileName+"_sn_nodeFile"+node+"_means.txt", "Subnet means values", Item.TYPE.FILE, Arrays.asList("subnet","means"),new HashMap<String,String>(),"Output data"));
 
-		
+		ProteinNetwork subProteinNetwork = createSubnet(subgraph);
+
+		f = new File(outputFileName+"_sn_nodeFile"+node+"_topo.txt");
+		IOUtils.write(f.getAbsoluteFile(), sbTopo.toString());
+		result.addOutputItem(new Item("sn_nodeFile"+node+"_topo_param", f.getName(), "Topografical values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
+
+		sbMeans.append(getTopologicalMeanValues(subProteinNetwork, node));
+		f = new File(outputFileName+"_sn_nodeFile"+node+"_means.txt"); 
+		IOUtils.write(f.getAbsoluteFile(), sbMeans.toString());
+		result.addOutputItem(new Item("sn_nodeFile"+node+"_means_param", f.getName(), "Means values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
+
+
 		if(!noNumberOfComponents) {
 			sbComponents.append(getComponentsValues(subProteinNetwork, node));
 			sbComponents.deleteCharAt(sbComponents.lastIndexOf(System.getProperty("line.separator")));
-			IOUtils.write(outputFileName+"_sn_nodeFile"+node+"_comp.txt", sbComponents.toString());
-			result.addOutputItem(new Item("sn_nodeFile"+node+"_components", outputFileName+"_sn_nodeFile"+node+"_comp.txt", "Subnet components", Item.TYPE.FILE, Arrays.asList("subnet","components"),new HashMap<String,String>(),"Output data"));
+			f = new File(outputFileName+"_sn_nodeFile"+node+"_comp.txt");
+			IOUtils.write(f.getAbsoluteFile(), sbComponents.toString());
+			result.addOutputItem(new Item("sn_nodeFile"+node+"_components_param", f.getName(), "Component values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
 
 		}
 		return subProteinNetwork;
@@ -421,7 +511,7 @@ public class Snow2  extends BabelomicsTool{
 		subProteinNetwork.calcTopologicalMeanValues();
 		return subProteinNetwork;
 	}
-	
+
 	private StringBuilder createMeansHeader(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("#Subnet\tMeanBet\tStdBet\t").append("MeanCon\tStdCon\t").append("MeanCls\tStdCls\t");
@@ -434,20 +524,20 @@ public class Snow2  extends BabelomicsTool{
 		sb.append(System.getProperty("line.separator"));
 		return sb;
 	}
-	
+
 	private StringBuilder createTopoHeader(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("#Subnet\tId\tBet\tClust").append(System.getProperty("line.separator"));
 		return sb;
 	}
-	
+
 	private StringBuilder createComponentsHeader(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("#Subnet\tComp\tDia\tSize\tNod").append(System.getProperty("line.separator"));
 		return sb;
 	}
-	
-	
+
+
 	private String getTopologicalValues(ProteinNetwork subProteinNetwork, int subnet){
 		StringBuilder sb = new StringBuilder();
 		for (ProteinVertex proteinVertex : subProteinNetwork.getInteractomeGraph().getVertices()) {
@@ -461,7 +551,7 @@ public class Snow2  extends BabelomicsTool{
 		sb.deleteCharAt(sb.length()-1);
 		return sb.toString();
 	}
-	
+
 	private String getTopologicalMeanValues(ProteinNetwork subProteinNetwork, int subnet){
 		StringBuilder sb = new StringBuilder();
 		SimpleUndirectedGraph<ProteinVertex, DefaultEdge> interactomeGraph = subProteinNetwork.getInteractomeGraph();
@@ -483,14 +573,14 @@ public class Snow2  extends BabelomicsTool{
 		if(bicomponents){
 			sb.append("\t").append(interactomeGraph.getNumberOfBicomponents());
 		}
-			
+
 		return sb.toString();
-		
+
 	}
 	private String getComponentsValues(ProteinNetwork subProteinNetwork, int subnet){
 		StringBuilder sb = new StringBuilder();
 		SimpleUndirectedGraph<ProteinVertex, DefaultEdge> interactomeGraph = subProteinNetwork.getInteractomeGraph();
-		
+
 		if(!noNumberOfComponents){
 			List<List<ProteinVertex>> componentsList =  interactomeGraph.getAllInformationComponents(true);
 			List<Double> componentsDiameter = Calc.calcDiameter(interactomeGraph, componentsList);
@@ -508,7 +598,7 @@ public class Snow2  extends BabelomicsTool{
 		//sb.deleteCharAt(sb.lastIndexOf(System.getProperty("line.separator")));
 		return sb.toString();
 	}
-	
+
 	private void randomFilesToString(StringBuilder sb, String file) throws IOException{
 		if(!sb.toString().equals("")){
 			sb.deleteCharAt(sb.lastIndexOf(System.getProperty("line.separator")));
@@ -518,8 +608,8 @@ public class Snow2  extends BabelomicsTool{
 	private List<ProteinVertex> toProteinVertex(List<String> vertices){
 		List<ProteinVertex> verticesList = new ArrayList<ProteinVertex>(vertices.size());
 		for(String proteinName : vertices){
-//			if(verticesList.contains(new ProteinVertex(proteinName)))
-//				System.out.println("Contiene:" +proteinName);
+			//			if(verticesList.contains(new ProteinVertex(proteinName)))
+			//				System.out.println("Contiene:" +proteinName);
 			if(!proteinName.equals(""))
 				verticesList.add(new ProteinVertex(proteinName));
 		}
