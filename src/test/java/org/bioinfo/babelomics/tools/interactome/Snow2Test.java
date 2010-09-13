@@ -47,6 +47,7 @@ public class Snow2Test {
 				"--side", "less",
 	//			"--intermediate",
 				"--json",
+				"--images",
 				"--home", System.getenv("BABELOMICS_HOME")};
 
 		main(args);
