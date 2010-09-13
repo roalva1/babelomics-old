@@ -6,7 +6,7 @@ import org.junit.Test;
 public class Snow2Test {
 
 	
-//	@Test
+	@Test
 	public void Test1() {
 
 		String []args = {

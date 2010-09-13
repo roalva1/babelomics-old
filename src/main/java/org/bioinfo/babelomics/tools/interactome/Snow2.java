@@ -322,7 +322,7 @@ public class Snow2  extends BabelomicsTool{
 		File twopiFile = new File(outputFileName+node+"_twopi.svg");
 		IOUtils.write(twopiFile, svg.toSvg(sourceDotFile, "twopi"));
 		//IOUtils.write(outputFileName+node+"_twopi.json", json.toJson(twopiFile, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
-		IOUtils.write(outputFileName+node+"_all.json", json.toJson(dotFile, twopiFile, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
+		IOUtils.write(outputFileName+node+".json", json.toJson(dotFile, twopiFile, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
 
 	}
 
@@ -333,9 +333,9 @@ public class Snow2  extends BabelomicsTool{
 		bpc.addSeries(list2, legend2, legend2);
 		bpc.addSeries(list1, legend1, legend1);
 		bpc.setOrientation(PlotOrientation.HORIZONTAL);
-		bpc.save(f.getAbsolutePath());
+		bpc.save(f.getAbsolutePath()+".png");
 
-		result.addOutputItem(new Item(itemName, f.getName(), itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));		
+		result.addOutputItem(new Item(itemName, f.getName()+".png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));		
 	}
 
 
