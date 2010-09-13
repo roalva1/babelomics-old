@@ -283,17 +283,12 @@ public class Snow2  extends BabelomicsTool{
 				System.err.println("Not correct arguments for statistic test");
 				return;
 			}
-				
-
-
 			if(json){
 				if(subProteinNetwork1 != null){
-					createJson(subProteinNetwork1, outputFileName+"1.dot", componentsListSub1, intermediatesSub1, 1);
-					//					createSVGFile(subProteinNetwork1, outputFileName+"1.dot", 1);
-					//					createJson(outputFileName+"1.svg", subProteinNetwork1, componentsListSub1, intermediatesSub1, 1);
+					createJson(subProteinNetwork1, outputFileName+"_list1.dot", componentsListSub1, intermediatesSub1, 1);
 				}
 				if(subProteinNetwork2 != null){
-					createJson(subProteinNetwork2, outputFileName+"2.dot", componentsListSub2, intermediatesSub2, 2);
+					createJson(subProteinNetwork2, outputFileName+"_list2.dot", componentsListSub2, intermediatesSub2, 2);
 				}
 			}
 		} catch (IOException e) {
@@ -302,27 +297,29 @@ public class Snow2  extends BabelomicsTool{
 	}
 
 	private void createJson(ProteinNetwork proteinNetwork, String sourceDotFile, List<List<ProteinVertex>> componentsListSub, Set<String> intermediatesSub, int node) throws IOException{
-		//		double tInicio = System.currentTimeMillis();
-		//		System.out.println("Starting dot file....");
 
 		Dot<ProteinVertex, DefaultEdge> dot = new Dot<ProteinVertex, DefaultEdge>();
 		Svg svg = new Svg();
 		Json<ProteinVertex, DefaultEdge> json = new Json<ProteinVertex, DefaultEdge>();
-
+		List<File> fileList = new ArrayList<File>();
+		List<String> layoutsName = new ArrayList<String>();
+		
 		if(componentsListSub == null)
 			System.err.println("not components calculated. Remove --no-number-components");
 
 		IOUtils.write(sourceDotFile, dot.toDot(proteinNetwork.getInteractomeGraph()));
-		//		System.out.println("Starting svg files....");
-		//		svg.toSvg(sourceDotFile, layout);
-		File dotFile = new File(outputFileName+node+"_dot.svg");
+		
+		File dotFile = new File(outputFileName+"_list"+node+"_dot.svg");
 		IOUtils.write(dotFile, svg.toSvg(sourceDotFile, "dot"));
-		//IOUtils.write(outputFileName+node+"_dot.json", json.toJson(dotFile, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
-
-		File twopiFile = new File(outputFileName+node+"_twopi.svg");
+		fileList.add(dotFile);
+		layoutsName.add("dot");
+		
+		File twopiFile = new File(outputFileName+"_list"+node+"_twopi.svg");
 		IOUtils.write(twopiFile, svg.toSvg(sourceDotFile, "twopi"));
-		//IOUtils.write(outputFileName+node+"_twopi.json", json.toJson(twopiFile, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
-		IOUtils.write(outputFileName+node+".json", json.toJson(dotFile, twopiFile, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
+		fileList.add(twopiFile);
+		layoutsName.add("twopi");
+		
+		IOUtils.write(outputFileName+"_list"+node+".json", json.toJson(fileList, layoutsName, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
 
 	}
 
@@ -464,6 +461,8 @@ public class Snow2  extends BabelomicsTool{
 	}
 	private void createTopoFilterList(List<String> list, List<Double> relBetList, List<Double> connList, List<Double> clustList){
 		for(String proteinName : list){
+			if(proteinNetwork.getInteractomeGraph().getVertex(proteinName) == null)
+				continue;
 			relBetList.add(proteinNetwork.getRelBetweennessVertex(proteinName));
 			connList.add(proteinNetwork.getDegreeVertex(proteinName));
 			clustList.add(proteinNetwork.getClusterinVertex(proteinName));
