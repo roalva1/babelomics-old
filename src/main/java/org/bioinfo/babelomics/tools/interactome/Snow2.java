@@ -56,14 +56,14 @@ public class Snow2  extends BabelomicsTool{
 		options.addOption(OptionFactory.createOption("topo-file","t", "An input file containing topological values", false, true));
 		options.addOption(OptionFactory.createOption("list1", "An input file containing a node per line", false));
 		options.addOption(OptionFactory.createOption("list2", "An input file containing a node per line", false));
-		options.addOption(OptionFactory.createOption("type", "An argument saying if you want genes or proteins", false, true));
+		options.addOption(OptionFactory.createOption("type", "An argument saying if you want genes or proteins(default)", false, true));
 		options.addOption(OptionFactory.createOption("randoms", "Number of randoms", false, true));
 		options.addOption(OptionFactory.createOption("randoms-size", "Size of randoms", false, true));
 		options.addOption(OptionFactory.createOption("intermediate", "If there is this argument, it will create the network with 1 intermediate", false, false));
 		options.addOption(OptionFactory.createOption("no-number-components", "If there is this argument, it won't calculate the number of components", false, false));
 		options.addOption(OptionFactory.createOption("bicomponents", "If there is this argument, it will calculate the number of bicomponents", false, false));
 		options.addOption(OptionFactory.createOption("json", "It will create an output .json file", false, false));
-		options.addOption(OptionFactory.createOption("o-sif-topo-file", "Create a full topological file from a sif file", false));
+		options.addOption(OptionFactory.createOption("o-sif-topo-file", "Create a full topological file from a sif file", false, false));
 		options.addOption(OptionFactory.createOption("o-name", "If there is this argument, it will create an output .cmp file for the information of each component", false, true));
 		options.addOption(OptionFactory.createOption("side", "side for kolmogorov and wilkoxon test. Can be two.sided(by default), less or greater", false, true));
 		options.addOption(OptionFactory.createOption("images", "Print the images for the statistics", false, false));
@@ -86,6 +86,7 @@ public class Snow2  extends BabelomicsTool{
 
 		String interactomeMsg = "Homo sapiens";
 		interactome = commandLine.getOptionValue("interactome");
+		
 		if ("hsa".equalsIgnoreCase(interactome)) {
 			interactomeMsg = "Homo sapiens";
 		} else if ("sce".equalsIgnoreCase(interactome)) {
@@ -118,6 +119,7 @@ public class Snow2  extends BabelomicsTool{
 			//String folderInteractions = "/mnt/commons/babelomics/tests/snow2/data/interactions/";
 			SimpleUndirectedGraph<ProteinVertex, DefaultEdge> interactomeGraph = null;
 
+			
 			if (interactome.equals("sce")) {
 				if(type.equals("proteins")) {
 					interactomeGraph = InteractomeParser.parseFromSifFile(folderInteractions+"sce_alldb_proteins_interactome_nr.sif");
@@ -152,7 +154,13 @@ public class Snow2  extends BabelomicsTool{
 					interactomeGraph = InteractomeParser.parseFromSifFile(commandLine.getOptionValue("sif-file") );
 					proteinNetwork = new ProteinNetwork(interactomeGraph);
 					
-					proteinNetwork.calcTopologicalValues();
+					if(commandLine.hasOption("topo-file"))
+						proteinNetwork.loadTopologicalValues(commandLine.getOptionValue("topo-file"));
+					else
+						proteinNetwork.calcTopologicalValues();
+					if(commandLine.hasOption("o-sif-topo-file")) {
+						file.toTopologicalFile(outputFileName+"_topo.txt", proteinNetwork);
+					}
 				} else {
 					System.err.println("Missing custom interactome");
 					return;					
@@ -247,10 +255,7 @@ public class Snow2  extends BabelomicsTool{
 					result.addOutputItem(new Item("sn_nodeFile"+node+"_components_param", f.getName(), "Component values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
 				}
 			}
-			if(commandLine.hasOption("o-sif-topo-file")) {
-				proteinNetwork.calcTopologicalValues();
-				file.toTopologicalFile(commandLine.getOptionValue("o-sif-topo-file")+"_topo.txt", proteinNetwork);
-			}
+			
 			if(commandLine.hasOption("randoms")){
 				logger.debug("Starting randoms.........");
 				int randomSize = 0;
@@ -525,14 +530,8 @@ public class Snow2  extends BabelomicsTool{
 	}
 	private ProteinNetwork createSubnet(SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph) {
 		ProteinNetwork subProteinNetwork = new ProteinNetwork(subgraph);
-		double tInicio = System.currentTimeMillis();
 		subProteinNetwork.calcTopologicalValues();
-		double tFinal = System.currentTimeMillis();
-		System.out.println("TopologicalValues: "+(tFinal-tInicio)/1000);
-		tInicio = System.currentTimeMillis();
 		subProteinNetwork.calcTopologicalMeanValues();
-		tFinal = System.currentTimeMillis();
-		System.out.println("TopologicalMeanValues: "+(tFinal-tInicio)/1000);
 		return subProteinNetwork;
 	}
 

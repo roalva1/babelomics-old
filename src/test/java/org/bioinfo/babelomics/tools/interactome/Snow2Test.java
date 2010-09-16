@@ -6,7 +6,7 @@ import org.junit.Test;
 public class Snow2Test {
 
 	
-	//@Test
+	@Test
 	public void Test1() {
 
 		String []args = {
@@ -16,42 +16,44 @@ public class Snow2Test {
 //				"--log-level","1",
 //				"-s", "/mnt/commons/babelomics/tests/snow2/ej1/sce_alldb_proteins_interactome_nr.sif", 
 //				"-t", "/home/ralonso/appl/babelomics/sce/proteins/sce_alldb_proteins_interactome_nr_topo.txt",
-				"--randoms", "1",
-				"--randoms-size","1", 
+//				"--randoms", "1",
+//				"--randoms-size","1", 
 				"--o-name","result",
-//				"--list1","/mnt/commons/babelomics/tests/snow2/ej1/UPYDOWN_HET_list_uniq",
-				"--list1","/mnt/commons/babelomics/tests/snow2/ej1/list1",
+				"--list1", "/mnt/commons/babelomics/tests/snow2/ej1/list1",
+				"--list2","/mnt/commons/babelomics/tests/snow2/ej1/list2",
 //				"--species","sce",
 				"--interactome","sce",
 				"--side", "less",
 				"--intermediate",
+//				"--no-number-components",
 //				"--bicomponents",
 //				"--images",
 //				"--json",
 				"--home", System.getenv("BABELOMICS_HOME")};
-		String comando="./babelomics.sh --tool snow2 -o /tmp/snow2/test1 --o-name result --list1 /mnt/commons/babelomics/tests/snow2/ej1/UPYDOWN_HET_list_uniq --list2 /mnt/commons/babelomics/tests/snow2/ej1/list2 --interactome sce --side less";
+//		String comando="./babelomics.sh --tool snow2 -o /tmp/snow2/test1 --o-name result --list1 /mnt/commons/babelomics/tests/snow2/ej1/UPYDOWN_HET_list_uniq --list2 /mnt/commons/babelomics/tests/snow2/ej1/list2 --interactome sce --side less";
 		main(args);
 	}
 	
-	@Test
+//	@Test
 	public void Test2() {
 
 		String []args = {
 				"--tool", "snow2", 
-				"-sif-file", "/mnt/commons/babelomics/tests/snow2/ej8/ej8.sif", 
+				"--sif-file", "/mnt/commons/babelomics/tests/snow2/ej8/ej8.sif",
+				"-t", "/mnt/commons/babelomics/tests/snow2/ej8/ej8.topo", 
 				"-o", "/tmp/snow2/test2",
-				"--log-file","/tmp/snow2/test2/result.log",
+				"--o-sif-topo-file",
 //				"-topo-file", "/home/ralonso/appl/babelomics/sce/proteins/sce_alldb_proteins_interactome_nr_topo.txt",
 //				"--randoms", "10",
 //				"--randoms-size","3", 
-				"--o-name","result",
+				"--o-name","resultSmall",
 				"--interactome","own",
 				"--type", "proteins",
 				"--list1","/mnt/commons/babelomics/tests/snow2/ej8/list1",
 				"--list2","/mnt/commons/babelomics/tests/snow2/ej8/list2",
 				"--side", "less",
-//				"--intermediate",
-				"--bicomponents",
+				"--intermediate",
+//				"--bicomponents",
 				"--json",
 				"--home", System.getenv("BABELOMICS_HOME")};
 
