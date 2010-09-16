@@ -13,6 +13,7 @@ import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
+import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.graph.SimpleUndirectedGraph;
 import org.bioinfo.data.graph.Subgraph;
 import org.bioinfo.data.graph.alg.Calc;
@@ -324,6 +325,21 @@ public class Snow2  extends BabelomicsTool{
 		//IOUtils.write(outputFileName+node+"_twopi.json", json.toJson(twopiFile, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
 		IOUtils.write(outputFileName+node+".json", json.toJson(dotFile, twopiFile, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
 
+		File f = new File(outputFileName+node+".json");
+		System.out.println("********************* json file = " + f.getAbsolutePath());
+		if (f.exists()) {
+			System.out.println("********************* exists JSON !!!");
+			String url = "SnowViewer2?filename=" + f.getName();
+			result.addOutputItem(new Item("viewer_param", url, "Network viewer", TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Graph"));			
+		}
+//		f = new File("result1.json");
+//		//String url = "http://beta.babelomics.bioinfo.cipf.es/SnowViewer?filename=" + fileName;
+//		//http://beta.babelomics.bioinfo.cipf.es/SnowViewer?filename=subnetwork1.xml&jobid=262&sessionid=7tySrwJgNRM0tyGOnj9N3eT2BCTsEC8Qw3StPMwwz1WfsFyt1zoIqR6lPa7fnv54
+//		result.addOutputItem(new Item("graph_param", url, "Graph", TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Graph"));
+//			
+//			url = "SnowViewer?filename=" + fileName;
+//			result.addOutputItem(new Item(name + "_new_window", url, "Open applet in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), groupName));
+		
 	}
 
 	private void createImages(String fileName, List<Double> list1, String legend1, List<Double> list2, String legend2, String itemName, String itemLabel, String itemGroup) throws IOException {
@@ -404,6 +420,17 @@ public class Snow2  extends BabelomicsTool{
 			createImages(outputFileName+"_sn_random_conn", connSubnet1, "subnet1", connRandoms, "randoms", "sn_random_conn", "conn", "Images.Subnet random");
 			createImages(outputFileName+"_sn_random_clust", clustSubnet1, "subnet1", clustRandoms, "randoms", "sn_random_clust", "clust", "Images.Subnet random");
 		}
+		
+//		f = new File("result1.json");
+//		String url = "SnowViewer2?filename=" + f.getName() + "&width=600&height=600";
+//		//String url = "http://beta.babelomics.bioinfo.cipf.es/SnowViewer?filename=" + fileName;
+//		//http://beta.babelomics.bioinfo.cipf.es/SnowViewer?filename=subnetwork1.xml&jobid=262&sessionid=7tySrwJgNRM0tyGOnj9N3eT2BCTsEC8Qw3StPMwwz1WfsFyt1zoIqR6lPa7fnv54
+//		result.addOutputItem(new Item("graph_param", url, "Graph", TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Graph"));
+//			
+//			url = "SnowViewer?filename=" + fileName;
+//			result.addOutputItem(new Item(name + "_new_window", url, "Open applet in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), groupName));
+//		}
+		
 		System.out.println("Finished 2nd Analysis..................");
 	}
 	private void statsTwoListsAnalisys(String side) throws IOException{
