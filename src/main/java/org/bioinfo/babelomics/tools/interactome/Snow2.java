@@ -117,7 +117,6 @@ public class Snow2  extends BabelomicsTool{
 		try {
 
 			String folderInteractions = this.babelomicsHomePath + "/conf/interactions/";
-			//String folderInteractions = "/mnt/commons/babelomics/tests/snow2/data/interactions/";
 			SimpleUndirectedGraph<ProteinVertex, DefaultEdge> interactomeGraph = null;
 
 			
@@ -506,6 +505,7 @@ public class Snow2  extends BabelomicsTool{
 		}
 	}
 	private void createRandoms(int randoms, int randomSize) throws IOException{
+		
 		StringBuilder sbMeans = createMeansHeader();
 		StringBuilder sbTopo = createTopoHeader();
 		StringBuilder sbComponents =createComponentsHeader();
@@ -513,13 +513,13 @@ public class Snow2  extends BabelomicsTool{
 		for(int i=1; i<=randoms; i++){
 			SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), randomSize);
 			logger.debug("Randoms["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getEdges().size());
+			
 			if(commandLine.hasOption("intermediate")) {
 				Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
 				logger.debug("Randoms intermediate["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getEdges().size());
 			}
-
-			
 			ProteinNetwork subProteinNetwork = createSubnet(subgraph);
+			
 			logger.debug("Subnet created");
 			sbTopo.append(getTopologicalValues(subProteinNetwork, i)).append(System.getProperty("line.separator"));
 			sbMeans.append(getTopologicalMeanValues(subProteinNetwork, i)).append(System.getProperty("line.separator"));
@@ -531,7 +531,7 @@ public class Snow2  extends BabelomicsTool{
 			logger.debug("Components created");
 			subProteinNetworkRandoms.add(subProteinNetwork);
 		}
-
+		
 		File f = new File(outputFileName+"_sn_1-"+(randoms)+"_topo.txt");
 		randomFilesToString(sbTopo, f.getAbsolutePath());
 		result.addOutputItem(new Item("randoms_topo_param", f.getName(), "Topografical values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Randoms results"));
