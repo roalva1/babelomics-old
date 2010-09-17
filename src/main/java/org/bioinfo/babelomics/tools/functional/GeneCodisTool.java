@@ -11,15 +11,11 @@ import java.util.List;
 
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.math.genetics.Chromosome;
 import org.bioinfo.babelomics.methods.functional.FatiGO;
 import org.bioinfo.babelomics.methods.functional.GeneCodis;
-import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
-import org.bioinfo.babelomics.methods.functional.GeneCodis.analysisFactor;
 import org.bioinfo.babelomics.methods.functional.GeneCodis.correctionFactor;
 import org.bioinfo.babelomics.methods.functional.GeneCodis.testFactor;
 import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
@@ -27,7 +23,6 @@ import org.bioinfo.infrared.common.feature.FeatureList;
 import org.bioinfo.infrared.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
-import org.bioinfo.math.stats.inference.FisherExactTest;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -304,7 +299,13 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		String fileName = filterInfo.getName() + ".txt";
 		String annotFileName = filterInfo.getName() + ".annot";
 		updateJobStatus("80", "saving results");
-				
+				String legend = "Id: the id of the result returned<br />";
+				legend += "Items: contains the enriched items<br />";
+				legend += "S: contains the number of genes in the input list that have been matched in the enriched set and the total number of genes in the list.<br />";
+				legend += "TS: contains the number of genes in the reference list that match with the enriched set and total number of genes in the reference list.<br />";
+				legend += "Hyp: pvalue calculated by the hypergeometric function.<br />";
+				legend += "Chi: pvalue calculated by the chi-square method.<br />";				
+				legend += "Genes: the genes of the input list that match with the enriched items.<br/>";
 		if (genecodis.getSignificantTerms()>0){
 			String correctionParam = (correction== correctionFactor.none)?"CORRECTEDNONE":"CORRECTED";
 			result.addOutputItem(new Item(filterInfo.getName() + "_concurrence.txt", filterInfo.getName() + "_concurrence.txt", "Co-ocurrence annotations results", TYPE.FILE, Arrays.asList("TABLE","GENECODIS_TABLE_"+test.toString().toUpperCase()+"_"+correctionParam,filterInfo.getPrefix().toUpperCase() + "_TERM"), new HashMap<String, String>(), "Co-ocurrence annotations results"));
@@ -316,7 +317,7 @@ public class GeneCodisTool extends FunctionalProfilingTool{
 		} else if (genecodis.getSignificantTerms()==-1){
 			result.addOutputItem(new Item(filterInfo.getName() +"_genecodis_file","Error running tool","Annotations results " + filterInfo.getName(),Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant terms"));
 		}
-			
+		result.addOutputItem(new Item(filterInfo.getName() +"_genecodis_file",legend,"",Item.TYPE.MESSAGE,"Legend"));
 		// save annotation
 		IOUtils.write(outdir + "/" + annotFileName, genecodis.getAnnotations().toString());
 		result.addOutputItem(new Item("annot_" + filterInfo.getName(),annotFileName,"Annotations for " + filterInfo.getTitle(),Item.TYPE.FILE,Arrays.asList("ANNOTATION"),new HashMap<String,String>(),"Annotation files"));
