@@ -20,7 +20,6 @@ public class IDConverterTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
 	public void Test() {
 		String outdir = "/tmp/IDConverterTest";
 		new File(outdir).mkdir();
@@ -54,4 +53,21 @@ public class IDConverterTest {
 		}
 	}	
 
+	@Test
+	public void Test2() {
+		//String dataset = "/mnt/commons/test/tools/tmt/list2_liver.txt";
+		String dataset = "/mnt/commons/babelomics/tests/idconverter/genes_sce_notilde.txt";
+		String outdir = "/tmp/IDConverterTest2";
+		new File(outdir).mkdir();
+
+		String []args = { "--tool", "id-converter","--log-level", "2", "--species", "sce", "--listfile", dataset, "--db-names", "go,entrezgene,interpro", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
+
+		System.out.println("ID Converter Test, args : " + Arrays.toString(args));
+		try {
+			FileUtils.createDirectory(outdir);
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}	
 }
