@@ -240,6 +240,9 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		// db attributes
 		FunctionalDbDescriptor filterInfo = new FunctionalDbDescriptor("your_annotation","Your annotations", "your_annotations","Your annotations");
 		
+		// get term sizes
+		Map<String, Integer> termSizes = getYourAnnotationsTermSizes();
+		
 		logger.info(filterInfo.getTitle() + "...\n");
 		
 		GeneSetAnalysis gsea;
@@ -252,6 +255,11 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		
 		// run
 		try{
+			
+			gsea.setLogger(logger);
+			
+			// set term sizes
+			gsea.setTermSizes(termSizes);
 			
 			gsea.run();
 				

@@ -154,6 +154,9 @@ public class LogisticScan extends GeneSetAnalysis{
 				adjPValue = Double.parseDouble(fields[4]);
 				// compute term sizes and gene list 
 				if(geneMap.containsKey(term)){
+					if(term.equalsIgnoreCase("GO:0004004")){
+						System.err.println("genes: " + geneMap.get(term) + " : " + geneMap.get(term).size());
+					}
 					termSize = geneMap.get(term).size();
 					genes = geneMap.get(term);
 				} else {

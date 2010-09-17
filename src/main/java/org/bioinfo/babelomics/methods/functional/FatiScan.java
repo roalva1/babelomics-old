@@ -86,41 +86,41 @@ public class FatiScan extends GeneSetAnalysis {
 			System.err.println(i + ": threshold = " + acum + " (" + thresholdPosition + ") ");
 			
 			// top
-			list1 = idList.subList(0, thresholdPosition);
-			
+			list1 = new ArrayList<String>(idList.subList(0, thresholdPosition));
+						
 			if(thresholdPosition<(idList.size()-1)){
 				
 				// bottom
-				list2 = idList.subList(thresholdPosition + 1, idList.size()-1);
-		
-				// run test
-				fisher = new TwoListFisherTest();
-				fisher.test(list1,list2,annotations,testMode,termSizes);
-			
-				// get result
-				results.addAll(toGeneSetAnalysisTestResult(fisher.getResults()));
+				list2 = new ArrayList<String>(idList.subList(thresholdPosition + 1, idList.size()-1));
 				
+				// list1 and list2 have length > 0
+				if(list2.size()>0){
+					// run test
+					fisher = new TwoListFisherTest();
+					fisher.test(list1,list2,annotations,testMode,termSizes);							
+					// get result
+					results.addAll(toGeneSetAnalysisTestResult(fisher.getResults()));					
+				}		
+						
 			}
 						
 			acum+=inc;
 			
 		}
 
-		if(outputFormat == SHORT_FORMAT) {
-			System.err.println("shorting term list...");
+		if(outputFormat == SHORT_FORMAT) {			
 			HashMap<String,GeneSetAnalysisTestResult> resultsMap = new HashMap<String,GeneSetAnalysisTestResult>();
 			// unique term
 			for(GeneSetAnalysisTestResult testResult: results){
-				if(resultsMap.containsKey(testResult.getTerm())){
-					if(resultsMap.get(testResult.getTerm()).getAdjPValue()>testResult.getAdjPValue()){
+				if(resultsMap.containsKey(testResult.getTerm())){					
+					if(resultsMap.get(testResult.getTerm()).getAdjPValue()>testResult.getAdjPValue()){						
 						resultsMap.remove(testResult.getTerm());
 						resultsMap.put(testResult.getTerm(), testResult);
 					}
 				} else {
 					resultsMap.put(testResult.getTerm(), testResult);
 				}
-			}
-			System.err.println("end of shorting...");
+			}			
 			// update results
 			results.clear();
 			results.addAll(resultsMap.values());

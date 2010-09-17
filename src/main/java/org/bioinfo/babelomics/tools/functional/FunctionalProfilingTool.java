@@ -198,6 +198,8 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		
 	}
 
+	
+	
 	public void parseGODb(CommandLine cmdLine, String namespace){
 		if(cmdLine.hasOption("go-" + namespace + "")) {
 			if(cmdLine.hasOption("go-" + namespace + "-inclusive")) {				
@@ -458,6 +460,25 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		}	
 		
 		return outOfBounds;
+	}
+
+	
+	protected Map<String, Integer> getYourAnnotationsTermSizes(){
+		logger.print("Computing your annotations term sizes...");
+		Map<String, Integer> termSizes = new HashMap<String, Integer>();
+		String termId;
+		int cont;
+		for(AnnotationItem annotation: yourAnnotations){
+			termId = annotation.getFunctionalTermId();
+			if(termSizes.containsKey(termId)){
+				cont = termSizes.get(termId);
+				termSizes.put(termId,cont+1);
+			} else {
+				termSizes.put(termId,1);
+			}
+		}
+		logger.println("OK");
+		return termSizes;
 	}
 	
 	

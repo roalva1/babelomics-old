@@ -108,6 +108,8 @@ public class TwoListFisherTest extends FunctionalTest {
 					termSizeInGenome = termSizes.get(terms.get(i));
 				}
 				results.add(new TwoListFisherTestResult(terms.get(i),fisherCounts.get(i,0)+fisherCounts.get(i,2),termSizeInGenome,fisherCounts.get(i,0),fisherCounts.get(i,1),fisherCounts.get(i,2),fisherCounts.get(i,3),list1Positives.get(terms.get(i)),list2Positives.get(terms.get(i)),testResult.get(i).getOddRatio(),testResult.get(i).getPValue(),testResult.get(i).getAdjPValue()));
+				TwoListFisherTestResult mytest =  new TwoListFisherTestResult(terms.get(i),fisherCounts.get(i,0)+fisherCounts.get(i,2),termSizeInGenome,fisherCounts.get(i,0),fisherCounts.get(i,1),fisherCounts.get(i,2),fisherCounts.get(i,3),list1Positives.get(terms.get(i)),list2Positives.get(terms.get(i)),testResult.get(i).getOddRatio(),testResult.get(i).getPValue(),testResult.get(i).getAdjPValue());
+				//if(mytest.getPValue()<0.1) System.err.println(mytest.getList1Positives() + " " + mytest.getList1Negatives() + " " + mytest.getList2Positives() + " " + mytest.getList2Negatives() + " : " + mytest.getPValue() + "/" + mytest.getAdjPValue());
 			}
 			
 		} else {
