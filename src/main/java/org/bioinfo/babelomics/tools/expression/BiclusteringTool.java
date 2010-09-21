@@ -297,6 +297,7 @@ public class BiclusteringTool extends BabelomicsTool {
 	
 	private void addInputItems(){
 		
+		//result.addOutputItem(new Item())
 		
 	}
 	
