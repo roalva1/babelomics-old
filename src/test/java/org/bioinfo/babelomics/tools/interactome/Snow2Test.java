@@ -6,7 +6,7 @@ import org.junit.Test;
 public class Snow2Test {
 
 	
-	@Test
+	//@Test
 	public void Test1() {
 
 		String []args = {
@@ -35,7 +35,7 @@ public class Snow2Test {
 		main(args);
 	}
 	
-//	@Test
+	@Test
 	public void Test2() {
 
 		String []args = {
