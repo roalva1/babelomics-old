@@ -117,7 +117,6 @@ public class Snow2  extends BabelomicsTool{
 		try {
 
 			String folderInteractions = this.babelomicsHomePath + "/conf/interactions/";
-			//String folderInteractions = "/mnt/commons/babelomics/tests/snow2/data/interactions/";
 			SimpleUndirectedGraph<ProteinVertex, DefaultEdge> interactomeGraph = null;
 
 			
@@ -322,9 +321,9 @@ public class Snow2  extends BabelomicsTool{
 		fileList.add(twopiFile);
 		layoutsName.add("twopi");
 		
-		IOUtils.write(outputFileName+"_list"+node+".json", json.toJson(fileList, layoutsName, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
+		File f = new File(outputFileName+"_list"+node+".json");
+		IOUtils.write(f.getAbsoluteFile(), json.toJson(fileList, layoutsName, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
 
-		File f = new File(outputFileName+node+".json");
 		System.out.println("********************* json file = " + f.getAbsolutePath());
 		if (f.exists()) {
 			System.out.println("********************* exists JSON !!!");
@@ -345,8 +344,10 @@ public class Snow2  extends BabelomicsTool{
 		File f = new File(fileName);
 		BoxPlotChart bpc = new BoxPlotChart("", "", "");
 		bpc.getLegend().setVisible(true);
-		bpc.addSeries(list2, legend2, legend2);
-		bpc.addSeries(list1, legend1, legend1);
+		if(!list2.isEmpty())
+			bpc.addSeries(list2, legend2, legend2);
+		if(!list1.isEmpty())
+			bpc.addSeries(list1, legend1, legend1);
 		bpc.setOrientation(PlotOrientation.HORIZONTAL);
 		bpc.save(f.getAbsolutePath()+".png");
 
@@ -491,9 +492,9 @@ public class Snow2  extends BabelomicsTool{
 		KSTest kstest = new KSTest();
 		StringBuilder sb = new StringBuilder();
 		sb.append("#parameter\tpval\tside\n");
-		sb.append("betweenness\t"+kstest.resultKolmogorovSmirnov(ListUtils.toArray(relBetList1), ListUtils.toArray(relBetList2), side).getPValue()+"\t"+side+"\n");
-		sb.append("connections\t"+kstest.resultKolmogorovSmirnov(ListUtils.toArray(connList1), ListUtils.toArray(connList2), side).getPValue()+"\t"+side+"\n");
-		sb.append("coefficient\t"+kstest.resultKolmogorovSmirnov(ListUtils.toArray(clustList1), ListUtils.toArray(clustList2), side).getPValue()+"\t"+side);
+		sb.append("betweenness\t"+kstest.resultKolmogorovSmirnov(ListUtils.toDoubleArray(relBetList1), ListUtils.toDoubleArray(relBetList2), side).getPValue()+"\t"+side+"\n");
+		sb.append("connections\t"+kstest.resultKolmogorovSmirnov(ListUtils.toDoubleArray(connList1), ListUtils.toDoubleArray(connList2), side).getPValue()+"\t"+side+"\n");
+		sb.append("coefficient\t"+kstest.resultKolmogorovSmirnov(ListUtils.toDoubleArray(clustList1), ListUtils.toDoubleArray(clustList2), side).getPValue()+"\t"+side);
 		return sb.toString();
 	}
 	private void createTopoFilterList(List<ProteinVertex> list, List<Double> relBetList, List<Double> connList, List<Double> clustList){
@@ -506,6 +507,7 @@ public class Snow2  extends BabelomicsTool{
 		}
 	}
 	private void createRandoms(int randoms, int randomSize) throws IOException{
+		
 		StringBuilder sbMeans = createMeansHeader();
 		StringBuilder sbTopo = createTopoHeader();
 		StringBuilder sbComponents =createComponentsHeader();
@@ -513,13 +515,13 @@ public class Snow2  extends BabelomicsTool{
 		for(int i=1; i<=randoms; i++){
 			SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), randomSize);
 			logger.debug("Randoms["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getEdges().size());
+			
 			if(commandLine.hasOption("intermediate")) {
 				Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
 				logger.debug("Randoms intermediate["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getEdges().size());
 			}
-
-			
 			ProteinNetwork subProteinNetwork = createSubnet(subgraph);
+			
 			logger.debug("Subnet created");
 			sbTopo.append(getTopologicalValues(subProteinNetwork, i)).append(System.getProperty("line.separator"));
 			sbMeans.append(getTopologicalMeanValues(subProteinNetwork, i)).append(System.getProperty("line.separator"));
@@ -531,7 +533,7 @@ public class Snow2  extends BabelomicsTool{
 			logger.debug("Components created");
 			subProteinNetworkRandoms.add(subProteinNetwork);
 		}
-
+		
 		File f = new File(outputFileName+"_sn_1-"+(randoms)+"_topo.txt");
 		randomFilesToString(sbTopo, f.getAbsolutePath());
 		result.addOutputItem(new Item("randoms_topo_param", f.getName(), "Topografical values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Randoms results"));
@@ -587,7 +589,8 @@ public class Snow2  extends BabelomicsTool{
 			sb.append(proteinVertex.getRelativeBetweenness()).append("\t").append(subProteinNetwork.getInteractomeGraph().getDegree(proteinVertex)).append("\t").append(proteinVertex.getClusteringCoefficient());
 			sb.append(System.getProperty("line.separator"));
 		}
-		sb.deleteCharAt(sb.length()-1);
+		if(!sb.toString().equals(""))
+			sb.deleteCharAt(sb.lastIndexOf(System.getProperty("line.separator")));
 		return sb.toString();
 	}
 
@@ -634,7 +637,6 @@ public class Snow2  extends BabelomicsTool{
 				sb.append((i)+"\t"+componentsDiameter.get(i)+"\t"+componentsList.get(i).size()+"\t"+sbNodes.toString()+ System.getProperty("line.separator"));
 			}
 		}
-		//sb.deleteCharAt(sb.lastIndexOf(System.getProperty("line.separator")));
 		return sb.toString();
 	}
 
