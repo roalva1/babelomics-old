@@ -1,5 +1,6 @@
 package org.bioinfo.babelomics.tools;
 
+import org.bioinfo.babelomics.tools.expression.BiclusteringTool;
 import org.bioinfo.babelomics.tools.expression.Clustering;
 import org.bioinfo.babelomics.tools.expression.MAPlot;
 import org.bioinfo.babelomics.tools.expression.OutlierLrs;
@@ -139,6 +140,9 @@ public class BabelomicsFactory {
 			return new Clustering();
 		}
 
+		if(toolName.equalsIgnoreCase("biclustering")) {
+			return new BiclusteringTool();			
+		}
 		
 		/*
 		 * **************************************************************************************************
