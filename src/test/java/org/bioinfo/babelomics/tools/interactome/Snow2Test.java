@@ -6,7 +6,7 @@ import org.junit.Test;
 public class Snow2Test {
 
 	
-	//@Test
+	@Test
 	public void Test1() {
 
 		String []args = {
@@ -19,11 +19,9 @@ public class Snow2Test {
 //				"--randoms", "10",
 //				"--randoms-size","2", 
 				"--o-name","result",
-				"--list1", "/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_10_block325.txt",
-				"--list2","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_10_block325.txt",
-//				"--list1","/mnt/commons/babelomics/tests/snow2/ej1/UPYDOWN_HET_list_uniq",
-//				"--list2","/mnt/commons/babelomics/tests/snow2/ej1/UPYDOWN_HET_list_uniq",
-				"--interactome","hsa",
+				"--list1","/mnt/commons/babelomics/tests/snow2/ej1/UPYDOWN_HET_list_uniq",
+				"--list2","/mnt/commons/babelomics/tests/snow2/ej1/UPYDOWN_HET_list_uniq_mitad",
+				"--interactome","sce",
 				"--type","proteins",
 				"--side", "less",
 //				"--intermediate",
