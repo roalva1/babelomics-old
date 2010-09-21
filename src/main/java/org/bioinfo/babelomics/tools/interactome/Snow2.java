@@ -587,7 +587,8 @@ public class Snow2  extends BabelomicsTool{
 			sb.append(proteinVertex.getRelativeBetweenness()).append("\t").append(subProteinNetwork.getInteractomeGraph().getDegree(proteinVertex)).append("\t").append(proteinVertex.getClusteringCoefficient());
 			sb.append(System.getProperty("line.separator"));
 		}
-		sb.deleteCharAt(sb.length()-1);
+		if(!sb.toString().equals(""))
+			sb.deleteCharAt(sb.lastIndexOf(System.getProperty("line.separator")));
 		return sb.toString();
 	}
 
@@ -634,7 +635,6 @@ public class Snow2  extends BabelomicsTool{
 				sb.append((i)+"\t"+componentsDiameter.get(i)+"\t"+componentsList.get(i).size()+"\t"+sbNodes.toString()+ System.getProperty("line.separator"));
 			}
 		}
-		//sb.deleteCharAt(sb.lastIndexOf(System.getProperty("line.separator")));
 		return sb.toString();
 	}
 
