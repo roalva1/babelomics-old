@@ -344,8 +344,10 @@ public class Snow2  extends BabelomicsTool{
 		File f = new File(fileName);
 		BoxPlotChart bpc = new BoxPlotChart("", "", "");
 		bpc.getLegend().setVisible(true);
-		bpc.addSeries(list2, legend2, legend2);
-		bpc.addSeries(list1, legend1, legend1);
+		if(!list2.isEmpty())
+			bpc.addSeries(list2, legend2, legend2);
+		if(!list1.isEmpty())
+			bpc.addSeries(list1, legend1, legend1);
 		bpc.setOrientation(PlotOrientation.HORIZONTAL);
 		bpc.save(f.getAbsolutePath()+".png");
 
