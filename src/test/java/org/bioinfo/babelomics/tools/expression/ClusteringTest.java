@@ -91,7 +91,6 @@ public class ClusteringTest {
 	}	
 	
 
-	@Test
 	public void Test4() {
 		String dataset = "//mnt/commons/babelomics/tests/clustering/hypoxia_norm.txt";
 		//String dataset = "/mnt/commons/test/biodata/example/merged_normalized_data.txt";
