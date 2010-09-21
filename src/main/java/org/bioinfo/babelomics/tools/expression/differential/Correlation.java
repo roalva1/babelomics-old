@@ -40,7 +40,7 @@ public class Correlation extends BabelomicsTool {
 	public void initOptions() {
 		options.addOption(OptionFactory.createOption("dataset", "the data"));
 		options.addOption(OptionFactory.createOption("test", "the test, possible values: pearson, spearman, regression"));
-		options.addOption(OptionFactory.createOption("class-name", "class variable", false));
+		options.addOption(OptionFactory.createOption("classname", "class variable", false));
 		options.addOption(OptionFactory.createOption("correction", "Multiple-test correction: fdr, bh, by, bonferroni, hochberg, holm", false));
 		options.addOption(OptionFactory.createOption("p-value", "p-value for significative genes", false));
 	}
