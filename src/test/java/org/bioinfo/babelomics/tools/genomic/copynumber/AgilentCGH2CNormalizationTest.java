@@ -8,6 +8,10 @@ import org.junit.Test;
 
 public class AgilentCGH2CNormalizationTest {
 
+	@Test
+	public void test0() {
+	}
+
 
 	public void test() {
 		String outDirName = "/tmp/AgilentCGH2CNormalizationTest";
