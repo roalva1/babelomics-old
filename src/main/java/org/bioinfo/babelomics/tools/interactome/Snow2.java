@@ -322,9 +322,9 @@ public class Snow2  extends BabelomicsTool{
 		fileList.add(twopiFile);
 		layoutsName.add("twopi");
 		
-		IOUtils.write(outputFileName+"_list"+node+".json", json.toJson(fileList, layoutsName, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
+		File f = new File(outputFileName+"_list"+node+".json");
+		IOUtils.write(f.getAbsoluteFile(), json.toJson(fileList, layoutsName, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
 
-		File f = new File(outputFileName+node+".json");
 		System.out.println("********************* json file = " + f.getAbsolutePath());
 		if (f.exists()) {
 			System.out.println("********************* exists JSON !!!");
@@ -491,9 +491,9 @@ public class Snow2  extends BabelomicsTool{
 		KSTest kstest = new KSTest();
 		StringBuilder sb = new StringBuilder();
 		sb.append("#parameter\tpval\tside\n");
-		sb.append("betweenness\t"+kstest.resultKolmogorovSmirnov(ListUtils.toArray(relBetList1), ListUtils.toArray(relBetList2), side).getPValue()+"\t"+side+"\n");
-		sb.append("connections\t"+kstest.resultKolmogorovSmirnov(ListUtils.toArray(connList1), ListUtils.toArray(connList2), side).getPValue()+"\t"+side+"\n");
-		sb.append("coefficient\t"+kstest.resultKolmogorovSmirnov(ListUtils.toArray(clustList1), ListUtils.toArray(clustList2), side).getPValue()+"\t"+side);
+		sb.append("betweenness\t"+kstest.resultKolmogorovSmirnov(ListUtils.toDoubleArray(relBetList1), ListUtils.toDoubleArray(relBetList2), side).getPValue()+"\t"+side+"\n");
+		sb.append("connections\t"+kstest.resultKolmogorovSmirnov(ListUtils.toDoubleArray(connList1), ListUtils.toDoubleArray(connList2), side).getPValue()+"\t"+side+"\n");
+		sb.append("coefficient\t"+kstest.resultKolmogorovSmirnov(ListUtils.toDoubleArray(clustList1), ListUtils.toDoubleArray(clustList2), side).getPValue()+"\t"+side);
 		return sb.toString();
 	}
 	private void createTopoFilterList(List<ProteinVertex> list, List<Double> relBetList, List<Double> connList, List<Double> clustList){
