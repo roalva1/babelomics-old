@@ -357,7 +357,7 @@ public class Snow2  extends BabelomicsTool{
 		if(!list1.isEmpty())
 			bpc.addSeries(list1, legend1, legend1);
 		bpc.setOrientation(PlotOrientation.HORIZONTAL);
-		bpc.save(f.getAbsolutePath()+".png");
+		bpc.save(f.getAbsolutePath()+".png", 300, 250, "png");
 
 		result.addOutputItem(new Item(itemName, f.getName()+".png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));		
 	}
