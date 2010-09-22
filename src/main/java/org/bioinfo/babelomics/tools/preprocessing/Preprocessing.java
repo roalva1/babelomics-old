@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.exec.Command;
@@ -15,8 +16,13 @@ import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
+import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
+import org.bioinfo.infrared.common.dbsql.DBConnector;
+import org.bioinfo.infrared.common.feature.FeatureList;
+import org.bioinfo.infrared.core.XRef;
+import org.bioinfo.infrared.core.dbsql.XRefDBManager;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
@@ -29,15 +35,18 @@ public class Preprocessing extends BabelomicsTool {
 
 	@Override
 	public void initOptions() {
-		options.addOption(OptionFactory.createOption("dataset", "the data"));
-		options.addOption(OptionFactory.createOption("logarithm-base", "the logarithm base to apply transformation, possible values: e, 2 10 for log base 2, log base 2 and log base 10", false));
-		options.addOption(OptionFactory.createOption("exp", "the exponential function, possible values: e, 2, 10", false));
-		options.addOption(OptionFactory.createOption("merge-replicates", "method to merge replicates, valid values are: mean or median", false));
-		options.addOption(OptionFactory.createOption("filter-missing", "minimum percentage of existing values, from 0 to 100", false));
-		options.addOption(OptionFactory.createOption("impute-missing", "method to impute missing values, valid values are: zero, mean, median, knn", false));
-		options.addOption(OptionFactory.createOption("kvalue", "kvalue for knn impute method, default 15", false));
+		options.addOption(OptionFactory.createOption("dataset", "The dataset"));
+		options.addOption(OptionFactory.createOption("logarithm-base", "The logarithm base to apply transformation, possible values: e, 2 10 for log base 2, log base 2 and log base 10", false));
+		options.addOption(OptionFactory.createOption("exp", "The exponential function, possible values: e, 2, 10", false));
+		options.addOption(OptionFactory.createOption("merge-replicates", "Method to merge replicates, valid values are: mean or median", false));
+		options.addOption(OptionFactory.createOption("filter-missing", "Minimum percentage of existing values, from 0 to 100", false));
+		options.addOption(OptionFactory.createOption("impute-missing", "Method to impute missing values, valid values are: zero, mean, median, knn", false));
+		options.addOption(OptionFactory.createOption("kvalue", "K-value for knn impute method, default 15", false));
 		options.addOption(OptionFactory.createOption("extract-ids", "This option will extract the IDs (first column) in the dataset", false));
 		options.addOption(OptionFactory.createOption("gene-file-filter", "This option will remove all the patterns of the genes that are not present in this gene file", false));
+		options.addOption(OptionFactory.createOption("convert-ids", "This option will convert IDs. User can convert IDs to the following terms: ensembl_gene, ensembl_transcript", false));
+		options.addOption(OptionFactory.createOption("convert-ids-merge", "Method to merge the converted IDs if replicated, valid values are mean or median", false));
+		
 		//		options.addOption(OptionFactory.createOption("sample-filter", "class variable", false));
 		//		options.addOption(OptionFactory.createOption("feature-filter", "class variable", false));
 	}
@@ -58,9 +67,12 @@ public class Preprocessing extends BabelomicsTool {
 		String exp = commandLine.getOptionValue("exp",  "none");
 		String mergeMethod = commandLine.getOptionValue("merge-replicates",  "none");
 		String filterPercentage = commandLine.getOptionValue("filter-missing",  "none");
+		String minFilterPercentage = commandLine.getOptionValue("min_perc_int","0"); 
 		String imputeMethod = commandLine.getOptionValue("impute-missing",  "none");
 		String extractIds = commandLine.getOptionValue("extract-ids",  "none");
 		String filterFilename = commandLine.getOptionValue("gene-file-filter",  "none");
+		String convertIds = commandLine.getOptionValue("convert-ids",  "none");
+		String convertIdsMerge = commandLine.getOptionValue("convert-ids-merge",  "mean");
 
 		int progress = 1;
 		int finalProgress = 3;
@@ -71,6 +83,7 @@ public class Preprocessing extends BabelomicsTool {
 		if ( imputeMethod != null && !("none".equalsIgnoreCase(imputeMethod)) ) finalProgress++; 
 		if ( extractIds != null && !("none".equalsIgnoreCase(extractIds)) ) finalProgress++; 
 		if ( filterFilename != null && !("none".equalsIgnoreCase(filterFilename)) && new File(filterFilename).exists() ) finalProgress++; 
+		if ( convertIds != null && !("none".equalsIgnoreCase(convertIds)) ) finalProgress++; 
 
 		
 		// input parameters
@@ -80,8 +93,9 @@ public class Preprocessing extends BabelomicsTool {
 		result.addOutputItem(new Item("merge_input_param", mergeMethod, "Merge replicates", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("filter_input_param", filterPercentage, "Filter missing values", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("impute_input_param", ("knn".equalsIgnoreCase(imputeMethod) ? ("knn, k-value = " + commandLine.getOptionValue("k-value", "15")) : imputeMethod) , "Impute missing values", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-		result.addOutputItem(new Item("filenamefilter_input_param", (filterFilename != null && !"none".equalsIgnoreCase(filterFilename) ? "none" : new File(filterFilename).getName()), "ID-file filter", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("extractid_input_param", "" + (extractIds != null && !extractIds.equalsIgnoreCase("none")), "Extract IDs", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("filenamefilter_input_param", (filterFilename != null && !"none".equalsIgnoreCase(filterFilename) ? "none" : new File(filterFilename).getName()), "ID-file filter", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("convertid_input_param", (convertIds != null && !convertIds.equalsIgnoreCase("none") ? (convertIds + ", merge method: " + convertIdsMerge) : "none"), "Convert IDs", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		
 		imputeMethodMsg = imputeMethod;
 		if ( "knn".equalsIgnoreCase(imputeMethod) ) {
@@ -240,7 +254,7 @@ public class Preprocessing extends BabelomicsTool {
 			}
 
 			try {
-				double perc = Double.parseDouble(filterPercentage);					
+				double perc = Double.parseDouble(minFilterPercentage);					
 
 				dataset = dataset.filterRowsByPercOfMissingValues(perc);
 				dataset.validate();
@@ -310,7 +324,7 @@ public class Preprocessing extends BabelomicsTool {
 					IOUtils.write(idsFile, dataset.getFeatureNames());
 				}
 			} catch (IOException e1) {
-				printWarning("ioexception_execute_maplot", "IO error", "Error ocurred when accessing input file: " + datasetFile.getName(), "");
+				printWarning("ioexception_execute_preprocessing", "IO error", "Error ocurred when accessing input file: " + datasetFile.getName(), "");
 			}				
 
 			logger.debug("end of extracting ids\n");
@@ -381,6 +395,98 @@ public class Preprocessing extends BabelomicsTool {
 			preprocessed = true;
 		}
 
+		// convert ids
+		//
+		//File idsFile = new File(outdir + "/id_list.txt");
+		if ( convertIds != null && !("none".equalsIgnoreCase(convertIds)) ) {
+			try {
+				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "converting ids...");
+			} catch (FileNotFoundException e) {
+				abort("filenotfoundexception_execute_preprocessing", "job status file not found", e.toString(), StringUtils.getStackTrace(e));
+			}
+			logger.debug("converting ids...\n");
+
+			try {
+				List<Integer> rows = new ArrayList<Integer>();
+				List<String> ids = dataset.getFeatureNames();
+				List<String> outIds = new ArrayList<String>(ids.size());
+				
+				DBConnector dbConnector = new DBConnector(species, new File(babelomicsHomePath + "/conf/infrared.properties"));
+								
+				List<String> dbNames = new ArrayList<String>();
+				//dbNames.add("ensembl_gene");
+				dbNames.add(convertIds);
+				
+//				List<String> outIds = new ArrayList<String>(); 
+//				Map<String, List<String>> idsMap = new HashMap<String, List<String>>(); 
+				
+				System.out.println("-> infrared config = " + babelomicsHomePath + "/conf/infrared.conf");
+				
+				System.out.println("-> db connector = " + dbConnector.toString());
+				System.out.println("-> db names = " + ListUtils.toString(dbNames, ","));
+				List<Map<String, FeatureList<XRef>>> list = new XRefDBManager(dbConnector).getListByDBNames(ids, dbNames);
+
+				List<String> noFound = new ArrayList<String>();
+				if ( list != null && list.size() > 0 ) {
+					//System.out.println("list size = " + list.size());
+					String key;
+					for(int i=0 ; i<list.size() ; i++) {
+						//System.out.println("Converting " + ids.get(i));
+						key = convertIds;
+						//for(String key: MapUtils.getKeys(list.get(i))) {
+							//System.out.print("\tto " + key + " ---> ");
+							if (list.get(i).get(key)!=null && list.get(i).get(key).size()>0) {
+								//for(XRef xref: list.get(i).get(key)) {
+								//	System.out.print(xref.getId() + "\t");
+								//}
+								//System.out.print(list.get(i).get(key).get(0).getId());
+								outIds.add(list.get(i).get(key).get(0).getId());
+							} else {
+								rows.add(i);
+								outIds.add(ids.get(i));
+								noFound.add(ids.get(i));
+							}
+							//System.out.println("");
+						//}
+					}
+					
+					dataset.setFeatureNames(outIds);
+					if (noFound.size()==outIds.size()) {
+						printWarning("preprocessing", "Warning", "None input ID could be converted (" + convertIds + "). The result dataset keeps the original IDs.");
+					} else {
+						if (noFound.size()>0) {
+							System.out.println("rows to remove: " + rows.size() + ", indices: " + ListUtils.toString(rows, ","));
+							System.out.println("before, number of rows = " + dataset.getRowDimension());
+							//dataset.save(new File(this.getOutdir() + "/before_remove_rows.txt"));
+							dataset = dataset.filterRows(rows);
+							//dataset.save(new File(this.getOutdir() + "/after_remove_rows.txt"));
+							System.out.println("after, number of rows = " + dataset.getRowDimension());
+						
+							String msg = ListUtils.toString(noFound, ", ");
+							printWarning("preprocessing", "Warning", "None (" + convertIds + ") ID found for " + noFound.size() + " input IDs: " + (msg.length()>36 ? (msg.substring(0,36)+"..."): msg) + ". These IDs were removed from the result dataset.");
+						}
+						dataset = dataset.mergeReplicatedFeatures(convertIdsMerge);
+						preprocessed = true;
+					}
+				} else {
+					printWarning("preprocessing", "Warning", "None input ID could be converted (" + convertIds + "). The result dataset keeps the original IDs.");
+				}
+				
+				
+				//System.out.println("*************** features names size = " + (dataset.getFeatureNames().size()));
+//				if ( dataset.getFeatureNames() == null || dataset.getFeatureNames().size() == 0) {
+//					printWarning("invaliddataset_execute_preprocessing", "Invalid dataset", "Dataset " + datasetFile.getName() + " is not valid");
+//				} else {
+//					IOUtils.write(idsFile, dataset.getFeatureNames());
+//				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				printWarning("exception_execute_preprocessing", "IO error", "Error ocurred when accessing input file: " + datasetFile.getName(), "");
+			}				
+
+			logger.debug("end of converting ids\n");
+			progress++;
+		}
 
 
 		logger.debug("saving dataset...\n");

@@ -164,8 +164,7 @@ public class DescriptiveStatistics extends BabelomicsTool {
 				int[] colIndexByVariableValue = dataset.getColumnIndexesByVariableValue(className, str);
 				doubleVars = new ArrayList<Double>(colIndexByVariableValue.length);
 				DoubleMatrix matrixByVal =dataset.getSubMatrixByColumns(colIndexByVariableValue);
-				addSeries(matrixByVal, hc, bp, str);	
-
+				addSeries(matrixByVal, hc, bp, str);
 			}
 		}
 		else{

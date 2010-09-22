@@ -44,6 +44,8 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 	private int numberOfPartitions;
 	private int outputFormat;
 	private int order;
+	protected int duplicatesMode;
+	
 	
 	
 	public FatiScanTool(){
@@ -65,12 +67,19 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		options.addOption(OptionFactory.createOption("order", "ascend or descend [ascend]",false,true));
 		options.addOption(OptionFactory.createOption("higher-label", "label for condition with higher statistical values",false,true));
 		options.addOption(OptionFactory.createOption("lower-label", "label for condition with lower statistical values",false,true));
-		
+		options.addOption(OptionFactory.createOption("duplicates", "to remove duplicated IDs", false));
 	}
 		
 	@Override
 	public void prepare() throws IOException, ParseException, InvalidIndexException {
 		super.prepare();
+		
+		
+		String duplicates = commandLine.getOptionValue("duplicates", "never");		
+		if(duplicates.equalsIgnoreCase("never")) duplicatesMode = FatiScan.REMOVE_NEVER;
+		if(duplicates.equalsIgnoreCase("remove_duplicates")) duplicatesMode = FatiScan.REMOVE_DUPLICATES;
+		
+		// your annotations
 
 		// method 
 		method = Method.FatiScan;
@@ -80,6 +89,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		}
 		
 		// ranked list		
+		
 		rankedList = new FeatureData(new File(commandLine.getOptionValue("ranked-list")), true);
 		
 		// test
@@ -123,7 +133,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				result.addOutputItem(new Item("ranked_list","ranked_list.txt","Ranked list",Item.TYPE.FILE,Arrays.asList("RANKED_LIST","CLEAN"),new HashMap<String,String>(),"Input data"));
 								
 				// order ranked list and save genes and rank separately
-				FatiScan fatiscan = new FatiScan(rankedList,null,dbConnector,FatiScan.DEFAULT_NUMBER_OF_PARTITIONS,testMode,outputFormat,order);
+				FatiScan fatiscan = new FatiScan(rankedList,null,dbConnector,FatiScan.DEFAULT_NUMBER_OF_PARTITIONS,testMode,outputFormat,order,duplicatesMode);
 				fatiscan.prepareLists();
 				IOUtils.write(outdir + "/id_list.txt", fatiscan.getIdList());
 				result.addOutputItem(new Item("id_list","id_list.txt","Id list (sorted)",Item.TYPE.FILE,Arrays.asList("IDLIST","SORTED"),new HashMap<String,String>(),"Input data"));
@@ -206,7 +216,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 			gsea = new LogisticScan(rankedList,filter,dbConnector,order);
 			((LogisticScan)gsea).setWorkingDirectory(outdir);
 		}else {
-			gsea = new FatiScan(rankedList,filter,dbConnector,numberOfPartitions,testMode,outputFormat,order);	
+			gsea = new FatiScan(rankedList,filter,dbConnector,numberOfPartitions,testMode,outputFormat,order, duplicatesMode);	
 		}
 			
 		// run
@@ -240,6 +250,9 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		// db attributes
 		FunctionalDbDescriptor filterInfo = new FunctionalDbDescriptor("your_annotation","Your annotations", "your_annotations","Your annotations");
 		
+		// get term sizes
+		Map<String, Integer> termSizes = getYourAnnotationsTermSizes();
+		
 		logger.info(filterInfo.getTitle() + "...\n");
 		
 		GeneSetAnalysis gsea;
@@ -247,11 +260,16 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 		if(method==Method.Logistic){			
 			gsea = new LogisticScan(rankedList, annotations,order);
 		}else {
-			gsea = new FatiScan(rankedList, annotations,numberOfPartitions,testMode,outputFormat,order);
+			gsea = new FatiScan(rankedList, annotations,numberOfPartitions,testMode,outputFormat,order, duplicatesMode);
 		}
 		
 		// run
 		try{
+			
+			gsea.setLogger(logger);
+			
+			// set term sizes
+			gsea.setTermSizes(termSizes);
 			
 			gsea.run();
 				

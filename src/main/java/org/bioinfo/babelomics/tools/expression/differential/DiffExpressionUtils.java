@@ -140,13 +140,13 @@ public class DiffExpressionUtils {
 		}
 
 		if ( sigRowIndexes.size() > 0  ) {				
-			List<Double> sigStatistics = ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes));
-			List<Double> sigAdjPValues = ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toArray(sigRowIndexes));
+			List<Double> sigStatistics = ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toIntArray(sigRowIndexes));
+			List<Double> sigAdjPValues = ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toIntArray(sigRowIndexes));
 
 			int[] sigRowOrder = ListUtils.order(sigStatistics, true);
 
 			if ( filterRowIndexes.size() == 0 ) {
-				return DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, sigRowOrder, statisticsLabel, ListUtils.toArray(sigStatistics), adjPValuesLabel, ListUtils.toArray(sigAdjPValues));				
+				return DiffExpressionUtils.generateHeatmap(dataset, className, columnOrder, sigRowOrder, statisticsLabel, ListUtils.toDoubleArray(sigStatistics), adjPValuesLabel, ListUtils.toDoubleArray(sigAdjPValues));				
 			} else {
 				Dataset sigDataset = dataset.filterRows(filterRowIndexes);
 				sigDataset.validate();
@@ -159,7 +159,7 @@ public class DiffExpressionUtils {
 				//			System.out.println("sig row indexes = " + ListUtils.toString(sigRowIndexes));
 
 
-				return DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, sigRowOrder, statisticsLabel, ListUtils.toArray(sigStatistics), adjPValuesLabel, ListUtils.toArray(sigAdjPValues));
+				return DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, sigRowOrder, statisticsLabel, ListUtils.toDoubleArray(sigStatistics), adjPValuesLabel, ListUtils.toDoubleArray(sigAdjPValues));
 			}
 		}
 		return null;
@@ -548,7 +548,7 @@ public class DiffExpressionUtils {
 			// adding dataset to results
 			//
 			File file = new File(tool.getOutdir() + "/" + test +"_significative_dataset.txt");
-			Dataset sigDataset = new Dataset(subDataset.getSampleNames(), ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), doubleMatrix);
+			Dataset sigDataset = new Dataset(subDataset.getSampleNames(), ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toIntArray(sigRowIndexes)), doubleMatrix);
 			sigDataset.setVariables(subDataset.getVariables());
 			sigDataset.validate();
 			sigDataset.save(file);
@@ -567,22 +567,22 @@ public class DiffExpressionUtils {
 
 			int[] rowOrder = null;
 			if (isRegression || isCorrelation) {
-				rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toArray(sigRowIndexes)), true);				
+				rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toIntArray(sigRowIndexes)), true);				
 			} else {
-				rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes)), true);
+				rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toIntArray(sigRowIndexes)), true);
 			}
 
 			DataFrame dataFrame = new DataFrame(sigDataset.getFeatureNames().size(), 0);
-			dataFrame.addColumn(statLabel, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes)), rowOrder)));
+			dataFrame.addColumn(statLabel, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toIntArray(sigRowIndexes)), rowOrder)));
 			if (isCox || isCorrelation) {
-				dataFrame.addColumn(label1, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toArray(sigRowIndexes)), rowOrder)));				
+				dataFrame.addColumn(label1, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toIntArray(sigRowIndexes)), rowOrder)));				
 			} else if (isRegression) {
-				dataFrame.addColumn(label1, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toArray(sigRowIndexes)), rowOrder)));				
-				dataFrame.addColumn(label2, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(values2), ListUtils.toArray(sigRowIndexes)), rowOrder)));								
+				dataFrame.addColumn(label1, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toIntArray(sigRowIndexes)), rowOrder)));				
+				dataFrame.addColumn(label2, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(values2), ListUtils.toIntArray(sigRowIndexes)), rowOrder)));								
 			}
-			dataFrame.addColumn(pValLabel, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(pValues), ListUtils.toArray(sigRowIndexes)), rowOrder)));
-			dataFrame.addColumn(adjPValLabel, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toArray(sigRowIndexes)), rowOrder)));
-			dataFrame.setRowNames(ListUtils.ordered(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), rowOrder));
+			dataFrame.addColumn(pValLabel, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(pValues), ListUtils.toIntArray(sigRowIndexes)), rowOrder)));
+			dataFrame.addColumn(adjPValLabel, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toIntArray(sigRowIndexes)), rowOrder)));
+			dataFrame.setRowNames(ListUtils.ordered(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toIntArray(sigRowIndexes)), rowOrder));
 
 			//System.out.println("names from data frame :\n" + ListUtils.toString(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), "\n"));
 			//System.out.println("names from data set   :\n" + ListUtils.toString(sigDataset.getFeatureNames(), "\n"));
@@ -607,9 +607,9 @@ public class DiffExpressionUtils {
 			//
 			Canvas sigHeatmap = null;
 			if (isCox || isCorrelation || isRegression) {
-				sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, label1, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toArray(sigRowIndexes))), adjPValLabel, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toArray(sigRowIndexes))));
+				sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, label1, ListUtils.toDoubleArray(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toIntArray(sigRowIndexes))), adjPValLabel, ListUtils.toDoubleArray(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toIntArray(sigRowIndexes))));
 			} else {
-				sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, statLabel, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toArray(sigRowIndexes))), adjPValLabel, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toArray(sigRowIndexes))));
+				sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, statLabel, ListUtils.toDoubleArray(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toIntArray(sigRowIndexes))), adjPValLabel, ListUtils.toDoubleArray(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toIntArray(sigRowIndexes))));
 			}
 			if (sigHeatmap == null) {
 				tool.printError("ioexception_executet_classcomparison", "ERROR", "Error generating heatmap image");

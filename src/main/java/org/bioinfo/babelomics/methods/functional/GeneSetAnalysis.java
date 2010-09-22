@@ -50,7 +50,7 @@ public abstract class GeneSetAnalysis {
 	// summary
 	private int annotatedCounter;
 	private double meanAnnotationsPerId;
-	private Logger logger;
+	protected Logger logger;
 	
 	public void prepare() throws InvalidIndexException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, EmptyAnnotationException{
 				
@@ -98,9 +98,11 @@ public abstract class GeneSetAnalysis {
 		// init annotation counters
 		meanAnnotationsPerId = 0;
 		annotatedCounter = 0;
-		HashMap<String,Integer> listAnnotations = new HashMap<String, Integer>();		
+		HashMap<String,Integer> listAnnotations = new HashMap<String, Integer>();
+		HashMap<String,Boolean> idHash = new HashMap<String, Boolean>();
 		for(String id: idList){
 			listAnnotations.put(id, 0);
+			idHash.put(id, true);
 		}
 		
 		// process annotations
@@ -115,7 +117,9 @@ public abstract class GeneSetAnalysis {
 			if(!geneMap.containsKey(annotation.getFunctionalTermId())){
 				geneMap.put(annotation.getFunctionalTermId(), new ArrayList<String>());
 			}
-			geneMap.get(annotation.getFunctionalTermId()).add(annotation.getId());
+			if(idHash.containsKey(annotation.getId())){
+				geneMap.get(annotation.getFunctionalTermId()).add(annotation.getId());
+			}
 			if(listAnnotations.containsKey(annotation.getId())){
 				count = listAnnotations.get(annotation.getId()) + 1;				
 			} else {

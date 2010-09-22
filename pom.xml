@@ -61,9 +61,14 @@
 			<version>0.1.0</version>
 		</dependency>
 		<dependency>
+			<groupId>org.bioinfo</groupId>
+			<artifactId>bioinfo-networks</artifactId>
+			<version>0.1.0</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.4</version>
+			<version>4.8.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -71,6 +76,11 @@
 			<artifactId>bioinfo-validation</artifactId>
 			<version>0.1.0</version>
 		</dependency>
+		<dependency>
+			<groupId>smadeira</groupId>
+  			<artifactId>smadeira</artifactId>
+  			<version>1.0.0</version>
+  		</dependency>
 	</dependencies>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>

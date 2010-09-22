@@ -263,13 +263,13 @@ public class SageTmt extends Tmt {
 				throw new Exception("Impossible to create the frequency matrixes for your filtering parameters. Please, change your parameters and try again");
 			}
 			
-			matrix1 = new DoubleMatrix(matrix1.getSubMatrix(ListUtils.toArray(rowIndexes), ListUtils.toArray(columnIndexes1)).getData());
+			matrix1 = new DoubleMatrix(matrix1.getSubMatrix(ListUtils.toIntArray(rowIndexes), ListUtils.toIntArray(columnIndexes1)).getData());
 			System.out.println("matrix1 :\n" + matrix1);
 			if ( matrix1 == null || matrix1.getColumnDimension() ==  0 || matrix1.getRowDimension() == 0) {
 				throw new Exception("Impossible to create the frequency matrix for list #1 for your filtering parameters. Please, change your parameters and try again");
 			}
 
-			matrix2 = new DoubleMatrix(matrix2.getSubMatrix(ListUtils.toArray(rowIndexes), ListUtils.toArray(columnIndexes2)).getData());
+			matrix2 = new DoubleMatrix(matrix2.getSubMatrix(ListUtils.toIntArray(rowIndexes), ListUtils.toIntArray(columnIndexes2)).getData());
 			System.out.println("matrix2 :\n" + matrix2);
 			if ( matrix2 == null || matrix2.getColumnDimension() ==  0 || matrix2.getRowDimension() == 0) {
 				throw new Exception("Impossible to create the frequency matrix for list #2 for your filtering parameters. Please, change your parameters and try again");

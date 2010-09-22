@@ -391,7 +391,7 @@ public class ClassComparison extends BabelomicsTool {
 		}
 		
 		file = new File(outdir + "/" + test +"_fold_change_significative_dataset.txt");
-		Dataset sigDataset = new Dataset(subDataset.getSampleNames(), ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), doubleMatrix);
+		Dataset sigDataset = new Dataset(subDataset.getSampleNames(), ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toIntArray(sigRowIndexes)), doubleMatrix);
 		sigDataset.setVariables(subDataset.getVariables());
 		sigDataset.validate();
 		sigDataset.save(file);
@@ -408,7 +408,7 @@ public class ClassComparison extends BabelomicsTool {
 		}
 		
 		
-		rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(res), ListUtils.toArray(sigRowIndexes)), true);	
+		rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(res), ListUtils.toIntArray(sigRowIndexes)), true);	
 		
 //		System.out.println("dataset feature names = " + ListUtils.toString(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), "\n"));
 //		System.out.println("dataset feature names = " + ListUtils.toString(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), "\n"));
@@ -417,8 +417,8 @@ public class ClassComparison extends BabelomicsTool {
 		
 		DataFrame sigDataFrame = new DataFrame(sigDataset.getFeatureNames().size(), 0);
 		
-		sigDataFrame.addColumn(test, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(res), ListUtils.toArray(sigRowIndexes)), rowOrder)));
-		sigDataFrame.setRowNames(ListUtils.ordered(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), rowOrder));
+		sigDataFrame.addColumn(test, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(res), ListUtils.toIntArray(sigRowIndexes)), rowOrder)));
+		sigDataFrame.setRowNames(ListUtils.ordered(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toIntArray(sigRowIndexes)), rowOrder));
 
 		//System.out.println("names from data frame :\n" + ListUtils.toString(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), "\n"));
 		//System.out.println("names from data set   :\n" + ListUtils.toString(sigDataset.getFeatureNames(), "\n"));
@@ -433,7 +433,7 @@ public class ClassComparison extends BabelomicsTool {
 
 		// adding heatmap to results
 		//
-		Canvas sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, testLabel, ListUtils.toArray(ListUtils.subList(ArrayUtils.toList(res), ListUtils.toArray(sigRowIndexes))), null, null);
+		Canvas sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, testLabel, ListUtils.toDoubleArray(ListUtils.subList(ArrayUtils.toList(res), ListUtils.toIntArray(sigRowIndexes))), null, null);
 		if (sigHeatmap == null) {
 			printError("ioexception_execute_fold_change_classcomparison", "ERROR", "Error generating " + test + " fold-change heatmap image");
 		} else {
@@ -471,7 +471,7 @@ public class ClassComparison extends BabelomicsTool {
 					vars.add(values.get(i));
 				}
 			}
-			matrix = dataset.getSubMatrixByColumns(ListUtils.toArray(indices));
+			matrix = dataset.getSubMatrixByColumns(ListUtils.toIntArray(indices));
 		}
 
 		try {
