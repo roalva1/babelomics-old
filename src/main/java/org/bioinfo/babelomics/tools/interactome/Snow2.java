@@ -41,7 +41,7 @@ public class Snow2  extends BabelomicsTool{
 	private ProteinNetwork proteinNetwork;
 	private ProteinNetwork subProteinNetwork1, subProteinNetwork2;
 	private List<ProteinNetwork> subProteinNetworkRandoms;
-	private boolean noNumberOfComponents;
+	private boolean components;
 	private boolean bicomponents;
 	private boolean images;
 	private boolean json;
@@ -61,7 +61,7 @@ public class Snow2  extends BabelomicsTool{
 		options.addOption(OptionFactory.createOption("randoms", "Number of randoms", false, true));
 		options.addOption(OptionFactory.createOption("randoms-size", "Size of randoms", false, true));
 		options.addOption(OptionFactory.createOption("intermediate", "If there is this argument, it will create the network with 1 intermediate", false, false));
-		options.addOption(OptionFactory.createOption("no-number-components", "If there is this argument, it won't calculate the number of components", false, false));
+		options.addOption(OptionFactory.createOption("components", "If there is this argument, it will calculate the number of components", false, false));
 		options.addOption(OptionFactory.createOption("bicomponents", "If there is this argument, it will calculate the number of bicomponents", false, false));
 		options.addOption(OptionFactory.createOption("json", "It will create an output .json file", false, false));
 		options.addOption(OptionFactory.createOption("o-sif-topo-file", "Create a full topological file from a sif file", false, false));
@@ -78,7 +78,7 @@ public class Snow2  extends BabelomicsTool{
 		subProteinNetwork2 = null;
 
 		subProteinNetworkRandoms = new ArrayList<ProteinNetwork>();
-		noNumberOfComponents = commandLine.hasOption("no-number-components");
+		components = commandLine.hasOption("components");
 		bicomponents = commandLine.hasOption("bicomponents");
 		images = commandLine.hasOption("images");
 		json = commandLine.hasOption("json");
@@ -204,7 +204,7 @@ public class Snow2  extends BabelomicsTool{
 				result.addOutputItem(new Item("sn_nodeFile"+node+"_means_param", f.getName(), "Means values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
 
 
-				if(!noNumberOfComponents) {
+				if(components) {
 					logger.debug("Starting list1 components.........");
 					componentsListSub1 = subProteinNetwork1.getInteractomeGraph().getAllInformationComponents(true);
 					
@@ -245,7 +245,7 @@ public class Snow2  extends BabelomicsTool{
 				IOUtils.write(f.getAbsoluteFile(), sbMeans.toString());
 				result.addOutputItem(new Item("sn_nodeFile"+node+"_means_param", f.getName(), "Means values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
 
-				if(!noNumberOfComponents) {
+				if(components) {
 					logger.debug("Starting list2 components.........");
 					componentsListSub2 = subProteinNetwork2.getInteractomeGraph().getAllInformationComponents(true);
 					sbComponents.append(getComponentsValues(subProteinNetwork2, node, componentsListSub2));
@@ -315,7 +315,7 @@ public class Snow2  extends BabelomicsTool{
 		List<String> layoutsName = new ArrayList<String>();
 		
 		if(componentsListSub == null)
-			logger.error("not components calculated. Remove --no-number-components");
+			logger.error("not components calculated, please, set the --components option");
 
 		IOUtils.write(sourceDotFile, dot.toDot(proteinNetwork.getInteractomeGraph()));
 		
@@ -534,7 +534,7 @@ public class Snow2  extends BabelomicsTool{
 			sbTopo.append(getTopologicalValues(subProteinNetwork, i)).append(System.getProperty("line.separator"));
 			sbMeans.append(getTopologicalMeanValues(subProteinNetwork, i)).append(System.getProperty("line.separator"));
 
-			if(!noNumberOfComponents) {
+			if(components) {
 				List<List<ProteinVertex>> componentsList =  subProteinNetwork.getInteractomeGraph().getAllInformationComponents(true);
 				sbComponents.append(getComponentsValues(subProteinNetwork, i, componentsList));
 			}
@@ -564,7 +564,7 @@ public class Snow2  extends BabelomicsTool{
 	private StringBuilder createMeansHeader(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("#Subnet\tMeanBet\tStdBet\t").append("MeanCon\tStdCon\t").append("MeanCls\tStdCls\t");
-		if(!noNumberOfComponents){
+		if(components){
 			sb.append("Comp\t1Comp");
 		}
 		if(bicomponents){
@@ -608,7 +608,7 @@ public class Snow2  extends BabelomicsTool{
 		sb.append("sn"+(subnet)).append("\t");
 		sb.append(subProteinNetwork.getTopologicalMeanValuesToString());
 
-		if(!noNumberOfComponents){
+		if(components){
 			int oneComponent = 0;
 			int moreOneComponent = 0;
 			List<List<ProteinVertex>> listComponents = interactomeGraph.getAllInformationComponents(true);
@@ -631,7 +631,7 @@ public class Snow2  extends BabelomicsTool{
 		StringBuilder sb = new StringBuilder();
 		SimpleUndirectedGraph<ProteinVertex, DefaultEdge> interactomeGraph = subProteinNetwork.getInteractomeGraph();
 
-		if(!noNumberOfComponents){
+		if(components){
 			//			componentsList =  interactomeGraph.getAllInformationComponents(true);
 			List<Double> componentsDiameter = Calc.calcDiameter(interactomeGraph, componentsList);
 			for(int i=0; i < componentsList.size(); i++){
