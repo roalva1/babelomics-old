@@ -83,7 +83,7 @@ public class Snow2  extends BabelomicsTool{
 		images = commandLine.hasOption("images");
 		json = commandLine.hasOption("json");
 
-		outputFileName = outdir + "/" + commandLine.getOptionValue("o-name");
+		outputFileName = outdir + "/" + commandLine.getOptionValue("o-name", "result");
 
 		String interactomeMsg = "Homo sapiens";
 		interactome = commandLine.getOptionValue("interactome");
@@ -286,12 +286,20 @@ public class Snow2  extends BabelomicsTool{
 				return;
 			}
 			if(json){
+				File auxFile = new File(outputFileName);;
+				List<String> names = new ArrayList<String>();
 				if(subProteinNetwork1 != null){
+					names.add(auxFile.getName() + "_list1.json");
 					createJson(subProteinNetwork1, outputFileName+"_list1.dot", componentsListSub1, intermediatesSub1, 1);
 				}
 				if(subProteinNetwork2 != null){
+					names.add(auxFile.getName() + "_list2.json");
 					createJson(subProteinNetwork2, outputFileName+"_list2.dot", componentsListSub2, intermediatesSub2, 2);
 				}
+				
+				String url = "SnowViewer2?filename=" + ListUtils.toString(names, ",");
+				result.addOutputItem(new Item("viewer_param", url, "Viewer", TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Network viewer"));			
+
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -324,12 +332,12 @@ public class Snow2  extends BabelomicsTool{
 		File f = new File(outputFileName+"_list"+node+".json");
 		IOUtils.write(f.getAbsoluteFile(), json.toJson(fileList, layoutsName, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
 
-		System.out.println("********************* json file = " + f.getAbsolutePath());
-		if (f.exists()) {
-			System.out.println("********************* exists JSON !!!");
-			String url = "SnowViewer2?filename=" + f.getName();
-			result.addOutputItem(new Item("viewer_param", url, "Network viewer", TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Graph"));			
-		}
+//		System.out.println("********************* json file = " + f.getAbsolutePath());
+//		if (f.exists()) {
+//			System.out.println("********************* exists JSON !!!");
+//			String url = "SnowViewer2?filename=" + f.getName();
+//			result.addOutputItem(new Item("viewer_param", url, "Network viewer", TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Graph"));			
+//		}
 //		f = new File("result1.json");
 //		//String url = "http://beta.babelomics.bioinfo.cipf.es/SnowViewer?filename=" + fileName;
 //		//http://beta.babelomics.bioinfo.cipf.es/SnowViewer?filename=subnetwork1.xml&jobid=262&sessionid=7tySrwJgNRM0tyGOnj9N3eT2BCTsEC8Qw3StPMwwz1WfsFyt1zoIqR6lPa7fnv54
