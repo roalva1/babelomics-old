@@ -6,7 +6,7 @@ import org.junit.Test;
 public class Snow2Test {
 
 	
-	@Test
+	//@Test
 	public void Test1() {
 
 		String []args = {
@@ -16,8 +16,8 @@ public class Snow2Test {
 //				"--log-level","1",
 //				"-s", "/mnt/commons/babelomics/tests/snow2/ej1/sce_alldb_proteins_interactome_nr.sif", 
 //				"-t", "/home/ralonso/appl/babelomics/sce/proteins/sce_alldb_proteins_interactome_nr_topo.txt",
-//				"--randoms", "10",
-//				"--randoms-size","2", 
+//				"--randoms", "1000",
+//				"--randoms-size","37", 
 				"--o-name","result",
 				"--list1","/mnt/commons/babelomics/tests/snow2/ej1/UPYDOWN_HET_list_uniq",
 				"--list2","/mnt/commons/babelomics/tests/snow2/ej1/UPYDOWN_HET_list_uniq_mitad",
@@ -45,41 +45,43 @@ public class Snow2Test {
 //				"--o-sif-topo-file",
 //				"-topo-file", "/home/ralonso/appl/babelomics/sce/proteins/sce_alldb_proteins_interactome_nr_topo.txt",
 				"--randoms", "10",
-				"--randoms-size","2", 
 				"--o-name","resultSmall",
 				"--interactome","own",
 				"--type", "proteins",
-				"--list1","/mnt/commons/babelomics/tests/snow2/ej8/list3.txt",
+				"--list1","/mnt/commons/babelomics/tests/snow2/ej8/list1",
 //				"--list2","/mnt/commons/babelomics/tests/snow2/ej8/list2",
 				"--side", "less",
-//				"--intermediate",
+				"--intermediate",
 				"--json",
 				"--images",
 				"--home", System.getenv("BABELOMICS_HOME")};
 
 		main(args);
 	}
-	
 	//@Test
-	public void DotSvgJsonTest() {
+	public void test3(){
+		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
 
 		String []args = {
-				"--tool", "snow2", 
-				"-o", "/tmp/ej8/",  
-				"-s", "/mnt/commons/babelomics/tests/snow2/ej8/ej8.sif",
-				"-t", "/mnt/commons/babelomics/tests/snow2/ej8/ej8.topo",
-				"--node-file1","/mnt/commons/babelomics/tests/snow2/ej8/list1",
-				"--node-file2","/mnt/commons/babelomics/tests/snow2/ej8/list2",
-//				"--dot",
-				"--o-name", "result",
-				"--intermediate",
-//				"--bicomponents",
-				"--json",
-				"--home", System.getenv("BABELOMICS_HOME")};
-
+				 "--tool", "snow2", 
+//					"-t", "/mnt/commons/babelomics/tests/snow2/ej8/ej8.topo", 
+					"-o", "/tmp/snow2/test3",
+//					"--o-sif-topo-file",
+//					"-topo-file", "/home/ralonso/appl/babelomics/sce/proteins/sce_alldb_proteins_interactome_nr_topo.txt",
+					"--randoms", "10",
+					"--randoms-size","2", 
+					"--o-name","result",
+					"--interactome","hsa",
+					"--type", "proteins",
+					"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_9_block6.txt",
+					"--list2","none",
+					"--side", "less",
+//					"--intermediate",
+					"--json",
+					"--images",
+					"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
-	
 	public void main(String []args){
 		try {
 //			for(String arg : args)
