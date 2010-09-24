@@ -72,7 +72,7 @@ public class Snow2Test {
 //					"--o-sif-topo-file",
 //					"-topo-file", "/home/ralonso/appl/babelomics/sce/proteins/sce_alldb_proteins_interactome_nr_topo.txt",
 					"--randoms", "10",
-					"--randoms-size","2", 
+//					"--randoms-size","2", 
 					"--o-name","result",
 					"--interactome","hsa",
 					"--type", "proteins",
