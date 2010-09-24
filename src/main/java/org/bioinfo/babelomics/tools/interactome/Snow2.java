@@ -62,7 +62,7 @@ public class Snow2  extends BabelomicsTool{
 		options.addOption(OptionFactory.createOption("type", "An argument saying if you want genes or proteins(default)", false, true));
 		options.addOption(OptionFactory.createOption("randoms", "Number of randoms", false, true));
 //		options.addOption(OptionFactory.createOption("randoms-size", "Size of randoms", false, true));
-		options.addOption(OptionFactory.createOption("intermediate", "If there is this argument, it will create the network with 1 intermediate", false, false));
+		options.addOption(OptionFactory.createOption("intermediate", "If there is this argument, it will create the network with 1 intermediate", false, true));
 		options.addOption(OptionFactory.createOption("components", "If there is this argument, it will calculate the number of components", false, false));
 		options.addOption(OptionFactory.createOption("bicomponents", "If there is this argument, it will calculate the number of bicomponents", false, false));
 		options.addOption(OptionFactory.createOption("json", "It will create an output .json file", false, false));
@@ -114,6 +114,7 @@ public class Snow2  extends BabelomicsTool{
 		result.addOutputItem(new Item("type_param", type, "ID type", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 
 		intermediate = (commandLine.hasOption("intermediate") && !"0".equalsIgnoreCase(commandLine.getOptionValue("intermediate")));
+		System.out.println("intermediate = " + intermediate + ", value = " + commandLine.getOptionValue("intermediate"));
 		
 		ProteinNetworkToFile file = new ProteinNetworkToFile();
 
@@ -211,6 +212,7 @@ public class Snow2  extends BabelomicsTool{
 
 				if(components) {
 					logger.debug("Starting list1 components.........");
+					System.out.println("Starting list1 components.........");
 					componentsListSub1 = subProteinNetwork1.getInteractomeGraph().getAllInformationComponents(true);
 					
 					sbComponents.append(getComponentsValues(subProteinNetwork1, node, componentsListSub1));

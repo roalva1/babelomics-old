@@ -9,7 +9,6 @@ public class Snow2Test {
 	public void Test0() {
 	}
 	
-	//@Test
 	public void Test1() {
 
 		String []args = {
@@ -60,7 +59,7 @@ public class Snow2Test {
 
 		main(args);
 	}
-	@Test
+	
 	public void SnowExampleOneList(){
 		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
 
@@ -83,6 +82,7 @@ public class Snow2Test {
 					"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
+	
 	@Test
 	public void SnowExampleTwoLists(){
 		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
@@ -96,19 +96,19 @@ public class Snow2Test {
 //					"--randoms", "10",
 //					"--randoms-size","2", 
 					"--o-name","result",
+					"--components",
 					"--interactome","hsa",
 					"--type", "proteins",
 					"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_10_block225.txt",
 					"--list2","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_11_block80.txt",
 					"--side", "less",
-					"--intermediate", "1",
+					"--intermediate", "0",
 					"--json",
 					"--images",
 					"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
 	
-	@Test
 	public void Test3() {
 
 		String []args = {
