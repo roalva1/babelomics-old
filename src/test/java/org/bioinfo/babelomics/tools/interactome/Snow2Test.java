@@ -34,7 +34,7 @@ public class Snow2Test {
 		main(args);
 	}
 	
-	@Test
+	//@Test
 	public void Test2() {
 
 		String []args = {
@@ -58,8 +58,8 @@ public class Snow2Test {
 
 		main(args);
 	}
-	//@Test
-	public void test3(){
+	@Test
+	public void SnowExampleOneList(){
 		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
 
 		String []args = {
@@ -68,15 +68,38 @@ public class Snow2Test {
 					"-o", "/tmp/snow2/test3",
 //					"--o-sif-topo-file",
 //					"-topo-file", "/home/ralonso/appl/babelomics/sce/proteins/sce_alldb_proteins_interactome_nr_topo.txt",
-					"--randoms", "10",
-					"--randoms-size","2", 
+					"--randoms", "1000",
+//					"--randoms-size","2", 
 					"--o-name","result",
 					"--interactome","hsa",
 					"--type", "proteins",
-					"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_9_block6.txt",
-					"--list2","none",
+					"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_10_block225.txt",
 					"--side", "less",
-//					"--intermediate",
+					"--intermediate",
+					"--json",
+					"--images",
+					"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
+	}
+	@Test
+	public void SnowExampleTwoLists(){
+		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
+
+		String []args = {
+				 "--tool", "snow2", 
+//					"-t", "/mnt/commons/babelomics/tests/snow2/ej8/ej8.topo", 
+					"-o", "/tmp/snow2/test4",
+//					"--o-sif-topo-file",
+//					"-topo-file", "/home/ralonso/appl/babelomics/sce/proteins/sce_alldb_proteins_interactome_nr_topo.txt",
+//					"--randoms", "10",
+//					"--randoms-size","2", 
+					"--o-name","result",
+					"--interactome","hsa",
+					"--type", "proteins",
+					"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_10_block225.txt",
+					"--list2","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_11_block80.txt",
+					"--side", "less",
+					"--intermediate",
 					"--json",
 					"--images",
 					"--home", System.getenv("BABELOMICS_HOME")};
