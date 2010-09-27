@@ -31,7 +31,7 @@ public class CorrelationJunitTest {
 		new File(outdir).mkdir();
 
 		System.out.println("-----  correlation : spearman ------");
-		String []args = {"--tool", "correlation", "--dataset", dataset, "-o", outdir, "--test", "spearman", "--classsname", "indep", "--correction", "holm", "--home", System.getenv("BABELOMICS_HOME")};
+		String []args = {"--tool", "correlation", "--dataset", dataset, "-o", outdir, "--test", "spearman", "--classname", "indep", "--correction", "holm", "--home", System.getenv("BABELOMICS_HOME")};
 		
 		try {
 			BabelomicsMain.main(args); 
