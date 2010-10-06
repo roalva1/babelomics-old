@@ -60,14 +60,21 @@ public class Preprocessing extends BabelomicsTool {
 		boolean preprocessed = false;
 		
 		Dataset dataset = null; //, auxDataset = null;
-
+		double filterPercentage = 0;
 		int kvalue = 15;
 		String imputeMethodMsg = "";
 		String logBase = commandLine.getOptionValue("logarithm-base", "none");
 		String exp = commandLine.getOptionValue("exp",  "none");
 		String mergeMethod = commandLine.getOptionValue("merge-replicates",  "none");
-		String filterPercentage = commandLine.getOptionValue("filter-missing",  "none");
-		String minFilterPercentage = commandLine.getOptionValue("min_perc_int","0"); 
+		try {
+			filterPercentage = Double.parseDouble(commandLine.getOptionValue("filter-missing",  "0.0"));
+			if (filterPercentage>100 || filterPercentage<0) {
+				filterPercentage = 0;
+			}
+		} catch(Exception e) {
+			filterPercentage = 0;
+		}
+//		String minFilterPercentage = commandLine.getOptionValue("min_perc_int","0"); 
 		String imputeMethod = commandLine.getOptionValue("impute-missing",  "none");
 		String extractIds = commandLine.getOptionValue("extract-ids",  "none");
 		String filterFilename = commandLine.getOptionValue("gene-file-filter",  "none");
@@ -79,7 +86,7 @@ public class Preprocessing extends BabelomicsTool {
 		if ( logBase != null && !("none".equalsIgnoreCase(logBase)) ) finalProgress++;
 		if ( exp != null && !("none".equalsIgnoreCase(exp)) ) finalProgress++;
 		if ( mergeMethod != null && !("none".equalsIgnoreCase(mergeMethod)) ) finalProgress++;
-		if ( filterPercentage != null && !("none".equalsIgnoreCase(filterPercentage)) ) finalProgress++;
+		if ( filterPercentage > 0 ) finalProgress++;
 		if ( imputeMethod != null && !("none".equalsIgnoreCase(imputeMethod)) ) finalProgress++; 
 		if ( extractIds != null && !("none".equalsIgnoreCase(extractIds)) ) finalProgress++; 
 		if ( filterFilename != null && !("none".equalsIgnoreCase(filterFilename)) && new File(filterFilename).exists() ) finalProgress++; 
@@ -91,7 +98,7 @@ public class Preprocessing extends BabelomicsTool {
 		result.addOutputItem(new Item("log_input_param", logBase, "Logarithmic transformation", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("exp_input_param", exp, "Exponential function", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("merge_input_param", mergeMethod, "Merge replicates", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-		result.addOutputItem(new Item("filter_input_param", filterPercentage, "Filter missing values", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("filter_input_param", filterPercentage + " %", "Minimum percentage of existing values", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("impute_input_param", ("knn".equalsIgnoreCase(imputeMethod) ? ("knn, k-value = " + commandLine.getOptionValue("k-value", "15")) : imputeMethod) , "Impute missing values", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("extractid_input_param", "" + (extractIds != null && !extractIds.equalsIgnoreCase("none")), "Extract IDs", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		result.addOutputItem(new Item("filenamefilter_input_param", (filterFilename != null && !"none".equalsIgnoreCase(filterFilename) ? "none" : new File(filterFilename).getName()), "ID-file filter", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
@@ -236,7 +243,7 @@ public class Preprocessing extends BabelomicsTool {
 
 		// filter missing values according to the given percentage
 		//
-		if ( filterPercentage != null && !("none".equalsIgnoreCase(filterPercentage)) ) {
+		if ( filterPercentage > 0 ) {
 			try {
 				jobStatus.addStatusMessage("" + (progress*100/finalProgress), "filtering missing values by percentage " + filterPercentage);
 			} catch (FileNotFoundException e) {
@@ -254,11 +261,8 @@ public class Preprocessing extends BabelomicsTool {
 			}
 
 			try {
-				double perc = Double.parseDouble(minFilterPercentage);					
-
-				dataset = dataset.filterRowsByPercOfMissingValues(perc);
+				dataset = dataset.filterRowsByPercOfMissingValues(filterPercentage);
 				dataset.validate();
-
 			} catch (Exception e) {
 				abort("exception_filterbymissingvalues_execute_preprocessing", "Error filtering by missing values, percentage value of " + filterPercentage + "%", e.toString(), StringUtils.getStackTrace(e));
 			}
@@ -301,6 +305,7 @@ public class Preprocessing extends BabelomicsTool {
 				abort("cloneexeption_imputemissingvalues_execute_preprocessing", "Error imputing missing values with method " + imputeMethodMsg, e.toString(), StringUtils.getStackTrace(e));
 			}	
 			logger.debug("end of imputing missing values (" + imputeMethodMsg + ")\n");
+			
 			progress++;
 			preprocessed = true;
 		}

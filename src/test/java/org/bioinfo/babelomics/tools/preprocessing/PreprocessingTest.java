@@ -125,12 +125,13 @@ public class PreprocessingTest {
 		}
 	}
 	
+	@Test
 	public void Test4() {
-		//String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
-		String dataset = "/mnt/commons/babelomics/tests/preprocessing/paco_preprocessing.txt";
+		String dataset = "/mnt/commons/test/biodata/example/dataset_example.txt";
+		//String dataset = "/mnt/commons/babelomics/tests/preprocessing/paco_preprocessing.txt";
 		String outdir = "/tmp/PreprocessingTest";
 		new File(outdir).mkdir();
-		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir,"--filter-missing", "90", "--home", System.getenv("BABELOMICS_HOME")};
+		String []args = { "--tool", "preprocessing","--log-level", "2", "--dataset", dataset, "-o", outdir,"--filter-missing", "15", "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("----------------> " + Arrays.toString(args));
 		
@@ -165,7 +166,6 @@ public class PreprocessingTest {
 		}
 	}
 
-	@Test
 	public void Test6() {
 		String dataset = "/mnt/commons/babelomics/tests/preprocessing/normdata.txt";
 		String outdir = "/tmp/PreprocessingTest6";

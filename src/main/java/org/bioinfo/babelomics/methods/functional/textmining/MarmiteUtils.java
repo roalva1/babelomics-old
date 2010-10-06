@@ -35,6 +35,7 @@ public class MarmiteUtils {
 		PreparedQuery query;
 		//Query query;
 		ResultSetHandler rsh = new BeanArrayListHandler(Score.class);
+		
 		DBConnection dbConn = new DBConnection("mysql", "mem20", "3306", "Babelomics", "ensembl_user", "ensembl_user");
 
 		String prefix = "select " + (entity.equalsIgnoreCase("roots") ? "word_root" : "entity") + ", hgnc_name, score from";
