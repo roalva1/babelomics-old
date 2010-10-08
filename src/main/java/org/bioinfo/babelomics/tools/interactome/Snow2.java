@@ -28,6 +28,8 @@ import org.bioinfo.networks.protein.WilcoxonTest;
 import org.bioinfo.networks.protein.files.Dot;
 import org.bioinfo.networks.protein.files.Json;
 import org.bioinfo.networks.protein.files.Svg;
+import org.bioinfo.networks.protein.files.Xml;
+import org.bioinfo.networks.protein.files.Sif;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -47,8 +49,11 @@ public class Snow2  extends BabelomicsTool{
 	private boolean intermediate;
 	private boolean images;
 	private boolean json;
+	private boolean xml;
+	private boolean sif;
 	private Set<String> intermediatesSub1, intermediatesSub2; 
 	private List<List<ProteinVertex>> componentsListSub1, componentsListSub2;
+	private int randomSize;
 
 	private String wBinPath;
 
@@ -70,6 +75,10 @@ public class Snow2  extends BabelomicsTool{
 		options.addOption(OptionFactory.createOption("o-name", "If there is this argument, it will create an output .cmp file for the information of each component", false, true));
 		options.addOption(OptionFactory.createOption("side", "side for kolmogorov and wilkoxon test. Can be two.sided(by default), less or greater", false, true));
 		options.addOption(OptionFactory.createOption("images", "Print the images for the statistics", false, false));
+		options.addOption(OptionFactory.createOption("xml", "Output xml file with the representation of the graph", false, false));
+		options.addOption(OptionFactory.createOption("sif", "Output sif file with the representation of the graph", false, false));
+
+
 	}
 	@Override
 	protected void execute() {
@@ -84,6 +93,8 @@ public class Snow2  extends BabelomicsTool{
 		bicomponents = commandLine.hasOption("bicomponents");
 		images = commandLine.hasOption("images");
 		json = commandLine.hasOption("json");
+		xml = commandLine.hasOption("xml");
+		sif = commandLine.hasOption("sif");
 
 		outputFileName = outdir + "/" + commandLine.getOptionValue("o-name", "result");
 
@@ -186,15 +197,21 @@ public class Snow2  extends BabelomicsTool{
 				List<String> list = IOUtils.readLines(nodeFile);
 				logger.debug("nodes read: " + list.toString());
 
+				double tInicio = System.currentTimeMillis();
 				SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), toProteinVertex(list));
-
+				
+				double tFinal = System.currentTimeMillis();
+				this.randomSize = subgraph.getVertices().size();
+//				System.out.println("Tiempo creando subgrafo["+subgraph.getVertices().size()+","+subgraph.getEdges().size()+"] lista1: "+(tFinal-tInicio)/1000);
 				if(intermediate){
+					tInicio = System.currentTimeMillis();
 					intermediatesSub1 = Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
+					tFinal = System.currentTimeMillis();
+//					System.out.println("Tiempo creando intermediario subgrafo["+subgraph.getVertices().size()+","+subgraph.getEdges().size()+"] lista1: "+(tFinal-tInicio)/1000);
 					if(intermediatesSub1.size()>0)
 						result.addOutputItem(new Item("external_nodes_list_"+node, intermediatesSub1.toString().substring(1, intermediatesSub1.toString().length()-1), "External nodes added", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
 					else
 						result.addOutputItem(new Item("external_nodes_list_"+node, "No added", "External nodes added", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
-
 				}
 
 				subProteinNetwork1 = createSubnet(subgraph);
@@ -277,7 +294,6 @@ public class Snow2  extends BabelomicsTool{
 			
 			if(commandLine.hasOption("randoms")){
 				logger.debug("Starting randoms.........");
-				int randomSize = this.subProteinNetwork1.getInteractomeGraph().getVertices().size();
 				int randoms = Integer.parseInt(commandLine.getOptionValue("randoms"));
 //				if(!commandLine.hasOption("randoms-size")){
 //					int size = this.proteinNetwork.getInteractomeGraph().getVertices().size();
@@ -320,6 +336,31 @@ public class Snow2  extends BabelomicsTool{
 				String url = "SnowViewer2?filename=" + ListUtils.toString(names, ",");
 				result.addOutputItem(new Item("viewer_param", url, "Viewer", TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Network viewer"));			
 
+			}
+			if(xml){
+				Xml xmlObject = new Xml();
+				if(subProteinNetwork1 != null){
+					xmlObject.graphToXML(outdir+"/subnetwork1.xml",subProteinNetwork1.getInteractomeGraph(), intermediatesSub1, componentsListSub1);
+				}
+				if(subProteinNetwork2 != null){
+					xmlObject.graphToXML(outdir+"/subnetwork2.xml",subProteinNetwork2.getInteractomeGraph(), intermediatesSub2, componentsListSub2);
+				}
+			}
+			if(sif){
+				Sif sifObject = new Sif();
+				File fSif;
+				if(subProteinNetwork1 != null){
+					fSif = new File(outputFileName+"_subnetwork1.sif");
+					IOUtils.write(fSif.getAbsoluteFile(), sifObject.graphToSif(subProteinNetwork1.getInteractomeGraph()));
+					result.addOutputItem(new Item("subnetwork1.sif", fSif.getName(), "subnetwork1 sif file", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Sif network file"));
+
+				}
+				if(subProteinNetwork2 != null){
+					fSif = new File(outputFileName+"_subnetwork2.sif");
+					IOUtils.write(fSif.getAbsoluteFile(), sifObject.graphToSif(subProteinNetwork2.getInteractomeGraph()));
+					result.addOutputItem(new Item("subnetwork2.sif", fSif.getName(), "subnetwork2 sif file", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Sif network file"));
+
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -594,13 +635,16 @@ public class Snow2  extends BabelomicsTool{
 		for(int i=1; i<=randoms; i++){
 			SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), randomSize);
 			logger.debug("Randoms["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getEdges().size());
-			
+
+			//System.out.println("Randoms["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getEdges().size());
 			if(intermediate) {
+				double tInicio = System.currentTimeMillis();
 				Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
+				double tFinal = System.currentTimeMillis();
+//				System.out.println("Randoms["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getEdges().size()+" t= "+(tFinal-tInicio)/1000);
 				logger.debug("Randoms intermediate["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getEdges().size());
 			}
 			ProteinNetwork subProteinNetwork = createSubnet(subgraph);
-			
 			logger.debug("Subnet created");
 			sbTopo.append(getTopologicalValues(subProteinNetwork, i)).append(System.getProperty("line.separator"));
 			sbMeans.append(getTopologicalMeanValues(subProteinNetwork, i)).append(System.getProperty("line.separator"));
@@ -627,7 +671,10 @@ public class Snow2  extends BabelomicsTool{
 	}
 	private ProteinNetwork createSubnet(SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph) {
 		ProteinNetwork subProteinNetwork = new ProteinNetwork(subgraph);
+		double tInicio = System.currentTimeMillis();
 		subProteinNetwork.calcTopologicalValues();
+		double tFinal = System.currentTimeMillis();
+//		System.out.println("\tTiempo calculando valores topológicos: "+(tFinal-tInicio)/1000);
 		subProteinNetwork.calcTopologicalMeanValues();
 		return subProteinNetwork;
 	}
