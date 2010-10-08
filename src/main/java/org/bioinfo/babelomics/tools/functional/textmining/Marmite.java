@@ -14,7 +14,6 @@ import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
-import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.DataFrame;
 import org.bioinfo.math.result.KolmogorovSmirnovTestResult;
 import org.bioinfo.math.result.TestResultList;
@@ -33,7 +32,7 @@ public class Marmite extends BabelomicsTool {
 
 		options.addOption(OptionFactory.createOption("list1", "gene list #1"));
 		options.addOption(OptionFactory.createOption("list2", "gene list #2"));
-		options.addOption(OptionFactory.createOption("bioentity-name", "Valid values: wordroot, disease, chemical"));
+		options.addOption(OptionFactory.createOption("bioentity-name", "Valid values: disease, chemical, drug, sympton"));
 		options.addOption(OptionFactory.createOption("bioentity-score-filter", "Minimum number of genes with a score (0-10000)", false));
 		options.addOption(OptionFactory.createOption("bioentity-number-filter", "Number of bio-entities in results (0-10000)", false));
 		options.addOption(OptionFactory.createOption("duplicates", "to remove duplicated IDs, valid values: never, each, ref. By default, never", false));
@@ -61,13 +60,11 @@ public class Marmite extends BabelomicsTool {
 
 	private void executeMarmite(File f1, File f2, String bioentity, int scoreFilter, int numberFilter, int duplicatesMode) {
 
-		long time;
-
 		try {
 			String filename;
 			String cleanName;
 			String aux;
-			MarmiteTest marmiteTest = new MarmiteTest();
+			MarmiteTest marmiteTest = new MarmiteTest(babelomicsHomePath + "/conf/infrared.properties");
 			
 			// reading data
 			//
@@ -180,10 +177,10 @@ public class Marmite extends BabelomicsTool {
 			dataFrame.setRowNames(rowNames.subList(0, nEntities));
 			
 			// output file
-			filename = "marmite_output.txt";
-			FeatureData featureData = new FeatureData(dataFrame);
-			featureData.save(new File(getOutdir() + "/" + filename));
-			result.addOutputItem(new Item("marmite_file", filename, "MARMITE output file", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Results"));
+//			filename = "marmite_output.txt";
+//			FeatureData featureData = new FeatureData(dataFrame);
+//			featureData.save(new File(getOutdir() + "/" + filename));
+//			result.addOutputItem(new Item("marmite_file", filename, "MARMITE output file", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Results"));
 
 			// output table
 			filename = "marmite_table.txt";

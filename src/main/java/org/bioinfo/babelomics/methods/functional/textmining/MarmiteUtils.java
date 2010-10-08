@@ -13,8 +13,10 @@ import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.db.DBConnection;
 import org.bioinfo.db.api.PreparedQuery;
+import org.bioinfo.db.api.Query;
 import org.bioinfo.db.handler.BeanArrayListHandler;
 import org.bioinfo.db.handler.ResultSetHandler;
+import org.bioinfo.db.handler.ScalarHandler;
 import org.jfree.chart.plot.PlotOrientation;
 
 public class MarmiteUtils {
@@ -28,29 +30,37 @@ public class MarmiteUtils {
 	public static int REMOVE_REF = 3;
 	public static int REMOVE_ALL = 4;	
 	
-	public static Map<String, List<Score>> getEntityMap(List<String> genes, String entity) {	
+	public static Map<String, List<Score>> getEntityMap(List<String> genes, String entity, DBConnection dbConn) {
+		long limit = 400000;
 		ArrayList<Score> list;
 		Map<String, List<Score>> map = new HashMap<String, List<Score>>();
 
-		PreparedQuery query;
-		//Query query;
+		PreparedQuery prepQuery;
 		ResultSetHandler rsh = new BeanArrayListHandler(Score.class);
 		
-		DBConnection dbConn = new DBConnection("mysql", "mem20", "3306", "Babelomics", "ensembl_user", "ensembl_user");
-
-		String prefix = "select " + (entity.equalsIgnoreCase("roots") ? "word_root" : "entity") + ", hgnc_name, score from";
-		if ( entity.equalsIgnoreCase("diseases") ) prefix = prefix + " hsa_bioalmaDis";
-		if ( entity.equalsIgnoreCase("products") ) prefix = prefix + " hsa_bioalmaChem";
-		if ( entity.equalsIgnoreCase("roots") )    prefix = prefix + " hsa_bioalmaWordRoot";
-		prefix = prefix + " where hgnc_name = ?"; 
-		//prefix = prefix + " where hgnc_name ="; 
+		try {
+			// without 'limit' the query for disease and gene GATA2 takes a lot lot lot of time,
+			// then I decide to calculate the size of the text_mining table
+			ResultSetHandler sh = new ScalarHandler();
+			Query query = dbConn.createSQLQuery("select count(*) from text_mining");
+			limit = (Long) query.execute(sh);
+		} catch(Exception e) {
+			limit = 400000;
+		}
+				
+		String queryStr = "select distinct tm.bioentity, x.display_id, tm.score from text_mining tm, xref x, transcript2xref tx where tm.bioentity_type='" + entity + "' and x.display_id=? and x.xref_id=tx.xref_id and tm.transcript_id=tx.transcript_id limit " + limit;
+		//System.out.println("marmite, getEntityMap, queryStr = " + queryStr);
+				
+		int i= 0;
 		for(String gene: genes) {
 			try {
-				//System.out.println("query = " + prefix + " '" + gene.toUpperCase() + "'");
-				//query = dbConn.createSQLPrepQuery(prefix + " \"" + gene.toUpperCase() + "\"");
-				query = dbConn.createSQLPrepQuery(prefix);
-				query.setParams(gene.toUpperCase());
-				list = (ArrayList<Score>) query.execute(rsh);
+				prepQuery = dbConn.createSQLPrepQuery(queryStr);
+				prepQuery.setParams(gene.toUpperCase());
+
+				//System.out.println(i++ + " of " + genes.size() + ", marmite, getEntityMap, query for gene = " + gene);
+				list = (ArrayList<Score>) prepQuery.execute(rsh);
+				//System.out.println("results size = " + (list!=null ? list.size() : 0));
+
 				if ( list != null ) {
 					for(Score score: list) {
 						if ( ! map.containsKey(score.getEntity()) ) {
@@ -60,7 +70,7 @@ public class MarmiteUtils {
 					}
 				}
 			} catch (Exception e) {
-				System.out.println("marmite, getEntityMap(), error accessing db: " + prefix + ", " + gene.toUpperCase() + ", error = " + e.toString());
+				System.out.println("marmite, getEntityMap(), error accessing db: " + queryStr + ", " + gene.toUpperCase() + ", error = " + e.toString());
 			}				
 		}
 

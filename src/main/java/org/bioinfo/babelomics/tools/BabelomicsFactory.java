@@ -44,6 +44,10 @@ public class BabelomicsFactory {
 		 * *****	Preprocessing, normalization and annotation tools	*************************************
 		 * **************************************************************************************************
 		 */
+		if(toolName.equalsIgnoreCase("expression-normalization")) {
+			return new ExpressionNormalizationTool();
+		}
+
 		if(toolName.equalsIgnoreCase("affy-expression-normalization")) {
 			return new ExpressionNormalizationTool();
 		}

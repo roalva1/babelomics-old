@@ -37,7 +37,7 @@ public class MarmiteScan extends BabelomicsTool {
 	@Override
 	public void initOptions() {
 		options.addOption(OptionFactory.createOption("list", "ranked gene list"));
-		options.addOption(OptionFactory.createOption("bioentity-name", "Valid values: wordroot, disease, chemical"));
+		options.addOption(OptionFactory.createOption("bioentity-name", "Valid values: disease, chemical, drug, sympton"));
 		options.addOption(OptionFactory.createOption("bioentity-score-filter", "Minimum number of genes with a score (0-10000)", false));
 		options.addOption(OptionFactory.createOption("bioentity-number-filter", "Number of bio-entities in results (0-10000)", false));
 		options.addOption(OptionFactory.createOption("sort", "Sort list", false));
@@ -121,7 +121,7 @@ public class MarmiteScan extends BabelomicsTool {
 					System.err.println("l1.size: " + list1.size() + "l2.size: " + list2.size());
 
 					try {
-						MarmiteTest marmiteTest = new MarmiteTest();
+						MarmiteTest marmiteTest = new MarmiteTest(babelomicsHomePath + "/conf/infrared.properties");
 
 						TestResultList<KolmogorovSmirnovTestResult> res = marmiteTest.run(list1, list2, bioEntityName, bioentityScoreFilter);
 
@@ -238,11 +238,11 @@ public class MarmiteScan extends BabelomicsTool {
 
 			dataFrame.setRowNames(entities.subList(0, nEntities));
 
-			// output file
-			filename = "marmitescan_output.txt";
-			FeatureData featureData = new FeatureData(dataFrame);
-			featureData.save(new File(getOutdir() + "/" + filename));
-			result.addOutputItem(new Item("marmitescan_file", filename, "MARMITE SCAN output file", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Results"));
+//			// output file
+//			filename = "marmitescan_output.txt";
+//			FeatureData featureData = new FeatureData(dataFrame);
+//			featureData.save(new File(getOutdir() + "/" + filename));
+//			result.addOutputItem(new Item("marmitescan_file", filename, "MARMITE SCAN output file", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Results"));
 
 			// output table
 			filename = "marmitescan_table.txt";
