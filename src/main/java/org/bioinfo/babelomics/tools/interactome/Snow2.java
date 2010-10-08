@@ -27,6 +27,7 @@ import org.bioinfo.networks.protein.ProteinVertex;
 import org.bioinfo.networks.protein.WilcoxonTest;
 import org.bioinfo.networks.protein.files.Dot;
 import org.bioinfo.networks.protein.files.Json;
+import org.bioinfo.networks.protein.files.Sif;
 import org.bioinfo.networks.protein.files.Svg;
 import org.bioinfo.networks.protein.files.Xml;
 import org.bioinfo.tool.OptionFactory;
@@ -48,6 +49,7 @@ public class Snow2  extends BabelomicsTool{
 	private boolean images;
 	private boolean json;
 	private boolean xml;
+	private boolean sif;
 	private Set<String> intermediatesSub1, intermediatesSub2; 
 	private List<List<ProteinVertex>> componentsListSub1, componentsListSub2;
 	private int randomSize;
@@ -73,6 +75,8 @@ public class Snow2  extends BabelomicsTool{
 		options.addOption(OptionFactory.createOption("side", "side for kolmogorov and wilkoxon test. Can be two.sided(by default), less or greater", false, true));
 		options.addOption(OptionFactory.createOption("images", "Print the images for the statistics", false, false));
 		options.addOption(OptionFactory.createOption("xml", "Output xml file with the representation of the graph", false, false));
+		options.addOption(OptionFactory.createOption("sif", "Output sif file with the representation of the graph", false, false));
+
 
 	}
 	@Override
@@ -89,6 +93,7 @@ public class Snow2  extends BabelomicsTool{
 		images = commandLine.hasOption("images");
 		json = commandLine.hasOption("json");
 		xml = commandLine.hasOption("xml");
+		sif = commandLine.hasOption("sif");
 
 		outputFileName = outdir + "/" + commandLine.getOptionValue("o-name");
 
@@ -327,6 +332,22 @@ public class Snow2  extends BabelomicsTool{
 				}
 				if(subProteinNetwork2 != null){
 					xmlObject.graphToXML(outdir+"/subnetwork2.xml",subProteinNetwork2.getInteractomeGraph(), intermediatesSub2, componentsListSub2);
+				}
+			}
+			if(sif){
+				Sif sifObject = new Sif();
+				File fSif;
+				if(subProteinNetwork1 != null){
+					fSif = new File(outputFileName+"_subnetwork1.sif");
+					IOUtils.write(fSif.getAbsoluteFile(), sifObject.graphToSif(subProteinNetwork1.getInteractomeGraph()));
+					result.addOutputItem(new Item("subnetwork1.sif", fSif.getName(), "subnetwork1 sif file", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Sif network file"));
+
+				}
+				if(subProteinNetwork2 != null){
+					fSif = new File(outputFileName+"_subnetwork2.sif");
+					IOUtils.write(fSif.getAbsoluteFile(), sifObject.graphToSif(subProteinNetwork2.getInteractomeGraph()));
+					result.addOutputItem(new Item("subnetwork2.sif", fSif.getName(), "subnetwork2 sif file", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Sif network file"));
+
 				}
 			}
 		} catch (IOException e) {

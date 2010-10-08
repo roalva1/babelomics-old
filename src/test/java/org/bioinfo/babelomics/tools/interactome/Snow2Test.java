@@ -28,8 +28,9 @@ public class Snow2Test {
 //				"--no-number-components",
 //				"--bicomponents",
 //				"--images",
-//				"--json",
+				"--json",
 				"--xml",
+				"--sif",
 				"--home", System.getenv("BABELOMICS_HOME")};
 //		String comando="./babelomics.sh --tool snow2 -o /tmp/snow2/test1 --o-name result --list1 /mnt/commons/babelomics/tests/snow2/ej1/UPYDOWN_HET_list_uniq --list2 /mnt/commons/babelomics/tests/snow2/ej1/list2 --interactome sce --side less";
 		main(args);
