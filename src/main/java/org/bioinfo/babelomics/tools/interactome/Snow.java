@@ -66,7 +66,7 @@ public class Snow  extends BabelomicsTool{
 		options.addOption(OptionFactory.createOption("list2", "An input file containing a node per line", false));
 		options.addOption(OptionFactory.createOption("type", "An argument saying if you want genes or proteins(default)", false, true));
 		options.addOption(OptionFactory.createOption("randoms", "Number of randoms", false, true));
-//		options.addOption(OptionFactory.createOption("randoms-size", "Size of randoms", false, true));
+		//		options.addOption(OptionFactory.createOption("randoms-size", "Size of randoms", false, true));
 		options.addOption(OptionFactory.createOption("intermediate", "If there is this argument, it will create the network with 1 intermediate", false, true));
 		options.addOption(OptionFactory.createOption("components", "If there is this argument, it will calculate the number of components", false, false));
 		options.addOption(OptionFactory.createOption("bicomponents", "If there is this argument, it will calculate the number of bicomponents", false, false));
@@ -97,12 +97,12 @@ public class Snow  extends BabelomicsTool{
 		sif = commandLine.hasOption("sif");
 
 		xml = true;
-		
+
 		outputFileName = outdir + "/" + commandLine.getOptionValue("o-name", "result");
 
 		String interactomeMsg = "Homo sapiens";
 		interactome = commandLine.getOptionValue("interactome");
-		
+
 		if ("hsa".equalsIgnoreCase(interactome)) {
 			interactomeMsg = "Homo sapiens";
 		} else if ("sce".equalsIgnoreCase(interactome)) {
@@ -128,7 +128,7 @@ public class Snow  extends BabelomicsTool{
 
 		intermediate = (commandLine.hasOption("intermediate") && !"0".equalsIgnoreCase(commandLine.getOptionValue("intermediate")));
 		System.out.println("intermediate = " + intermediate + ", value = " + commandLine.getOptionValue("intermediate"));
-		
+
 		ProteinNetworkToFile file = new ProteinNetworkToFile();
 
 		try {
@@ -136,7 +136,7 @@ public class Snow  extends BabelomicsTool{
 			String folderInteractions = this.babelomicsHomePath + "/conf/interactions/";
 			SimpleUndirectedGraph<ProteinVertex, DefaultEdge> interactomeGraph = null;
 
-			
+
 			if (interactome.equals("sce")) {
 				if(type.equals("proteins")) {
 					interactomeGraph = InteractomeParser.parseFromSifFile(folderInteractions+"sce_alldb_proteins_interactome_nr.sif");
@@ -170,7 +170,7 @@ public class Snow  extends BabelomicsTool{
 					FileUtils.checkFile(inputFile);
 					interactomeGraph = InteractomeParser.parseFromSifFile(commandLine.getOptionValue("sif-file") );
 					proteinNetwork = new ProteinNetwork(interactomeGraph);
-					
+
 					if(commandLine.hasOption("topo-file"))
 						proteinNetwork.loadTopologicalValues(commandLine.getOptionValue("topo-file"));
 					else
@@ -190,7 +190,7 @@ public class Snow  extends BabelomicsTool{
 			StringBuilder sbMeans = createMeansHeader();
 			StringBuilder sbTopo = createTopoHeader();
 			StringBuilder sbComponents = createComponentsHeader();
-			
+
 			if(commandLine.hasOption("list1")) {
 				logger.debug("Starting list1.........");
 				String nodeFile = commandLine.getOptionValue("list1");
@@ -201,15 +201,15 @@ public class Snow  extends BabelomicsTool{
 
 				double tInicio = System.currentTimeMillis();
 				SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), toProteinVertex(list));
-				
+
 				double tFinal = System.currentTimeMillis();
 				this.randomSize = subgraph.getVertices().size();
-//				System.out.println("Tiempo creando subgrafo["+subgraph.getVertices().size()+","+subgraph.getEdges().size()+"] lista1: "+(tFinal-tInicio)/1000);
+				//				System.out.println("Tiempo creando subgrafo["+subgraph.getVertices().size()+","+subgraph.getEdges().size()+"] lista1: "+(tFinal-tInicio)/1000);
 				if(intermediate){
 					tInicio = System.currentTimeMillis();
 					intermediatesSub1 = Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
 					tFinal = System.currentTimeMillis();
-//					System.out.println("Tiempo creando intermediario subgrafo["+subgraph.getVertices().size()+","+subgraph.getEdges().size()+"] lista1: "+(tFinal-tInicio)/1000);
+					//					System.out.println("Tiempo creando intermediario subgrafo["+subgraph.getVertices().size()+","+subgraph.getEdges().size()+"] lista1: "+(tFinal-tInicio)/1000);
 					if(intermediatesSub1.size()>0)
 						result.addOutputItem(new Item("external_nodes_list_"+node, intermediatesSub1.toString().substring(1, intermediatesSub1.toString().length()-1), "External nodes added", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
 					else
@@ -233,7 +233,7 @@ public class Snow  extends BabelomicsTool{
 					logger.debug("Starting list1 components.........");
 					System.out.println("Starting list1 components.........");
 					componentsListSub1 = subProteinNetwork1.getInteractomeGraph().getAllInformationComponents(true);
-					
+
 					sbComponents.append(getComponentsValues(subProteinNetwork1, node, componentsListSub1));
 					sbComponents.deleteCharAt(sbComponents.lastIndexOf(System.getProperty("line.separator")));
 					f = new File(outputFileName+"_sn_nodeFile"+node+"_comp.txt");
@@ -263,7 +263,7 @@ public class Snow  extends BabelomicsTool{
 					else
 						result.addOutputItem(new Item("external_nodes_list_"+node, "No added", "External nodes added", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
 				}
-				
+
 				/***
 				 * if(intermediatesSub1.size()>0)
 						result.addOutputItem(new Item("external_nodes_list_"+node, intermediatesSub1.toString().substring(1, intermediatesSub1.toString().length()-1), "External nodes added", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
@@ -293,18 +293,18 @@ public class Snow  extends BabelomicsTool{
 					result.addOutputItem(new Item("sn_nodeFile"+node+"_components_param", f.getName(), "Component values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
 				}
 			}
-			
+
 			if(commandLine.hasOption("randoms")){
 				logger.debug("Starting randoms.........");
 				int randoms = Integer.parseInt(commandLine.getOptionValue("randoms"));
-//				if(!commandLine.hasOption("randoms-size")){
-//					int size = this.proteinNetwork.getInteractomeGraph().getVertices().size();
-//					while(randomSize == 0)
-//						randomSize = (int) (Math.random() * size);
-//				}
-//				else{
-//					randomSize = Integer.parseInt(commandLine.getOptionValue("randoms-size"));
-//				}
+				//				if(!commandLine.hasOption("randoms-size")){
+				//					int size = this.proteinNetwork.getInteractomeGraph().getVertices().size();
+				//					while(randomSize == 0)
+				//						randomSize = (int) (Math.random() * size);
+				//				}
+				//				else{
+				//					randomSize = Integer.parseInt(commandLine.getOptionValue("randoms-size"));
+				//				}
 				if(randomSize > 0)
 					createRandoms(randoms, randomSize);
 				result.addOutputItem(new Item("randoms_param", ""+randoms, "Number of randoms", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
@@ -334,7 +334,7 @@ public class Snow  extends BabelomicsTool{
 					names.add(auxFile.getName() + "_list2.json");
 					createJson(subProteinNetwork2, outputFileName+"_list2.dot", componentsListSub2, intermediatesSub2, 2);
 				}
-				
+
 				//String url = "SnowViewer2?filename=" + ListUtils.toString(names, ",");
 				//result.addOutputItem(new Item("viewer_param", url, "Viewer", TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Network viewer"));			
 
@@ -345,20 +345,15 @@ public class Snow  extends BabelomicsTool{
 				if(subProteinNetwork1 != null){
 					xmlFile = new File(outdir+"/subnetwork1.xml");
 					xmlObject.graphToXML(xmlFile.getAbsolutePath(),subProteinNetwork1.getInteractomeGraph(), intermediatesSub1, componentsListSub1);
-					if (xmlFile.exists()) {
-						String url = "SnowViewer?filename=" + xmlFile.getName();
-						result.addOutputItem(new Item("viewer1_param", url, "Viewer for network #1", TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Network viewer"));
-					}
+					addOutputAppletItem(xmlFile, 1);
 				}
 				if(subProteinNetwork2 != null){
 					xmlFile = new File(outdir+"/subnetwork2.xml");
 					xmlObject.graphToXML(xmlFile.getAbsolutePath(),subProteinNetwork2.getInteractomeGraph(), intermediatesSub2, componentsListSub2);
-					if (xmlFile.exists()) {
-						String url = "SnowViewer?filename=" + xmlFile.getName();
-						result.addOutputItem(new Item("viewer2_param", url, "Viewer for network #2", TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Network viewer"));
-					}
+					addOutputAppletItem(xmlFile, 2);
 				}
 			}
+
 			if(sif){
 				Sif sifObject = new Sif();
 				File fSif;
@@ -387,39 +382,39 @@ public class Snow  extends BabelomicsTool{
 		Json<ProteinVertex, DefaultEdge> json = new Json<ProteinVertex, DefaultEdge>();
 		List<File> fileList = new ArrayList<File>();
 		List<String> layoutsName = new ArrayList<String>();
-		
+
 		if(componentsListSub == null)
 			logger.error("not components calculated, please, set the --components option");
 
 		IOUtils.write(sourceDotFile, dot.toDot(proteinNetwork.getInteractomeGraph()));
-		
+
 		File dotFile = new File(outputFileName+"_list"+node+"_dot.svg");
 		IOUtils.write(dotFile, svg.toSvg(sourceDotFile, "dot"));
 		fileList.add(dotFile);
 		layoutsName.add("dot");
-		
+
 		File twopiFile = new File(outputFileName+"_list"+node+"_twopi.svg");
 		IOUtils.write(twopiFile, svg.toSvg(sourceDotFile, "twopi"));
 		fileList.add(twopiFile);
 		layoutsName.add("twopi");
-		
+
 		File f = new File(outputFileName+"_list"+node+".json");
 		IOUtils.write(f.getAbsoluteFile(), json.toJson(fileList, layoutsName, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
 
-//		System.out.println("********************* json file = " + f.getAbsolutePath());
-//		if (f.exists()) {
-//			System.out.println("********************* exists JSON !!!");
-//			String url = "SnowViewer2?filename=" + f.getName();
-//			result.addOutputItem(new Item("viewer_param", url, "Network viewer", TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Graph"));			
-//		}
-//		f = new File("result1.json");
-//		//String url = "http://beta.babelomics.bioinfo.cipf.es/SnowViewer?filename=" + fileName;
-//		//http://beta.babelomics.bioinfo.cipf.es/SnowViewer?filename=subnetwork1.xml&jobid=262&sessionid=7tySrwJgNRM0tyGOnj9N3eT2BCTsEC8Qw3StPMwwz1WfsFyt1zoIqR6lPa7fnv54
-//		result.addOutputItem(new Item("graph_param", url, "Graph", TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Graph"));
-//			
-//			url = "SnowViewer?filename=" + fileName;
-//			result.addOutputItem(new Item(name + "_new_window", url, "Open applet in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), groupName));
-		
+		//		System.out.println("********************* json file = " + f.getAbsolutePath());
+		//		if (f.exists()) {
+		//			System.out.println("********************* exists JSON !!!");
+		//			String url = "SnowViewer2?filename=" + f.getName();
+		//			result.addOutputItem(new Item("viewer_param", url, "Network viewer", TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Graph"));			
+		//		}
+		//		f = new File("result1.json");
+		//		//String url = "http://beta.babelomics.bioinfo.cipf.es/SnowViewer?filename=" + fileName;
+		//		//http://beta.babelomics.bioinfo.cipf.es/SnowViewer?filename=subnetwork1.xml&jobid=262&sessionid=7tySrwJgNRM0tyGOnj9N3eT2BCTsEC8Qw3StPMwwz1WfsFyt1zoIqR6lPa7fnv54
+		//		result.addOutputItem(new Item("graph_param", url, "Graph", TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Graph"));
+		//			
+		//			url = "SnowViewer?filename=" + fileName;
+		//			result.addOutputItem(new Item(name + "_new_window", url, "Open applet in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), groupName));
+
 	}
 
 	private void createImages(String fileName, List<Double> list1, String legend1, List<Double> list2, String legend2, String itemName, String itemLabel, String itemGroup) throws IOException {
@@ -442,7 +437,7 @@ public class Snow  extends BabelomicsTool{
 		File f = null;
 		logger.debug("Starting 1st Analysis..................");
 		WilcoxonTest wTest = new WilcoxonTest();
-	//	List<String> list = IOUtils.readLines(commandLine.getOptionValue("list1"));
+		//	List<String> list = IOUtils.readLines(commandLine.getOptionValue("list1"));
 		List<ProteinVertex> list = this.subProteinNetwork1.getInteractomeGraph().getVertices();
 
 
@@ -466,20 +461,20 @@ public class Snow  extends BabelomicsTool{
 		else
 			result.addOutputItem(new Item("list_inter_kol_param", "Empty results", "List - Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Statistic results.Kolmogorov-Smirnov test"));
 
-		
+
 		f = new File(outputFileName+"_list_inter_wil.txt");
-		
+
 		if(wTest.test(wBinPath, f.getAbsolutePath(), side, "list1", "inter", relBetList1, relBetInter, connList1, connInter, clustList1, clustInter)){
 			result.addOutputItem(new Item("list_inter_wil_param", f.getName(), "List - Interactome", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-//			List<Double> wilcoxValues = getWilcoxonTestValues(f);
-//			result.addOutputItem(new Item("bet_list_inter_wil_param", wilcoxValues.get(0).toString(), "List - Interactome: Betweenness", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-//			result.addOutputItem(new Item("conn_list_inter_wil_param", wilcoxValues.get(1).toString(), "List - Interactome: Connections", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-//			result.addOutputItem(new Item("coeff_list_inter_wil_param", wilcoxValues.get(2).toString(), "List - Interactome: Clustering coefficient", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+			//			List<Double> wilcoxValues = getWilcoxonTestValues(f);
+			//			result.addOutputItem(new Item("bet_list_inter_wil_param", wilcoxValues.get(0).toString(), "List - Interactome: Betweenness", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+			//			result.addOutputItem(new Item("conn_list_inter_wil_param", wilcoxValues.get(1).toString(), "List - Interactome: Connections", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+			//			result.addOutputItem(new Item("coeff_list_inter_wil_param", wilcoxValues.get(2).toString(), "List - Interactome: Clustering coefficient", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
 
 		}
 		else
 			result.addOutputItem(new Item("list_inter_wil_param", "Empty results", "List - Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-		
+
 		if(images){
 			createImages(outputFileName+"_list_inter_relBet", relBetList1, "list1", relBetInter, "inter", "list_inter_relBet", "relBet", "Images.List vs inter");
 			createImages(outputFileName+"_list_inter_conn", connList1, "list1", connInter, "inter", "list_inter_conn", "conn", "Images.List vs inter");
@@ -512,14 +507,14 @@ public class Snow  extends BabelomicsTool{
 		else
 			result.addOutputItem(new Item("sn_random_kol_param", "Empty results", "Subnet - Random", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Statistic results.Kolmogorov-Smirnov test"));
 
-		
+
 		f = new File(outputFileName+"_sn_random_wil.txt");
 		if(wTest.test(wBinPath, f.getAbsolutePath(), side, "sn1", "rnd", relBetSubnet1, relBetRandoms, connSubnet1, connRandoms, clustSubnet1, clustRandoms)){
 			result.addOutputItem(new Item("sn_random_wil_param", f.getName(), "Subnet - Random", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-//			List<Double> wilcoxValues = getWilcoxonTestValues(f);
-//			result.addOutputItem(new Item("bet_sn_random_wil_param", wilcoxValues.get(0).toString(), "Subnet - Random: Betweenness", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-//			result.addOutputItem(new Item("conn_sn_random_wil_param", wilcoxValues.get(1).toString(), "Subnet - Random: Connections", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-//			result.addOutputItem(new Item("coef_sn_random_wil_param", wilcoxValues.get(2).toString(), "Subnet - Random: Clustering coefficient", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+			//			List<Double> wilcoxValues = getWilcoxonTestValues(f);
+			//			result.addOutputItem(new Item("bet_sn_random_wil_param", wilcoxValues.get(0).toString(), "Subnet - Random: Betweenness", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+			//			result.addOutputItem(new Item("conn_sn_random_wil_param", wilcoxValues.get(1).toString(), "Subnet - Random: Connections", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+			//			result.addOutputItem(new Item("coef_sn_random_wil_param", wilcoxValues.get(2).toString(), "Subnet - Random: Clustering coefficient", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
 
 		}
 		else
@@ -561,14 +556,14 @@ public class Snow  extends BabelomicsTool{
 		else
 			result.addOutputItem(new Item("list1_list2_kol", "Empty results", "List1 - List2", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test"));
 
-		
+
 		f = new File(outputFileName+"_list1_list2_wil.txt");
 		if(wTest.test(wBinPath, f.getAbsolutePath(), side, "list1", "list2", relBetList1, relBetList2, connList1, connList2, clustList1, clustList2)){
 			result.addOutputItem(new Item("list1_list2_wil", f.getName(), "List1 - List2", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-//			List<Double> wilcoxValues = getWilcoxonTestValues(f);
-//			result.addOutputItem(new Item("bet_list1_list2_wil", wilcoxValues.get(0).toString(), "Subnet - Random: Betweenness", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-//			result.addOutputItem(new Item("conn_list1_list2_wil", wilcoxValues.get(1).toString(), "Subnet - Random: Connections", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-//			result.addOutputItem(new Item("coef_list1_list2_wil", wilcoxValues.get(2).toString(), "Subnet - Random: Clustering coefficient", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+			//			List<Double> wilcoxValues = getWilcoxonTestValues(f);
+			//			result.addOutputItem(new Item("bet_list1_list2_wil", wilcoxValues.get(0).toString(), "Subnet - Random: Betweenness", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+			//			result.addOutputItem(new Item("conn_list1_list2_wil", wilcoxValues.get(1).toString(), "Subnet - Random: Connections", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+			//			result.addOutputItem(new Item("coef_list1_list2_wil", wilcoxValues.get(2).toString(), "Subnet - Random: Clustering coefficient", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
 		}
 		else
 			result.addOutputItem(new Item("list1_list2_wil", "Empty results", "List1 - List2", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
@@ -589,7 +584,7 @@ public class Snow  extends BabelomicsTool{
 
 		List<Double> clustSubnet1 = subProteinNetwork1.getClustList();
 		List<Double> clustSubnet2 = subProteinNetwork2.getClustList();
-		
+
 		toWrite = ksTest(relBetSubnet1, relBetSubnet2, connSubnet1, connSubnet2, clustSubnet1, clustSubnet2, side);
 		if(!toWrite.equals("")){
 			f = new File(outputFileName+"_sn1_sn2_kol.txt");
@@ -599,19 +594,19 @@ public class Snow  extends BabelomicsTool{
 		else
 			result.addOutputItem(new Item("sn1_sn2_kol", "Empty results", "Subnet1 - Subnet2", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test"));
 
-		
+
 		f = new File(outputFileName+"_sn1_sn2_wil.txt");
 		if(wTest.test(wBinPath, f.getAbsolutePath(), side, "sn1", "sn2", relBetSubnet1, relBetSubnet2, connSubnet1, connSubnet2, clustSubnet1, clustSubnet2)){
 			result.addOutputItem(new Item("sn1_sn2_wil", f.getName(), "Subnet1 - Subnet2", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-//			List<Double> wilcoxValues = getWilcoxonTestValues(f);
-//			result.addOutputItem(new Item("bet_sn1_sn2_wil", wilcoxValues.get(0).toString(), "Subnet1 - Subnet2: Betweenness", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-//			result.addOutputItem(new Item("conn_sn1_sn2_wil", wilcoxValues.get(1).toString(), "Subnet1 - Subnet2: Connections", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-//			result.addOutputItem(new Item("coef_sn1_sn2_wil", wilcoxValues.get(2).toString(), "Subnet1 - Subnet2: Clustering coefficient", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-		
+			//			List<Double> wilcoxValues = getWilcoxonTestValues(f);
+			//			result.addOutputItem(new Item("bet_sn1_sn2_wil", wilcoxValues.get(0).toString(), "Subnet1 - Subnet2: Betweenness", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+			//			result.addOutputItem(new Item("conn_sn1_sn2_wil", wilcoxValues.get(1).toString(), "Subnet1 - Subnet2: Connections", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+			//			result.addOutputItem(new Item("coef_sn1_sn2_wil", wilcoxValues.get(2).toString(), "Subnet1 - Subnet2: Clustering coefficient", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+
 		}
 		else
 			result.addOutputItem(new Item("sn1_sn2_wil", "Empty results", "Subnet1 - Subnet2", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-		
+
 		if(images){
 			createImages(outputFileName+"_sn1_sn2_relBet", relBetSubnet1, "subnet1", relBetSubnet2, "subnet2", "sn1_sn2_relBet", "relBet", "Images.Subnet1 vs Subnet2");
 			createImages(outputFileName+"_sn1_sn2_conn", connSubnet1, "subnet1", connSubnet2, "subnet2", "sn1_sn2_conn", "conn", "Images.Subnet1 vs Subnet2");
@@ -640,7 +635,7 @@ public class Snow  extends BabelomicsTool{
 		}
 	}
 	private void createRandoms(int randoms, int randomSize) throws IOException{
-		
+
 		StringBuilder sbMeans = createMeansHeader();
 		StringBuilder sbTopo = createTopoHeader();
 		StringBuilder sbComponents =createComponentsHeader();
@@ -654,7 +649,7 @@ public class Snow  extends BabelomicsTool{
 				double tInicio = System.currentTimeMillis();
 				Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
 				double tFinal = System.currentTimeMillis();
-//				System.out.println("Randoms["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getEdges().size()+" t= "+(tFinal-tInicio)/1000);
+				//				System.out.println("Randoms["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getEdges().size()+" t= "+(tFinal-tInicio)/1000);
 				logger.debug("Randoms intermediate["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getEdges().size());
 			}
 			ProteinNetwork subProteinNetwork = createSubnet(subgraph);
@@ -669,7 +664,7 @@ public class Snow  extends BabelomicsTool{
 			logger.debug("Components created");
 			subProteinNetworkRandoms.add(subProteinNetwork);
 		}
-		
+
 		File f = new File(outputFileName+"_sn_1-"+(randoms)+"_topo.txt");
 		randomFilesToString(sbTopo, f.getAbsolutePath());
 		result.addOutputItem(new Item("randoms_topo_param", f.getName(), "Topografical values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Randoms results"));
@@ -687,7 +682,7 @@ public class Snow  extends BabelomicsTool{
 		double tInicio = System.currentTimeMillis();
 		subProteinNetwork.calcTopologicalValues();
 		double tFinal = System.currentTimeMillis();
-//		System.out.println("\tTiempo calculando valores topológicos: "+(tFinal-tInicio)/1000);
+		//		System.out.println("\tTiempo calculando valores topológicos: "+(tFinal-tInicio)/1000);
 		subProteinNetwork.calcTopologicalMeanValues();
 		return subProteinNetwork;
 	}
@@ -795,7 +790,7 @@ public class Snow  extends BabelomicsTool{
 	}
 	private List<Double> getWilcoxonTestValues(File file) throws IOException{
 		List<Double> list = new ArrayList<Double>();
-		
+
 		TextFileReader tfr = new TextFileReader(file.getAbsolutePath());
 		String line = null;
 		String[] fields;
@@ -810,4 +805,15 @@ public class Snow  extends BabelomicsTool{
 		tfr.close();
 		return list;
 	}
+
+	public void addOutputAppletItem(File xmlFile, int index) {
+		if (xmlFile.exists()) {
+			String url = "SnowViewer?filename=" + xmlFile.getName() + "&width=600&height=600";
+			result.addOutputItem(new Item("viewer" + index + "_param", url, "Viewer for network #" + index, TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Network viewer"));
+
+			url = "SnowViewer?filename=" + xmlFile.getName();
+			result.addOutputItem(new Item("viewer" + index + "_param_new_window", url, "Open applet for network #" + index + " in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Network viewer"));
+		}
+	}
+
 }
