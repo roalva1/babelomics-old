@@ -282,9 +282,10 @@ public class AffyTmt extends Tmt {
 			
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.save(new File(outdir + "/affy-tmt.txt"));
-			result.addOutputItem(new Item("tmt_file", "affy-tmt.txt", "Output file:", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Output file"));
+			//result.addOutputItem(new Item("tmt_file", "affy-tmt.txt", "Output file:", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Output file"));
+			result.addOutputItem(new Item("tmt_file", "affy-tmt.txt", "Output file:", TYPE.FILE, StringUtils.toList("TABLE,DIFF_EXPRESSION_TABLE"), new HashMap<String, String>(), "Output file"));
 			
-			//			FileUtils.writeStringToFile(new File(getOutdir() + "/replicates.txt"), "Removed " + replicated1 + " genes from list 1\nRemoved " + replicated2 + " genes from list 2");
+//			FileUtils.writeStringToFile(new File(getOutdir() + "/replicates.txt"), "Removed " + replicated1 + " genes from list 1\nRemoved " + replicated2 + " genes from list 2");
 
 //			writeProbesMap(new File(getOutdir() + "/gene_probes_1.txt"), probesMap1, ensemblIdtoGene1);
 //			writeProbesMap(new File(getOutdir() + "/gene_probes_2.txt"), probesMap2, ensemblIdtoGene1);

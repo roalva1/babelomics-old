@@ -328,7 +328,8 @@ public class SageTmt extends Tmt {
 			
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.save(new File(outdir + "/sage-tmt.txt"));
-			result.addOutputItem(new Item("sage_file", "sage-tmt.txt", "Output file:", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Output file"));
+			//result.addOutputItem(new Item("sage_file", "sage-tmt.txt", "Output file:", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Output file"));
+			result.addOutputItem(new Item("sage_file", "sage-tmt.txt", "Output file:", TYPE.FILE, StringUtils.toList("TABLE,DIFF_EXPRESSION_TABLE"), new HashMap<String, String>(), "Output file"));
 			
 		} catch (Exception e) {
 			abort("exception_execute_tmt", "SAGE tissue profiling error", e.getMessage(), StringUtils.getStackTrace(e));
