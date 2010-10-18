@@ -8,6 +8,9 @@ import org.junit.Test;
 
 public class AgilentCGHNormalizationTest {
 	
+	@Test
+	public void test0() {
+	}
 
 	public void test() {
 		String outdirname = "/tmp/agilent-cgh-normalization";

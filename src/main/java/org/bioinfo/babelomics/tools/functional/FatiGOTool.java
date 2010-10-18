@@ -169,8 +169,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				// init annotation report
 				annotationReport = new StringBuilder();
 				annotationReport.append("#DB").append("\t").append("List1").append("\t").append(list2label).append("\n");
-				
-				
+								
 				// run fatigo's
 				for(FunctionalFilter filter: filterList) {
 					fatigo = doFatigo(idList1,idList2,filter,dbConnector);
@@ -247,6 +246,9 @@ public class FatiGOTool extends FunctionalProfilingTool{
 //		String name = "your_annotations";
 //		String title = "Your annotations";					
 				
+		// get term sizes
+		Map<String, Integer> termSizes = getYourAnnotationsTermSizes();
+		
 		logger.println(filterInfo.getTitle() + "...");
 
 		// init test
@@ -254,6 +256,11 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		if(list2!=null) fatigo = new FatiGO(idList1, idList2, yourAnnotations, testMode, duplicatesMode);
 		//else if(isRestOfGenome()) fatigo = new FatiGO(idList1,yourAnnotations);
 		else fatigo = new FatiGO(idList1,yourAnnotations);
+		
+		fatigo.setLogger(logger);
+		
+		// term sizes
+		fatigo.setTermSizes(termSizes);
 		
 		// run test
 		fatigo.run();

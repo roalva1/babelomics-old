@@ -1,5 +1,6 @@
 package org.bioinfo.babelomics.tools;
 
+import org.bioinfo.babelomics.tools.expression.BiclusteringTool;
 import org.bioinfo.babelomics.tools.expression.Clustering;
 import org.bioinfo.babelomics.tools.expression.MAPlot;
 import org.bioinfo.babelomics.tools.expression.OutlierLrs;
@@ -28,7 +29,7 @@ import org.bioinfo.babelomics.tools.graph.DescriptiveStatistics;
 import org.bioinfo.babelomics.tools.graph.GoGraphViewerTool;
 import org.bioinfo.babelomics.tools.interactome.Snow;
 //import org.bioinfo.babelomics.tools.interactome.Snow2Old;
-import org.bioinfo.babelomics.tools.interactome.Snow2;
+import org.bioinfo.babelomics.tools.interactome.Snow;
 import org.bioinfo.babelomics.tools.preprocessing.CreateAnnotation;
 import org.bioinfo.babelomics.tools.preprocessing.IDConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
@@ -43,6 +44,10 @@ public class BabelomicsFactory {
 		 * *****	Preprocessing, normalization and annotation tools	*************************************
 		 * **************************************************************************************************
 		 */
+		if(toolName.equalsIgnoreCase("expression-normalization")) {
+			return new ExpressionNormalizationTool();
+		}
+
 		if(toolName.equalsIgnoreCase("affy-expression-normalization")) {
 			return new ExpressionNormalizationTool();
 		}
@@ -141,6 +146,9 @@ public class BabelomicsFactory {
 			return new Clustering();
 		}
 
+		if(toolName.equalsIgnoreCase("biclustering")) {
+			return new BiclusteringTool();			
+		}
 		
 		/*
 		 * **************************************************************************************************
@@ -200,13 +208,9 @@ public class BabelomicsFactory {
 		if(toolName.equalsIgnoreCase("snow")) {
 			return new Snow();
 		}
-		
-//		if(toolName.equalsIgnoreCase("snow2Old")) {
-//			return new Snow2Old();
-//		}
-		
+				
 		if(toolName.equalsIgnoreCase("snow2")) {
-			return new Snow2();
+			return new Snow();
 		}
 
 		if(toolName.equalsIgnoreCase("blast2go")) {

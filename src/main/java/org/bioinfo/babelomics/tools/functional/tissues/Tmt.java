@@ -44,7 +44,7 @@ public abstract class Tmt extends BabelomicsTool {
 				}
 			}
 		
-			res.add(tTest.tTest(ListUtils.toArray(sample1), ListUtils.toArray(sample2)));
+			res.add(tTest.tTest(ListUtils.toDoubleArray(sample1), ListUtils.toDoubleArray(sample2)));
 		}
 		
 		return res;

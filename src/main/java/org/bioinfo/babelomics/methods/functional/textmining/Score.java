@@ -3,9 +3,9 @@ package org.bioinfo.babelomics.methods.functional.textmining;
 public class Score {
 	private String entity;
 	private String gene;
-	private float value;
+	private double value;
 
-	public Score(String entity, String gene, Float value) {
+	public Score(String entity, String gene, Double value) {
 		this.entity = entity;
 		this.gene = gene;
 		this.value = value;
@@ -27,11 +27,11 @@ public class Score {
 		this.gene = gene;
 	}
 
-	public void setValue(float value) {
+	public void setValue(double value) {
 		this.value = value;
 	}
 
-	public float getValue() {
+	public double getValue() {
 		return value;
 	}
 	

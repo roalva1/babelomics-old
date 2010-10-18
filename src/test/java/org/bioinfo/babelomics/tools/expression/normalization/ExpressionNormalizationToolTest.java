@@ -43,6 +43,23 @@ public class ExpressionNormalizationToolTest {
 		}
 	}		
 	
+	public void Test15() {
+		String outDirName = "/tmp/GenepixExpression1CNormalizationOneSingleFile";
+		new File(outDirName).mkdir();
+		String dataset = "/mnt/commons/babelomics/tests/normalization/genepix/one-color/array1.gpr";
+		String tags = "genepix,one-channel";
+		
+		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", tags, "-o", outDirName, "--bg-correction", "normexp", "--wa-normalization", "loess", "--ba-normalization", "none", "--home", System.getenv("BABELOMICS_HOME")};
+
+		System.out.println("command line parameters --> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}	
+
 	public void Test2() {
 		String outDirName = "/tmp/GenePixExpression2CNormalizationTest";
 		new File(outDirName).mkdir();
@@ -60,6 +77,23 @@ public class ExpressionNormalizationToolTest {
 		}
 	}		
 
+	public void Test25() {
+		String outDirName = "/tmp/GenepixExpression2CNormalizationOneSingleFile";
+		new File(outDirName).mkdir();
+		String dataset = "/mnt/commons/babelomics/tests/normalization/genepix/two-colors/array1.gpr";
+		String tags = "genepix,two-channels";
+		
+		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", tags, "-o", outDirName, "--bg-correction", "normexp", "--wa-normalization", "loess", "--ba-normalization", "none", "--home", System.getenv("BABELOMICS_HOME")};
+
+		System.out.println("command line parameters --> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}	
+
 	public void Test3() {
 		String outDirName = "/tmp/AgilentExpression1CNormalizationTest";
 		new File(outDirName).mkdir();
@@ -76,8 +110,25 @@ public class ExpressionNormalizationToolTest {
 			fail(e.toString());
 		}
 	}	
+	
+	public void Test35() {
+		String outDirName = "/tmp/AgilentExpression1CNormalizationOneSingleFile";
+		new File(outDirName).mkdir();
+		String dataset = "/mnt/commons/babelomics/tests/normalization/agilent/one-color/array_1.txt";
+		String tags = "agilent,one-channel";
+		
+		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", tags, "-o", outDirName, "--bg-correction", "normexp", "--wa-normalization", "loess", "--ba-normalization", "none", "--home", System.getenv("BABELOMICS_HOME")};
 
-	@Test
+		System.out.println("command line parameters --> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}	
+	
+	
 	public void Test4() {
 		String outDirName = "/tmp/AgilentExpression2CNormalizationTest2";
 		new File(outDirName).mkdir();
@@ -95,9 +146,43 @@ public class ExpressionNormalizationToolTest {
 		}
 	}	
 	
+	public void Test45() {
+		String outDirName = "/tmp/AgilentExpression2CNormalizationOneSingleFile";
+		new File(outDirName).mkdir();
+		String dataset = "/mnt/commons/babelomics/tests/normalization/agilent/two-colors/GSM302995.txt";
+		String tags = "agilent,two-channels";
+		
+		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", tags, "-o", outDirName, "--bg-correction", "normexp", "--wa-normalization", "loess", "--ba-normalization", "none", "--home", System.getenv("BABELOMICS_HOME")};
+
+		System.out.println("command line parameters --> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}	
+
 	public void Test5() {
 		String dataset = "/mnt/commons/test/biodata/example/cel.zip";
 		String outdir = "/tmp/AffyExpressionNormalizationTest";
+		new File(outdir).mkdir();
+		
+		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", "affymetrix,one-channel", "-o", outdir, "--rma", "--plier", "--calls", "--home", System.getenv("BABELOMICS_HOME")};
+
+		System.out.println("executing ----------------> " + Arrays.toString(args));
+		try {
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}	
+
+	@Test
+	public void Test55() {
+		String dataset = "/mnt/commons/babelomics/tests/normalization/affy/Heart.CEL";
+		String outdir = "/tmp/AffyExpressionNormalizationTestOneSingleFile";
 		new File(outdir).mkdir();
 		
 		String []args = { "--tool", "expression-normalization","--log-level", "2", "--compressed-file", dataset, "--compressed-file-tags", "affymetrix,one-channel", "-o", outdir, "--rma", "--plier", "--calls", "--home", System.getenv("BABELOMICS_HOME")};
