@@ -20,6 +20,7 @@ import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
+import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.infrared.common.dbsql.DBConnector;
@@ -325,6 +326,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 							item.setContext("pvalue==" + formattedPValue);
 							result.getOutputItems().add(4, item);
 						} catch(GoGraphException gge){
+							System.out.println("[FatiGoTool]"+ gge.getMessage()+" ==> "+ StringUtils.getStackTrace(gge));
 							Item item = new Item("go_graph_significant_" + filterInfo.getName() + "_" + formattedPValue,"Graph not found",filterInfo.getTitle() + " DAG (significant terms, pvalue=" + formattedPValue + ")",Item.TYPE.MESSAGE,Arrays.asList("ERROR"),new HashMap<String,String>(),"Significant Results." + filterInfo.getTitle());
 							item.setContext("pvalue==" + formattedPValue);
 							result.getOutputItems().add(4, item);
