@@ -97,6 +97,7 @@ public class Snow  extends BabelomicsTool{
 		sif = commandLine.hasOption("sif");
 
 		xml = true;
+		json = false;
 
 		outputFileName = outdir + "/" + commandLine.getOptionValue("o-name", "result");
 
