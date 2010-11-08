@@ -170,7 +170,7 @@ public class SnowTest {
 				"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_10_block225.txt",
 				"--list2","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_11_block80.txt",
 				"--side", "less",
-				"--intermediate", "1",
+				"--intermediate", "0",
 				"--xml",
 				"--images",
 				"--home", System.getenv("BABELOMICS_HOME")};

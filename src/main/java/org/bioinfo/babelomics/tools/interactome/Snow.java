@@ -60,7 +60,7 @@ public class Snow  extends BabelomicsTool{
 	private List<List<ProteinVertex>> componentsListSub1, componentsListSub2;
 	private int randomSize;
 	
-	private DBConnector man;
+	private DBConnector dbConnector;
 	private XRefDBManager xrefDBMan;
 
 	private String wBinPath;
@@ -201,8 +201,8 @@ public class Snow  extends BabelomicsTool{
 				System.err.println("Unknown interactome");
 				return;
 			}
-			man = new DBConnector();
-			xrefDBMan = new XRefDBManager(man);
+			dbConnector = new DBConnector(new File(babelomicsHomePath + "/conf/infrared.properties"));
+			xrefDBMan = new XRefDBManager(dbConnector);
 			StringBuilder sbMeans = createMeansHeader();
 			StringBuilder sbTopo = createTopoHeader();
 			StringBuilder sbComponents = createComponentsHeader();
@@ -353,7 +353,7 @@ public class Snow  extends BabelomicsTool{
 			}
 			if(xml){
 				File xmlFile = null;
-				Xml xmlObject = new Xml();
+				Xml xmlObject = new Xml(new File(babelomicsHomePath + "/conf/infrared.properties"));
 				Map<String, String> listGenEnsem;
 				if(subProteinNetwork1 != null){
 					xmlFile = new File(outdir+"/subnetwork1.xml");
@@ -385,12 +385,12 @@ public class Snow  extends BabelomicsTool{
 
 				}
 			}
-			man.disconnect();
+			//dbConnector.disconnect();
 		} catch (SQLException e) {
-			  e.printStackTrace();
+			  //e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+		//	e.printStackTrace();
 		}
 			
 	}
@@ -806,7 +806,7 @@ public class Snow  extends BabelomicsTool{
 					if(xrefsEns != null && !xrefsEns.isEmpty())
 						verticesList.add(new ProteinVertex(xrefsEns.get(0).getId()));
 				} catch (Exception e) {
-					e.printStackTrace();
+				//	e.printStackTrace();
 				}
 			}
 			return verticesList;
@@ -829,7 +829,7 @@ public class Snow  extends BabelomicsTool{
 					if(xrefsEns != null && !xrefsEns.isEmpty())
 						listGenEnsembl.put(xrefsEns.get(0).getId(), proteinName);
 				} catch (Exception e) {
-					e.printStackTrace();
+				//	e.printStackTrace();
 				}
 			}
 		}
