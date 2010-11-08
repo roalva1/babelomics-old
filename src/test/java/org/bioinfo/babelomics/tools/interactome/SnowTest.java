@@ -7,10 +7,33 @@ import org.junit.Test;
 
 public class SnowTest {
 
+	@Test
+	public void newStatsTest(){
+		//./babelomics.sh --tool snow2 --outdir /tmp/ --sif-file /mnt/commons/babelomics/tests/snow2/ej8/ej8.sif  --o-sif-topo-file --o-name prueba --interactome own
+		String outdir = "/tmp/snow2/newStatsTest";
+		new File(outdir).mkdirs();
+		String []args = {
+				"--tool", "snow2", 
+				"-o", outdir, 
+				"--sif-file", "/mnt/commons/babelomics/tests/snow2/ej8/ej8.sif",
+				"--topo-file", "/mnt/commons/babelomics/tests/snow2/ej8/ej8_topo.txt",
+				"--list1","/mnt/commons/babelomics/tests/snow2/ej8/list1",
+				"--interactome","own",
+				"--type","proteins",
+				"--randoms", "500",
+				"--components", "1",
+				"--bicomponents", "1",
+				"--intermediate", "0",
+				"--images", "1",
+				"--xml",
+				"--side", "less",
+				"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
+	}
 	//@Test
 	public void createTopoFile(){
 		//./babelomics.sh --tool snow2 --outdir /tmp/ --sif-file /mnt/commons/babelomics/tests/snow2/ej8/ej8.sif  --o-sif-topo-file --o-name prueba --interactome own
-		String outdir = "/tmp/snow2/topoTest";
+		String outdir = "/mnt/commons/babelomics/tests/snow2/ej8/";
 		new File(outdir).mkdirs();
 		String []args = {
 				"--tool", "snow2", 
@@ -153,7 +176,7 @@ public class SnowTest {
 		main(args);
 	}
 
-	@Test
+	//@Test
 	public void SnowExampleTwoLists(){
 		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
 

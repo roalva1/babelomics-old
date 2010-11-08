@@ -456,8 +456,6 @@ public class Snow  extends BabelomicsTool{
 		// 1st Analysis
 		File f = null;
 		logger.debug("Starting 1st Analysis..................");
-		WilcoxonTest wTest = new WilcoxonTest();
-		//	List<String> list = IOUtils.readLines(commandLine.getOptionValue("list1"));
 		List<ProteinVertex> list = this.subProteinNetwork1.getInteractomeGraph().getVertices();
 
 
@@ -481,20 +479,6 @@ public class Snow  extends BabelomicsTool{
 		else
 			result.addOutputItem(new Item("list_inter_kol_param", "Empty results", "List - Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Statistic results.Kolmogorov-Smirnov test"));
 
-
-		f = new File(outputFileName+"_list_inter_wil.txt");
-
-		if(wTest.test(wBinPath, f.getAbsolutePath(), side, "list1", "inter", relBetList1, relBetInter, connList1, connInter, clustList1, clustInter)){
-			result.addOutputItem(new Item("list_inter_wil_param", f.getName(), "List - Interactome", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-			//			List<Double> wilcoxValues = getWilcoxonTestValues(f);
-			//			result.addOutputItem(new Item("bet_list_inter_wil_param", wilcoxValues.get(0).toString(), "List - Interactome: Betweenness", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-			//			result.addOutputItem(new Item("conn_list_inter_wil_param", wilcoxValues.get(1).toString(), "List - Interactome: Connections", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-			//			result.addOutputItem(new Item("coeff_list_inter_wil_param", wilcoxValues.get(2).toString(), "List - Interactome: Clustering coefficient", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-
-		}
-		else
-			result.addOutputItem(new Item("list_inter_wil_param", "Empty results", "List - Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-
 		if(images){
 			createImages(outputFileName+"_list_inter_relBet", relBetList1, "list1", relBetInter, "inter", "list_inter_relBet", "relBet", "Images.List vs inter");
 			createImages(outputFileName+"_list_inter_conn", connList1, "list1", connInter, "inter", "list_inter_conn", "conn", "Images.List vs inter");
@@ -511,11 +495,12 @@ public class Snow  extends BabelomicsTool{
 
 		List<Double> clustSubnet1 = subProteinNetwork1.getClustList();
 		List<Double> clustRandoms = new ArrayList<Double>();
-
 		for(ProteinNetwork proteinNetwork : subProteinNetworkRandoms){
-			relBetRandoms.add(proteinNetwork.getMeanRelBet());
-			connRandoms.add(proteinNetwork.getMeanConnections());
-			clustRandoms.add(proteinNetwork.getMeanClust());
+			int  randomVertex = (int) (Math.random() * proteinNetwork.getInteractomeGraph().getVertices().size());
+			ProteinVertex v = proteinNetwork.getInteractomeGraph().getVertices().get(randomVertex);
+			relBetRandoms.add(v.getRelativeBetweenness());
+			connRandoms.add(Double.parseDouble(Integer.toString(proteinNetwork.getInteractomeGraph().getDegree(v))));
+			clustRandoms.add(v.getClusteringCoefficient());
 		}
 
 		toWrite = ksTest(relBetSubnet1, relBetRandoms, connSubnet1, connRandoms, clustSubnet1, clustRandoms, side);
@@ -526,19 +511,6 @@ public class Snow  extends BabelomicsTool{
 		}
 		else
 			result.addOutputItem(new Item("sn_random_kol_param", "Empty results", "Subnet - Random", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Statistic results.Kolmogorov-Smirnov test"));
-
-
-		f = new File(outputFileName+"_sn_random_wil.txt");
-		if(wTest.test(wBinPath, f.getAbsolutePath(), side, "sn1", "rnd", relBetSubnet1, relBetRandoms, connSubnet1, connRandoms, clustSubnet1, clustRandoms)){
-			result.addOutputItem(new Item("sn_random_wil_param", f.getName(), "Subnet - Random", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-			//			List<Double> wilcoxValues = getWilcoxonTestValues(f);
-			//			result.addOutputItem(new Item("bet_sn_random_wil_param", wilcoxValues.get(0).toString(), "Subnet - Random: Betweenness", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-			//			result.addOutputItem(new Item("conn_sn_random_wil_param", wilcoxValues.get(1).toString(), "Subnet - Random: Connections", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-			//			result.addOutputItem(new Item("coef_sn_random_wil_param", wilcoxValues.get(2).toString(), "Subnet - Random: Clustering coefficient", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-
-		}
-		else
-			result.addOutputItem(new Item("sn_random_wil_param", "Empty results", "Subnet - Random", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
 
 		if(images){
 			createImages(outputFileName+"_sn_random_relBet", relBetSubnet1, "subnet1", relBetRandoms, "randoms", "sn_random_relBet", "relBet", "Images.Subnet random");
@@ -551,7 +523,6 @@ public class Snow  extends BabelomicsTool{
 		// 1st Analysis
 		logger.debug("Starting 1st Analysis..................");
 		File f = null;
-		WilcoxonTest wTest = new WilcoxonTest();
 
 		List<Double> relBetList1 = new ArrayList<Double>();
 		List<Double> connList1 = new ArrayList<Double>();
@@ -575,18 +546,6 @@ public class Snow  extends BabelomicsTool{
 		}
 		else
 			result.addOutputItem(new Item("list1_list2_kol", "Empty results", "List1 - List2", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test"));
-
-
-		f = new File(outputFileName+"_list1_list2_wil.txt");
-		if(wTest.test(wBinPath, f.getAbsolutePath(), side, "list1", "list2", relBetList1, relBetList2, connList1, connList2, clustList1, clustList2)){
-			result.addOutputItem(new Item("list1_list2_wil", f.getName(), "List1 - List2", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-			//			List<Double> wilcoxValues = getWilcoxonTestValues(f);
-			//			result.addOutputItem(new Item("bet_list1_list2_wil", wilcoxValues.get(0).toString(), "Subnet - Random: Betweenness", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-			//			result.addOutputItem(new Item("conn_list1_list2_wil", wilcoxValues.get(1).toString(), "Subnet - Random: Connections", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-			//			result.addOutputItem(new Item("coef_list1_list2_wil", wilcoxValues.get(2).toString(), "Subnet - Random: Clustering coefficient", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-		}
-		else
-			result.addOutputItem(new Item("list1_list2_wil", "Empty results", "List1 - List2", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
 
 		if(images){
 			createImages(outputFileName+"_list1_list2_relBet", relBetList1, "list1", relBetList2, "list2", "list1_list2_relBet", "relBet", "Images.List1 vs List2");
@@ -615,17 +574,17 @@ public class Snow  extends BabelomicsTool{
 			result.addOutputItem(new Item("sn1_sn2_kol", "Empty results", "Subnet1 - Subnet2", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test"));
 
 
-		f = new File(outputFileName+"_sn1_sn2_wil.txt");
-		if(wTest.test(wBinPath, f.getAbsolutePath(), side, "sn1", "sn2", relBetSubnet1, relBetSubnet2, connSubnet1, connSubnet2, clustSubnet1, clustSubnet2)){
-			result.addOutputItem(new Item("sn1_sn2_wil", f.getName(), "Subnet1 - Subnet2", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-			//			List<Double> wilcoxValues = getWilcoxonTestValues(f);
-			//			result.addOutputItem(new Item("bet_sn1_sn2_wil", wilcoxValues.get(0).toString(), "Subnet1 - Subnet2: Betweenness", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-			//			result.addOutputItem(new Item("conn_sn1_sn2_wil", wilcoxValues.get(1).toString(), "Subnet1 - Subnet2: Connections", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-			//			result.addOutputItem(new Item("coef_sn1_sn2_wil", wilcoxValues.get(2).toString(), "Subnet1 - Subnet2: Clustering coefficient", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
-
-		}
-		else
-			result.addOutputItem(new Item("sn1_sn2_wil", "Empty results", "Subnet1 - Subnet2", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+//		f = new File(outputFileName+"_sn1_sn2_wil.txt");
+//		if(wTest.test(wBinPath, f.getAbsolutePath(), side, "sn1", "sn2", relBetSubnet1, relBetSubnet2, connSubnet1, connSubnet2, clustSubnet1, clustSubnet2)){
+//			result.addOutputItem(new Item("sn1_sn2_wil", f.getName(), "Subnet1 - Subnet2", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+//			//			List<Double> wilcoxValues = getWilcoxonTestValues(f);
+//			//			result.addOutputItem(new Item("bet_sn1_sn2_wil", wilcoxValues.get(0).toString(), "Subnet1 - Subnet2: Betweenness", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+//			//			result.addOutputItem(new Item("conn_sn1_sn2_wil", wilcoxValues.get(1).toString(), "Subnet1 - Subnet2: Connections", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+//			//			result.addOutputItem(new Item("coef_sn1_sn2_wil", wilcoxValues.get(2).toString(), "Subnet1 - Subnet2: Clustering coefficient", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
+//
+//		}
+//		else
+//			result.addOutputItem(new Item("sn1_sn2_wil", "Empty results", "Subnet1 - Subnet2", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Wilcoxon test"));
 
 		if(images){
 			createImages(outputFileName+"_sn1_sn2_relBet", relBetSubnet1, "subnet1", relBetSubnet2, "subnet2", "sn1_sn2_relBet", "relBet", "Images.Subnet1 vs Subnet2");
