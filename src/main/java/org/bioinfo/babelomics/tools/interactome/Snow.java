@@ -664,12 +664,13 @@ public class Snow  extends BabelomicsTool{
 
 	private StringBuilder createMeansHeader(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("#Subnet\tMeanBet\tStdBet\t").append("MeanCon\tStdCon\t").append("MeanCls\tStdCls\t");
+		sb.append("#Subnet\tMeanBet\tStdBet\t").append("MeanCon\tStdCon\t").append("MeanCls\tStdCls");
 		if(components){
-			sb.append("Comp\t1Comp");
+			sb.append("\tComp\t1Comp");
 		}
+		sb.append("\tNodes");
 		if(bicomponents){
-			sb.append("\t1BiComp\t");
+			sb.append("\tBiComp\t");
 		}
 		sb.append(System.getProperty("line.separator"));
 		return sb;
@@ -721,6 +722,7 @@ public class Snow  extends BabelomicsTool{
 			}
 			sb.append("\t"+moreOneComponent+"\t"+oneComponent);
 		}
+		sb.append("\t").append(subProteinNetwork.getInteractomeGraph().getVertices().size());
 		if(bicomponents){
 			sb.append("\t").append(interactomeGraph.getNumberOfBicomponents());
 		}

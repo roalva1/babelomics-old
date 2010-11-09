@@ -15,22 +15,23 @@ public class SnowTest {
 		String []args = {
 				"--tool", "snow2", 
 				"-o", outdir, 
-				"--sif-file", "/mnt/commons/babelomics/tests/snow2/ej8/ej8.sif",
-				"--topo-file", "/mnt/commons/babelomics/tests/snow2/ej8/ej8_topo.txt",
-				"--list1","/mnt/commons/babelomics/tests/snow2/ej8/list1",
+				"--sif-file", "/mnt/commons/babelomics/tests/snow2/ej8/ej9.sif",
+				"--topo-file", "/mnt/commons/babelomics/tests/snow2/ej8/ej9_topo.txt",
+				"--list1","/mnt/commons/babelomics/tests/snow2/ej8/list2",
 				"--interactome","own",
 				"--type","proteins",
 				"--randoms", "500",
 				"--components", "1",
 				"--bicomponents", "1",
-				"--intermediate", "0",
+				"--intermediate", "1",
 				"--images", "1",
 				"--xml",
+				"--sif",
 				"--side", "less",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
-	//@Test
+//	@Test
 	public void createTopoFile(){
 		//./babelomics.sh --tool snow2 --outdir /tmp/ --sif-file /mnt/commons/babelomics/tests/snow2/ej8/ej8.sif  --o-sif-topo-file --o-name prueba --interactome own
 		String outdir = "/mnt/commons/babelomics/tests/snow2/ej8/";
@@ -38,7 +39,7 @@ public class SnowTest {
 		String []args = {
 				"--tool", "snow2", 
 				"-o", outdir, 
-				"--sif-file", "/mnt/commons/babelomics/tests/snow2/ej8/ej8.sif",
+				"--sif-file", "/mnt/commons/babelomics/tests/snow2/ej8/ej9.sif",
 				"--o-sif-topo-file",
 				"--interactome","own",
 				"--home", System.getenv("BABELOMICS_HOME")};
