@@ -7,8 +7,33 @@ import org.junit.Test;
 
 public class SnowTest {
 
-
 	@Test
+	public void ownInteractomeTest(){
+		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
+
+		String outdir = "/tmp/snow2/ownTest";
+		new File(outdir).mkdirs();
+
+		String []args = {
+				"--tool", "snow2", 
+				"-o", outdir, 
+				"--randoms", "2",
+				"--o-name","result",
+				"--interactome","own",
+				"--sif-file","/mnt/commons/babelomics/tests/snow2/ej8/ej8.sif",
+				"--list1","/mnt/commons/babelomics/tests/snow2/ej8/list1",
+				"--side", "less",
+				"--intermediate","1",
+				"--components","1",
+				"--xml",
+				"--sif",
+				"--images",
+				"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
+	}
+
+
+	//@Test
 	public void SnowExampleOneList(){
 		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
 
@@ -29,12 +54,13 @@ public class SnowTest {
 				"--components","1",
 				"--xml",
 				"--sif",
+				
 				"--images",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
 
-	//@Test
+//	@Test
 	public void SnowExampleTwoLists(){
 		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
 
@@ -54,6 +80,8 @@ public class SnowTest {
 				"--intermediate", "0",
 				"--xml",
 				"--images",
+				"--json",
+				//"--sif",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
