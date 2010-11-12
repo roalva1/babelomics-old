@@ -316,7 +316,7 @@ public class Snow  extends BabelomicsTool{
 				logger.error("Not correct arguments for statistic test");
 				return;
 			}
-		//	if(json){
+			if(json){
 				File auxFile = new File(outputFileName);;
 				List<String> names = new ArrayList<String>();
 				if(subProteinNetwork1 != null){
@@ -328,7 +328,7 @@ public class Snow  extends BabelomicsTool{
 					createJson(subProteinNetwork2, outputFileName+"_list2.dot", componentsListSub2, intermediatesSub2, 2);
 				}
 
-	//		}
+			}
 			if(xml){
 				File xmlFile = null;
 				Xml xmlObject;
