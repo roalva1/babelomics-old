@@ -74,7 +74,7 @@ public class Snow  extends BabelomicsTool{
 		options.addOption(OptionFactory.createOption("list1", "An input file containing a node per line", false));
 		options.addOption(OptionFactory.createOption("list2", "An input file containing a node per line", false));
 		options.addOption(OptionFactory.createOption("type", "An argument saying if you want genes, proteins(default) or transcripts", false, true));
-		options.addOption(OptionFactory.createOption("group", "Values:all/curated. It is An argument saying whether you want a curated interactome or the whole interactome(default)", false, true));
+		options.addOption(OptionFactory.createOption("group", "Values all(by default) or curated. It is An argument saying whether you want a curated interactome or the whole interactome", false, true));
 		options.addOption(OptionFactory.createOption("randoms", "Number of randoms", false, true));
 		//		options.addOption(OptionFactory.createOption("randoms-size", "Size of randoms", false, true));
 		options.addOption(OptionFactory.createOption("intermediate", "If there is this argument, it will create the network with 1 intermediate", false, true));
