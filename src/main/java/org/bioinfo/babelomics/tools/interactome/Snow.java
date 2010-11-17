@@ -74,9 +74,9 @@ public class Snow  extends BabelomicsTool{
 		options.addOption(OptionFactory.createOption("list1", "An input file containing a node per line", false));
 		options.addOption(OptionFactory.createOption("list2", "An input file containing a node per line", false));
 		options.addOption(OptionFactory.createOption("type", "An argument saying if you want genes, proteins(default) or transcripts", false, true));
-		options.addOption(OptionFactory.createOption("group", "Values all(by default) or curated. It is An argument saying whether you want a curated interactome or the whole interactome", false, true));
+		
+
 		options.addOption(OptionFactory.createOption("randoms", "Number of randoms", false, true));
-		//		options.addOption(OptionFactory.createOption("randoms-size", "Size of randoms", false, true));
 		options.addOption(OptionFactory.createOption("intermediate", "If there is this argument, it will create the network with 1 intermediate", false, true));
 		options.addOption(OptionFactory.createOption("components", "If there is this argument, it will calculate the number of components", false, false));
 		options.addOption(OptionFactory.createOption("bicomponents", "If there is this argument, it will calculate the number of bicomponents", false, false));
@@ -87,6 +87,7 @@ public class Snow  extends BabelomicsTool{
 		options.addOption(OptionFactory.createOption("images", "Print the images for the statistics", false, false));
 		options.addOption(OptionFactory.createOption("xml", "Output xml file with the representation of the graph", false, false));
 		options.addOption(OptionFactory.createOption("sif", "Output sif file with the representation of the graph", false, false));
+		options.addOption(OptionFactory.createOption("group", "Values all(by default) or curated. It is An argument saying whether you want a curated interactome or the whole interactome", true, true));
 
 
 	}
@@ -119,7 +120,6 @@ public class Snow  extends BabelomicsTool{
 		
 		interactome = commandLine.getOptionValue("interactome");
 		String interactomeMsg = getInteractomeMsg();
-		
 		dbConnector = new DBConnector(interactome, new File(babelomicsHomePath + "/conf/infrared.properties"));
 		xrefDBMan = new XRefDBManager(dbConnector);
 		
@@ -131,7 +131,9 @@ public class Snow  extends BabelomicsTool{
 		type = !commandLine.hasOption("type") ? "proteins":commandLine.getOptionValue("type");
 		result.addOutputItem(new Item("type_param", type, "ID type", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 
-		group = !commandLine.hasOption("group") ?"all": commandLine.getOptionValue("group");
+		group = !commandLine.hasOption("group") ? "all": commandLine.getOptionValue("group");
+		result.addOutputItem(new Item("group_param", group, "Interactome group (curated or all)", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		
 		intermediate = (commandLine.hasOption("intermediate") && !"0".equalsIgnoreCase(commandLine.getOptionValue("intermediate")));
 
 		ProteinNetworkToFile file = new ProteinNetworkToFile();
@@ -170,8 +172,10 @@ public class Snow  extends BabelomicsTool{
 					localType = "proteins";
 				String parseFromSifFile = folderInteractions+interactome+"_alldb_"+group+"physical_"+localType+"_interactome_nr.sif";
 				interactomeGraph = InteractomeParser.parseFromSifFile(parseFromSifFile);
+				System.out.println("Interactome read: "+interactome+"_alldb_"+group+"physical_"+localType+"_interactome_nr.sif");
 				proteinNetwork = new ProteinNetwork(interactomeGraph);
 				proteinNetwork.loadTopologicalValues(folderInteractions+interactome+"_alldb_"+group+"physical_"+localType+"_interactome_nr_topo.txt");
+				System.out.println("Interactome topo values read: "+interactome+"_alldb_"+group+"physical_"+localType+"_interactome_nr_topo.txt");
 //				System.err.println("Unknown interactome");
 //				return;
 			}
@@ -200,9 +204,10 @@ public class Snow  extends BabelomicsTool{
 					listToVertex1 = list1;
 				
 				logger.debug("nodes read: " + list1.toString());
+				System.out.println("nodes read: " + listToVertex1.toString());
 
 				SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), toVertex(listToVertex1));
-
+				System.out.println("Before intermediate: "+subgraph.getVertices().size()+" nodes");
 				this.randomSize = subgraph.getVertices().size();
 				if(intermediate){
 					intermediatesSub1 = Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
@@ -211,7 +216,7 @@ public class Snow  extends BabelomicsTool{
 					else
 						result.addOutputItem(new Item("external_nodes_list_"+node, "No added", "External nodes added", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
 				}
-
+				System.out.println("With intermediate: "+subgraph.getVertices().size()+" nodes");
 				subProteinNetwork1 = createSubnet(subgraph);
 
 				sbTopo.append(getTopologicalValues(subProteinNetwork1, node, false));
@@ -477,8 +482,9 @@ public class Snow  extends BabelomicsTool{
 		List<Double> clustInter = proteinNetwork.getClustList();
 		List<Double> clustList1 = new ArrayList<Double>();
 
-		createTopoFilterList(list, relBetList1, connList1, clustList1);
-
+		//createTopoFilterList(list, relBetList1, connList1, clustList1);
+		createTopoFilterListNoIntermediates(list, relBetList1, connList1, clustList1);
+		
 		String toWrite = ksTest(relBetList1, relBetInter, connList1, connInter, clustList1, clustInter, side);
 		if(!toWrite.equals("")){
 			f = new File(outputFileName+"_list_inter_kol.txt");
@@ -599,6 +605,15 @@ public class Snow  extends BabelomicsTool{
 		sb.append("connections\t"+kstest.resultKolmogorovSmirnov(ListUtils.toDoubleArray(connList1), ListUtils.toDoubleArray(connList2), side).getPValue()+"\t"+side+"\n");
 		sb.append("coefficient\t"+kstest.resultKolmogorovSmirnov(ListUtils.toDoubleArray(clustList1), ListUtils.toDoubleArray(clustList2), side).getPValue()+"\t"+side);
 		return sb.toString();
+	}
+	private void createTopoFilterListNoIntermediates(List<ProteinVertex> list, List<Double> relBetList, List<Double> connList, List<Double> clustList){
+		for(ProteinVertex protein : list){
+			if( (this.intermediatesSub1 != null && this.intermediatesSub1.contains(protein.getId())) || proteinNetwork.getInteractomeGraph().getVertex(protein.getId()) == null)
+				continue;
+			relBetList.add(proteinNetwork.getRelBetweennessVertex(protein.getId()));
+			connList.add(proteinNetwork.getDegreeVertex(protein.getId()));
+			clustList.add(proteinNetwork.getClusterinVertex(protein.getId()));
+		}
 	}
 	private void createTopoFilterList(List<ProteinVertex> list, List<Double> relBetList, List<Double> connList, List<Double> clustList){
 		for(ProteinVertex protein : list){
