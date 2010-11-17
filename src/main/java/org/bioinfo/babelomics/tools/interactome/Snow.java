@@ -77,13 +77,13 @@ public class Snow  extends BabelomicsTool{
 		
 
 		options.addOption(OptionFactory.createOption("randoms", "Number of randoms", false, true));
-		options.addOption(OptionFactory.createOption("intermediate", "If there is this argument, it will create the network with 1 intermediate", false, true));
-		options.addOption(OptionFactory.createOption("components", "If there is this argument, it will calculate the number of components", false, false));
-		options.addOption(OptionFactory.createOption("bicomponents", "If there is this argument, it will calculate the number of bicomponents", false, false));
+		options.addOption(OptionFactory.createOption("intermediate", "If we want the intermediate we put 1, otherwise we put 0", false, true));
+		options.addOption(OptionFactory.createOption("components", "If we want the number of components we put 1, otherwise we put 0", false, false));
+		options.addOption(OptionFactory.createOption("bicomponents", "If we want the number of bicomponents we put 1, otherwise we put 0", false, false));
 		options.addOption(OptionFactory.createOption("json", "It will create an output .json file", false, false));
 		options.addOption(OptionFactory.createOption("o-sif-topo-file", "Create a full topological file from a sif file", false, false));
 		options.addOption(OptionFactory.createOption("o-name", "If there is this argument, it will create an output .cmp file for the information of each component", false, true));
-		options.addOption(OptionFactory.createOption("side", "side for kolmogorov and wilkoxon test. Can be two.sided(by default), less or greater", false, true));
+		options.addOption(OptionFactory.createOption("side", "side for kolmogorov and wilkoxon test. Can be less or greater", false, true));
 		options.addOption(OptionFactory.createOption("images", "Print the images for the statistics", false, false));
 		options.addOption(OptionFactory.createOption("xml", "Output xml file with the representation of the graph", false, false));
 		options.addOption(OptionFactory.createOption("sif", "Output sif file with the representation of the graph", false, false));
