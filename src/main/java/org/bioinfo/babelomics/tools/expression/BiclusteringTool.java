@@ -45,7 +45,9 @@ public class BiclusteringTool extends BabelomicsTool {
 	private float maxPValue;
 	private float maxOverlappingPercentage;
 	
-	private Biclustering biclustering; 
+	private Biclustering biclustering;
+	
+	private boolean generateCharts;
 	
 	@Override
 	public void initOptions() {
@@ -72,6 +74,9 @@ public class BiclusteringTool extends BabelomicsTool {
 		// sorting results
 		getOptions().addOption(OptionFactory.createOption("sort", "[genes,conditions,size,pvalue,msr] sorting criteria (default pvalue)",false,true));
 		getOptions().addOption(OptionFactory.createOption("order", "[ascending,descencing] sorting order (default ascending, just for genes,conditions and size values of sorting param)",false,true));
+		
+		// charts
+		getOptions().addOption(OptionFactory.createOption("charts", "generate charts",false,false));
 		
 	}
 
@@ -205,6 +210,9 @@ public class BiclusteringTool extends BabelomicsTool {
 					throw new Exception("invalid overlapping percentage value");
 				}	
 			}
+			// charts
+			if(commandLine.hasOption("charts")) generateCharts = true;
+			
 			
 			addInputItems();
 			
@@ -261,31 +269,49 @@ public class BiclusteringTool extends BabelomicsTool {
 				}
 			}
 						
+			
+			// output items
+			  // number of biclusters
+			String numberOfBiclustersMessage = "" + biclustering.getNumberOfBiclusters();
+			if(filterByconstantPattern || filterByMinNumberOfGenes || filterByMinNumberOfConditions || filterByMaxMSR || filterByMaxPValue || filterByOverlapping){
+				numberOfBiclustersMessage += " of "  + biclustering.getNumberOfOriginalBiclusters() + " unfiltered biclusters (filtered " + StringUtils.decimalFormat(100.0*((double)biclustering.getNumberOfFilteredBiclusters()/(double)biclustering.getNumberOfOriginalBiclusters()), "#0.00") + "%)";         
+			} 
+			result.addOutputItem(new Item("number_of_biclusters",numberOfBiclustersMessage,"Number of biclusters",Item.TYPE.MESSAGE,Arrays.asList(""),new HashMap(),"Summary"));
+			  // biclusters
+			result.addOutputItem(new Item("biclusters","biclusters.txt","Biclusters file",Item.TYPE.FILE,Arrays.asList(""),new HashMap(),"Biclusters"));
+			
+			
+			
 			// output results
 			stats.println("Number of biclusters: " + biclustering.getNumberOfBiclusters());			
 			stats.println("Number of original biclusters: " + biclustering.getNumberOfOriginalBiclusters());			
 			stats.println("Number of filtered biclusters: " + biclustering.getNumberOfFilteredBiclusters());
-
-			String numberOfBiclustersMessage = "" + biclustering.getNumberOfBiclusters();
-			if(filterByconstantPattern || filterByMinNumberOfGenes || filterByMinNumberOfConditions || filterByMaxMSR || filterByMaxPValue || filterByOverlapping){
-				numberOfBiclustersMessage += " of "  + biclustering.getNumberOfOriginalBiclusters() + " unfiltered biclusters (filtered " + StringUtils.decimalFormat(100.0*((double)biclustering.getNumberOfFilteredBiclusters()/(double)biclustering.getNumberOfOriginalBiclusters()), "#0.00)");
-			} 
-			result.addOutputItem(new Item("number_of_original_biclusters",numberOfBiclustersMessage,"Number of original biclusters",Item.TYPE.MESSAGE,Arrays.asList(""),new HashMap(),"Summary"));			
+		
+			logger.print("saving biclusters...");
 			
-			logger.print("saving results...");
-			int cont = 0;
 			for(Bicluster bicluster:biclustering.getBiclusters()){
 				printBicluster((CCC_Bicluster)bicluster);
-				cont++;
-				if(cont<10) saveBiclusterCharts((CCC_Bicluster)bicluster);
 			}
 			logger.println("OK");
+
+			if(generateCharts){
+				logger.print("saving charts...");
+				for(Bicluster bicluster:biclustering.getBiclusters()){					
+					saveBiclusterCharts((CCC_Bicluster)bicluster);
+					result.addOutputItem(new Item("bicluster_expression_" + bicluster.getID(),"bicluster_expression_" + bicluster.getID() + ".png","Bicluster " + bicluster.getID(),Item.TYPE.IMAGE,Arrays.asList(""),new HashMap(),"Expression Charts"));
+					result.addOutputItem(new Item("bicluster_pattern_" + bicluster.getID(),"bicluster_pattern_" + bicluster.getID() + ".png","Bicluster " + bicluster.getID(),Item.TYPE.IMAGE,Arrays.asList(""),new HashMap(),"Pattern Charts"));
+				}
+				logger.println("OK");
+			}
 						
 			out.close();
 			stats.close();
 			
 			logger.println("");
 			logger.println("");
+
+			
+			
 			
 			
 		} catch (Exception e) {			
@@ -301,9 +327,9 @@ public class BiclusteringTool extends BabelomicsTool {
 		
 	}
 	
-	private void saveBiclusterCharts(CCC_Bicluster bicluster){
-		String fileName = "bicluster_" + bicluster.getID() + ".png";
-		bicluster.printColorChartGeneExpressionBiclusterConditions_ToFile(outdir,fileName,400,400,true,true);
+	private void saveBiclusterCharts(CCC_Bicluster bicluster){		
+		bicluster.printColorChartGeneExpressionBiclusterConditions_ToFile(outdir,"bicluster_expression_" + bicluster.getID() + ".png",400,400,true,false);
+		bicluster.printBiclusterPatternChart_ToFile(outdir,"bicluster_pattern_" + bicluster.getID() + ".png",400,400,true,false);
 	}
 	
 	private void printBicluster(CCC_Bicluster bicluster){
@@ -315,13 +341,18 @@ public class BiclusteringTool extends BabelomicsTool {
 		
 		// print bicluster
 		out.println(">>Bicluster " + bicluster.getID());
-		out.println("+ " + bicluster.getNumberOfGenes() + " genes X " + bicluster.getNumberOfConditions() + " conditions (size = " + (bicluster.getNumberOfGenes()*bicluster.getNumberOfConditions()) + ")");
+		//out.println("+ " + bicluster.getNumberOfGenes() + " genes X " + bicluster.getNumberOfConditions() + " conditions (size = " + (bicluster.getNumberOfGenes()*bicluster.getNumberOfConditions()) + ")");
+		  // basic info
+		out.println("+ genes = " + bicluster.getNumberOfGenes());
+		out.println("+ conditions = " + bicluster.getNumberOfConditions());
+		out.println("+ size = " + (bicluster.getNumberOfGenes()*bicluster.getNumberOfConditions()));
+		  // pattern
 		if(signChanges){
 			out.println("+ pattern = " + getPrettyPattern(bicluster.getBiclusterExpressionPattern()) + "/" + getPrettyPattern(((CCC_Bicluster_SignChanges)bicluster).getBiclusterExpressionPattern_SignChanges()));
 		} else {
 			out.println("+ pattern = " + getPrettyPattern(bicluster.getBiclusterExpressionPattern()));
-		}		
-		
+		}
+		  // pvalue
 		if(sortingCriteria==SORTING_CRITERIA.BY_PVALUE || filterByMaxPValue) out.println("+ pvalue = " + bicluster.getBiclusterPatternWithColumns_pValue(1));		
 		if(sortingCriteria==SORTING_CRITERIA.BY_MSR || filterByMaxMSR) out.println("+ MSR = " + bicluster.computeMSR());
 		
