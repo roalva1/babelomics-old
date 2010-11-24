@@ -112,8 +112,8 @@ public class Snow  extends BabelomicsTool{
 		xml = commandLine.hasOption("xml");
 		sif = commandLine.hasOption("sif");
 
-		xml = true;
-		json = false;
+		//xml = true;
+		//json = false;
 
 		outputFileName = outdir + "/" + commandLine.getOptionValue("o-name", "result");
 		
