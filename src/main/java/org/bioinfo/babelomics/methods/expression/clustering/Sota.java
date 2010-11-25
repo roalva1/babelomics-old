@@ -9,7 +9,6 @@ import org.bioinfo.commons.exec.SingleProcess;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
-import org.bioinfo.data.format.io.parser.NewickParser;
 import org.bioinfo.data.tree.multiway.MultipleTree;
 import org.bioinfo.math.data.DoubleMatrix;
 

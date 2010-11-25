@@ -8,22 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
-import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ArrayUtils;
-import org.bioinfo.commons.utils.ListUtils;
-import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
-import org.bioinfo.data.list.exception.InvalidIndexException;
-import org.bioinfo.io.file.compress.CompressFactory;
-import org.bioinfo.io.file.compress.GenericCompressManager;
-import org.bioinfo.microarray.AffymetrixExpressionUtils;
 import org.bioinfo.microarray.ExpressionUtils;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
-import org.jfree.chart.ChartUtilities;
 
 public class MAPlot extends BabelomicsTool {
 

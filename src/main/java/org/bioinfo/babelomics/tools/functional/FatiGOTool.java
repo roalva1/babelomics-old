@@ -16,26 +16,22 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.genetics.Chromosome;
 import org.bioinfo.babelomics.methods.functional.FatiGO;
 import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
-import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
-import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.exception.InvalidIndexException;
-import org.bioinfo.infrared.common.dbsql.DBConnector;
-import org.bioinfo.infrared.common.feature.FeatureList;
-import org.bioinfo.infrared.funcannot.AnnotationItem;
-import org.bioinfo.infrared.funcannot.dbsql.AnnotationDBManager;
+import org.bioinfo.infrared.common.DBConnector;
+import org.bioinfo.infrared.core.common.FeatureList;
+import org.bioinfo.infrared.core.funcannot.AnnotationItem;
+import org.bioinfo.infrared.funcannot.AnnotationDBManager;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
-import org.bioinfo.io.file.parser.msexcel.ExcelFileWriter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.stats.inference.FisherExactTest;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 
-import es.blast2go.prog.graph.GetGraphApi;
 import es.blast2go.prog.graph.GoGraphException;
 
 public class FatiGOTool extends FunctionalProfilingTool{

@@ -9,7 +9,7 @@ import java.util.Arrays;
 import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.methods.functional.InfraredUtils;
 import org.bioinfo.babelomics.tools.BabelomicsFactory;
-import org.bioinfo.infrared.common.dbsql.DBConnector;
+import org.bioinfo.infrared.common.DBConnector;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.junit.After;
 import org.junit.Before;

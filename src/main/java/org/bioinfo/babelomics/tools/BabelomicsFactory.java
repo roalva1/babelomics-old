@@ -28,8 +28,6 @@ import org.bioinfo.babelomics.tools.genomic.genotype.StratificationTool;
 import org.bioinfo.babelomics.tools.graph.DescriptiveStatistics;
 import org.bioinfo.babelomics.tools.graph.GoGraphViewerTool;
 import org.bioinfo.babelomics.tools.interactome.Snow;
-//import org.bioinfo.babelomics.tools.interactome.Snow2Old;
-import org.bioinfo.babelomics.tools.interactome.Snow;
 import org.bioinfo.babelomics.tools.preprocessing.CreateAnnotation;
 import org.bioinfo.babelomics.tools.preprocessing.IDConverter;
 import org.bioinfo.babelomics.tools.preprocessing.Preprocessing;
