@@ -204,7 +204,7 @@ public class Snow  extends BabelomicsTool{
 					listToVertex1 = list1;
 				
 				logger.debug("nodes read: " + list1.toString());
-				System.out.println("nodes read: " + listToVertex1.toString());
+				//System.out.println("nodes read: " + listToVertex1.toString());
 
 				SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), toVertex(listToVertex1));
 				System.out.println("Before intermediate: "+subgraph.getVertices().size()+" nodes");
@@ -234,7 +234,7 @@ public class Snow  extends BabelomicsTool{
 					logger.debug("Starting list1 components.........");
 					System.out.println("Starting list1 components.........");
 					componentsListSub1 = subProteinNetwork1.getInteractomeGraph().getAllInformationComponents(true);
-
+System.out.println("componentsListSub1 size: "+componentsListSub1.size());
 					sbComponents.append(getComponentsValues(subProteinNetwork1, node, componentsListSub1));
 					sbComponents.deleteCharAt(sbComponents.lastIndexOf(System.getProperty("line.separator")));
 					f = new File(outputFileName+"_sn_nodeFile"+node+"_comp.txt");
@@ -348,6 +348,7 @@ public class Snow  extends BabelomicsTool{
 //						mapList = this.getGenEnsemble(listToVertex1);
 //					else if(type.equals("proteins"))
 //						mapList = this.mapList1;
+					
 					xmlObject.graphToXML(xmlFile.getAbsolutePath(),subProteinNetwork1.getInteractomeGraph(), intermediatesSub1, componentsListSub1, type, this.mapList1);
 					addOutputAppletItem(xmlFile, 1);
 				}
@@ -815,8 +816,8 @@ public class Snow  extends BabelomicsTool{
 			try {
 //				xrefsEns  = xrefDBMan.getByDBName(proteinName, "ensembl_gene");
 				XRef xrefsEns  = xrefDBMan.getByDBName(proteinName, "ensembl_gene");
-				if(xrefsEns != null && !xrefsEns.getXrefItems().get("ensemble_gene").isEmpty() && !xrefsEns.getXrefItems().get("ensemble_gene").get(0).getDisplayName().equals(proteinName))
-					listGenEnsembl.put(xrefsEns.getXrefItems().get("ensemble_gene").get(0).getDisplayName(), proteinName);
+				if(xrefsEns != null && !xrefsEns.getXrefItems().get("ensembl_gene").isEmpty() && !xrefsEns.getXrefItems().get("ensembl_gene").get(0).getDisplayName().equals(proteinName))
+					listGenEnsembl.put(xrefsEns.getXrefItems().get("ensembl_gene").get(0).getDisplayName(), proteinName);
 			} catch (Exception e) {
 			//	e.printStackTrace();
 			}
