@@ -57,8 +57,8 @@ public class BiclusteringTool extends BabelomicsTool {
 		
 		// missing values
 		getOptions().addOption(OptionFactory.createOption("missing-values", "[remove,fill,jump] missing values treatment (default is jump)",false,true));
-		getOptions().addOption(OptionFactory.createOption("missing-value-filling", "[neighbors,gene] fill missing values with the neighbors mean or the gene mean (default gene)",false,true));
-		getOptions().addOption(OptionFactory.createOption("missing-value-filling-neighbors", "[int] number of neighbors used to fill (default 1)",false,true));
+		getOptions().addOption(OptionFactory.createOption("missing-values-filling", "[neighbors,gene] fill missing values with the neighbors mean or the gene mean (default gene)",false,true));
+		getOptions().addOption(OptionFactory.createOption("missing-values-filling-neighbors", "[int] number of neighbors used to fill (default 1)",false,true));
 		
 		// sign changes
 		getOptions().addOption(OptionFactory.createOption("sign-changes", "compute signchanges",false,false));
@@ -81,6 +81,7 @@ public class BiclusteringTool extends BabelomicsTool {
 	}
 
 	
+	@SuppressWarnings("rawtypes")
 	@Override
 	protected void execute() {
 						
@@ -278,7 +279,7 @@ public class BiclusteringTool extends BabelomicsTool {
 			} 
 			result.addOutputItem(new Item("number_of_biclusters",numberOfBiclustersMessage,"Number of biclusters",Item.TYPE.MESSAGE,Arrays.asList(""),new HashMap(),"Summary"));
 			  // biclusters
-			result.addOutputItem(new Item("biclusters","biclusters.txt","Biclusters file",Item.TYPE.FILE,Arrays.asList(""),new HashMap(),"Biclusters"));
+			result.addOutputItem(new Item("biclusters","biclusters.txt","Biclusters file",Item.TYPE.FILE,Arrays.asList("BICLUSTERING"),new HashMap(),"Biclusters"));
 			
 			
 			
@@ -328,7 +329,7 @@ public class BiclusteringTool extends BabelomicsTool {
 	}
 	
 	private void saveBiclusterCharts(CCC_Bicluster bicluster){		
-		bicluster.printColorChartGeneExpressionBiclusterConditions_ToFile(outdir,"bicluster_expression_" + bicluster.getID() + ".png",400,400,true,false);
+		bicluster.printColorChartGeneExpressionBiclusterConditions_ToFile(outdir,"bicluster_expression_" + bicluster.getID() + ".png",400,400,true,false);		
 		bicluster.printBiclusterPatternChart_ToFile(outdir,"bicluster_pattern_" + bicluster.getID() + ".png",400,400,true,false);
 	}
 	
