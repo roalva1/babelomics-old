@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bioinfo.babelomics.methods.functional.GeneSetAnalysisTestResult;
-import org.bioinfo.babelomics.methods.functional.TwoListFisherTestResult;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.graphics.canvas.Canvas;
 import org.bioinfo.graphics.canvas.feature.AnnotationFeature;

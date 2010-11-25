@@ -4,12 +4,8 @@ package org.bioinfo.babelomics.tools.functional;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.IOException;
 
-import org.apache.commons.cli.ParseException;
 import org.bioinfo.babelomics.BabelomicsMain;
-import org.bioinfo.babelomics.tools.BabelomicsFactory;
-import org.bioinfo.tool.OptionFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

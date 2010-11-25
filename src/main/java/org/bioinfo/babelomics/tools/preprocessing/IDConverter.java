@@ -12,13 +12,12 @@ import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;
-import org.bioinfo.infrared.common.dbsql.DBConnector;
-import org.bioinfo.infrared.common.feature.FeatureList;
-import org.bioinfo.infrared.core.XRef;
-import org.bioinfo.infrared.core.dbsql.XRefDBManager;
+import org.bioinfo.infrared.common.DBConnector;
+import org.bioinfo.infrared.core.XRefDBManager;
+import org.bioinfo.infrared.core.common.FeatureList;
+import org.bioinfo.infrared.core.feature.XRef;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
-import org.bioinfo.tool.result.Item.TYPE;
 
 public class IDConverter extends BabelomicsTool {
 

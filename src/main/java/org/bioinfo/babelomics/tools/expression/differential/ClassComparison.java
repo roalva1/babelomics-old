@@ -28,7 +28,6 @@ import org.bioinfo.math.stats.inference.FoldChangeTest;
 import org.bioinfo.math.stats.inference.TTest;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
-import org.bioinfo.tool.result.Result;
 import org.bioinfo.tool.result.Item.TYPE;
 
 public class ClassComparison extends BabelomicsTool {

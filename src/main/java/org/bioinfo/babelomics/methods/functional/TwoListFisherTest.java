@@ -1,13 +1,12 @@
 package org.bioinfo.babelomics.methods.functional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bioinfo.infrared.common.feature.FeatureList;
-import org.bioinfo.infrared.funcannot.AnnotationItem;
+import org.bioinfo.infrared.core.common.FeatureList;
+import org.bioinfo.infrared.core.funcannot.AnnotationItem;
 import org.bioinfo.math.data.IntegerMatrix;
 import org.bioinfo.math.result.FisherTestResult;
 import org.bioinfo.math.result.TestResultList;

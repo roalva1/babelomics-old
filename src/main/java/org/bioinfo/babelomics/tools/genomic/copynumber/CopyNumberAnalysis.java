@@ -11,10 +11,7 @@ import org.bioinfo.babelomics.methods.genomic.copynumber.CopyNumberAnalysisExecu
 import org.bioinfo.babelomics.methods.genomic.copynumber.CopyNumberUtils;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.utils.ListUtils;
-import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.data.dataset.Dataset;
-import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;

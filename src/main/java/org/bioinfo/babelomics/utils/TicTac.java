@@ -1,7 +1,5 @@
 package org.bioinfo.babelomics.utils;
 
-import java.util.logging.LogManager;
-
 import org.bioinfo.commons.log.Logger;
 
 public class TicTac {

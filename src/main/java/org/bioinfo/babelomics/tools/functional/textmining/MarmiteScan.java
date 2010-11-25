@@ -16,7 +16,6 @@ import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;
-import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.DataFrame;
 import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.math.exception.InvalidParameterException;

@@ -20,10 +20,10 @@ import org.bioinfo.data.graph.SimpleUndirectedGraph;
 import org.bioinfo.data.graph.Subgraph;
 import org.bioinfo.data.graph.alg.Calc;
 import org.bioinfo.data.graph.edge.DefaultEdge;
-import org.bioinfo.infrared.common.dbsql.DBConnector;
-import org.bioinfo.infrared.common.feature.FeatureList;
-import org.bioinfo.infrared.core.XRef;
-import org.bioinfo.infrared.core.dbsql.XRefDBManager;
+import org.bioinfo.infrared.common.DBConnector;
+import org.bioinfo.infrared.core.XRefDBManager;
+import org.bioinfo.infrared.core.common.FeatureList;
+import org.bioinfo.infrared.core.feature.XRef;
 import org.bioinfo.networks.protein.InteractomeParser;
 import org.bioinfo.networks.protein.KSTest;
 import org.bioinfo.networks.protein.ProteinNetwork;
@@ -390,18 +390,22 @@ public class Snow  extends BabelomicsTool{
 
 	private Map<String, String> transcriptToUniprot(List<String> list) {
 		Map<String, String> map = new HashMap<String, String>();
-		FeatureList<XRef> xrefsEns = new FeatureList<XRef>();
+//		FeatureList<XRef> xrefsEns = new FeatureList<XRef>();
 		for(String id : list){
 			try {
-				xrefsEns  = xrefDBMan.getByDBName(id, "uniprot_swissprot_accession");
-				if(xrefsEns != null && !xrefsEns.isEmpty() && !xrefsEns.get(0).getId().equals(id))
-					map.put(xrefsEns.get(0).getId(), id);
+//				xrefsEns  = xrefDBMan.getByDBName(id, "uniprot_swissprot_accession");
+				XRef xrefEns  = xrefDBMan.getByDBName(id, "uniprot_swissprot_accession");
+//				if(xrefsEns != null && !xrefsEns.isEmpty() && !xrefsEns.get(0).getId().equals(id))
+//					map.put(xrefsEns.get(0).getId(), id);
+				if(xrefEns != null && !xrefEns.getXrefItems().get("uniprot_swissprot_accession").isEmpty() && !xrefEns.getXrefItems().get("uniprot_swissprot_accession").get(0).equals(id))
+					map.put(xrefEns.getXrefItems().get("uniprot_swissprot_accession").get(0).getDisplayName(), id);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 		return map;
 	}
+
 	private String getInteractomeMsg() {
 		String interactomeMsg = "Homo sapiens";
 		if ("hsa".equalsIgnoreCase(interactome) ) {
@@ -806,12 +810,13 @@ public class Snow  extends BabelomicsTool{
 
 	private Map<String,String> getGenEnsemble(List<String> vertices){
 		Map<String, String> listGenEnsembl = new HashMap<String, String>();
-		FeatureList<XRef> xrefsEns = new FeatureList<XRef>();
+//		FeatureList<XRef> xrefsEns = new FeatureList<XRef>();
 		for(String proteinName : vertices){
 			try {
-				xrefsEns  = xrefDBMan.getByDBName(proteinName, "ensembl_gene");
-				if(xrefsEns != null && !xrefsEns.isEmpty() && !xrefsEns.get(0).getId().equals(proteinName))
-					listGenEnsembl.put(xrefsEns.get(0).getId(), proteinName);
+//				xrefsEns  = xrefDBMan.getByDBName(proteinName, "ensembl_gene");
+				XRef xrefsEns  = xrefDBMan.getByDBName(proteinName, "ensembl_gene");
+				if(xrefsEns != null && !xrefsEns.getXrefItems().get("ensemble_gene").isEmpty() && !xrefsEns.getXrefItems().get("ensemble_gene").get(0).getDisplayName().equals(proteinName))
+					listGenEnsembl.put(xrefsEns.getXrefItems().get("ensemble_gene").get(0).getDisplayName(), proteinName);
 			} catch (Exception e) {
 			//	e.printStackTrace();
 			}

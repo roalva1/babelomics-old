@@ -20,7 +20,7 @@ import org.bioinfo.db.api.Query;
 import org.bioinfo.db.handler.BeanArrayListHandler;
 import org.bioinfo.db.handler.MatrixHandler;
 import org.bioinfo.db.handler.ResultSetHandler;
-import org.bioinfo.infrared.common.dbsql.DBConnector;
+import org.bioinfo.infrared.common.DBConnector;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.math.result.TTestResult;
 import org.bioinfo.math.result.TestResultList;
