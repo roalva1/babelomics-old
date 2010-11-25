@@ -33,7 +33,7 @@ public class SnowTest {
 		main(args);
 	}
 	
-	@Test
+	//@Test
 	public void genesTest(){
 
 		String outdir = "/tmp/snow2/test2";
@@ -48,6 +48,29 @@ public class SnowTest {
 				"--group","all",
 				"--type", "genes",
 				"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/genes/list1.txt",
+				"--side", "less",
+				"--intermediate","1",
+				"--components","1",
+				"--xml",
+				"--images",
+				"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
+	}
+	@Test
+	public void transcriptsTest(){
+
+		String outdir = "/tmp/snow2/test3";
+		new File(outdir).mkdirs();
+
+		String []args = {
+				"--tool", "snow2", 
+				"-o", outdir, 
+				"--randoms", "50",
+				"--o-name","result",
+				"--interactome","hsa",
+				"--group","all",
+				"--type", "transcripts",
+				"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/transcripts/list1.txt",
 				"--side", "less",
 				"--intermediate","1",
 				"--components","1",
