@@ -22,7 +22,6 @@ import org.bioinfo.data.graph.alg.Calc;
 import org.bioinfo.data.graph.edge.DefaultEdge;
 import org.bioinfo.infrared.common.DBConnector;
 import org.bioinfo.infrared.core.XRefDBManager;
-import org.bioinfo.infrared.core.common.FeatureList;
 import org.bioinfo.infrared.core.feature.XRef;
 import org.bioinfo.networks.protein.InteractomeParser;
 import org.bioinfo.networks.protein.KSTest;
@@ -234,13 +233,16 @@ public class Snow  extends BabelomicsTool{
 					logger.debug("Starting list1 components.........");
 					System.out.println("Starting list1 components.........");
 					componentsListSub1 = subProteinNetwork1.getInteractomeGraph().getAllInformationComponents(true);
-System.out.println("componentsListSub1 size: "+componentsListSub1.size());
 					sbComponents.append(getComponentsValues(subProteinNetwork1, node, componentsListSub1));
 					sbComponents.deleteCharAt(sbComponents.lastIndexOf(System.getProperty("line.separator")));
 					f = new File(outputFileName+"_sn_nodeFile"+node+"_comp.txt");
 					IOUtils.write(f.getAbsoluteFile(), sbComponents.toString());
 					result.addOutputItem(new Item("sn_nodeFile"+node+"_components_param", f.getName(), "Component values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
-
+				}
+				else{
+					//We assume the subgraph as a component
+					componentsListSub1 = new ArrayList<List<ProteinVertex>>();
+					componentsListSub1.add(subProteinNetwork1.getInteractomeGraph().getVertices());
 				}
 			}
 
@@ -298,6 +300,11 @@ System.out.println("componentsListSub1 size: "+componentsListSub1.size());
 					IOUtils.write(f.getAbsoluteFile(), sbComponents.toString());
 					result.addOutputItem(new Item("sn_nodeFile"+node+"_components_param", f.getName(), "Component values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Subnet results.List " + node));
 				}
+				else{
+					//We assume the subgraph as a component
+					componentsListSub2 = new ArrayList<List<ProteinVertex>>();
+					componentsListSub2.add(subProteinNetwork2.getInteractomeGraph().getVertices());
+				}
 			}
 
 			if(commandLine.hasOption("randoms")){
@@ -341,24 +348,14 @@ System.out.println("componentsListSub1 size: "+componentsListSub1.size());
 					xmlObject = new Xml();
 				else
 					xmlObject = new Xml(this.dbConnector);
-				//Map<String, String> mapList = new HashMap<String,String>();
 				if(subProteinNetwork1 != null){
 					xmlFile = new File(outdir+"/subnetwork1.xml");
-//					if(type.equals("genes"))
-//						mapList = this.getGenEnsemble(listToVertex1);
-//					else if(type.equals("proteins"))
-//						mapList = this.mapList1;
 					
 					xmlObject.graphToXML(xmlFile.getAbsolutePath(),subProteinNetwork1.getInteractomeGraph(), intermediatesSub1, componentsListSub1, type, this.mapList1);
 					addOutputAppletItem(xmlFile, 1);
 				}
 				if(subProteinNetwork2 != null){
 					xmlFile = new File(outdir+"/subnetwork2.xml");
-					//mapList.clear();
-//					if(type.equals("genes"))
-//						mapList = this.getGenEnsemble(listToVertex2);
-//					else if(type.equals("proteins"))
-//						mapList = this.mapList2;
 					xmlObject.graphToXML(xmlFile.getAbsolutePath(),subProteinNetwork2.getInteractomeGraph(), intermediatesSub2, componentsListSub2, type, this.mapList2);
 					addOutputAppletItem(xmlFile, 2);
 				}

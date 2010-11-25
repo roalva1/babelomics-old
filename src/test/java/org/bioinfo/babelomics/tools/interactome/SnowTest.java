@@ -73,7 +73,7 @@ public class SnowTest {
 				"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/transcripts/list1.txt",
 				"--side", "less",
 				"--intermediate","1",
-				"--components","1",
+//				"--components","1",
 				"--xml",
 				"--images",
 				"--home", System.getenv("BABELOMICS_HOME")};
