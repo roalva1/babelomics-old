@@ -3,9 +3,9 @@ package org.bioinfo.babelomics.tools.functional;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.bioinfo.infrared.common.dbsql.DBConnector;
-import org.bioinfo.infrared.common.feature.FeatureList;
-import org.bioinfo.infrared.funcannot.AnnotationItem;
+import org.bioinfo.infrared.common.DBConnector;
+import org.bioinfo.infrared.core.common.FeatureList;
+import org.bioinfo.infrared.core.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.result.FisherTestResult;

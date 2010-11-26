@@ -27,8 +27,8 @@ import org.bioinfo.math.result.TestResult;
 import org.bioinfo.math.result.TestResultList;
 import org.bioinfo.math.stats.MultipleTestCorrection;
 import org.bioinfo.tool.result.Item;
-import org.bioinfo.tool.result.Result;
 import org.bioinfo.tool.result.Item.TYPE;
+import org.bioinfo.tool.result.Result;
 
 public class DiffExpressionUtils {
 

@@ -5,7 +5,6 @@ import java.io.File;
 import java.util.Arrays;
 
 import org.bioinfo.babelomics.BabelomicsMain;
-import org.bioinfo.data.format.io.parser.NewickParser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
