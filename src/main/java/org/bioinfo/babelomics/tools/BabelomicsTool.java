@@ -58,7 +58,9 @@ public abstract class BabelomicsTool extends GenericBioTool {
 		this.toolName = commandLine.getOptionValue("tool", "");
 		this.species = commandLine.getOptionValue("species", "unknown");
 		
-		babelomicsHomePath = commandLine.getOptionValue("home", "");
+		// invoke getCanonicalPath() to remove the '.' and '..' of the paths
+		babelomicsHomePath = new File(commandLine.getOptionValue("home", "")).getCanonicalPath();
+		logger.debug("BABELOMICS_HOME path: "+babelomicsHomePath);
 		try {
 			this.appendConfig(new File(babelomicsHomePath + "/conf/babelomics.properties"));
 		} catch (Exception e) {
@@ -71,10 +73,12 @@ public abstract class BabelomicsTool extends GenericBioTool {
 //		}
 	}
 	
+	@Deprecated
 	public void checkFile(String filePath) throws InvalidParameterException, IOException {
 		checkFile(new File(filePath));
 	}
 	
+	@Deprecated
 	public void checkFile(File file) throws InvalidParameterException, IOException {
 		if(file == null) {
 			throw new InvalidParameterException("File is null");
