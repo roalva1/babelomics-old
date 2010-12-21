@@ -2,20 +2,17 @@ package org.bioinfo.babelomics.methods.functional;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.bioinfo.babelomics.exception.EmptyAnnotationException;
 import org.bioinfo.commons.log.Logger;
-import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.exception.InvalidIndexException;
-import org.bioinfo.infrared.common.dbsql.DBConnector;
-import org.bioinfo.infrared.common.feature.FeatureList;
-import org.bioinfo.infrared.funcannot.AnnotationItem;
+import org.bioinfo.infrared.common.DBConnector;
+import org.bioinfo.infrared.core.common.FeatureList;
+import org.bioinfo.infrared.core.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 
 

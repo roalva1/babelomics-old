@@ -27,8 +27,8 @@ import org.bioinfo.math.result.TestResult;
 import org.bioinfo.math.result.TestResultList;
 import org.bioinfo.math.stats.MultipleTestCorrection;
 import org.bioinfo.tool.result.Item;
-import org.bioinfo.tool.result.Result;
 import org.bioinfo.tool.result.Item.TYPE;
+import org.bioinfo.tool.result.Result;
 
 public class DiffExpressionUtils {
 
@@ -624,8 +624,8 @@ public class DiffExpressionUtils {
 					tool.printError("ioexception_executet_classcomparison", "ERROR", "Error saving heatmap image");
 				}
 			}
-
-			createFatiGoRedirection(dataFrame.getRowNames(), dataFrame.getColumnAsDoubleArray(statLabel), test, tool.getResult(), tool.getOutdir());
+			//createFatiGoRedirection(dataFrame.getRowNames(), dataFrame.getColumnAsDoubleArray(statLabel), test, tool.getResult(), tool.getOutdir());
+			createFatiGoRedirection(ListUtils.ordered(subDataset.getFeatureNames(), sigOrder), ListUtils.toDoubleArray(ListUtils.ordered(ArrayUtils.toList(statistics), sigOrder)), test, tool.getResult(), tool.getOutdir());
 		} else {
 			tool.getResult().addOutputItem(new Item("no_sig_results", "No significative results (p-value = " + pValue + ")", "Significative results", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));															
 		}	

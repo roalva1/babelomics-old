@@ -11,10 +11,7 @@ import org.bioinfo.babelomics.methods.genomic.copynumber.CopyNumberAnalysisExecu
 import org.bioinfo.babelomics.methods.genomic.copynumber.CopyNumberUtils;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.utils.ListUtils;
-import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.data.dataset.Dataset;
-import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -27,12 +24,13 @@ public class CopyNumberAnalysis extends BabelomicsTool {
 		options.addOption(OptionFactory.createOption("normalized-file", "Normalized file", true, true));
 
 		options.addOption(OptionFactory.createOption("segmentation-method", "Segmentation method: dnacopy or glad", true, true));
+		options.addOption(OptionFactory.createOption("alpha", "Significance levels for DNAcopy test to accept change-points (only for DNAcopy segmentation method)", false, true));
 
 		options.addOption(OptionFactory.createOption("cgh-mcr", "Minimal common region", false, false));
-		options.addOption(OptionFactory.createOption("gap-allowed", "Gap allowed (for CGH-MCR)", false, true));
-		options.addOption(OptionFactory.createOption("altered-low", "Gap altered low (for CGH-MCR)", false, true));
-		options.addOption(OptionFactory.createOption("altered-high", "Gap altered high (for CGH-MCR)", false, true));
-		options.addOption(OptionFactory.createOption("recurrence", "Recurrence (for CGH-MCR)", false, true));
+		options.addOption(OptionFactory.createOption("gap-allowed", "Gap allowed (only for CGH-MCR)", false, true));
+		options.addOption(OptionFactory.createOption("altered-low", "Gap altered low (only for CGH-MCR)", false, true));
+		options.addOption(OptionFactory.createOption("altered-high", "Gap altered high (only for CGH-MCR)", false, true));
+		options.addOption(OptionFactory.createOption("recurrence", "Recurrence (onlyfor CGH-MCR)", false, true));
 	}
 
 	@Override
@@ -45,6 +43,7 @@ public class CopyNumberAnalysis extends BabelomicsTool {
 		String normalizedFilename = commandLine.getOptionValue("normalized-file", null);
 
 		String segmentation = commandLine.getOptionValue("segmentation-method", null);
+		double alpha = Double.parseDouble(commandLine.getOptionValue("alpha", "0.01"));
 		boolean cghMcr = commandLine.hasOption("cgh-mcr");
 		int gapAllowed = Integer.parseInt(commandLine.getOptionValue("gap-allowed", "500"));
 		double alteredLow = Double.parseDouble(commandLine.getOptionValue("altered-low", "0.2"));

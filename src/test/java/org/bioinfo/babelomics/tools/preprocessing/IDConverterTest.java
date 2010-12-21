@@ -53,7 +53,6 @@ public class IDConverterTest {
 		}
 	}	
 
-	@Test
 	public void Test2() {
 		//String dataset = "/mnt/commons/test/tools/tmt/list2_liver.txt";
 		String dataset = "/mnt/commons/babelomics/tests/idconverter/genes_sce_notilde.txt";
@@ -70,4 +69,24 @@ public class IDConverterTest {
 			e.printStackTrace();
 		}
 	}	
+	
+	@Test
+	public void Test3() {
+		//String dataset = "/mnt/commons/test/tools/tmt/list2_liver.txt";
+		String dataset = "/mnt/commons/babelomics/tests/preprocessing/ids_sce_con_comillas.txt";
+		String outdir = "/tmp/IDConverterTest3";
+		new File(outdir).mkdir();
+
+		String []args = { "--tool", "id-converter","--log-level", "2", "--species", "sce", "--listfile", dataset, "--db-names", "ensembl_gene", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
+
+		System.out.println("ID Converter Test, args : " + Arrays.toString(args));
+		try {
+			FileUtils.createDirectory(outdir);
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}	
+	
+	
 }

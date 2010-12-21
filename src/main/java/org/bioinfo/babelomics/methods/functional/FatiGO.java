@@ -9,9 +9,9 @@ import java.util.Map;
 
 import org.bioinfo.commons.log.Logger;
 import org.bioinfo.commons.utils.ListUtils;
-import org.bioinfo.infrared.common.dbsql.DBConnector;
-import org.bioinfo.infrared.common.feature.FeatureList;
-import org.bioinfo.infrared.funcannot.AnnotationItem;
+import org.bioinfo.infrared.common.DBConnector;
+import org.bioinfo.infrared.core.common.FeatureList;
+import org.bioinfo.infrared.core.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.stats.inference.FisherExactTest;

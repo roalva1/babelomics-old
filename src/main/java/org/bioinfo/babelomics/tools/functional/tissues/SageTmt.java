@@ -20,7 +20,7 @@ import org.bioinfo.db.api.Query;
 import org.bioinfo.db.handler.BeanArrayListHandler;
 import org.bioinfo.db.handler.MatrixHandler;
 import org.bioinfo.db.handler.ResultSetHandler;
-import org.bioinfo.infrared.common.dbsql.DBConnector;
+import org.bioinfo.infrared.common.DBConnector;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.math.result.TTestResult;
 import org.bioinfo.math.result.TestResultList;
@@ -31,14 +31,8 @@ import org.bioinfo.tool.result.Item.TYPE;
 
 public class SageTmt extends Tmt {
 
-	// best place for these paramteres, a config file
-	//
-	protected String dbDriver = "mysql";
-	protected String dbHost = "mem20";
-	protected String dbPort = "3306"; 
-	protected String dbUser = "ensembl_user";
-	protected String dbPass = "ensembl_user";
 	protected String dbName = "sage_long_human_07_11_2007";
+	DBConnection dbConn = null; 
 
 	//	private Map<String, String> ensemblIdtoGene1 = new HashMap<String, String>(), ensemblIdtoGene2 = new HashMap<String, String>();
 	//	private int replicated1 = 0, replicated2 = 0;
@@ -81,10 +75,14 @@ public class SageTmt extends Tmt {
 		//String multipleProbes = commandLine.getOptionValue("multiple-probes", "mean");
 		//
 		//		
-		dbName = "sage_" + ("long".equalsIgnoreCase(tagType) ? "long" : "short") + "_" + ("mouse".equalsIgnoreCase(species) ? "mouse" : "human") + "_07_11_2007";
-		System.out.println("db name = " + dbName);
-
-		try {			
+		try {		
+			
+			dbName = "sage_" + ("long".equalsIgnoreCase(tagType) ? "long" : "short") + "_" + ("mouse".equalsIgnoreCase(species) ? "mouse" : "human") + "_07_11_2007";
+			config.append(new File(babelomicsHomePath + "/conf/infrared.properties"));
+			dbConn = new DBConnection("mysql", config.getProperty("INFRARED.HOST"), config.getProperty("INFRARED.PORT"), dbName, config.getProperty("INFRARED.USER"), config.getProperty("INFRARED.PASSWORD"));
+			System.out.println("db name = " + dbName);
+			
+			
 			if ( tissues.contains("alltissues") ) {
 				tissues = getAllTissues(species);
 			}
@@ -330,7 +328,8 @@ public class SageTmt extends Tmt {
 			
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.save(new File(outdir + "/sage-tmt.txt"));
-			result.addOutputItem(new Item("sage_file", "sage-tmt.txt", "Output file:", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Output file"));
+			//result.addOutputItem(new Item("sage_file", "sage-tmt.txt", "Output file:", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Output file"));
+			result.addOutputItem(new Item("sage_file", "sage-tmt.txt", "Output file:", TYPE.FILE, StringUtils.toList("TABLE,DIFF_EXPRESSION_TABLE"), new HashMap<String, String>(), "Output file"));
 			
 		} catch (Exception e) {
 			abort("exception_execute_tmt", "SAGE tissue profiling error", e.getMessage(), StringUtils.getStackTrace(e));
@@ -359,7 +358,6 @@ public class SageTmt extends Tmt {
 	private Map<String, Double> getFrequencyMap(List<String> unigenes) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 
 		Map<String, Double> res = new HashMap<String, Double>();
-		DBConnection dbConn = new DBConnection(dbDriver, dbHost, dbPort, dbName, dbUser, dbPass);
 
 		String q;
 		PreparedQuery query;
@@ -384,7 +382,6 @@ public class SageTmt extends Tmt {
 	public List<List<String>> getLibraries(List<String> tissues, List<String> histologies, boolean cellLine, int minTags) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 
 		List<List<String>> res = new ArrayList<List<String>>(2);
-		DBConnection dbConn = new DBConnection(dbDriver, dbHost, dbPort, dbName, dbUser, dbPass);
 
 	    String endStatement;
 
@@ -428,8 +425,6 @@ public class SageTmt extends Tmt {
 	public List<String> getAllTissues(String organism) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 		List<String> tissues;
 
-		DBConnection dbConn = new DBConnection(dbDriver, dbHost, dbPort, dbName, dbUser, dbPass);
-
 		ResultSetHandler rsh = new BeanArrayListHandler(String.class);
 		String q = "select distinct tissue from tissue_info order by tissue asc"; 
 		Query query;
@@ -442,8 +437,6 @@ public class SageTmt extends Tmt {
 	public List<String> getAllHistologies(String organism) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 		List<String> histologies;
 
-		DBConnection dbConn = new DBConnection(dbDriver, dbHost, dbPort, dbName, dbUser, dbPass);
-
 		ResultSetHandler rsh = new BeanArrayListHandler(String.class);
 		String q = "select distinct histology from tissue_info order by histology asc"; 
 		Query query;
@@ -455,8 +448,6 @@ public class SageTmt extends Tmt {
 
 	public List<String> getAllGenes(String organism) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 		List<String> genes;
-
-		DBConnection dbConn = new DBConnection(dbDriver, dbHost, dbPort, dbName, dbUser, dbPass);
 
 		ResultSetHandler rsh = new BeanArrayListHandler(String.class);
 		String q = "select distinct uniGene_cluster_number from best_tag"; 

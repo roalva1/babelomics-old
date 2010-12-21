@@ -1,7 +1,11 @@
 package org.bioinfo.babelomics.tools.expression.normalization;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,7 +22,6 @@ import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.Dataset;
-//import org.bioinfo.data.dataset.DatasetUtils;
 import org.bioinfo.data.list.exception.InvalidIndexException;
 import org.bioinfo.io.file.compress.CompressFactory;
 import org.bioinfo.io.file.compress.GenericCompressManager;
@@ -83,11 +86,11 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		// checking analysis methods and input data (compressed file or directory name)
 		//
 		if ( compressedFileName == null && rawDirName == null ) {
-			abort("missingdata_execute_expressionnormalization", "missing input data", "missing input data", "missing input data");						
+			abort("missingdata_execute_expressionnormalization", "Error", "Missing input data", "Missing input data");						
 		}
 
 		if ( tags == null || tags.size() == 0 ) {
-			abort("unidentifieddata_execute_expressionnormalization", "unidentified input data", "unidentified input data", "unidentified input data");						
+			abort("unidentifieddata_execute_expressionnormalization", "Error", "Unidentified input data", "Unidentified input data");						
 		}
 
 
@@ -113,15 +116,15 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		System.out.println("nbChannels = " + nbChannels + ", technology = " + technology);
 
 		if ( technology == null ) {
-			abort("missingtechnology_execute_expressionnormalization", "missing technology tag", "missing technology tag", "missing technology tag");						
+			abort("missingtechnology_execute_expressionnormalization", "Error", "Missing technology tag", "Missing technology tag");						
 		}
 
 		if ( !technology.equalsIgnoreCase("agilent") && !technology.equalsIgnoreCase("genepix") && !technology.equalsIgnoreCase("affy") ) {
-			abort("invalidtechnology_execute_expressionnormalization", "invalid technology tag. Valid values are: agilent, genepix, affymetrix", "invalid technology type " + technology + ". Valid values are: agilent, genepix", "invalid technology type " + technology + ". Valid values are: agilent, genepix, affymetrix.");									
+			abort("invalidtechnology_execute_expressionnormalization", "Error", "Invalid technology type " + technology + ". Valid values are: agilent, genepix", "Invalid technology type " + technology + ". Valid values are: agilent, genepix, affymetrix.");									
 		}
 
 		if ( nbChannels == 0 ) {
-			abort("missingnbchannels_execute_expressionnormalization", "missing number of channels", "missing number of channels", "missing number of channels");						
+			abort("missingnbchannels_execute_expressionnormalization", "Error", "Missing number of channels", "Missing number of channels");						
 		}
 
 
@@ -134,8 +137,37 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 
 			System.out.println("input dataset = " + compressedFileName);
 			System.out.println("tmp dir = " + tmpDir.getAbsolutePath());
+
 			GenericCompressManager compresor = CompressFactory.getCompressManager(new File(compressedFileName));
-			rawFileNames = compresor.decompress(compressedFileName, tmpDir.getAbsolutePath());
+			if (compresor != null) {
+				try {
+					rawFileNames = compresor.decompress(compressedFileName, tmpDir.getAbsolutePath());
+				} catch (Exception e) {
+					System.out.println("***** exception when decompressing input file, maybe it is not a zip-file like");
+					abort("missingrawfiles_execute_expressionnormalization", "Error", "Missing raw files", "Missing raw files");
+				}
+			} else {
+				tmpDir.mkdir();
+				File outfile = new File(tmpDir.getAbsolutePath() + "/" + new File(compressedFileName).getName());
+
+				System.out.println("***** compresor is null, copy " + compressedFileName + " ---> " + outfile.getAbsolutePath());
+
+				InputStream inputStream = new FileInputStream(new File(compressedFileName));
+				OutputStream outputStream = new FileOutputStream(outfile);
+
+				long copiedBytes = FileUtils.copy(inputStream, outputStream);
+				System.out.println("copied bytes = " + copiedBytes);
+
+				inputStream.close();
+				outputStream.close();
+
+				//				FileSystem
+				//				tmpDir.setWritable(true, false);
+				//				tmpDir.mkdir();
+				//				//outfile.setWritable(true);
+				//				System.out.println("copy file to: " + outfile + ", is writable? " + outfile.canWrite());
+				//				FileUtils.copy(new File(compressedFileName), outfile);
+			}
 		} else {
 			// getting raw files from directory
 			//
@@ -153,7 +185,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		// sanity check
 		//
 		if ( rawFileNames == null || rawFileNames.size() == 0 ) {
-			abort("missingrawfiles_execute_expressionnormalization", "missing raw files", "missing raw files", "missing raw files");
+			abort("missingrawfiles_execute_expressionnormalization", "Error", "Missing raw files", "Missing raw files");
 		}		
 	}
 
@@ -184,6 +216,13 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		boolean flagsNotFitted = commandLine.hasOption("flags-not-fitted");
 		boolean flagsAsMissing = commandLine.hasOption("flags-as-missing");
 
+		if (rawFileNames.size() == 1) {
+			if (!"none".equalsIgnoreCase(baNormalization)) {
+				printWarning("ba_normalization_warning", "Warnig", "Between arrays normalization has been set to 'none' since your dataset contains one single array");
+			}
+			baNormalization = "none";
+		}
+		
 		String intensityPlotBinPath = babelomicsHomePath + "/bin/plots/plot_image_" + technology.toLowerCase() + ".r";
 
 		// input parameters
@@ -195,10 +234,10 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		}
 		result.addOutputItem(new Item("ba_input_param", baNormalization, "Between arrays normalization", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		if ( flagsNotFitted ) {
-			result.addOutputItem(new Item("ba_input_param", "Flagged spots are not be used in the fitting of the parameters of the normalization steps", "Flag", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+			result.addOutputItem(new Item("notfitted_input_param", "Flagged spots are not be used in the fitting of the parameters of the normalization steps", "Flag", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		}
 		if ( flagsAsMissing ) {
-			result.addOutputItem(new Item("notfitted_input_param", "Flagged spots have a missing (NA) normalized value and A-value as well", "Flag", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+			result.addOutputItem(new Item("missing_input_param", "Flagged spots have a missing (NA) normalized value and A-value as well", "Flag", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 		}
 
 
@@ -212,7 +251,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			readingScript += "_agilent_reading.r";
 			normalizationScript += "_agilent_normalizing.r";			
 		} else {
-			abort("invalidtechnology_execute_expressionnormalization", "invalid technology tag. Valid values are: agilent, genepix, affymetrix", "invalid technology type " + technology + ". Valid values are: agilent, genepix", "invalid technology type " + technology + ". Valid values are: agilent, genepix, affymetrix");
+			abort("invalidtechnology_execute_expressionnormalization", "Error", "Invalid technology type " + technology + ". Valid values are: agilent, genepix", "Invalid technology type " + technology + ". Valid values are: agilent, genepix, affymetrix");
 		}
 
 		// normalizing data
@@ -227,7 +266,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			ExpressionUtils.TwoColorsNormalization(readingScript, normalizationScript, rawFileNames, (sampleNames != null ? StringUtils.toList(sampleNames, ","): getSamples(rawFileNames)), bgCorrection, waNormalization, baNormalization, flagsNotFitted, flagsAsMissing, outdir);			
 			maPlotBinPath = babelomicsHomePath + "/bin/plots/plotMA_from_MA_matrices.r";
 		} else {
-			abort("invalidchannels_execute_expressionnormalization", "invalid number of channels (" + nbChannels + ")", "invalid number of channels (" + nbChannels + ")", "invalid number of channels (" + nbChannels + ")");			
+			abort("invalidchannels_execute_expressionnormalization", "Error", "Invalid number of channels (" + nbChannels + ")", "Invalid number of channels (" + nbChannels + ")");			
 		}
 
 		// saving normalization results
@@ -258,14 +297,16 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			file = new File(outdir + "/normalized_dataset.featdata"); 			
 			if ( file.exists() ) {				
 				result.addOutputItem(new Item("normalized", file.getName(), "Feature data ", TYPE.FILE, StringUtils.toList("idlist", ","), new HashMap<String, String>(2), "Normalization output files"));
-				
+
 				file = new File(outdir + "/normalized_dataset.gff3"); 
-			//	DatasetUtils.dataset2Gff3(outdir + "/normalized_dataset.txt", file.getAbsolutePath());
+				//	DatasetUtils.dataset2Gff3(outdir + "/normalized_dataset.txt", file.getAbsolutePath());
 				if ( file.exists() ) {
 					result.addOutputItem(new Item("gff3", file.getName(), "GFF3 format", TYPE.FILE, StringUtils.toList("gff", ","), new HashMap<String, String>(2), "Normalization output files"));
 				}
 			}
 
+		} else {
+			abort("expressionnormalization", "Error", "Could not normalize your data", "Could not normalize your data");						
 		}
 
 
@@ -275,7 +316,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			ExpressionUtils.updateAValuesFile(file.getAbsolutePath(), outdir + "/" + ExpressionUtils.getFeatureDataFileName(), 1, aFile.getAbsolutePath());
 			result.addOutputItem(new Item("avalues", aFile.getName(), "A-values", TYPE.FILE, new ArrayList<String>(2), new HashMap<String, String>(2), "Normalization output files"));
 		}
-		
+
 
 		// ma plots
 		//
@@ -290,7 +331,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		// intensity images
 		//
 		if ( new File(outdir + "/" + ExpressionUtils.getNormalizedFileName()).exists() && 
-			 new File(outdir + "/" + ExpressionUtils.getFeatureDataFileName()).exists() ) {
+				new File(outdir + "/" + ExpressionUtils.getFeatureDataFileName()).exists() ) {
 			ExpressionUtils.createIntensityPlot(intensityPlotBinPath, outdir + "/" + ExpressionUtils.getNormalizedFileName(), outdir + "/" + ExpressionUtils.getFeatureDataFileName(), "norm_", false, "norm_intensity_plot.Rout", outdir);
 			addOutputItemImgs(outdir, "norm_", "png", "norm_intensity_image", "Intensity image", "Intensity images");
 		}
@@ -330,7 +371,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		// checking analysis methods and input data (compressed file or directory name)
 		//
 		if ( !rma && !plier && !calls ) {
-			abort("missinganalysis_execute_affynormalization", "missing analysis", "missing analysis, valid values are rma, plier and calls", "missing analysis, valid values are rma, plier and calls");			
+			abort("missinganalysis_execute_affynormalization", "Error", "Missing analysis, valid values are rma, plier and calls", "Missing analysis, valid values are rma, plier and calls");			
 		}
 
 		// input parameters
@@ -350,8 +391,6 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		//
 		File celFiles = new File(outdir + "/cel_files.txt");
 		IOUtils.write(celFiles, "cel_files\n" + ListUtils.toString(rawFileNames, "\n"));
-
-		System.out.println("raw files = " + ListUtils.toString(rawFileNames, "\n"));
 
 		// converting to CEL text
 		//
@@ -380,7 +419,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		String chipName = getChipName(rawFileNames, config.getKeys());
 
 		if ( chipName == null ) {
-			abort("exception_execute_affynormalization", "array type not supported", "array type not supported", "array type not supported");			
+			abort("exception_execute_affynormalization", "Error", "Array type not supported", "Array type not supported");			
 		}
 
 		String infoStr = config.getProperty(chipName);
@@ -392,11 +431,11 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 
 		String chipType = chipInfo.get("type");
 		if ( chipType == null ) {
-			abort("exception_execute_affynormalization", "could not find out the chip type", "could not find out the chip type", "could not find out the chip type");			
+			abort("exception_execute_affynormalization", "Error", "Could not find out the chip type", "Could not find out the chip type");			
 		}
 
 		if ( !"3-prime".equalsIgnoreCase(chipType) && !"wt".equalsIgnoreCase(chipType) ) {
-			abort("exception_execute_affynormalization", "array type (" + chipType + ") not supported", "array type (" + chipType + ") not supported", "array type (" + chipType + ") not supported");			
+			abort("exception_execute_affynormalization", "Error", "Array type (" + chipType + ") not supported", "Array type (" + chipType + ") not supported");			
 		}
 		// normalizing data
 		//
@@ -438,8 +477,12 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 
 		String maPlotBinPath = babelomicsHomePath + "/bin/plots/plotMA_from_single_matrix.r";
 
+		boolean results = false;
+		
 		file = new File(outdir + "/rma.summary.txt"); 
 		if ( file.exists() ) {
+			results = true;
+			
 			IOUtils.write(file, cleanLines(IOUtils.readLines(file)));
 			ExpressionUtils.createMAPlot(maPlotBinPath, file.getAbsolutePath(), "MA_RMA_", false, "ma_plot.Rout", outdir);
 
@@ -461,6 +504,8 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 
 		file = new File(outdir + "/plier-mm.summary.txt"); 
 		if ( file.exists() ) {
+			results = true;
+			
 			IOUtils.write(file, cleanLines(IOUtils.readLines(file), true));
 			ExpressionUtils.createMAPlot(maPlotBinPath, file.getAbsolutePath(), "MA_PLIER_MM_", false, "ma_plot.Rout", outdir);
 
@@ -482,6 +527,8 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 
 		file = new File(outdir + "/plier-gcbg.summary.txt"); 
 		if ( file.exists() ) {
+			results = true;
+
 			IOUtils.write(file, cleanLines(IOUtils.readLines(file), true));
 			ExpressionUtils.createMAPlot(maPlotBinPath, file.getAbsolutePath(), "MA_PLIER_GCBG_", false, "ma_plot.Rout", outdir);
 
@@ -503,6 +550,8 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 
 		file = new File(outdir + "/pm-mm.mas5-detect.summary.txt"); 
 		if ( file.exists() ) {
+			results = true;
+
 			IOUtils.write(file, cleanLines(IOUtils.readLines(file)));
 			saveAsDataset(file);
 
@@ -520,12 +569,16 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 
 		file = new File(outdir + "/pm-mm.mas5-detect.calls.txt"); 
 		if ( file.exists() ) {
+			results = true;
+
 			IOUtils.write(file, cleanLines(IOUtils.readLines(file)));
 			result.addOutputItem(new Item("pm-mm.calls", file.getName(), "Calls ", TYPE.FILE, new ArrayList<String>(1), new HashMap<String, String>(1), "Present-absent calls"));								
 		}
 
 		file = new File(outdir + "/dabg.summary.txt"); 
 		if ( file.exists() ) {
+			results = true;
+
 			List<String> lines = cleanLines(IOUtils.readLines(file)); 
 			IOUtils.write(file, lines);
 			saveAsDataset(file);
@@ -547,7 +600,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			double value;
 			List<String> valueList = new ArrayList<String>();
 			for(String line: lines) {
-				
+
 				if ( line != null && line.trim() != null && line.trim().length() > 0 ) {
 					line = line.trim();
 					if ( line.startsWith("#NAMES") ) {
@@ -575,6 +628,10 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 
 
 			//saveBoxPlot(file, "DABG box-plot", "dabgimg", "Present-absent calls");				
+		}
+
+		if (!results) {
+			abort("expressionnormalization", "Error", "Could not normalize your data", "Could not normalize your data");						
 		}
 
 		//		String maPlotBinPath = babelomicsHomePath + "/bin/plots/plotMA_from_single_matrix.r";
@@ -657,7 +714,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 	private List<String> cleanLines(List<String> lines) {
 		return cleanLines(lines, false);
 	}
-	
+
 	private List<String> cleanLines(List<String> lines, boolean log2) {
 		double value;
 		String []values = null;
@@ -672,7 +729,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 			} else {
 				if ( log2 ) {
 					double log2Value = Math.log(2);
-					
+
 					values = line.split("\t");
 					if ( values != null && values.length > 0 ) {
 						newLine.clear();

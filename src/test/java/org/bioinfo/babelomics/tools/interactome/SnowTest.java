@@ -1,83 +1,158 @@
 package org.bioinfo.babelomics.tools.interactome;
 
-
-import static org.junit.Assert.fail;
-
 import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
 
 import org.bioinfo.babelomics.BabelomicsMain;
-import org.bioinfo.commons.Config;
-import org.bioinfo.commons.io.utils.FileUtils;
-import org.bioinfo.commons.utils.StringUtils;
-import org.bioinfo.tool.OptionFactory;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 public class SnowTest {
 
-	@Before
-	public void setUp() throws Exception {
+	
+	//@Test
+	public void SnowExampleOneList(){
+		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
+
+		String outdir = "/tmp/snow2/test1";
+		new File(outdir).mkdirs();
+
+		String []args = {
+				"--tool", "snow2", 
+				"-o", outdir, 
+				"--randoms", "1",
+				"--o-name","result",
+				"--interactome","hsa",
+				"--group","all",
+				"--type", "proteins",
+				"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_10_block225.txt",
+				"--side", "less",
+				"--intermediate","0",
+				"--components","1",
+				"--xml",
+				"--images",
+				"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
 	}
+	
+	//@Test
+	public void genesTest(){
 
-	@After
-	public void tearDown() throws Exception {
+		String outdir = "/tmp/snow2/test2";
+		new File(outdir).mkdirs();
+
+		String []args = {
+				"--tool", "snow2", 
+				"-o", outdir, 
+				"--randoms", "50",
+				"--o-name","result",
+				"--interactome","hsa",
+				"--group","all",
+				"--type", "genes",
+				"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/genes/list1.txt",
+				"--side", "less",
+				"--intermediate","1",
+				"--components","1",
+				"--xml",
+				"--images",
+				"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
 	}
-
-	//	options.addOption(OptionFactory.createOption("list1", "the list1"));		
-	//	options.addOption(OptionFactory.createOption("list2", "the list2", false));		
-	//	options.addOption(OptionFactory.createOption("interactome", "Select interactome: join (for human interactome with all ppis), intersect (for human interacionts with only ppis detected by two methods) and own (for your own interactions)", false));
-	//	options.addOption(OptionFactory.createOption("own-interactions", "submit a file with interactome ",false));
-	//	options.addOption(OptionFactory.createOption("check-interactions", "Set this option if proteins in interactions and list are in same id",false,false));
-	//	options.addOption(OptionFactory.createOption("id-nature", "Nature of your lists: genes or proteins", false));
-	//	options.addOption(OptionFactory.createOption("interactions-number", "Maximum number of external proteins introduced: 0, 1, 2 or 3", false));
-
-
-	public void Test1() {
-		String list1 = "/mnt/commons/test/tools/snow/brca1_overexp_dn.txt";
-		String outdir = "/tmp/SnowTest1";
-		new File(outdir).mkdir();
-
-		String []args = { "--tool", "snow","--log-level", "2", "--list1", list1, "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
-
-		System.out.println("executing ----------------> " + Arrays.toString(args));
-		try {
-			FileUtils.createDirectory(outdir);
-			BabelomicsMain.main(args); 
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail(e.toString());
-		}
-
-	}
-
 	@Test
-	public void Test2() {
-		String title;
-		Config config;
-		try {
-			config = new Config("/mnt/commons/test/tools/snow/output.properties");
+	public void transcriptsTest(){
 
-			String key;
-			String keyStr = "INTERACTOME.BETWEENNESS,INTERACTOME.COEFFICIENT,INTERACTOME.COEFFICIENT,NETWORK.BETWEENNESS,NETWORK.COEFFICIENT,NETWORK.COEFFICIENT";
-			for(String item: StringUtils.toList(keyStr, ",")) {
-				key = item + ".PVALUE";
-				System.out.println(key + " = " + config.getProperty(key));
+		String outdir = "/tmp/snow2/test3";
+		new File(outdir).mkdirs();
 
-				key = item + ".SIDE";
-				System.out.println(key + " = " + config.getProperty(key));
-
-				System.out.println("");
-			}
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+		String []args = {
+				"--tool", "snow2", 
+				"-o", outdir, 
+				"--randoms", "50",
+				"--o-name","result",
+				"--interactome","hsa",
+				"--group","all",
+				"--type", "transcripts",
+				"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/transcripts/list1.txt",
+				"--side", "less",
+				"--intermediate","1",
+//				"--components","1",
+				"--xml",
+				"--images",
+				"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
 	}
 
+//	@Test
+	public void SnowExampleTwoLists(){
+		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
 
+		String outdir = "/tmp/snow2/testTwoLists";
+		new File(outdir).mkdirs();
+
+		String []args = {
+				"--tool", "snow2", 
+				"-o", outdir, 
+				"--o-name","result",
+				"--components", "1",
+				"--interactome","hsa",
+				"--type", "proteins",
+				"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_10_block225.txt",
+				"--list2","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_11_block80.txt",
+				"--side", "less",
+				"--intermediate", "0",
+				"--xml",
+				"--images",
+				"--json",
+				//"--sif",
+				"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
+	}
+
+//	@Test
+	public void createTopoFile(){
+		//./babelomics.sh --tool snow2 --outdir /tmp/ --sif-file /mnt/commons/babelomics/tests/snow2/ej8/ej8.sif  --o-sif-topo-file --o-name prueba --interactome own
+		String outdir = "/mnt/commons/babelomics/tests/snow2/ej8/";
+		new File(outdir).mkdirs();
+		String []args = {
+				"--tool", "snow2", 
+				"-o", outdir, 
+				"--sif-file", "/mnt/commons/babelomics/tests/snow2/ej8/ej9.sif",
+				"--o-sif-topo-file",
+				"--interactome","own",
+				"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
+	}
+	//@Test
+	public void ownInteractomeTest(){
+		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
+
+		String outdir = "/tmp/snow2/ownTest";
+		new File(outdir).mkdirs();
+
+		String []args = {
+				"--tool", "snow2", 
+				"-o", outdir, 
+				"--randoms", "2",
+				"--o-name","result",
+				"--interactome","own",
+				"--group","all",
+				"--sif-file","/mnt/commons/babelomics/tests/snow2/ej8/ej8.sif",
+				"--list1","/mnt/commons/babelomics/tests/snow2/ej8/list1",
+				"--side", "less",
+				"--intermediate","1",
+				"--components","1",
+				"--xml",
+				"--sif",
+				"--images",
+				"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
+	}
+	public void main(String []args){
+	try {
+		//			for(String arg : args)
+		//				System.out.println(arg);
+		BabelomicsMain.main(args);
+
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+	}
 }

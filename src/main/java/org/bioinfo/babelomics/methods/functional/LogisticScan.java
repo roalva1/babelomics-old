@@ -3,22 +3,18 @@ package org.bioinfo.babelomics.methods.functional;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.bioinfo.babelomics.exception.EmptyAnnotationException;
 import org.bioinfo.babelomics.utils.RCommand;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.utils.ArrayUtils;
-import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.dataset.FeatureData;
 import org.bioinfo.data.list.exception.InvalidIndexException;
-import org.bioinfo.infrared.common.dbsql.DBConnector;
-import org.bioinfo.infrared.common.feature.FeatureList;
-import org.bioinfo.infrared.funcannot.AnnotationItem;
-import org.bioinfo.infrared.funcannot.filter.Filter;
+import org.bioinfo.infrared.common.DBConnector;
+import org.bioinfo.infrared.core.common.FeatureList;
+import org.bioinfo.infrared.core.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 
 public class LogisticScan extends GeneSetAnalysis{

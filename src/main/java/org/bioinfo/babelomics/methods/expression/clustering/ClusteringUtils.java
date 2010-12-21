@@ -11,7 +11,6 @@ import org.bioinfo.graphics.canvas.feature.ScoreFeature;
 import org.bioinfo.graphics.canvas.panel.GridPanel;
 import org.bioinfo.graphics.canvas.panel.NewickPanel;
 import org.bioinfo.graphics.canvas.track.GridTrack;
-import org.bioinfo.graphics.canvas.track.NewickTrack;
 import org.bioinfo.math.data.DoubleMatrix;
 
 public class ClusteringUtils {

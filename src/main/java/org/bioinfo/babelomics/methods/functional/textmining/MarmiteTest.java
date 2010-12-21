@@ -1,12 +1,16 @@
 package org.bioinfo.babelomics.methods.functional.textmining;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.bioinfo.commons.Config;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.MapUtils;
+import org.bioinfo.db.DBConnection;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.result.KolmogorovSmirnovTestResult;
 import org.bioinfo.math.result.TestResultList;
@@ -14,6 +18,10 @@ import org.bioinfo.math.stats.inference.KolmogorovSmirnovTest;
 
 public class MarmiteTest {
 	
+
+	DBConnection dbConn = null; 
+	Config config = new Config();
+
 	List<String> geneList1;
 	List<String> geneList2;
 	
@@ -25,15 +33,21 @@ public class MarmiteTest {
 	
 	List<String> validEntities;
 
+	public MarmiteTest(String propertiesFile) throws FileNotFoundException, IOException {
+		config.append(new File(propertiesFile));
+		dbConn = new DBConnection("mysql", config.getProperty("INFRARED.HOST"), config.getProperty("INFRARED.PORT"), config.getProperty("INFRARED.HSA.DATABASE"), config.getProperty("INFRARED.USER"), config.getProperty("INFRARED.PASSWORD"));
+	}
+	
 	public TestResultList<KolmogorovSmirnovTestResult> run (List<String> list1, List<String> list2, String bioentity, int scoreFilter) throws InvalidParameterException, IOException {
+		
 		
 		geneList1 = list1;
 		geneList2 = list2;
 		
 		// accessing to the db to get entities
 		//
-		entityMap1 = MarmiteUtils.getEntityMap(geneList1, bioentity);
-		entityMap2 = MarmiteUtils.getEntityMap(geneList2, bioentity);	
+		entityMap1 = MarmiteUtils.getEntityMap(geneList1, bioentity, dbConn);
+		entityMap2 = MarmiteUtils.getEntityMap(geneList2, bioentity, dbConn);	
 
 
 		if ( entityMap1.size() == 0 ) {

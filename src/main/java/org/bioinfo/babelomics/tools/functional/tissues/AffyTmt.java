@@ -22,7 +22,7 @@ import org.bioinfo.db.api.Query;
 import org.bioinfo.db.handler.BeanArrayListHandler;
 import org.bioinfo.db.handler.MatrixHandler;
 import org.bioinfo.db.handler.ResultSetHandler;
-import org.bioinfo.infrared.common.dbsql.DBConnector;
+import org.bioinfo.infrared.common.DBConnector;
 import org.bioinfo.math.data.DoubleMatrix;
 import org.bioinfo.math.result.TTestResult;
 import org.bioinfo.math.result.TestResultList;
@@ -34,21 +34,15 @@ import org.bioinfo.tool.result.Item.TYPE;
 
 public class AffyTmt extends Tmt {
 
-	// best place for these paramteres, a config file
-	//
-	protected String dbDriver = "mysql";
-	protected String dbHost = "mem20";
-	protected String dbPort = "3306"; 
-	protected String dbUser = "ensembl_user";
-	protected String dbPass = "ensembl_user";
-	protected String dbName;
-
+	protected String dbName = "gnf_human";
+	DBConnection dbConn; 
+	
 	//	private Map<String, String> ensemblIdtoGene1 = new HashMap<String, String>(), ensemblIdtoGene2 = new HashMap<String, String>();
 	//	private int replicated1 = 0, replicated2 = 0;
 	//	private List<String> genesWithoutEnsemblIds1 = new ArrayList<String>(), genesWithoutEnsemblIds2 = new ArrayList<String>();
 	//	private Map<String, List<String>> genesWithMultipleEnsemblIds1 = new HashMap<String, List<String>>(), genesWithMultipleEnsemblIds2 = new HashMap<String, List<String>>();
 	//	
-	//	private Map<String, List<String>> null, probesMap2 = null;
+	//	private Map<String, List<String>> null, probesMap2 = null;config.getProperty("INFRARED.HOST")
 	//	private List<String> genesWithoutProbes1 = null, genesWithoutProbes2 = null;
 
 	public AffyTmt() {
@@ -65,18 +59,19 @@ public class AffyTmt extends Tmt {
 		File f1 = new File(commandLine.getOptionValue("list1"));
 		File f2 = commandLine.hasOption("list2") ? new File(commandLine.getOptionValue("list2")) :  null;
 
-//		String organism = commandLine.getOptionValue("organism");
 		String normMethod = commandLine.getOptionValue("normalization-method", "mas5");
 		String multipleProbes = commandLine.getOptionValue("multiple-probes", "mean");
 
 		List<String> tissues = StringUtils.toList(commandLine.getOptionValue("tissues"), ",");
 		
 		System.out.println("tissues from getOptionValue: >>> " + commandLine.getOptionValue("tissues") + " <<<");
-		System.out.println("tissues: >>>> " + ListUtils.toString(tissues) + " <<<<");
-		
-		dbName = "mmu".equalsIgnoreCase(species) ? "gnf_mouse" : "gnf_human";
+		System.out.println("tissues: >>>> " + ListUtils.toString(tissues) + " <<<<");		
 
 		try {		
+			dbName = "mmu".equalsIgnoreCase(species) ? "gnf_mouse" : "gnf_human";
+			config.append(new File(babelomicsHomePath + "/conf/infrared.properties"));
+			dbConn = new DBConnection("mysql", config.getProperty("INFRARED.HOST"), config.getProperty("INFRARED.PORT"), dbName, config.getProperty("INFRARED.USER"), config.getProperty("INFRARED.PASSWORD"));
+
 			if ( tissues.contains("alltissues") ) {
 				tissues = getAllTissues(species);
 			}
@@ -285,9 +280,10 @@ public class AffyTmt extends Tmt {
 			
 			FeatureData featureData = new FeatureData(dataFrame);
 			featureData.save(new File(outdir + "/affy-tmt.txt"));
-			result.addOutputItem(new Item("tmt_file", "affy-tmt.txt", "Output file:", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Output file"));
+			//result.addOutputItem(new Item("tmt_file", "affy-tmt.txt", "Output file:", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), "Output file"));
+			result.addOutputItem(new Item("tmt_file", "affy-tmt.txt", "Output file:", TYPE.FILE, StringUtils.toList("TABLE,DIFF_EXPRESSION_TABLE"), new HashMap<String, String>(), "Output file"));
 			
-			//			FileUtils.writeStringToFile(new File(getOutdir() + "/replicates.txt"), "Removed " + replicated1 + " genes from list 1\nRemoved " + replicated2 + " genes from list 2");
+//			FileUtils.writeStringToFile(new File(getOutdir() + "/replicates.txt"), "Removed " + replicated1 + " genes from list 1\nRemoved " + replicated2 + " genes from list 2");
 
 //			writeProbesMap(new File(getOutdir() + "/gene_probes_1.txt"), probesMap1, ensemblIdtoGene1);
 //			writeProbesMap(new File(getOutdir() + "/gene_probes_2.txt"), probesMap2, ensemblIdtoGene1);
@@ -383,8 +379,6 @@ public class AffyTmt extends Tmt {
 
 		DoubleMatrix matrix = new DoubleMatrix(libraryNames.size(), genes.size());
 
-		DBConnection dbConn = new DBConnection(dbDriver, dbHost, dbPort, dbName, dbUser, dbPass);
-
 		double freq;
 		List<Double> values = new ArrayList<Double>();
 
@@ -457,9 +451,6 @@ public class AffyTmt extends Tmt {
 	public List<String> getAllTissues(String organism) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 		List<String> tissues;
 
-
-		DBConnection dbConn = new DBConnection(dbDriver, dbHost, dbPort, dbName, dbUser, dbPass);
-
 		ResultSetHandler rsh = new BeanArrayListHandler(String.class);
 		String q = "select distinct tissue_name from tissue_info order by tissue_name asc"; 
 		Query query;
@@ -472,8 +463,8 @@ public class AffyTmt extends Tmt {
 	public Map<String, List<String>> getProbes(String organism, List<String> geneList) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 		Map<String, List<String>> probeMap = new HashMap<String, List<String>>();
 
-		DBConnection dbConn = new DBConnection(dbDriver, dbHost, dbPort, dbName, dbUser, dbPass);
-
+		System.out.println("getProbes, database = " + dbConn.getDatabase());
+		
 		String q;
 		PreparedQuery prepQuery;
 		List<String> probes;
@@ -497,15 +488,6 @@ public class AffyTmt extends Tmt {
 	public List<String> getAllGenes(String organism) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 		List<String> genes;
 
-		String dbDriver = "mysql";
-		String dbHost = "mem20";
-		String dbPort = "3306"; 
-		String dbUser = "ensembl_user";
-		String dbPass = "ensembl_user";
-		String dbName = "mouse".equalsIgnoreCase(organism) ? "gnf_mouse" : "gnf_human";
-
-		DBConnection dbConn = new DBConnection(dbDriver, dbHost, dbPort, dbName, dbUser, dbPass);
-
 		ResultSetHandler rsh = new BeanArrayListHandler(String.class);
 		String q = "select distinct ensemblGene_id from ensemblGene"; 
 		Query query = dbConn.createSQLQuery(q);
@@ -516,8 +498,6 @@ public class AffyTmt extends Tmt {
 
 	public Map<String, String> getTissueLibraries(String organism, List<String> tissues) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 		Map<String, String> libraryMap = new HashMap<String, String>();
-
-		DBConnection dbConn = new DBConnection(dbDriver, dbHost, dbPort, dbName, dbUser, dbPass);
 
 		String q;
 		PreparedQuery query;

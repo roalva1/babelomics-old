@@ -1,6 +1,5 @@
 package org.bioinfo.babelomics;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
@@ -115,7 +114,7 @@ public class BabelomicsMain {
 //		// and no name has been provided
 //		if(i < (args.length-1)) {
 //			toolName = args[i+1];
-//			break;
+//			break;BabelomicsTool
 //		}
 //	}
 //}

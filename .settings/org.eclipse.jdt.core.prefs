@@ -1,6 +1,18 @@
+<<<<<<< HEAD
+<<<<<<< HEAD
+#Thu Oct 14 17:48:08 CEST 2010
+=======
+<<<<<<< HEAD
+#Tue Aug 31 16:58:59 CEST 2010
+=======
 #Tue Sep 21 16:51:41 CEST 2010
+>>>>>>> 4e6e689315c8f79ac10f6dbbceaf7328d111fb85
+>>>>>>> 643c276cb466753ff14e25c3233f420ead5e49ac
+=======
+#Tue Oct 19 17:22:00 CEST 2010
+=\=\=\=\=\=\=
+<<<<<<<=HEAD
+>>>>>>>=4e6e689315c8f79ac10f6dbbceaf7328d111fb85
+>>>>>>> d22a5247ce1746d8e9f71347ba14969516bc1484
 eclipse.preferences.version=1
-org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.6
-org.eclipse.jdt.core.compiler.compliance=1.6
 org.eclipse.jdt.core.compiler.problem.forbiddenReference=warning
-org.eclipse.jdt.core.compiler.source=1.6

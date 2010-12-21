@@ -34,7 +34,6 @@ public class CreateAnnotationTest {
 		}
 	}	
 
-	@Test
 	public void Test2() {
 		String outdir = "/tmp/CreateAnnotationTest2";
 		new File(outdir).mkdir();
@@ -56,6 +55,23 @@ public class CreateAnnotationTest {
 		new File(outdir).mkdir();
 
 		String []args = { "--tool", "create-annotation","--log-level", "2", "--species", "hsa", "--list", "AATK,BIRC7,PARM1,kkkkkk", "--go-bp", "--kegg", "--go-cc", "--output-format", "compact", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
+
+		System.out.println("CreateAnnotationTest3, args : " + Arrays.toString(args));
+
+		try {
+			FileUtils.createDirectory(outdir);
+			BabelomicsMain.main(args); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}	
+
+	@Test
+	public void Test4() {
+		String outdir = "/tmp/CreateAnnotationTest4";
+		new File(outdir).mkdir();
+
+		String []args = { "--tool", "create-annotation","--log-level", "2", "--species", "sce", "--list", "IMP2',AATK,BIRC7,AAP1'-YHR048W", "--kegg", "--go-cc", "--output-format", "compact", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("CreateAnnotationTest3, args : " + Arrays.toString(args));
 
