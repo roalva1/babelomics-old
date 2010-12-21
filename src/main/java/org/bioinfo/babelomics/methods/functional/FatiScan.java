@@ -108,7 +108,8 @@ public class FatiScan extends GeneSetAnalysis {
 			if(thresholdPosition<(idList.size()-1)){
 				
 				// bottom
-				list2 = new ArrayList<String>(idList.subList(thresholdPosition + 1, idList.size()-1));
+				//list2 = new ArrayList<String>(idList.subList(thresholdPosition + 1, idList.size()-1));
+				list2 = new ArrayList<String>(idList.subList(thresholdPosition, idList.size()));
 				
 				// list1 and list2 have length > 0
 				if(list2.size()>0){
@@ -130,7 +131,7 @@ public class FatiScan extends GeneSetAnalysis {
 			// unique term
 			for(GeneSetAnalysisTestResult testResult: results){
 				if(resultsMap.containsKey(testResult.getTerm())){					
-					if(resultsMap.get(testResult.getTerm()).getAdjPValue()>testResult.getAdjPValue()){						
+					if(resultsMap.get(testResult.getTerm()).getAdjPValue()>testResult.getAdjPValue()){
 						resultsMap.remove(testResult.getTerm());
 						resultsMap.put(testResult.getTerm(), testResult);
 					}

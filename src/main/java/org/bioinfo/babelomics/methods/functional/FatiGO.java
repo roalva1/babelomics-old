@@ -169,7 +169,7 @@ public class FatiGO {
 			for (String id:list1) {
 				if(list2.contains(id)){
 					list2.remove(id);
-					list1.remove(id);
+					//list1.remove(id);
 				}
 			}
 		}
