@@ -2,6 +2,7 @@ package org.bioinfo.babelomics.tools.expression;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -230,15 +231,37 @@ public class BiclusteringTool extends BabelomicsTool {
 			biclustering.setSortingCriteria(sortingCriteria);
 			biclustering.setSortingOrder(sortingOrder);
 			
+			
+			ArrayList<ArrayList> filters = new ArrayList<ArrayList>();
+			
 			// filtering
-			if(filterByconstantPattern) biclustering.setFilterByconstantPattern(true);
+			if(filterByconstantPattern) 
+			{
+				biclustering.setFilterByconstantPattern(true);
+				ArrayList filter = new ArrayList();
+				filter.add("Constant pattern");
+				filter.add("applied");
+				filters.add(filter);
+			
+			}
 			if(filterByMinNumberOfGenes) {
 				biclustering.setFilterByMinNumberOfGenes(true);
 				biclustering.setMinNumberOfGenes(minNumberOfGenes);
+				
+				ArrayList filter = new ArrayList();
+				filter.add("Minimum number of genes");
+				filter.add(minNumberOfGenes);
+				filters.add(filter);
 			}
 			if(filterByMinNumberOfConditions) {
 				biclustering.setFilterByMinNumberOfConditions(true);
 				biclustering.setMinNumberOfConditions(minNumberOfConditions);
+				
+				
+				ArrayList filter = new ArrayList();
+				filter.add("Minimum number of condition");
+				filter.add(minNumberOfConditions);
+				filters.add(filter);
 			}
 			if(filterByMaxMSR) {
 				biclustering.setFilterByMaxMSR(true);
@@ -247,10 +270,20 @@ public class BiclusteringTool extends BabelomicsTool {
 			if(filterByMaxPValue) {
 				biclustering.setFilterByMaxPValue(true);
 				biclustering.setMaxPValue(maxPValue);
+				
+				ArrayList filter = new ArrayList();
+				filter.add("Maximum p-value");
+				filter.add(maxPValue);
+				filters.add(filter);
 			}
 			if(filterByOverlapping) {
 				biclustering.setFilterByOverlapping(true);
 				biclustering.setMaxOverlappingPercentage(maxOverlappingPercentage);
+				ArrayList filter = new ArrayList();
+				filter.add("Maximum overlapping percentage");
+				filter.add(maxOverlappingPercentage);
+				filters.add(filter);
+				
 			}
 			
 			// set logger
@@ -271,15 +304,21 @@ public class BiclusteringTool extends BabelomicsTool {
 			}
 						
 			
-			// output items
-			  // number of biclusters
-			String numberOfBiclustersMessage = "" + biclustering.getNumberOfBiclusters();
-			if(filterByconstantPattern || filterByMinNumberOfGenes || filterByMinNumberOfConditions || filterByMaxMSR || filterByMaxPValue || filterByOverlapping){
-				numberOfBiclustersMessage += " of "  + biclustering.getNumberOfOriginalBiclusters() + " unfiltered biclusters (filtered " + StringUtils.decimalFormat(100.0*((double)biclustering.getNumberOfFilteredBiclusters()/(double)biclustering.getNumberOfOriginalBiclusters()), "#0.00") + "%)";         
-			} 
-			result.addOutputItem(new Item("number_of_biclusters",numberOfBiclustersMessage,"Number of biclusters",Item.TYPE.MESSAGE,Arrays.asList(""),new HashMap(),"Summary"));
-			  // biclusters
-			result.addOutputItem(new Item("biclusters","biclusters.txt","Biclusters file",Item.TYPE.FILE,Arrays.asList("BICLUSTERING"),new HashMap(),"Biclusters"));
+			
+			//input params
+			
+			biclustering.setSortingCriteria(sortingCriteria);
+			biclustering.setSortingOrder(sortingOrder);
+			
+			
+			//input params : filter
+			for (ArrayList arrayList : filters) {
+			
+				result.addOutputItem(new Item(arrayList.get(0).toString() ,arrayList.get(1).toString(),arrayList.get(0).toString(),Item.TYPE.MESSAGE,Arrays.asList(""),new HashMap(),"Input parameters"));
+			}
+			
+			result.addOutputItem(new Item("sorting_input" ,String.valueOf(sortingCriteria), "Sorting Criteria",Item.TYPE.MESSAGE,Arrays.asList(""),new HashMap(),"Input parameters"));
+			
 			
 			
 			
@@ -289,6 +328,34 @@ public class BiclusteringTool extends BabelomicsTool {
 			stats.println("Number of filtered biclusters: " + biclustering.getNumberOfFilteredBiclusters());
 		
 			logger.print("saving biclusters...");
+			
+			
+			  // number of biclusters
+			String numberOfBiclustersMessage = "" + biclustering.getNumberOfBiclusters();
+			//if(filterByconstantPattern || filterByMinNumberOfGenes || filterByMinNumberOfConditions || filterByMaxMSR || filterByMaxPValue || filterByOverlapping){
+			//	numberOfBiclustersMessage += " of "  + biclustering.getNumberOfOriginalBiclusters() + " unfiltered biclusters (filtered " + StringUtils.decimalFormat(100.0*((double)biclustering.getNumberOfFilteredBiclusters()/(double)biclustering.getNumberOfOriginalBiclusters()), "#0.00") + "%)";         
+			//} 
+			
+			
+			
+			String original = String.valueOf(biclustering.getNumberOfOriginalBiclusters());
+			String filtered = String.valueOf(biclustering.getNumberOfFilteredBiclusters()) + " ( " + StringUtils.decimalFormat(100.0*((double)biclustering.getNumberOfFilteredBiclusters()/(double)biclustering.getNumberOfOriginalBiclusters()), "#0.00") + "%)";
+			
+			
+			result.addOutputItem(new Item("number_of_biclusters",numberOfBiclustersMessage,"Number of biclusters",Item.TYPE.MESSAGE,Arrays.asList(""),new HashMap(),"Summary"));
+			result.addOutputItem(new Item("number_of_original_biclusters", original,"Number of original biclusters",Item.TYPE.MESSAGE,Arrays.asList(""),new HashMap(),"Summary"));
+			result.addOutputItem(new Item("number_of_filtered_biclusters", filtered,"Number of filtered biclusters",Item.TYPE.MESSAGE,Arrays.asList(""),new HashMap(),"Summary"));
+			
+			
+			
+			
+			
+			  // biclusters
+			result.addOutputItem(new Item("biclusters","biclusters.txt","Biclusters file",Item.TYPE.FILE,Arrays.asList("BICLUSTERING"),new HashMap(),"Biclusters"));
+			
+			
+			
+			
 			
 			for(Bicluster bicluster:biclustering.getBiclusters()){
 				printBicluster((CCC_Bicluster)bicluster);
