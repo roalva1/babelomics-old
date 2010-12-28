@@ -73,8 +73,8 @@ public class TwoListFisherTestResult {
 		if(oddsRatioLog == Double.POSITIVE_INFINITY){
 			odds=Double.MAX_VALUE/10000;
 		} else if(oddsRatioLog == Double.NEGATIVE_INFINITY){
-			odds=-Double.MAX_VALUE/10000;			
-		} else odds=oddsRatioLog;		
+			odds=-Double.MAX_VALUE/10000;		
+		} else odds=oddsRatioLog;
 		out.append(oddsFormatter.format(odds)).append("\t");
 		out.append(pvalueFormatter.format(this.pValue)).append("\t");
 		out.append(pvalueFormatter.format(this.adjPValue));

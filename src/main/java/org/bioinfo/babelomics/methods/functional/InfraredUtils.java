@@ -52,7 +52,7 @@ public class InfraredUtils {
 	// get chromosome region genes (ensembl gene format)
 	public static List<String> getChromosomeRegionGenes(DBConnector dbConnector, String chromosome, int start, int end) {
 		try {
-			FeatureList<Gene> genes = new GeneDBManager(dbConnector).getAllByLocation(chromosome, start, end);
+			FeatureList<Gene> genes = new GeneDBManager(dbConnector).getAllByRegion(chromosome, start, end);
 			List<String> list = new ArrayList<String> (genes.size());
 			for (Gene gene: genes) {
 				list.add(gene.getId());

@@ -136,7 +136,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 				throw new ParseException("chromosomes comparison not yet implemented");
 			} else {
 				fatigo = new FatiGO(idList1, yourAnnotations);				
-				idList2 = fatigo.getList2();				
+				idList2 = fatigo.getList2();
 				list2label = "Rest of ids from your annotations (complementary list)";
 			}
 //			else {

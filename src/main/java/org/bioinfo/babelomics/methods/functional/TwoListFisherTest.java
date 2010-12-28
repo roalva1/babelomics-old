@@ -95,6 +95,7 @@ public class TwoListFisherTest extends FunctionalTest {
 			}			
 			TestResultList<FisherTestResult> testResult = new FisherExactTest().fisherTest(fisherCounts, testMode);
 			
+			
 			// p-value adjustment
 			MultipleTestCorrection.BHCorrection(testResult);
 			
