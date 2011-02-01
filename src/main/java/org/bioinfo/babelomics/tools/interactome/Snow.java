@@ -14,7 +14,6 @@ import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.utils.ArrayUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.graph.SimpleUndirectedGraph;
@@ -114,7 +113,7 @@ public class Snow  extends BabelomicsTool{
 		sif = commandLine.hasOption("sif");
 
 		//xml = true;
-		//json = false;
+		json = true;
 
 		outputFileName = outdir + "/" + commandLine.getOptionValue("o-name", "result");
 		
@@ -331,15 +330,21 @@ public class Snow  extends BabelomicsTool{
 				return;
 			}
 			if(json){
-				File auxFile = new File(outputFileName);;
+				File auxFile = new File(outputFileName);
 				List<String> names = new ArrayList<String>();
 				if(subProteinNetwork1 != null){
 					names.add(auxFile.getName() + "_list1.json");
 					createJson(subProteinNetwork1, outputFileName+"_list1.dot", componentsListSub1, intermediatesSub1, 1);
+					
+					auxFile = new File(outputFileName+"_list1.json");
+					addOutputSvgViewer(auxFile, 1);
 				}
 				if(subProteinNetwork2 != null){
 					names.add(auxFile.getName() + "_list2.json");
 					createJson(subProteinNetwork2, outputFileName+"_list2.dot", componentsListSub2, intermediatesSub2, 2);
+					
+					auxFile = new File(outputFileName+"_list2.json");
+					addOutputSvgViewer(auxFile, 2);
 				}
 
 			}
@@ -908,6 +913,15 @@ public class Snow  extends BabelomicsTool{
 
 			url = "SnowViewer?filename=" + xmlFile.getName();
 			result.addOutputItem(new Item("viewer" + index + "_param_new_window", url, "Open applet for network #" + index + " in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Network viewer"));
+		}
+	}
+	public void addOutputSvgViewer(File jsonFile, int index) {
+		if (jsonFile.exists()) {
+			String url = "SnowViewer2?filename=" + jsonFile.getName() + "&width=600&height=600";
+			result.addOutputItem(new Item("svg_viewer" + index + "_param", jsonFile.getName(), "Svg Viewer for network #" + index, TYPE.FILE, StringUtils.toList("SNOW"), new HashMap<String, String>(2), "Network viewer 2"));
+
+//			url = "SnowViewer2?filename=" + jsonFile.getName();
+//			result.addOutputItem(new Item("svg_viewer" + index + "_param_new_window", url, "Open svg for network #" + index + " in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS,SNOW", ","), new HashMap<String, String>(2), "Network viewer 2"));
 		}
 	}
 

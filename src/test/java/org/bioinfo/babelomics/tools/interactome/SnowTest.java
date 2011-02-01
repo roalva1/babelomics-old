@@ -29,6 +29,7 @@ public class SnowTest {
 				"--components","1",
 				"--xml",
 				"--images",
+				"--json",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
