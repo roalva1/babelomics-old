@@ -2,7 +2,6 @@ package org.bioinfo.babelomics.tools.interactome;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,7 +32,6 @@ import org.bioinfo.networks.protein.files.Dot;
 import org.bioinfo.networks.protein.files.Json;
 import org.bioinfo.networks.protein.files.Sif;
 import org.bioinfo.networks.protein.files.Svg;
-import org.bioinfo.networks.protein.files.Xml;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -54,7 +52,7 @@ public class Snow  extends BabelomicsTool{
 	private boolean intermediate;
 	private boolean images;
 	private boolean json;
-	private boolean xml;
+	//private boolean xml;
 	private boolean sif;
 	private Set<String> intermediatesSub1, intermediatesSub2; 
 	private List<List<ProteinVertex>> componentsListSub1, componentsListSub2;
@@ -85,7 +83,10 @@ public class Snow  extends BabelomicsTool{
 		options.addOption(OptionFactory.createOption("o-name", "If there is this argument, it will create an output .cmp file for the information of each component", false, true));
 		options.addOption(OptionFactory.createOption("side", "side for kolmogorov and wilkoxon test. Can be less or greater", false, true));
 		options.addOption(OptionFactory.createOption("images", "Print the images for the statistics", false, false));
-		options.addOption(OptionFactory.createOption("xml", "Output xml file with the representation of the graph", false, false));
+		
+		//options.addOption(OptionFactory.createOption("xml", "Output xml file with the representation of the graph", false, false));
+		//options.addOption(OptionFactory.createOption("json", "Output json file with the representation of the graph", false, false));
+
 		options.addOption(OptionFactory.createOption("sif", "Output sif file with the representation of the graph", false, false));
 		options.addOption(OptionFactory.createOption("group", "Values all(by default) or curated. It is An argument saying whether you want a curated interactome or the whole interactome", true, true));
 
@@ -109,12 +110,12 @@ public class Snow  extends BabelomicsTool{
 		bicomponents = commandLine.hasOption("bicomponents");
 		images = commandLine.hasOption("images");
 		json = commandLine.hasOption("json");
-		xml = commandLine.hasOption("xml");
+	//	xml = commandLine.hasOption("xml");
 		sif = commandLine.hasOption("sif");
 
 		//xml = true;
+//		json = commandLine.hasOption("json");
 		json = true;
-
 		outputFileName = outdir + "/" + commandLine.getOptionValue("o-name", "result");
 		
 		
@@ -192,7 +193,7 @@ public class Snow  extends BabelomicsTool{
 				FileUtils.checkFile(new File(nodeFile));
 				List<String> list1 = IOUtils.readLines(nodeFile);
 				listToVertex1 = new ArrayList<String>();
-				if(type.equalsIgnoreCase("transcripts")){
+				if(type.equalsIgnoreCase("transcripts") || type.equalsIgnoreCase("proteins")){
 					this.mapList1 = transcriptToUniprot(list1);
 					listToVertex1.addAll(mapList1.keySet());
 				}
@@ -258,7 +259,7 @@ public class Snow  extends BabelomicsTool{
 				List<String> list2 = IOUtils.readLines(nodeFile);
 				
 				listToVertex2 = new ArrayList<String>();
-				if(type.equalsIgnoreCase("transcripts")){
+				if(type.equalsIgnoreCase("transcripts") || type.equalsIgnoreCase("proteins")){
 					this.mapList2 = transcriptToUniprot(list2);
 					listToVertex2.addAll(mapList2.keySet());
 				}
@@ -330,43 +331,44 @@ public class Snow  extends BabelomicsTool{
 				return;
 			}
 			if(json){
+				
 				File auxFile = new File(outputFileName);
 				List<String> names = new ArrayList<String>();
 				if(subProteinNetwork1 != null){
 					names.add(auxFile.getName() + "_list1.json");
-					createJson(subProteinNetwork1, outputFileName+"_list1.dot", componentsListSub1, intermediatesSub1, 1);
+					createJson(subProteinNetwork1, outputFileName+"_list1.dot", componentsListSub1, intermediatesSub1, 1, this.mapList1);
 					
 					auxFile = new File(outputFileName+"_list1.json");
 					addOutputSvgViewer(auxFile, 1);
 				}
 				if(subProteinNetwork2 != null){
 					names.add(auxFile.getName() + "_list2.json");
-					createJson(subProteinNetwork2, outputFileName+"_list2.dot", componentsListSub2, intermediatesSub2, 2);
+					createJson(subProteinNetwork2, outputFileName+"_list2.dot", componentsListSub2, intermediatesSub2, 2, this.mapList2);
 					
 					auxFile = new File(outputFileName+"_list2.json");
 					addOutputSvgViewer(auxFile, 2);
 				}
 
 			}
-			if(xml){
-				File xmlFile = null;
-				Xml xmlObject;
-				if(interactome.equalsIgnoreCase("own"))
-					xmlObject = new Xml();
-				else
-					xmlObject = new Xml(this.dbConnector);
-				if(subProteinNetwork1 != null){
-					xmlFile = new File(outdir+"/subnetwork1.xml");
-					
-					xmlObject.graphToXML(xmlFile.getAbsolutePath(),subProteinNetwork1.getInteractomeGraph(), intermediatesSub1, componentsListSub1, type, this.mapList1);
-					addOutputAppletItem(xmlFile, 1);
-				}
-				if(subProteinNetwork2 != null){
-					xmlFile = new File(outdir+"/subnetwork2.xml");
-					xmlObject.graphToXML(xmlFile.getAbsolutePath(),subProteinNetwork2.getInteractomeGraph(), intermediatesSub2, componentsListSub2, type, this.mapList2);
-					addOutputAppletItem(xmlFile, 2);
-				}
-			}
+//			if(xml){
+//				File xmlFile = null;
+//				Xml xmlObject;
+//				if(interactome.equalsIgnoreCase("own"))
+//					xmlObject = new Xml();
+//				else
+//					xmlObject = new Xml(this.dbConnector);
+//				if(subProteinNetwork1 != null){
+//					xmlFile = new File(outdir+"/subnetwork1.xml");
+//					
+//					xmlObject.graphToXML(xmlFile.getAbsolutePath(),subProteinNetwork1.getInteractomeGraph(), intermediatesSub1, componentsListSub1, type, this.mapList1);
+//					addOutputAppletItem(xmlFile, 1);
+//				}
+//				if(subProteinNetwork2 != null){
+//					xmlFile = new File(outdir+"/subnetwork2.xml");
+//					xmlObject.graphToXML(xmlFile.getAbsolutePath(),subProteinNetwork2.getInteractomeGraph(), intermediatesSub2, componentsListSub2, type, this.mapList2);
+//					addOutputAppletItem(xmlFile, 2);
+//				}
+//			}
 
 			if(sif){
 				Sif sifObject = new Sif();
@@ -384,9 +386,6 @@ public class Snow  extends BabelomicsTool{
 
 				}
 			}
-			//dbConnector.disconnect();
-		} catch (SQLException e) {
-			  //e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -402,7 +401,7 @@ public class Snow  extends BabelomicsTool{
 				XRef xrefEns  = xrefDBMan.getByDBName(id, "uniprot_swissprot_accession");
 //				if(xrefsEns != null && !xrefsEns.isEmpty() && !xrefsEns.get(0).getId().equals(id))
 //					map.put(xrefsEns.get(0).getId(), id);
-				if(xrefEns != null && !xrefEns.getXrefItems().get("uniprot_swissprot_accession").isEmpty() && !xrefEns.getXrefItems().get("uniprot_swissprot_accession").get(0).equals(id))
+				if(xrefEns != null && !xrefEns.getXrefItems().get("uniprot_swissprot_accession").isEmpty() /*&& !xrefEns.getXrefItems().get("uniprot_swissprot_accession").get(0).equals(id)*/)
 					map.put(xrefEns.getXrefItems().get("uniprot_swissprot_accession").get(0).getDisplayName(), id);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -433,7 +432,7 @@ public class Snow  extends BabelomicsTool{
 			return interactomeMsg;
 	}
 
-	private void createJson(ProteinNetwork proteinNetwork, String sourceDotFile, List<List<ProteinVertex>> componentsListSub, Set<String> intermediatesSub, int node) throws IOException{
+	private void createJson(ProteinNetwork proteinNetwork, String sourceDotFile, List<List<ProteinVertex>> componentsListSub, Set<String> intermediatesSub, int node, Map<String, String> mapList) throws IOException{
 
 		Dot<ProteinVertex, DefaultEdge> dot = new Dot<ProteinVertex, DefaultEdge>();
 		Svg svg = new Svg();
@@ -446,18 +445,23 @@ public class Snow  extends BabelomicsTool{
 
 		IOUtils.write(sourceDotFile, dot.toDot(proteinNetwork.getInteractomeGraph()));
 
-		File dotFile = new File(outputFileName+"_list"+node+"_dot.svg");
-		IOUtils.write(dotFile, svg.toSvg(sourceDotFile, "dot"));
-		fileList.add(dotFile);
-		layoutsName.add("dot");
+		File neatoFile = new File(outputFileName+"_list"+node+"_dot.svg");
+		IOUtils.write(neatoFile, svg.toSvg(sourceDotFile, "neato"));
+		fileList.add(neatoFile);
+		layoutsName.add("neato");
+		
+//		File dotFile = new File(outputFileName+"_list"+node+"_dot.svg");
+//		IOUtils.write(dotFile, svg.toSvg(sourceDotFile, "dot"));
+//		fileList.add(dotFile);
+//		layoutsName.add("dot");
 
-		File twopiFile = new File(outputFileName+"_list"+node+"_twopi.svg");
-		IOUtils.write(twopiFile, svg.toSvg(sourceDotFile, "twopi"));
-		fileList.add(twopiFile);
-		layoutsName.add("twopi");
+//		File twopiFile = new File(outputFileName+"_list"+node+"_twopi.svg");
+//		IOUtils.write(twopiFile, svg.toSvg(sourceDotFile, "twopi"));
+//		fileList.add(twopiFile);
+//		layoutsName.add("twopi");
 
 		File f = new File(outputFileName+"_list"+node+".json");
-		IOUtils.write(f.getAbsoluteFile(), json.toJson(fileList, layoutsName, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub));
+		IOUtils.write(f.getAbsoluteFile(), json.toJson(this.interactome, fileList, layoutsName, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub,mapList));
 	}
 
 	private void createImages(String fileName, List<Double> list1, String legend1, List<Double> list2, String legend2, String itemName, String itemLabel, String itemGroup) throws IOException {
@@ -898,7 +902,7 @@ public class Snow  extends BabelomicsTool{
 			try {
 //				xrefsEns  = xrefDBMan.getByDBName(proteinName, "ensembl_gene");
 				XRef xrefsEns  = xrefDBMan.getByDBName(proteinName, "ensembl_gene");
-				if(xrefsEns != null && !xrefsEns.getXrefItems().get("ensembl_gene").isEmpty() && !xrefsEns.getXrefItems().get("ensembl_gene").get(0).getDisplayName().equals(proteinName))
+				if(xrefsEns != null && !xrefsEns.getXrefItems().get("ensembl_gene").isEmpty() /*&& !xrefsEns.getXrefItems().get("ensembl_gene").get(0).getDisplayName().equals(proteinName)*/)
 					listGenEnsembl.put(xrefsEns.getXrefItems().get("ensembl_gene").get(0).getDisplayName(), proteinName);
 			} catch (Exception e) {
 			//	e.printStackTrace();
@@ -906,19 +910,20 @@ public class Snow  extends BabelomicsTool{
 		}
 		return listGenEnsembl;
 	}
-	public void addOutputAppletItem(File xmlFile, int index) {
-		if (xmlFile.exists()) {
-			String url = "SnowViewer?filename=" + xmlFile.getName() + "&width=600&height=600";
-			result.addOutputItem(new Item("viewer" + index + "_param", url, "Viewer for network #" + index, TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Network viewer"));
-
-			url = "SnowViewer?filename=" + xmlFile.getName();
-			result.addOutputItem(new Item("viewer" + index + "_param_new_window", url, "Open applet for network #" + index + " in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Network viewer"));
-		}
-	}
+//	public void addOutputAppletItem(File xmlFile, int index) {
+//		if (xmlFile.exists()) {
+//			String url = "SnowViewer?filename=" + xmlFile.getName() + "&width=600&height=600";
+//			result.addOutputItem(new Item("viewer" + index + "_param", url, "Viewer for network #" + index, TYPE.HTML, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Network viewer"));
+//
+//			url = "SnowViewer?filename=" + xmlFile.getName();
+//			result.addOutputItem(new Item("viewer" + index + "_param_new_window", url, "Open applet for network #" + index + " in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Network viewer"));
+//		}
+//	}
 	public void addOutputSvgViewer(File jsonFile, int index) {
 		if (jsonFile.exists()) {
+			
 			String url = "SnowViewer2?filename=" + jsonFile.getName() + "&width=600&height=600";
-			result.addOutputItem(new Item("svg_viewer" + index + "_param", jsonFile.getName(), "Svg Viewer for network #" + index, TYPE.FILE, StringUtils.toList("SNOW"), new HashMap<String, String>(2), "Network viewer 2"));
+			result.addOutputItem(new Item("svg_viewer" + index + "_param", jsonFile.getName(), "Svg Viewer for network #" + index, TYPE.FILE, StringUtils.toList("INTERACTOME_VIEWER"), new HashMap<String, String>(2), "Network viewer"));
 
 //			url = "SnowViewer2?filename=" + jsonFile.getName();
 //			result.addOutputItem(new Item("svg_viewer" + index + "_param_new_window", url, "Open svg for network #" + index + " in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS,SNOW", ","), new HashMap<String, String>(2), "Network viewer 2"));
