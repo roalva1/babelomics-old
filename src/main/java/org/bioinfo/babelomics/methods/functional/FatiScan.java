@@ -14,6 +14,7 @@ import org.bioinfo.infrared.common.DBConnector;
 import org.bioinfo.infrared.core.common.FeatureList;
 import org.bioinfo.infrared.core.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
+import org.bioinfo.math.stats.MultipleTestCorrection;
 
 
 public class FatiScan extends GeneSetAnalysis {
@@ -115,7 +116,7 @@ public class FatiScan extends GeneSetAnalysis {
 					fisher.test(list1,list2,annotations,testMode,termSizes);							
 					// get result
 					results.addAll(toGeneSetAnalysisTestResult(fisher.getResults()));					
-				}		
+				}
 						
 			}
 						
@@ -123,6 +124,8 @@ public class FatiScan extends GeneSetAnalysis {
 			
 		}
 
+		MultipleTestCorrection.BHCorrection(result);
+		
 		if(outputFormat == SHORT_FORMAT) {			
 			HashMap<String,GeneSetAnalysisTestResult> resultsMap = new HashMap<String,GeneSetAnalysisTestResult>();
 			// unique term
