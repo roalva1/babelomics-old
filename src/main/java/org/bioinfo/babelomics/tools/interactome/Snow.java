@@ -920,10 +920,18 @@ public class Snow  extends BabelomicsTool{
 //		}
 //	}
 	public void addOutputSvgViewer(File jsonFile, int index) {
+		List<String> tags = new ArrayList<String>();
+		
+		tags.add("INTERACTOME_VIEWER");
 		if (jsonFile.exists()) {
-			
+			String list = "list";
+			if(index==1)
+				list+="1";
+			if(index==2)
+				list+="2";
+			tags.add(list);
 			String url = "SnowViewer2?filename=" + jsonFile.getName() + "&width=600&height=600";
-			result.addOutputItem(new Item("svg_viewer" + index + "_param", jsonFile.getName(), "Svg Viewer for network #" + index, TYPE.FILE, StringUtils.toList("INTERACTOME_VIEWER"), new HashMap<String, String>(2), "Network viewer"));
+			result.addOutputItem(new Item("svg_viewer" + index + "_param", jsonFile.getName(), "Svg Viewer for network #" + index, TYPE.FILE, tags, new HashMap<String, String>(2), "Network viewer"));
 
 //			url = "SnowViewer2?filename=" + jsonFile.getName();
 //			result.addOutputItem(new Item("svg_viewer" + index + "_param_new_window", url, "Open svg for network #" + index + " in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS,SNOW", ","), new HashMap<String, String>(2), "Network viewer 2"));
