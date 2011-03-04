@@ -726,10 +726,10 @@ public class Snow  extends BabelomicsTool{
 	}
 	private void createRandoms(int randoms, int randomSize) throws IOException{
 
-		StringBuilder sbMeans = createMeansHeader();
-		StringBuilder sbTopo = createTopoHeader();
-		StringBuilder sbComponents =createComponentsHeader();
-
+//		StringBuilder sbMeans = createMeansHeader();
+//		StringBuilder sbTopo = createTopoHeader();
+//		StringBuilder sbComponents =createComponentsHeader();
+		double []componentsRandoms = new double[randoms];
 		for(int i=1; i<=randoms; i++){
 			SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), randomSize);
 			logger.debug("Randoms["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getEdges().size());
@@ -740,29 +740,46 @@ public class Snow  extends BabelomicsTool{
 			}
 			ProteinNetwork subProteinNetwork = createSubnet(subgraph);
 			logger.debug("Subnet created");
-			sbTopo.append(getTopologicalValues(subProteinNetwork, i, true)).append(System.getProperty("line.separator"));
-			sbMeans.append(getTopologicalMeanValues(subProteinNetwork, i)).append(System.getProperty("line.separator"));
+//			sbTopo.append(getTopologicalValues(subProteinNetwork, i, true)).append(System.getProperty("line.separator"));
+//			sbMeans.append(getTopologicalMeanValues(subProteinNetwork, i)).append(System.getProperty("line.separator"));
 
 			if(components) {
 				List<List<ProteinVertex>> componentsList =  subProteinNetwork.getInteractomeGraph().getAllInformationComponents(true);
-				sbComponents.append(getComponentsValues(subProteinNetwork, i, componentsList));
+				componentsRandoms[randoms-1] = (double)componentsList.size();
+			//	sbComponents.append(getComponentsValues(subProteinNetwork, i, componentsList));
 			}
 			logger.debug("Components created");
 			subProteinNetworkRandoms.add(subProteinNetwork);
+			
+			
+			
 		}
-
-		File f = new File(outputFileName+"_sn_1-"+(randoms)+"_topo.txt");
-		randomFilesToString(sbTopo, f.getAbsolutePath());
+		//Here we calculate 95% confidence interval
+		int[] range = getRange(componentsRandoms);
+		String rangeString = "["+Integer.toString(range[0])+", "+Integer.toString(range[1])+"]";
+		result.addOutputItem(new Item("components_number", componentsListSub1.size()+" "+rangeString, "Number of components [95% confidence interval]", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Minimal Connected Network topological evaluation"));
+		//File f = new File(outputFileName+"_sn_1-"+(randoms)+"_topo.txt");
+		//randomFilesToString(sbTopo, f.getAbsolutePath());
 		//result.addOutputItem(new Item("randoms_topo_param", f.getName(), "Topografical values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Randoms results"));
 
-		f = new File(outputFileName+"_sn_1-"+(randoms)+"_means.txt");
-		randomFilesToString(sbMeans, f.getAbsolutePath());
+		//f = new File(outputFileName+"_sn_1-"+(randoms)+"_means.txt");
+		//randomFilesToString(sbMeans, f.getAbsolutePath());
 		//result.addOutputItem(new Item("randoms_means_param", f.getName(), "Means values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Randoms results"));
 
-		f = new File(outputFileName+"_sn_1-"+(randoms)+"_comp.txt");
-		randomFilesToString(sbComponents, f.getAbsolutePath());
+		//f = new File(outputFileName+"_sn_1-"+(randoms)+"_comp.txt");
+		//randomFilesToString(sbComponents, f.getAbsolutePath());
 		//result.addOutputItem(new Item("randoms_means_param", f.getName(), "Components values", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Randoms results"));
 	}
+	public int[] getRange(double []componentsRandoms){
+		int[] resultRange = new int[2]; 
+		resultRange[0] = (int)MathUtils.percentile(componentsRandoms, 2.5);
+		resultRange[1] = (int)MathUtils.percentile(componentsRandoms, 97.5);
+		return resultRange;
+		
+	}
+	
+	
+	
 	private ProteinNetwork createSubnet(SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph) {
 		ProteinNetwork subProteinNetwork = new ProteinNetwork(subgraph);
 		subProteinNetwork.calcTopologicalValues();
