@@ -109,14 +109,16 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		if(namespace.equalsIgnoreCase("cc")) namespaceTitle = "cellular component";
 		if(namespace.equalsIgnoreCase("mf")) namespaceTitle = "molecular function";
 		getOptions().addOption(OptionFactory.createOption("go-" + namespace, "GO " + namespaceTitle + " database",false,false));
-		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-inclusive", "GO " + namespaceTitle + ", inclusive analysis (one per GO level), otherwise joins GO levels",false,false));
+//		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-inclusive", "GO " + namespaceTitle + ", inclusive analysis (one per GO level), otherwise joins GO levels",false,false));
 		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-min-level", "GO " + namespaceTitle + ", min go level to take into account, default 3",false));
 		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-max-level", "GO " + namespaceTitle + ", max GO level to take into account, default 15",false));
 		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-min-num-genes", "GO " + namespaceTitle + ", min number of genes filter",false));
 		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-max-num-genes", "GO " + namespaceTitle + ", max number of genes filter",false));
-		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-all-genome", "GO " + namespaceTitle + ", computes the number of annotated genes from all genome, otherwise from you input list",false,false));
-		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-keywords", "GO " + namespaceTitle + ", keywords filter",false));
-		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-keywords-logic", "GO " + namespaceTitle + ", keywords filter logic: all or any",false));
+		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-nannot-domain", "GO " + namespaceTitle + ", computes the number of annotated genes from all genome, otherwise from your input list",false));
+		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-keyword-filter", "GO " + namespaceTitle + ", enables keywords filter",false,false));
+		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-keyword-list", "GO " + namespaceTitle + ", keywords filter",false));
+		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-keyword-operator", "GO " + namespaceTitle + ", keywords filter logic: all or any",false));
+		getOptions().addOption(OptionFactory.createOption("go-" + namespace + "-propagation", "GO " + namespaceTitle + ", direct vs propagated annotation",false));
 	}
 	
 	protected void addGenericOptions(String db){
@@ -200,42 +202,64 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 
 	
 	
-	public void parseGODb(CommandLine cmdLine, String namespace){
+	public void parseGODb(CommandLine cmdLine, String namespace) throws ParseException{
 		if(cmdLine.hasOption("go-" + namespace + "")) {
-			if(cmdLine.hasOption("go-" + namespace + "-inclusive")) {				
-				int min = Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-min-level","5"));
-				int max = Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-min-level","12"));
-				for(int i=min; i<=max; i++){
-					GOFilter goBpFilter = parseGOFilter(cmdLine, namespace);
-					goBpFilter.setMinLevel(i);
-					goBpFilter.setMaxLevel(i);					
-					filterList.add(goBpFilter);	
-				}
-			} else {
+//			if(cmdLine.hasOption("go-" + namespace + "-inclusive")) {				
+//				int min = Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-min-level","5"));
+//				int max = Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-min-level","12"));
+//				for(int i=min; i<=max; i++){
+//					GOFilter goBpFilter = parseGOFilter(cmdLine, namespace);
+//					goBpFilter.setMinLevel(i);
+//					goBpFilter.setMaxLevel(i);					
+//					filterList.add(goBpFilter);					
+//				}
+//			} else {
 				GOFilter goBpFilter = parseGOFilter(cmdLine, namespace);				
 				filterList.add(goBpFilter);
-			}			
+//			}			
 		}		
 	}
 	
-	public GOFilter parseGOFilter(CommandLine cmdLine, String namespace){
+	public GOFilter parseGOFilter(CommandLine cmdLine, String namespace) throws ParseException{
+		
 		// ontology
 		String infraredNamespace = "biological_process";		
 		if(namespace.equalsIgnoreCase("cc")) infraredNamespace = "cellular_component";
 		if(namespace.equalsIgnoreCase("mf")) infraredNamespace = "molecular_function";
 		GOFilter goFilter = new GOFilter(infraredNamespace);
+		
+		// direct vs propagated annotation
+		goFilter.setPropagated(true);
+		if(cmdLine.hasOption("go-" + namespace + "-propagation") && !cmdLine.getOptionValue("go-" + namespace + "-propagation").equalsIgnoreCase("propagate")){				
+			goFilter.setPropagated(false);
+		}
+		
 		// levels
-		goFilter.setMinLevel(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-min-level","5")));
-		goFilter.setMaxLevel(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-max-level","12")));
+		goFilter.setMinLevel(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-min-level","3")));
+		goFilter.setMaxLevel(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-max-level","9")));
+		
 		// number of annotations
 		goFilter.setMinNumberGenes(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-min-num-genes","5")));	
 		goFilter.setMaxNumberGenes(Integer.parseInt(cmdLine.getOptionValue("go-" + namespace + "-max-num-genes","500")));
+		goFilter.setGenomicNumberOfGenes(true);
+		System.err.println("estas? " + cmdLine.getOptionValue("go-" + namespace + "-nannot-domain"));
+		if(cmdLine.hasOption("go-" + namespace + "-nannot-domain") && !cmdLine.getOptionValue("go-" + namespace + "-nannot-domain").equals("genome")){
+			goFilter.setGenomicNumberOfGenes(false);
+		}		
 		
 		// filter by keywords
-		if(cmdLine.hasOption("go-" + namespace + "-keywords")){
-			goFilter.addKeywords(StringUtils.toList(cmdLine.getOptionValue("go-" + namespace + "-keywords", "")));
-			goFilter.setLogicalOperator(cmdLine.getOptionValue("go-" + namespace + "-keywords-logic","AND"));			
+		if(cmdLine.hasOption("go-" + namespace + "-keyword-filter")) {
+			if(!cmdLine.hasOption("go-" + namespace + "-keyword-list")){
+				throw new ParseException("go-" + namespace + "-keyword-list is not defined");
+			} else {
+				goFilter.addKeywords(StringUtils.toList(cmdLine.getOptionValue("go-" + namespace + "-keyword-list", "")));
+				goFilter.setLogicalOperator(cmdLine.getOptionValue("go-" + namespace + "-keyword-operator","all"));
+				// 	add childre???
+			}
 		}
+		
+
+		
 		return goFilter;
 	}
 	
@@ -371,6 +395,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			GeneSetAnalysisTestResult gseaTest = new GeneSetAnalysisTestResult(test);
 			result.add(gseaTest);
 		}
+		System.err.println("que e lo que pasa: " + result.size());
 		return createGseaGoGraph(result,pvalue,filterInfo);
 	}
 	
@@ -436,12 +461,12 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 			
 			// init graph api
 			GetGraphApi graph = new GetGraphApi(outdir + "/graphs/",prefix,prefix  + "_association.txt",namespace,0,MakeGraphDot.BYDESCWITHLABEL,0.6,0,"orange",12,filterInfo.getTitle());
-			
-			
+
 			// setting server params
 			graph.setDownloader(config.getProperty("JNLP_DOWNLOADER_HOST_NAME"));
 			graph.setDataBase(config.getProperty("BLAST2GO_HOST_NAME"),config.getProperty("BLAST2GO_DB_NAME"),config.getProperty("BLAST2GO_DB_USER"), config.getProperty("BLAST2GO_DB_PASSWORD"));
 			
+			System.err.println("graph : " + config.getProperty("JNLP_DOWNLOADER_HOST_NAME") +" " + config.getProperty("BLAST2GO_HOST_NAME") +" " + config.getProperty("BLAST2GO_DB_NAME") +" " + config.getProperty("BLAST2GO_DB_USER") +" " + config.getProperty("BLAST2GO_DB_PASSWORD"));
 			// run
 			graph.run();
 			
