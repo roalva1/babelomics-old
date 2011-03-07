@@ -124,7 +124,7 @@ public class FatiScan extends GeneSetAnalysis {
 			
 		}
 
-		MultipleTestCorrection.BHCorrection(result);
+		//MultipleTestCorrection.BHCorrection(result);
 		
 		if(outputFormat == SHORT_FORMAT) {			
 			HashMap<String,GeneSetAnalysisTestResult> resultsMap = new HashMap<String,GeneSetAnalysisTestResult>();
