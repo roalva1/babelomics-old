@@ -8,7 +8,7 @@ import org.junit.Test;
 public class SnowTest {
 
 	
-	//@Test
+	@Test
 	public void SnowExampleOneList(){
 		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
 
@@ -18,17 +18,18 @@ public class SnowTest {
 		String []args = {
 				"--tool", "snow2", 
 				"-o", outdir, 
-				"--randoms", "1",
+				"--randoms", "100",
 				"--o-name","result",
 				"--interactome","hsa",
-				"--group","all",
+				"--group","curated",
 				"--type", "proteins",
 				"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_10_block225.txt",
 				"--side", "less",
-				"--intermediate","0",
+				"--intermediate","1",
 				"--components","1",
-				"--xml",
+				//"--xml",
 				"--images",
+				"--json",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
@@ -56,7 +57,7 @@ public class SnowTest {
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
-	@Test
+	//@Test
 	public void transcriptsTest(){
 
 		String outdir = "/tmp/snow2/test3";
