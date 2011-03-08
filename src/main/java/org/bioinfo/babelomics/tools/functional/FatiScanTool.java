@@ -155,7 +155,7 @@ public class FatiScanTool  extends FunctionalProfilingTool{
 				for(FunctionalFilter filter: filterList) {
 					doTest(rankedList,filter,dbConnector,method);					
 					jobStatus.addStatusMessage("" + progress, "Executing test");
-					progress+=inc;					
+					progress+=inc;
 				}
 				
 				// update status					
