@@ -35,14 +35,9 @@ import org.bioinfo.math.result.KolmogorovSmirnovTestResult;
 import org.bioinfo.math.util.MathUtils;
 import org.bioinfo.networks.protein.ProteinNetwork;
 import org.bioinfo.networks.protein.ProteinVertex;
-import org.bioinfo.networks.protein.files.Dot;
-import org.bioinfo.networks.protein.files.Json;
 import org.bioinfo.networks.protein.files.Sif;
-import org.bioinfo.networks.protein.files.Svg;
-import org.bioinfo.networks.protein.files.Xml;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
-import org.bioinfo.tool.result.Item.TYPE;
 
 
 public class GSnow extends SnowTool{
@@ -662,13 +657,13 @@ public class GSnow extends SnowTool{
 			result.addOutputItem(new Item("sn_random_kol_param", "Empty results", "Subnet - Random", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Minimun Connected Network description. Topology description"));
 		logger.debug("Finished 2nd Analysis..................");
 	}
-	private void getGraphViewer(SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph, Set<String> intermediates, List<List<ProteinVertex>> components) throws IOException, SQLException{
-		
-		Xml xmlObject = new Xml(this.dbConnector);
-		File xmlFile = new File(outdir+"/subnetwork1.xml");
-		xmlObject.graphToXML(xmlFile.getAbsolutePath(), subgraph, intermediates, components, type, this.mapNames);
-		addOutputAppletItem(xmlFile, 1);
-	}
+//	private void getGraphViewer(SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph, Set<String> intermediates, List<List<ProteinVertex>> components) throws IOException, SQLException{
+//		
+//		Xml xmlObject = new Xml(this.dbConnector);
+//		File xmlFile = new File(outdir+"/subnetwork1.xml");
+//		xmlObject.graphToXML(xmlFile.getAbsolutePath(), subgraph, intermediates, components, type, this.mapNames);
+//		addOutputAppletItem(xmlFile, 1);
+//	}
 	
 	private String getSignificantMcnSif(SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph){
 		Sif sif = new Sif();
