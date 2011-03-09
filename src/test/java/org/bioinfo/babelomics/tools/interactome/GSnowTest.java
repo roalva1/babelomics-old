@@ -7,6 +7,8 @@ import org.junit.Test;
 
 public class GSnowTest {
 	@Test
+	public void test(){};
+	//@Test
 	public void example1(){
 		// Essential_genes_in_cancer_cell_line_K562
 		// /opt/babelomics/babelomics.sh --tool network-miner --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5880 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5880/job.log --order ascendant --significant-value 0.05 --list /opt/babelomics/example/K562_symbol.txt --randoms 1000 --components true --interactome hsa --intermediate 0 --group curated --type genes --o-name result
