@@ -31,7 +31,8 @@ public class FatiScan extends GeneSetAnalysis {
 	private int numberOfPartitions;
 	private int outputFormat;
 	private int duplicatesMode;
-		
+
+
 	// test
 	private TwoListFisherTest fisher;
 		

@@ -32,7 +32,7 @@ import org.bioinfo.tool.result.Item.TYPE;
 
 import es.blast2go.prog.graph.GoGraphException;
 
-public class FatiScanTool  extends FunctionalProfilingTool{
+public class FatiScanTool extends FunctionalProfilingTool{
 		
 	// list1
 	private enum Method {FatiScan, Logistic};	
