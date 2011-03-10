@@ -300,20 +300,35 @@ public class Biclustering {
 			// read line and avoid missing values		
 			line = lines.get(i+1) + "<";			
 			line = line.replaceAll(separator + "<",separator + "@");
-			line = line.replaceAll(separator + separator + separator, separator + "@" + separator + "@" + separator);
-			line = line.replaceAll(separator + separator, separator + "@" + separator);	
+//			line = line.replaceAll(separator + separator + separator, separator + "@" + separator + "@" + separator);
+//			line = line.replaceAll(separator + separator, separator + "@" + separator);	
+//			line = line.replaceAll("@" + separator + separator + "@", "@" + separator + "@" + separator + "@");
+			String last;
+			do {
+				last = line;
+				line = line.replaceAll(separator + separator, separator + "@" + separator);
+			} while(!last.equals(line));
+			
 			line = line.replaceAll("<", "");
 			row = line.split("\t");
 			
 			// gene name
 			geneNames[i] = row[0];
-						
+					
+//			System.out.println("el line: " + line.replaceAll("\t", "_tab_"));
+			
 			// row values
-			for(int j=0; j<conditionNames.length; j++){				
+			for(int j=0; j<conditionNames.length; j++){
+				
+//				System.out.println(row[j+1]);
+				
 				if(row[j+1].equals("@")){
 					expressionMatrix[i][j] = DEFAULT_MISSING_VALUE;
-				} else {
-					expressionMatrix[i][j] = Float.parseFloat(row[j+1]);
+				} else {					
+//					if (!row[j+1].isEmpty())
+//					{
+						expressionMatrix[i][j] = Float.parseFloat(row[j+1]);
+//					}
 				}
 			}			
 			
@@ -697,3 +712,4 @@ public class Biclustering {
 
 
 }
+

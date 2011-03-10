@@ -25,26 +25,41 @@
 			<artifactId>bioinfo-graphics</artifactId>
 			<version>0.4.0</version>
 		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.bioinfo</groupId>-->
+<!--			<artifactId>bioinfo-math</artifactId>-->
+<!--			<version>0.3.0</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.bioinfo</groupId>-->
+<!--			<artifactId>bioinfo-tool</artifactId>-->
+<!--			<version>0.9.0</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.bioinfo</groupId>-->
+<!--			<artifactId>bioinfo-graphics</artifactId>-->
+<!--			<version>0.4.0</version>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.bioinfo</groupId>
 			<artifactId>infrared-lib</artifactId>
 			<version>1.2.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.bioinfo</groupId>
-			<artifactId>bioinfo-data</artifactId>
-			<version>0.6.0</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.bioinfo</groupId>-->
+<!--			<artifactId>bioinfo-data</artifactId>-->
+<!--			<version>0.6.0</version>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.bioinfo</groupId>
 			<artifactId>bioinfo-io-file</artifactId>
 			<version>0.1.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.bioinfo</groupId>
-			<artifactId>bioinfo-chart</artifactId>
-			<version>0.3.0</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.bioinfo</groupId>-->
+<!--			<artifactId>bioinfo-chart</artifactId>-->
+<!--			<version>0.3.0</version>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>es.blast2go</groupId>
 			<artifactId>blast2go</artifactId>
