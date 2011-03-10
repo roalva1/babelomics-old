@@ -7,16 +7,92 @@ import org.junit.Test;
 
 public class SnowTest {
 
-	
 	@Test
-	public void SnowExampleOneList(){
-		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
-
-		String outdir = "/tmp/snow2/test1";
+	public void testTest(){
+		
+	}
+	@Test
+	public void ownMMUTest(){
+		//opt/babelomics/babelomics.sh --tool snow --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5959 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5959/job.log --bicomponents true --list2 none --sif-file /httpd/bioinfo/wum_sessions_v0.7/4164/data/29908/mmu_alldb_proteins_interactome_nr.sif --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/29907/clean_prots_up_ratio_MMP14.txt --side less --images  --randoms 500 --components true --intermediate 1 --interactome own --type proteins --o-name result
+		String outdir = "/tmp/snow/test1";
 		new File(outdir).mkdirs();
 
 		String []args = {
-				"--tool", "snow2", 
+				"--tool", "snow", 
+				"-o", outdir,
+				"--sif-file", "/httpd/bioinfo/wum_sessions_v0.7/4164/data/29908/mmu_alldb_proteins_interactome_nr.sif", 
+				"--randoms", "5",
+				"--o-name","result",
+				"--interactome","own",
+				"--type", "proteins",
+				"--list1","/httpd/bioinfo/wum_sessions_v0.7/4164/data/29907/clean_prots_up_ratio_MMP14.txt",
+				"--side", "less",
+				"--intermediate","1",
+				"--components","1",
+				//"--xml",
+				"--images",
+				"--json",
+				"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
+	}
+	//@Test
+	public void btaTest(){
+		//opt/babelomics/babelomics.sh --tool snow --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5944 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5944/job.log --list2 none --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/29892/bta_genes.txt --side less --images  --randoms 500 --components true --intermediate 0 --interactome bta --group curated --type genes --o-name result
+		String outdir = "/tmp/snow/test1";
+		new File(outdir).mkdirs();
+
+		String []args = {
+				"--tool", "snow", 
+				"-o", outdir, 
+				"--randoms", "100",
+				"--o-name","result",
+				"--interactome","bta",
+				"--group","curated",
+				"--type", "genes",
+				"--list1","/httpd/bioinfo/wum_sessions_v0.7/4164/data/29892/bta_genes.txt",
+				"--side", "less",
+				"--intermediate","0",
+				"--components","1",
+				//"--xml",
+				"--images",
+				"--json",
+				"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
+	}
+	//@Test
+	public void sceTest(){
+		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
+
+		String outdir = "/tmp/snow/test1";
+		new File(outdir).mkdirs();
+
+		String []args = {
+				"--tool", "snow", 
+				"-o", outdir, 
+				"--randoms", "100",
+				"--o-name","result",
+				"--interactome","sce",
+				"--group","all",
+				"--type", "proteins",
+				"--list1","/mnt/commons/babelomics/tests/snow2/listas/sce/genes/OET_R_DNreg.txt",
+				"--side", "less",
+				"--intermediate","0",
+				"--components","1",
+				//"--xml",
+				"--images",
+				"--json",
+				"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
+	}
+	//@Test
+	public void SnowExampleOneList(){
+		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
+
+		String outdir = "/tmp/snow/test1";
+		new File(outdir).mkdirs();
+
+		String []args = {
+				"--tool", "snow", 
 				"-o", outdir, 
 				"--randoms", "100",
 				"--o-name","result",
@@ -37,11 +113,11 @@ public class SnowTest {
 	//@Test
 	public void genesTest(){
 
-		String outdir = "/tmp/snow2/test2";
+		String outdir = "/tmp/snow/test2";
 		new File(outdir).mkdirs();
 
 		String []args = {
-				"--tool", "snow2", 
+				"--tool", "snow", 
 				"-o", outdir, 
 				"--randoms", "50",
 				"--o-name","result",
@@ -64,7 +140,7 @@ public class SnowTest {
 		new File(outdir).mkdirs();
 
 		String []args = {
-				"--tool", "snow2", 
+				"--tool", "snow", 
 				"-o", outdir, 
 				"--randoms", "50",
 				"--o-name","result",
@@ -85,11 +161,11 @@ public class SnowTest {
 	public void SnowExampleTwoLists(){
 		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
 
-		String outdir = "/tmp/snow2/testTwoLists";
+		String outdir = "/tmp/snow/testTwoLists";
 		new File(outdir).mkdirs();
 
 		String []args = {
-				"--tool", "snow2", 
+				"--tool", "snow", 
 				"-o", outdir, 
 				"--o-name","result",
 				"--components", "1",
@@ -110,7 +186,7 @@ public class SnowTest {
 //	@Test
 	public void createTopoFile(){
 		//./babelomics.sh --tool snow2 --outdir /tmp/ --sif-file /mnt/commons/babelomics/tests/snow2/ej8/ej8.sif  --o-sif-topo-file --o-name prueba --interactome own
-		String outdir = "/mnt/commons/babelomics/tests/snow2/ej8/";
+		String outdir = "/mnt/commons/babelomics/tests/snow/ej8/";
 		new File(outdir).mkdirs();
 		String []args = {
 				"--tool", "snow2", 
@@ -125,11 +201,11 @@ public class SnowTest {
 	public void ownInteractomeTest(){
 		///httpd/bioinfo/babelomics/babelomics.sh --tool snow2 --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/2964/job.log --list2 none --randoms-size 2 --json 1 --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/27302/chr_9_block6.txt --side less --images  --randoms 10 --interactome hsa --o-name result
 
-		String outdir = "/tmp/snow2/ownTest";
+		String outdir = "/tmp/snow/ownTest";
 		new File(outdir).mkdirs();
 
 		String []args = {
-				"--tool", "snow2", 
+				"--tool", "snow", 
 				"-o", outdir, 
 				"--randoms", "2",
 				"--o-name","result",
