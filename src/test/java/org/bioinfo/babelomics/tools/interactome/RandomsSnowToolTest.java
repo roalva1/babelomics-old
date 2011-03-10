@@ -6,8 +6,9 @@ import org.bioinfo.babelomics.BabelomicsMain;
 import org.junit.Test;
 
 public class RandomsSnowToolTest {
-
 	@Test
+	public void test(){}
+	//@Test
 	public void test1(){
 		String outdir = "/tmp/snow2/test1";
 		new File(outdir).mkdirs();
