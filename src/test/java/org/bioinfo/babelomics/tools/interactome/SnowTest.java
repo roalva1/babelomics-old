@@ -11,7 +11,7 @@ public class SnowTest {
 	public void testTest(){
 		
 	}
-	@Test
+	//@Test
 	public void ownMMUTest(){
 		//opt/babelomics/babelomics.sh --tool snow --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5959 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5959/job.log --bicomponents true --list2 none --sif-file /httpd/bioinfo/wum_sessions_v0.7/4164/data/29908/mmu_alldb_proteins_interactome_nr.sif --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/29907/clean_prots_up_ratio_MMP14.txt --side less --images  --randoms 500 --components true --intermediate 1 --interactome own --type proteins --o-name result
 		String outdir = "/tmp/snow/test1";
