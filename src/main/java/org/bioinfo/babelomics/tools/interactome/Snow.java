@@ -34,6 +34,7 @@ import org.bioinfo.networks.protein.files.Svg;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 
 public class Snow  extends BabelomicsTool{
@@ -571,15 +572,56 @@ public class Snow  extends BabelomicsTool{
 	private void createImages(String fileName, List<Double> list1, String legend1, List<Double> list2, String legend2, String itemName, String itemLabel, String itemGroup) throws IOException {
 		File f = new File(fileName);
 		BoxPlotChart bpc = new BoxPlotChart("", "", "");
-		bpc.getLegend().setVisible(true);
+		//CategoryAxis xAxis;
+		//NumberAxis yAxis = new NumberAxis();
+		
+		double mymax = 0;
+		double mymin = Double.MAX_VALUE;
+		for(Double value : list1){
+			if(value>mymax) mymax = value;
+			if(value<mymin) mymin = value;
+		}
+		for(Double value : list2){
+			if(value>mymax) mymax = value;
+			if(value<mymin) mymin = value;
+		}
+		//yAxis.setRange(mymin,mymax);
+		
+		System.err.println("my file " + fileName);
+		if(fileName.endsWith("result_sn_random_relBet")){
+			System.err.println("my maximo es " + mymax);
+			System.err.println("my asi me gusta a mi minimo es " + mymin);
+			System.err.println("list1: " + list1);
+			System.err.println("list2: " + list2);
+		}
+//		yAxis.setAutoRange(false);		
+		//yAxis.setAutoRangeIncludesZero(true);
+		
+		//bpc.setYAxis(yAxis);
+		//bpc.getYAxis().setAutoRange(true);
+		
+		//bpc.getYAxis().setAutoRangeIncludesZero(true);
+		
+		//bpc.getCategoryPlot().setRangeAxis(yAxis);
+		
 		if(!list2.isEmpty())
 			bpc.addSeries(list2, legend2, legend2);
 		if(!list1.isEmpty())
 			bpc.addSeries(list1, legend1, legend1);
 		bpc.setOrientation(PlotOrientation.HORIZONTAL);
+		
+		System.out.println(legend1+": "+bpc.getDataset().getOutliers(legend1, legend1));
+		System.out.println(legend2+": "+bpc.getDataset().getOutliers(legend2, legend2));
+		//bpc.getDataset().add(bpc.getDataset().getOutliers(legend1, legend1), legend1, legend1);
+		//bpc.getDataset().add(bpc.getDataset().getOutliers(legend2, legend2), legend2, legend2);
+		//bpc.getCategoryPlot().setRangeAxis(yAxis);
+		
+		
+		//bpc.setYAxis(yAxis);
 		bpc.save(f.getAbsolutePath()+".png", 300, 250, "png");
 
-		result.addOutputItem(new Item(itemName, f.getName()+".png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));		
+		result.addOutputItem(new Item(itemName, f.getName()+".png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));
+		
 	}
 
 
@@ -636,15 +678,13 @@ public class Snow  extends BabelomicsTool{
 //			result.addOutputItem(new Item("list_inter_kol_param", "Empty results", "List - Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Statistic results.Kolmogorov-Smirnov test"));
 
 		if(images){
-//			createImages(outputFileName+"_list_inter_relBet", relBetList1, "list1", relBetInter, "inter", "list_inter_relBet", "relBet", "Images.List vs inter");
-//			createImages(outputFileName+"_list_inter_conn", connList1, "list1", connInter, "inter", "list_inter_conn", "conn", "Images.List vs inter");
-//			createImages(outputFileName+"_list_inter_clust", clustList1, "list1", clustInter, "inter", "list_inter_clust", "clust", "Images.List vs inter");
-			createImages(outputFileName+"_list_inter_relBet", relBetList1, "list1", relBetInter, "inter", "list_inter_relBet", "Betweenness", "Network parameters evaluation.Role of list within interactome of reference.Betweenness");
-			createImages(outputFileName+"_list_inter_conn", connList1, "list1", connInter, "inter", "list_inter_conn", "Connections", "Network parameters evaluation.Role of list within interactome of reference.Connections");
-			createImages(outputFileName+"_list_inter_clust", clustList1, "list1", clustInter, "inter", "list_inter_clust", "Clustering Coeff", "Network parameters evaluation.Role of list within interactome of reference.Clustering coeff");
+			createImages(outputFileName+"_list_inter_relBet", relBetList1, "list1", relBetInter, "inter", "list_inter_relBet", "Plot", "Network parameters evaluation.Role of list within interactome of reference.Betweenness");
+			createImages(outputFileName+"_list_inter_conn", connList1, "list1", connInter, "inter", "list_inter_conn", "Plot", "Network parameters evaluation.Role of list within interactome of reference.Connections");
+			createImages(outputFileName+"_list_inter_clust", clustList1, "list1", clustInter, "inter", "list_inter_clust", "Plot", "Network parameters evaluation.Role of list within interactome of reference.Clustering coeff");
 		}
 		createOutputTopoList(list,this.mapList1,"1");	
 		logger.debug("Finished 1st Analysis..................");
+		// Starting 2nd analysis
 		logger.debug("Starting 2nd Analysis..................");
 		List<Double> relBetSubnet1 = subProteinNetwork1.getBetRelList();
 		List<Double> relBetRandoms = new ArrayList<Double>();
@@ -690,9 +730,9 @@ public class Snow  extends BabelomicsTool{
 //			result.addOutputItem(new Item("sn_random_kol_param", "Empty results", "Subnet - Random", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Statistic results.Kolmogorov-Smirnov test"));
 
 		if(images){
-			createImages(outputFileName+"_sn_random_relBet", relBetSubnet1, "subnet1", relBetRandoms, "randoms", "sn_random_relBet", "Betweenness", "Network parameters evaluation.Minimal Connected Network topological evaluation.Betweenness");
-			createImages(outputFileName+"_sn_random_conn", connSubnet1, "subnet1", connRandoms, "randoms", "sn_random_conn", "Connections", "Network parameters evaluation.Minimal Connected Network topological evaluation.Connections");
-			createImages(outputFileName+"_sn_random_clust", clustSubnet1, "subnet1", clustRandoms, "randoms", "sn_random_clust", "Clustering Coeff", "Network parameters evaluation.Minimal Connected Network topological evaluation.Clustering Coeff");
+			createImages(outputFileName+"_sn_random_relBet", relBetSubnet1, "subnet1", relBetRandoms, "randoms", "sn_random_relBet", "Plot", "Network parameters evaluation.Minimal Connected Network topological evaluation.Betweenness");
+			createImages(outputFileName+"_sn_random_conn", connSubnet1, "subnet1", connRandoms, "randoms", "sn_random_conn", "Plot", "Network parameters evaluation.Minimal Connected Network topological evaluation.Connections");
+			createImages(outputFileName+"_sn_random_clust", clustSubnet1, "subnet1", clustRandoms, "randoms", "sn_random_clust", "Plot", "Network parameters evaluation.Minimal Connected Network topological evaluation.Clustering Coeff");
 		}
 		logger.debug("Finished 2nd Analysis..................");
 	}
@@ -748,9 +788,9 @@ public class Snow  extends BabelomicsTool{
 //			result.addOutputItem(new Item("list1_list2_kol", "Empty results", "List1 - List2", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test"));
 
 		if(images){
-			createImages(outputFileName+"_list1_list2_relBet", relBetList1, "list1", relBetList2, "list2", "list1_list2_relBet", "Betweenness", "Network parameters evaluation.List1 against List2.Betweenness");
-			createImages(outputFileName+"_list1_list2_conn", connList1, "list1", connList2, "list2", "list1_list2_conn", "Connections", "Network parameters evaluation.List1 against List2.Connections");
-			createImages(outputFileName+"_list1_list2_clust", clustList1, "list1", clustList2, "list2", "list1_list2_clust", "Clustering Coeff", "Network parameters evaluation.List1 against List2.Clustering Coeff");
+			createImages(outputFileName+"_list1_list2_relBet", relBetList1, "list1", relBetList2, "list2", "list1_list2_relBet", "Plot", "Network parameters evaluation.List1 against List2.Betweenness");
+			createImages(outputFileName+"_list1_list2_conn", connList1, "list1", connList2, "list2", "list1_list2_conn", "Plot", "Network parameters evaluation.List1 against List2.Connections");
+			createImages(outputFileName+"_list1_list2_clust", clustList1, "list1", clustList2, "list2", "list1_list2_clust", "Plot", "Network parameters evaluation.List1 against List2.Clustering Coeff");
 		}
 
 		//2nd Analysis
@@ -791,9 +831,9 @@ public class Snow  extends BabelomicsTool{
 //			result.addOutputItem(new Item("sn1_sn2_kol", "Empty results", "Subnet1 - Subnet2", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test"));
 
 		if(images){
-			createImages(outputFileName+"_sn1_sn2_relBet", relBetSubnet1, "subnet1", relBetSubnet2, "subnet2", "sn1_sn2_relBet", "Betweenness", "Network parameters evaluation.List 1 Minimal Connected Network against List 2 Minimal Connected Network.Betweenness");
-			createImages(outputFileName+"_sn1_sn2_conn", connSubnet1, "subnet1", connSubnet2, "subnet2", "sn1_sn2_conn", "Connections", "Network parameters evaluation.List 1 Minimal Connected Network against List 2 Minimal Connected Network.Connections");
-			createImages(outputFileName+"_sn1_sn2_clust", clustSubnet1, "subnet1", clustSubnet2, "subnet2", "sn1_sn2_clust", "Clustering Coeff", "Network parameters evaluation.List 1 Minimal Connected Network against List 2 Minimal Connected Network.Clustering Coeff");
+			createImages(outputFileName+"_sn1_sn2_relBet", relBetSubnet1, "subnet1", relBetSubnet2, "subnet2", "sn1_sn2_relBet", "Plot", "Network parameters evaluation.List 1 Minimal Connected Network against List 2 Minimal Connected Network.Betweenness");
+			createImages(outputFileName+"_sn1_sn2_conn", connSubnet1, "subnet1", connSubnet2, "subnet2", "sn1_sn2_conn", "Plot", "Network parameters evaluation.List 1 Minimal Connected Network against List 2 Minimal Connected Network.Connections");
+			createImages(outputFileName+"_sn1_sn2_clust", clustSubnet1, "subnet1", clustSubnet2, "subnet2", "sn1_sn2_clust", "Plot", "Network parameters evaluation.List 1 Minimal Connected Network against List 2 Minimal Connected Network.Clustering Coeff");
 		}
 
 	}
@@ -1144,3 +1184,4 @@ public class Snow  extends BabelomicsTool{
 	}
 
 }
+
