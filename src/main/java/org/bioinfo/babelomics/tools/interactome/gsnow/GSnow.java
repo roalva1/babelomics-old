@@ -507,7 +507,7 @@ public class GSnow extends SnowTool{
 
 		File f = new File(outputFileName+"_mcn.sif");
 		IOUtils.write(f.getAbsoluteFile(), getSignificantMcnSif(subgraph));
-		result.addOutputItem(new Item("mcn.sif", f.getName(), "Minimun Connected Network", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Minimun Connected Network selected"));
+		result.addOutputItem(new Item("mcn.sif", f.getName(), "Minimun Connected Network interactions", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Minimun Connected Network selected"));
 		
 
 		f = new File(outputFileName+"_mcn_interactors.txt");
@@ -637,17 +637,17 @@ public class GSnow extends SnowTool{
 			resultKs = getPValue(relBetSubnet1, relBetRandoms/*, side*/);
 			symbol = getSymbol(resultKs.getSide());
 			result.addOutputItem(new Item("sn_random_kol_param_bet",  Double.toString(resultKs.getPValue()), "Relative betweenness: Subnet "+symbol+" Random pval ", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Minimun Connected Network selected. Topology description"));
-			createImages(outputFileName+"_sn_random_relBet", relBetSubnet1, "subnet1", relBetRandoms, "randoms", "sn_random_relBet", "Comparison", "Minimun Connected Network selected. Topology description");
+			createImages(outputFileName+"_sn_random_relBet", relBetSubnet1, "subnet1", relBetRandoms, "randoms", "sn_random_relBet", "Plot", "Minimun Connected Network selected. Topology description");
 			
 			resultKs = getPValue(connSubnet1, connRandoms);
 			symbol = getSymbol(resultKs.getSide());
 			result.addOutputItem(new Item("sn_random_kol_param_conn",  Double.toString(resultKs.getPValue()), "Connection degree: Subnet "+symbol+" Random pval ", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Minimun Connected Network selected. Topology description"));
-			createImages(outputFileName+"_sn_random_conn", connSubnet1, "subnet1", connRandoms, "randoms", "sn_random_conn", "Comparison", "Minimun Connected Network selected. Topology description");
+			createImages(outputFileName+"_sn_random_conn", connSubnet1, "subnet1", connRandoms, "randoms", "sn_random_conn", "Plot", "Minimun Connected Network selected. Topology description");
 			
 			resultKs = getPValue(clustSubnet1, clustRandoms);
 			symbol = getSymbol(resultKs.getSide());
 			result.addOutputItem(new Item("sn_random_kol_param_clu",  Double.toString(resultKs.getPValue()), "Clustering coefficient: Subnet "+symbol+" Random pval ", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Minimun Connected Network selected. Topology description"));
-			createImages(outputFileName+"_sn_random_clust", clustSubnet1, "subnet1", clustRandoms, "randoms", "sn_random_clust", "Comparison", "Minimun Connected Network selected. Topology description");
+			createImages(outputFileName+"_sn_random_clust", clustSubnet1, "subnet1", clustRandoms, "randoms", "sn_random_clust", "Plot", "Minimun Connected Network selected. Topology description");
 
 			File f = new File(outputFileName+"_sn_random_kol.txt");
 			IOUtils.write(f.getAbsolutePath(), toWrite);
