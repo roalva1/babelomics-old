@@ -10,6 +10,21 @@
 			<artifactId>bioinfo-mlpr</artifactId>
 			<version>0.6.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.bioinfo</groupId>
+			<artifactId>bioinfo-math</artifactId>
+			<version>0.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bioinfo</groupId>
+			<artifactId>bioinfo-tool</artifactId>
+			<version>0.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bioinfo</groupId>
+			<artifactId>bioinfo-graphics</artifactId>
+			<version>0.4.0</version>
+		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>org.bioinfo</groupId>-->
 <!--			<artifactId>bioinfo-math</artifactId>-->
