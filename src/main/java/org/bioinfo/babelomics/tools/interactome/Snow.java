@@ -36,6 +36,7 @@ import org.bioinfo.networks.protein.files.Svg;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
+import org.jfree.data.statistics.HistogramType;
 
 public class Snow  extends BabelomicsTool{
 
@@ -588,20 +589,24 @@ public class Snow  extends BabelomicsTool{
 //		System.out.println("\t legend1: "+legend1+" size("+list1.size()+") "+list1.toString());
 //		System.out.println("\t legend2: "+legend2+" size("+list2.size()+") "+list2.toString());
 		int bins = 5;
-		hc.getXAxis().setRange(0, 5);
+		//hc.getXAxis().setAutoRange(false);
+		//hc.getXAxis().setRange(0, 5);
+		//hc.getYAxis().setAutoRange(true);
+
+		//		hc.getYAxis().setRange(0, 10);
 		//hc.getYAxis().setAutoRange(false);
-		hc.getDataset().addSeries(legend1, ListUtils.toDoubleArray(list1),bins);
+		hc.getDataset().addSeries(legend1, ListUtils.toDoubleArray(list1),2);
 		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
 		
-		hc.getDataset().addSeries(legend2, ListUtils.toDoubleArray(list2), bins);
+		hc.getDataset().addSeries(legend2, ListUtils.toDoubleArray(list2), 2);
 		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
 		
 //		hc.addSeries(list2, legend2);
 //		hc.addSeries(list1, legend1);
 //		hc.getDataset().setType(HistogramType.RELATIVE_FREQUENCY);
 		hc.getRenderer().setShadowVisible(false);
-		hc.getRenderer().setShadowXOffset(0);
-		hc.getRenderer().setShadowYOffset(0);
+//		hc.getRenderer().setShadowXOffset(0);
+//		hc.getRenderer().setShadowYOffset(0);
 //		hc.getRenderer().setBaseS
 
 		result.addOutputItem(new Item(itemName+"bp", f.getName()+"_bp.png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));
