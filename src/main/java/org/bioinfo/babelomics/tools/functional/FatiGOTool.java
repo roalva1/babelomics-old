@@ -204,6 +204,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		
 		// get term sizes
 		AnnotationDBManager adbm = new AnnotationDBManager(dbConnector);
+		System.err.println("dbConnector:     "  +  dbConnector);
 		
 		Map<String, Integer> termSizes = adbm.getAnnotationTermsSize(filterInfo.getPrefix());
 				
