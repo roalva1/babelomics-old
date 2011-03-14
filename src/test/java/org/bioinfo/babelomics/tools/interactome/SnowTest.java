@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class SnowTest {
 
-	//@Test
+	@Test
 	public void testExample1(){
 		//opt/babelomics/babelomics.sh --tool snow --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5974 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5974/job.log --list2 none --list1 /opt/babelomics/example/brca1_overexp_up.txt --side less --images  --randoms 500 --components true --intermediate 1 --interactome hsa --group curated --type genes --o-name result
 		String outdir = "/tmp/snow/test1";
@@ -20,7 +20,7 @@ public class SnowTest {
 				"--interactome","hsa",
 				"--group","curated",
 				"--type", "genes",
-				"--list1","/opt/babelomics/example/brca1_overexp_up.txt",
+				"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/genes/brca1_overexp_up.txt",
 				"--side", "less",
 				"--intermediate","0",
 				"--components","true",

@@ -573,51 +573,33 @@ public class Snow  extends BabelomicsTool{
 		File f = new File(fileName);
 		BoxPlotChart bpc = new BoxPlotChart("", "", "");
 		//CategoryAxis xAxis;
-		//NumberAxis yAxis = new NumberAxis();
 		
-		double mymax = 0;
-		double mymin = Double.MAX_VALUE;
-		for(Double value : list1){
-			if(value>mymax) mymax = value;
-			if(value<mymin) mymin = value;
-		}
-		for(Double value : list2){
-			if(value>mymax) mymax = value;
-			if(value<mymin) mymin = value;
-		}
-		//yAxis.setRange(mymin,mymax);
-		
-		System.err.println("my file " + fileName);
-		if(fileName.endsWith("result_sn_random_relBet")){
-			System.err.println("my maximo es " + mymax);
-			System.err.println("my asi me gusta a mi minimo es " + mymin);
-			System.err.println("list1: " + list1);
-			System.err.println("list2: " + list2);
-		}
+//		NumberAxis yAxis = new NumberAxis();
+//		double mymax = 0;
+//		double mymin = Double.MAX_VALUE;
+//		for(Double value : list1){
+//			if(value>mymax) mymax = value;
+//			if(value<mymin) mymin = value;
+//		}
+//		for(Double value : list2){
+//			if(value>mymax) mymax = value;
+//			if(value<mymin) mymin = value;
+//		}
+//		yAxis.setRange(mymin,mymax);
 //		yAxis.setAutoRange(false);		
-		//yAxis.setAutoRangeIncludesZero(true);
-		
-		//bpc.setYAxis(yAxis);
-		//bpc.getYAxis().setAutoRange(true);
-		
-		//bpc.getYAxis().setAutoRangeIncludesZero(true);
-		
-		//bpc.getCategoryPlot().setRangeAxis(yAxis);
+//		yAxis.setAutoRangeIncludesZero(true);
+//		
+//		yAxis.setAutoRange(false);		
+//		yAxis.setAutoRangeIncludesZero(true);
+//		bpc.getCategoryPlot().setRangeAxis(yAxis);
+//		System.out.println(legend1+": "+bpc.getDataset().getOutliers(legend1, legend1));
+//		System.out.println(legend2+": "+bpc.getDataset().getOutliers(legend2, legend2));
 		
 		if(!list2.isEmpty())
 			bpc.addSeries(list2, legend2, legend2);
 		if(!list1.isEmpty())
 			bpc.addSeries(list1, legend1, legend1);
 		bpc.setOrientation(PlotOrientation.HORIZONTAL);
-		
-		System.out.println(legend1+": "+bpc.getDataset().getOutliers(legend1, legend1));
-		System.out.println(legend2+": "+bpc.getDataset().getOutliers(legend2, legend2));
-		//bpc.getDataset().add(bpc.getDataset().getOutliers(legend1, legend1), legend1, legend1);
-		//bpc.getDataset().add(bpc.getDataset().getOutliers(legend2, legend2), legend2, legend2);
-		//bpc.getCategoryPlot().setRangeAxis(yAxis);
-		
-		
-		//bpc.setYAxis(yAxis);
 		bpc.save(f.getAbsolutePath()+".png", 300, 250, "png");
 
 		result.addOutputItem(new Item(itemName, f.getName()+".png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));
