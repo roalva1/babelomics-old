@@ -1,6 +1,5 @@
 package org.bioinfo.babelomics.tools.interactome;
 
-import java.awt.Stroke;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import org.bioinfo.chart.HistogramChart;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
+import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.graph.SimpleUndirectedGraph;
 import org.bioinfo.data.graph.Subgraph;
 import org.bioinfo.data.graph.alg.Calc;
@@ -36,7 +36,8 @@ import org.bioinfo.networks.protein.files.Svg;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
-import org.jfree.data.statistics.HistogramType;
+import org.jfree.chart.axis.NumberTickUnit;
+import org.jfree.data.Range;
 
 public class Snow  extends BabelomicsTool{
 
@@ -63,6 +64,7 @@ public class Snow  extends BabelomicsTool{
 	
 	private DBConnector dbConnector;
 	private XRefDBManager xrefDBMan;
+	private String decimalFormat;
 
 	//private String wBinPath;
 
@@ -83,7 +85,7 @@ public class Snow  extends BabelomicsTool{
 		options.addOption(OptionFactory.createOption("json", "It will create an output .json file", false, false));
 		options.addOption(OptionFactory.createOption("o-sif-topo-file", "Create a full topological file from a sif file", false, false));
 		options.addOption(OptionFactory.createOption("o-name", "If there is this argument, it will create an output .cmp file for the information of each component", false, true));
-		options.addOption(OptionFactory.createOption("side", "side for kolmogorov and wilkoxon test. Can be less or greater", false, true));
+		options.addOption(OptionFactory.createOption("side", "side for kolmogorov test. Can be less or greater", false, true));
 		options.addOption(OptionFactory.createOption("images", "Print the images for the statistics", false, false));
 		
 		//options.addOption(OptionFactory.createOption("xml", "Output xml file with the representation of the graph", false, false));
@@ -97,7 +99,7 @@ public class Snow  extends BabelomicsTool{
 	@Override
 	protected void execute() {
 		File f = null;
-		
+		this.decimalFormat= "#.####";
 		List<String> listToVertex1 = new ArrayList<String>();
 		List<String> listToVertex2 = new ArrayList<String>();
 		mapList1 = new HashMap<String, String>();
@@ -129,7 +131,7 @@ public class Snow  extends BabelomicsTool{
 		result.addOutputItem(new Item("interactome_param", interactomeMsg, "Species", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 
 		String side = !commandLine.hasOption("side") ? "less" : commandLine.getOptionValue("side");
-		result.addOutputItem(new Item("side_param", side, "Side for kolmogorov and wilkoxon test", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+		result.addOutputItem(new Item("side_param", side, "Side for kolmogorov test", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 
 		type = !commandLine.hasOption("type") ? "proteins":commandLine.getOptionValue("type");
 		result.addOutputItem(new Item("type_param", type, "ID type", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
@@ -196,6 +198,11 @@ public class Snow  extends BabelomicsTool{
 				int node=1;
 				FileUtils.checkFile(new File(nodeFile));
 				List<String> list1 = IOUtils.readLines(nodeFile);
+				
+				if(list1.size() > 500){
+					result.addOutputItem(new Item("list1_too_big", " List size should be less than 500 elements", "List too big", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Input list"));
+					return;
+				}
 				listToVertex1 = new ArrayList<String>();
 				if(type.equalsIgnoreCase("transcripts") || type.equalsIgnoreCase("proteins")){
 					this.mapList1 = transcriptToUniprot(list1);
@@ -317,6 +324,10 @@ public class Snow  extends BabelomicsTool{
 				int node=2;
 				FileUtils.checkFile(new File(nodeFile));
 				List<String> list2 = IOUtils.readLines(nodeFile);
+				if(list2.size() > 500){
+					result.addOutputItem(new Item("list2_too_big", " List 2 size should be less than 500 elements", "List too big", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Input list"));
+					return;
+				}
 				
 				listToVertex2 = new ArrayList<String>();
 				if(type.equalsIgnoreCase("transcripts") || type.equalsIgnoreCase("proteins")){
@@ -580,7 +591,18 @@ public class Snow  extends BabelomicsTool{
 			bpc.addSeries(list1, legend1, legend1);
 		//bpc.setOrientation(PlotOrientation.HORIZONTAL);
 		
-		HistogramChart hc = new HistogramChart("Histogram", xAxis, "Nodes");
+//		HistogramChart hc = new HistogramChart("Histogram", xAxis, "Nodes");
+//		hc.getDataset().addSeries(legend1, ListUtils.toDoubleArray(list1), Math.min(20,list1.size()));
+//		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
+//		
+//		hc.getDataset().addSeries(legend2, ListUtils.toDoubleArray(list2), Math.min(20,list1.size()));
+//		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
+//		hc.getRenderer().setShadowVisible(false);
+//		hc.getXYPlot().setForegroundAlpha(0.75f);
+//		hc.save(f.getAbsolutePath()+"_hg.png", 600, 550,"png");
+//		result.addOutputItem(new Item(itemName+"hg", f.getName()+"_hg.png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));
+
+		
 		//hc.getYAxis().setAutoRange(false);
 	//	hc.getXAxis().setAutoRange(false);
 	
@@ -588,33 +610,32 @@ public class Snow  extends BabelomicsTool{
 //		System.out.println("f.getName(): "+f.getName());
 //		System.out.println("\t legend1: "+legend1+" size("+list1.size()+") "+list1.toString());
 //		System.out.println("\t legend2: "+legend2+" size("+list2.size()+") "+list2.toString());
-		int bins = 5;
 		//hc.getXAxis().setAutoRange(false);
+	
 		//hc.getXAxis().setRange(0, 5);
 		//hc.getYAxis().setAutoRange(true);
-
+		/*if(fileName.endsWith("_sn_random_conn")){
+			NumberTickUnit number = new NumberTickUnit(1);
+			hc.getXAxis().setTickUnit(number);
+		}*/
+		
 		//		hc.getYAxis().setRange(0, 10);
 		//hc.getYAxis().setAutoRange(false);
-		hc.getDataset().addSeries(legend1, ListUtils.toDoubleArray(list1),2);
-		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
-		
-		hc.getDataset().addSeries(legend2, ListUtils.toDoubleArray(list2), 2);
-		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
+	
 		
 //		hc.addSeries(list2, legend2);
 //		hc.addSeries(list1, legend1);
 //		hc.getDataset().setType(HistogramType.RELATIVE_FREQUENCY);
-		hc.getRenderer().setShadowVisible(false);
+		
 //		hc.getRenderer().setShadowXOffset(0);
 //		hc.getRenderer().setShadowYOffset(0);
 //		hc.getRenderer().setBaseS
 
 		result.addOutputItem(new Item(itemName+"bp", f.getName()+"_bp.png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));
-		result.addOutputItem(new Item(itemName+"hg", f.getName()+"_hg.png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));
 
-		hc.getXYPlot().setForegroundAlpha(0.75f);
+		
 		bpc.save(f.getAbsolutePath()+"_bp.png", 300, 250, "png");
-		hc.save(f.getAbsolutePath()+"_hg.png", 600, 550,"png");
+		
 		
 
 	}
@@ -656,17 +677,17 @@ public class Snow  extends BabelomicsTool{
 			mean = MathUtils.mean(ListUtils.toDoubleArray(relBetList1));
 			symbol = getSymbol(mean, proteinNetwork.getMeanRelBet());
 			//result.addOutputItem(new Item("list_inter_kol_param_bet",  Double.toString(getPValue(relBetList1, relBetInter, side)), "P-value betweenness: List "+symbol+" Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test.List - Interactome"));
-			result.addOutputItem(new Item("list_inter_kol_param_bet",  Double.toString(getPValue(relBetList1, relBetInter, side)), "Relative betweenness: List "+symbol+" Interactome pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.Role of list within interactome of reference.Betweenness"));
+			result.addOutputItem(new Item("list_inter_kol_param_bet",  StringUtils.decimalFormat(getPValue(relBetList1, relBetInter, side), decimalFormat), "Relative betweenness: List "+symbol+" Interactome pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.Role of list within interactome of reference.Betweenness"));
 			
 			mean = MathUtils.mean(ListUtils.toDoubleArray(connList1));
 			symbol = getSymbol(mean, proteinNetwork.getMeanConnections());
 			//result.addOutputItem(new Item("list_inter_kol_param_conn",  Double.toString(getPValue(connList1, connInter, side)), "P-value connections: List "+symbol+" Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test.List - Interactome"));
-			result.addOutputItem(new Item("list_inter_kol_param_conn",  Double.toString(getPValue(connList1, connInter, side)), "Connections: List "+symbol+" Interactome pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.Role of list within interactome of reference.Connections"));
+			result.addOutputItem(new Item("list_inter_kol_param_conn",  StringUtils.decimalFormat(getPValue(connList1, connInter, side), decimalFormat), "Connections: List "+symbol+" Interactome pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.Role of list within interactome of reference.Connections"));
 
 			mean = MathUtils.mean(ListUtils.toDoubleArray(clustList1));
 			symbol = getSymbol(mean, proteinNetwork.getMeanClust());
 			//result.addOutputItem(new Item("list_inter_kol_param_clu",  Double.toString(getPValue(clustList1, clustInter, side)), "P-value clustering: List "+symbol+" Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test.List - Interactome"));
-			result.addOutputItem(new Item("list_inter_kol_param_clu",  Double.toString(getPValue(clustList1, clustInter, side)), "Clustering: List "+symbol+" Interactome pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.Role of list within interactome of reference.Clustering coeff"));
+			result.addOutputItem(new Item("list_inter_kol_param_clu",  StringUtils.decimalFormat(getPValue(clustList1, clustInter, side), decimalFormat), "Clustering: List "+symbol+" Interactome pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.Role of list within interactome of reference.Clustering coeff"));
 
 		}
 //		else
@@ -708,17 +729,17 @@ public class Snow  extends BabelomicsTool{
 			mean1 = MathUtils.mean(ListUtils.toDoubleArray(relBetSubnet1));
 			mean2 = MathUtils.mean(ListUtils.toDoubleArray(relBetRandoms));
 			symbol = getSymbol(mean1, mean2);
-			result.addOutputItem(new Item("sn_random_kol_param_bet",  Double.toString(getPValue(relBetSubnet1, relBetRandoms, side)), "Relative betweenness: List1 "+symbol+" Random pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.Minimal Connected Network topological evaluation.Betweenness"));
+			result.addOutputItem(new Item("sn_random_kol_param_bet", StringUtils.decimalFormat(getPValue(relBetSubnet1, relBetRandoms, side), decimalFormat), "Relative betweenness: List1 "+symbol+" Random pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.Minimal Connected Network topological evaluation.Betweenness"));
 			
 			mean1 = MathUtils.mean(ListUtils.toDoubleArray(connSubnet1));
 			mean2 = MathUtils.mean(ListUtils.toDoubleArray(connRandoms));
 			symbol = getSymbol(mean1, mean2);
-			result.addOutputItem(new Item("sn_random_kol_param_conn",  Double.toString(getPValue(connSubnet1, connRandoms, side)), "Connections: List1 "+symbol+" Random pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.Minimal Connected Network topological evaluation.Connections"));
+			result.addOutputItem(new Item("sn_random_kol_param_conn",  StringUtils.decimalFormat(getPValue(connSubnet1, connRandoms, side), decimalFormat), "Connections: List1 "+symbol+" Random pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.Minimal Connected Network topological evaluation.Connections"));
 			
 			mean1 = MathUtils.mean(ListUtils.toDoubleArray(clustSubnet1));
 			mean2 = MathUtils.mean(ListUtils.toDoubleArray(clustRandoms));
 			symbol = getSymbol(mean1, mean2);
-			result.addOutputItem(new Item("sn_random_kol_param_clu",  Double.toString(getPValue(clustSubnet1, clustRandoms, side)), "Clustering: List1 "+symbol+" Random pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.Minimal Connected Network topological evaluation.Clustering Coeff"));
+			result.addOutputItem(new Item("sn_random_kol_param_clu",  StringUtils.decimalFormat(getPValue(clustSubnet1, clustRandoms, side), decimalFormat), "Clustering: List1 "+symbol+" Random pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.Minimal Connected Network topological evaluation.Clustering Coeff"));
 
 		}
 //		else
@@ -764,19 +785,19 @@ public class Snow  extends BabelomicsTool{
 			mean2 = MathUtils.mean(ListUtils.toDoubleArray(relBetList2));
 			symbol = getSymbol(mean1, mean2);
 //			result.addOutputItem(new Item("list1_list2_kol_bet",  Double.toString(getPValue(relBetList1, relBetList2, side)), "P-value betweenness: List1 "+symbol+" List2", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test.List1 - List2"));
-			result.addOutputItem(new Item("list1_list2_kol_bet",  Double.toString(getPValue(relBetList1, relBetList2, side)), "Relative betweenness: List1 "+symbol+" List2 pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.List1 against List2.Betweenness"));
+			result.addOutputItem(new Item("list1_list2_kol_bet",  StringUtils.decimalFormat(getPValue(relBetList1, relBetList2, side),decimalFormat), "Relative betweenness: List1 "+symbol+" List2 pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.List1 against List2.Betweenness"));
 
 			mean1 = MathUtils.mean(ListUtils.toDoubleArray(connList1));
 			mean2 = MathUtils.mean(ListUtils.toDoubleArray(connList2));
 			symbol = getSymbol(mean1, mean2);
 //			result.addOutputItem(new Item("list1_list2_kol_con",  Double.toString(getPValue(connList1, connList2, side)), "P-value connections: List1 "+symbol+" List2", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test.List1 - List2"));
-			result.addOutputItem(new Item("list1_list2_kol_con",  Double.toString(getPValue(connList1, connList2, side)), "Connections: List1 "+symbol+" List2 pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.List1 against List2.Connections"));
+			result.addOutputItem(new Item("list1_list2_kol_con",  StringUtils.decimalFormat(getPValue(connList1, connList2, side),decimalFormat), "Connections: List1 "+symbol+" List2 pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.List1 against List2.Connections"));
 	
 			mean1 = MathUtils.mean(ListUtils.toDoubleArray(clustList1));
 			mean2 = MathUtils.mean(ListUtils.toDoubleArray(clustList2));
 			symbol = getSymbol(mean1, mean2);
 //			result.addOutputItem(new Item("list1_list2_kol_clu",  Double.toString(getPValue(clustList1, clustList2, side)), "P-value clustering: List1 "+symbol+" List2", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test.List1 - List2"));
-			result.addOutputItem(new Item("list1_list2_kol_clu",  Double.toString(getPValue(clustList1, clustList2, side)), "Clustering: List1 "+symbol+" List2 pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.List1 against List2.Clustering Coeff"));
+			result.addOutputItem(new Item("list1_list2_kol_clu",  StringUtils.decimalFormat(getPValue(clustList1, clustList2, side),decimalFormat), "Clustering: List1 "+symbol+" List2 pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.List1 against List2.Clustering Coeff"));
 
 		}
 //		else
@@ -809,17 +830,17 @@ public class Snow  extends BabelomicsTool{
 			mean1 = MathUtils.mean(ListUtils.toDoubleArray(relBetSubnet1));
 			mean2 = MathUtils.mean(ListUtils.toDoubleArray(relBetSubnet2));
 			symbol = getSymbol(mean1, mean2);
-			result.addOutputItem(new Item("sn1_sn2_kol_bet",  Double.toString(getPValue(relBetSubnet1, relBetSubnet2, side)), "Relative betweenness: Subnet1 "+symbol+" Subnet2 pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.List 1 Minimal Connected Network against List 2 Minimal Connected Network.Betweenness"));
+			result.addOutputItem(new Item("sn1_sn2_kol_bet",  StringUtils.decimalFormat(getPValue(relBetSubnet1, relBetSubnet2, side),decimalFormat), "Relative betweenness: Subnet1 "+symbol+" Subnet2 pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.List 1 Minimal Connected Network against List 2 Minimal Connected Network.Betweenness"));
 			
 			mean1 = MathUtils.mean(ListUtils.toDoubleArray(connSubnet1));
 			mean2 = MathUtils.mean(ListUtils.toDoubleArray(connSubnet2));
 			symbol = getSymbol(mean1, mean2);
-			result.addOutputItem(new Item("sn1_sn2_kol_con",  Double.toString(getPValue(connSubnet1, connSubnet2, side)), "Connections: Subnet1 "+symbol+" Subnet2 pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.List 1 Minimal Connected Network against List 2 Minimal Connected Network.Connections"));
+			result.addOutputItem(new Item("sn1_sn2_kol_con",  StringUtils.decimalFormat(getPValue(connSubnet1, connSubnet2, side),decimalFormat), "Connections: Subnet1 "+symbol+" Subnet2 pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.List 1 Minimal Connected Network against List 2 Minimal Connected Network.Connections"));
 			
 			mean1 = MathUtils.mean(ListUtils.toDoubleArray(clustSubnet1));
 			mean2 = MathUtils.mean(ListUtils.toDoubleArray(clustSubnet2));
 			symbol = getSymbol(mean1, mean2);
-			result.addOutputItem(new Item("sn1_sn2_kol_clu",  Double.toString(getPValue(clustSubnet1, clustSubnet2, side)), "Clustering: Subnet1 "+symbol+" Subnet2 pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.List 1 Minimal Connected Network against List 2 Minimal Connected Network.Clustering Coeff"));
+			result.addOutputItem(new Item("sn1_sn2_kol_clu",  StringUtils.decimalFormat(getPValue(clustSubnet1, clustSubnet2, side),decimalFormat), "Clustering: Subnet1 "+symbol+" Subnet2 pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Network parameters evaluation.List 1 Minimal Connected Network against List 2 Minimal Connected Network.Clustering Coeff"));
 
 		}
 //		else
