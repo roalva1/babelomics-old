@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,6 +37,8 @@ import org.bioinfo.networks.protein.files.Svg;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
+import org.jfree.chart.axis.LogAxis;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.data.Range;
 
@@ -65,6 +68,7 @@ public class Snow  extends BabelomicsTool{
 	private DBConnector dbConnector;
 	private XRefDBManager xrefDBMan;
 	private String decimalFormat;
+	private int listMaxSize;
 
 	//private String wBinPath;
 
@@ -100,6 +104,7 @@ public class Snow  extends BabelomicsTool{
 	protected void execute() {
 		File f = null;
 		this.decimalFormat= "#.####";
+		this.listMaxSize = 500;
 		List<String> listToVertex1 = new ArrayList<String>();
 		List<String> listToVertex2 = new ArrayList<String>();
 		mapList1 = new HashMap<String, String>();
@@ -199,10 +204,7 @@ public class Snow  extends BabelomicsTool{
 				FileUtils.checkFile(new File(nodeFile));
 				List<String> list1 = IOUtils.readLines(nodeFile);
 				
-				if(list1.size() > 500){
-					result.addOutputItem(new Item("list1_too_big", " List size should be less than 500 elements", "List too big", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Input list"));
-					return;
-				}
+				
 				listToVertex1 = new ArrayList<String>();
 				if(type.equalsIgnoreCase("transcripts") || type.equalsIgnoreCase("proteins")){
 					this.mapList1 = transcriptToUniprot(list1);
@@ -215,6 +217,10 @@ public class Snow  extends BabelomicsTool{
 				if(this.mapList1.isEmpty())
 					listToVertex1 = list1;
 				
+				if(listToVertex1.size() > listMaxSize){
+					result.addOutputItem(new Item("list1_too_big", "The list is too big, only considered the 500 first on the interactome ", "List", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+					listToVertex1 = listToVertex1.subList(0, listMaxSize);
+				}
 				String categoryOutput = "";
 				if(!commandLine.hasOption("list2") || "none".equalsIgnoreCase(commandLine.getOptionValue("list2"))) {
 					categoryOutput = "Network parameters evaluation.Minimal Connected Network topological evaluation";
@@ -324,10 +330,6 @@ public class Snow  extends BabelomicsTool{
 				int node=2;
 				FileUtils.checkFile(new File(nodeFile));
 				List<String> list2 = IOUtils.readLines(nodeFile);
-				if(list2.size() > 500){
-					result.addOutputItem(new Item("list2_too_big", " List 2 size should be less than 500 elements", "List too big", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Input list"));
-					return;
-				}
 				
 				listToVertex2 = new ArrayList<String>();
 				if(type.equalsIgnoreCase("transcripts") || type.equalsIgnoreCase("proteins")){
@@ -340,6 +342,11 @@ public class Snow  extends BabelomicsTool{
 				}
 				if(this.mapList2.isEmpty())
 					listToVertex2 = list2;
+				
+				if(listToVertex2.size() > listMaxSize){
+					result.addOutputItem(new Item("list2_too_big", "The list 2 is too big, only considered the 500 first on the interactome ", "List", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
+					listToVertex2 = listToVertex2.subList(0, listMaxSize);
+				}
 				
 				logger.debug("nodes read: " + list2.toString());
 				String categoryOutput = "Network parameters evaluation.Minimal Connected Network topological evaluation for List 2";
@@ -591,50 +598,32 @@ public class Snow  extends BabelomicsTool{
 			bpc.addSeries(list1, legend1, legend1);
 		//bpc.setOrientation(PlotOrientation.HORIZONTAL);
 		
-//		HistogramChart hc = new HistogramChart("Histogram", xAxis, "Nodes");
-//		hc.getDataset().addSeries(legend1, ListUtils.toDoubleArray(list1), Math.min(20,list1.size()));
-//		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
-//		
-//		hc.getDataset().addSeries(legend2, ListUtils.toDoubleArray(list2), Math.min(20,list1.size()));
-//		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
-//		hc.getRenderer().setShadowVisible(false);
-//		hc.getXYPlot().setForegroundAlpha(0.75f);
-//		hc.save(f.getAbsolutePath()+"_hg.png", 600, 550,"png");
-//		result.addOutputItem(new Item(itemName+"hg", f.getName()+"_hg.png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));
-
 		
-		//hc.getYAxis().setAutoRange(false);
-	//	hc.getXAxis().setAutoRange(false);
+		HistogramChart hc = new HistogramChart("Histogram", xAxis, "Nodes");
+		
+		LogAxis logAxis = new LogAxis();
+		double max = Math.max(list1.size(), list2.size());
+		logAxis.setRange( 0.1, max);
+		hc.getXYPlot().setRangeAxis(logAxis);		
 	
+		if(xAxis.equalsIgnoreCase("Connections")){
+			hc.getXYPlot().getDomainAxis().setMinorTickCount( 1 );
+		}
 		
-//		System.out.println("f.getName(): "+f.getName());
-//		System.out.println("\t legend1: "+legend1+" size("+list1.size()+") "+list1.toString());
-//		System.out.println("\t legend2: "+legend2+" size("+list2.size()+") "+list2.toString());
-		//hc.getXAxis().setAutoRange(false);
-	
-		//hc.getXAxis().setRange(0, 5);
-		//hc.getYAxis().setAutoRange(true);
-		/*if(fileName.endsWith("_sn_random_conn")){
-			NumberTickUnit number = new NumberTickUnit(1);
-			hc.getXAxis().setTickUnit(number);
-		}*/
+		hc.getDataset().addSeries(legend1, ListUtils.toDoubleArray(list1),list1.size());
+		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
 		
-		//		hc.getYAxis().setRange(0, 10);
-		//hc.getYAxis().setAutoRange(false);
-	
+		hc.getDataset().addSeries(legend2, ListUtils.toDoubleArray(list2), list2.size());
+		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
 		
-//		hc.addSeries(list2, legend2);
-//		hc.addSeries(list1, legend1);
-//		hc.getDataset().setType(HistogramType.RELATIVE_FREQUENCY);
+		hc.getRenderer().setShadowVisible(false);
+		hc.getXYPlot().setForegroundAlpha(0.75f);
 		
-//		hc.getRenderer().setShadowXOffset(0);
-//		hc.getRenderer().setShadowYOffset(0);
-//		hc.getRenderer().setBaseS
 
-		result.addOutputItem(new Item(itemName+"bp", f.getName()+"_bp.png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));
-
-		
+		hc.save(f.getAbsolutePath()+"_hg.png", 300, 250,"png");
+		result.addOutputItem(new Item(itemName+"hg", f.getName()+"_hg.png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));
 		bpc.save(f.getAbsolutePath()+"_bp.png", 300, 250, "png");
+		result.addOutputItem(new Item(itemName+"bp", f.getName()+"_bp.png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));
 		
 		
 
