@@ -629,7 +629,8 @@ public class DiffExpressionUtils {
 //			tool.getResult().addOutputItem(new Item("no_sig_results", "No significative results (p-value = " + pValue + ")", "Significative results", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));															
 		}	
 		
-		tool.getResult().addOutputItem(new Item("diff_expr_" + StringUtils.randomString(8), "input_params.txt", "Significative results", TYPE.FILE, StringUtils.toList("DIFF_EXPRESSION_VIEWER"), new HashMap<String, String>(), "Significative results"));															
+		String json = "{\\\"paramfilename\\\": \\\"input_params.txt\\\", \\\"testfilename\\\": \\\"" + test + ".txt\\\"}";
+		tool.getResult().addOutputItem(new Item("diff_expr_" + StringUtils.randomString(8), json, "Significative results", TYPE.FILE, StringUtils.toList("DIFF_EXPRESSION_VIEWER"), new HashMap<String, String>(), "Significative results"));															
 	}
 
 	public static void createClusteringRedirectionFile(File redirectionFile, File fileToRedirect) {
