@@ -7,20 +7,26 @@ import org.junit.Test;
 
 public class SnowTest {
 
-	//@Test
+	@Test
+	public void testTest(){
+	 System.out.println("I am a test!!");	
+	}
+	@Test
 	public void testExample1(){
 		//opt/babelomics/babelomics.sh --tool snow --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5974 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5974/job.log --list2 none --list1 /opt/babelomics/example/brca1_overexp_up.txt --side less --images  --randoms 500 --components true --intermediate 1 --interactome hsa --group curated --type genes --o-name result
+		
 		String outdir = "/tmp/snow/test1";
+		//String outdir = "/tmp/snow/testIntermediate";
 		new File(outdir).mkdirs();
 		String []args = {
 				"--tool", "snow", 
 				"-o", outdir, 
-				"--randoms", "100",
+				"--randoms", "1000",
 				"--o-name","result",
 				"--interactome","hsa",
 				"--group","curated",
 				"--type", "genes",
-				"--list1","/opt/babelomics/example/brca1_overexp_up.txt",
+				"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/genes/brca1_overexp_up.txt",
 				"--side", "less",
 				"--intermediate","0",
 				"--components","true",
@@ -30,10 +36,7 @@ public class SnowTest {
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
-	@Test
-	public void testTest(){
-		
-	}
+	
 	//@Test
 	public void ownMMUTest(){
 		//opt/babelomics/babelomics.sh --tool snow --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5959 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5959/job.log --bicomponents true --list2 none --sif-file /httpd/bioinfo/wum_sessions_v0.7/4164/data/29908/mmu_alldb_proteins_interactome_nr.sif --list1 /httpd/bioinfo/wum_sessions_v0.7/4164/data/29907/clean_prots_up_ratio_MMP14.txt --side less --images  --randoms 500 --components true --intermediate 1 --interactome own --type proteins --o-name result
@@ -124,7 +127,7 @@ public class SnowTest {
 				"--type", "proteins",
 				"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/proteins/chr_10_block225.txt",
 				"--side", "less",
-				"--intermediate","1",
+				"--intermediate","0",
 				"--components","1",
 				//"--xml",
 				"--images",
