@@ -5,13 +5,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.chart.BoxPlotChart;
+import org.bioinfo.chart.GenericJFreeChart;
 import org.bioinfo.chart.HistogramChart;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
@@ -37,10 +38,13 @@ import org.bioinfo.networks.protein.files.Svg;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
+import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.NumberTickUnit;
-import org.jfree.data.Range;
+import org.jfree.chart.labels.StandardCategoryToolTipGenerator;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 public class Snow  extends BabelomicsTool{
 
@@ -606,23 +610,129 @@ public class Snow  extends BabelomicsTool{
 		logAxis.setRange( 0.1, max);
 		hc.getXYPlot().setRangeAxis(logAxis);		
 	
-		if(xAxis.equalsIgnoreCase("Connections")){
-			hc.getXYPlot().getDomainAxis().setMinorTickCount( 1 );
-		}
+//		if(xAxis.equalsIgnoreCase("Connections")){
+//			hc.getXYPlot().getDomainAxis().setMinorTickCount( 10);
+//			hc.getXYPlot().getDomainAxis().setTickLabelsVisible(true);
+//		}
+		int bins = (int)(Math.sqrt(list2.size()));
 		
-		hc.getDataset().addSeries(legend1, ListUtils.toDoubleArray(list1),list1.size());
+//		if(fileName.endsWith("random_clust") && !intermediate){
+//			bins = list2.size()/10;
+//		}
+		double maxList1 = 0;
+		double maxList2 = 0;
+		if(xAxis.equalsIgnoreCase("Connections")){
+
+			Map<Number, Number> histogramList = new HashMap<Number, Number>();
+			List<Number> doubleList = new ArrayList<Number>();
+			DefaultCategoryDataset dataset1 = new DefaultCategoryDataset();
+			int index = 0;
+			for(double d : list1){
+				
+				//dataset1.addValue(d, "subnet", "");
+				if(histogramList.containsKey(d)){
+					Double value = (Double) histogramList.get(d);
+					value++;
+					histogramList.put(d, value);
+				}
+				else{
+					histogramList.put(d, 1.0);
+					doubleList.add(index, d);
+					index++;
+				}
+			}
+			for(Number d : doubleList){
+				Number key =  histogramList.get(d);
+				System.out.println("key: ["+d+","+key+"]");
+				dataset1.addValue(key, "subnet", (Comparable) d);
+			}
+			
+			histogramList.clear();
+			doubleList.clear();
+			index = 0;
+			for(double d : list2){
+				
+				//dataset1.addValue(d, "subnet", "");
+				if(histogramList.containsKey(d)){
+					Double value = (Double) histogramList.get(d);
+					value++;
+					histogramList.put(d, value);
+				}
+				else{
+					histogramList.put(d, 1.0);
+					doubleList.add(index, d);
+					index++;
+				}
+			}
+			for(Number d : doubleList){
+				Number key =  histogramList.get(d);
+				System.out.println("key: ["+d+","+key+"]");
+				dataset1.addValue(key, "randoms", (Comparable) d);
+			}
+			
+			
+			
+			NumberAxis rangeAxis1 = new NumberAxis("Nodes");
+			rangeAxis1.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+			BarRenderer renderer1 = new BarRenderer();
+			renderer1.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
+			
+			CategoryAxis domainAxis = new CategoryAxis("Connections");
+			CategoryPlot subplot1 = new CategoryPlot(dataset1, domainAxis, rangeAxis1,renderer1);
+			
+		    subplot1.setDomainGridlinesVisible(true);
+		    
+		    GenericJFreeChart genericJFreeChart = new GenericJFreeChart("titulo", subplot1);
+		    genericJFreeChart.save(f.getAbsolutePath()+"_ct.png", 300, 250,"png");
+			
+		    
+		    double maxList = 0;
+			for(double d : list1){
+				if (d > maxList)
+					maxList = d;
+				if (d > maxList1)
+					maxList1 = d;
+			}
+				
+			for(double d : list2){
+				if (d > maxList)
+					maxList = d;
+				if (d > maxList2)
+					maxList2 = d;
+			}
+				
+			bins = (int)maxList+1;
+			maxList1 +=1;
+			maxList2 +=1;
+			System.out.println("maxList1 = "+maxList1 );
+			System.out.println("maxList2 = "+maxList2 );
+		}
+		else{
+		//if(xAxis.equalsIgnoreCase("Clustering Coeff")){
+			Set<Double> setList = new HashSet<Double>();
+			for(double d : list1)
+				setList.add(d);
+			for(double d : list2)
+				setList.add(d);
+			bins = setList.size();
+			
+			maxList1 =1;
+			maxList2 =1;
+		}
+		System.out.println(fileName+" bins: "+bins);
+		hc.getDataset().addSeries(legend1, ListUtils.toDoubleArray(list1),(int)maxList1);
 		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
 		
-		hc.getDataset().addSeries(legend2, ListUtils.toDoubleArray(list2), list2.size());
+		hc.getDataset().addSeries(legend2, ListUtils.toDoubleArray(list2),(int)maxList2);
 		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
 		
 		hc.getRenderer().setShadowVisible(false);
 		hc.getXYPlot().setForegroundAlpha(0.75f);
 		
 
-		hc.save(f.getAbsolutePath()+"_hg.png", 300, 250,"png");
+		//hc.save(f.getAbsolutePath()+"_hg.png", 600, 500,"png");
 		result.addOutputItem(new Item(itemName+"hg", f.getName()+"_hg.png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));
-		bpc.save(f.getAbsolutePath()+"_bp.png", 300, 250, "png");
+		//bpc.save(f.getAbsolutePath()+"_bp.png", 600, 500, "png");
 		result.addOutputItem(new Item(itemName+"bp", f.getName()+"_bp.png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));
 		
 		

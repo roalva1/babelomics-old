@@ -11,6 +11,7 @@ import java.util.Set;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.babelomics.tools.interactome.gsnow.GSnowPreprocessing.Node;
 import org.bioinfo.chart.BoxPlotChart;
+import org.bioinfo.chart.HistogramChart;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
@@ -30,6 +31,7 @@ import org.bioinfo.networks.protein.files.Svg;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
+import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.plot.PlotOrientation;
 
 public abstract class SnowTool extends BabelomicsTool{
@@ -222,7 +224,7 @@ public abstract class SnowTool extends BabelomicsTool{
 			symbol = ">";
 		return symbol;
 	}
-	public void createImages(String fileName, List<Double> list1, String legend1, List<Double> list2, String legend2, String itemName, String itemLabel, String itemGroup) throws IOException {
+	public void createImages(String fileName, List<Double> list1, String legend1, List<Double> list2, String legend2, String itemName, String itemLabel, String itemGroup, String xAxis) throws IOException {
 		File f = new File(fileName);
 		BoxPlotChart bpc = new BoxPlotChart("", "", "");
 		bpc.getLegend().setVisible(true);
@@ -234,6 +236,33 @@ public abstract class SnowTool extends BabelomicsTool{
 		bpc.save(f.getAbsolutePath()+".png", 300, 250, "png");
 
 		result.addOutputItem(new Item(itemName, f.getName()+".png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));		
+		
+		HistogramChart hc = new HistogramChart("Histogram", xAxis, "Nodes");
+		
+		LogAxis logAxis = new LogAxis();
+		double max = Math.max(list1.size(), list2.size());
+		logAxis.setRange( 0, max);
+		hc.getXYPlot().setRangeAxis(logAxis);		
+	
+//		if(xAxis.equalsIgnoreCase("Connections")){
+//			hc.getXYPlot().getDomainAxis().setMinorTickCount( 10);
+//			hc.getXYPlot().getDomainAxis().setTickLabelsVisible(true);
+//		}
+		int bins = (int)(Math.sqrt(list2.size()));
+		hc.getDataset().addSeries(legend1, ListUtils.toDoubleArray(list1),bins);
+		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
+		
+		hc.getDataset().addSeries(legend2, ListUtils.toDoubleArray(list2), bins);
+		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
+		
+		hc.getRenderer().setShadowVisible(false);
+		hc.getXYPlot().setForegroundAlpha(0.75f);
+		
+
+		hc.save(f.getAbsolutePath()+"_hg.png", 300, 250,"png");
+		result.addOutputItem(new Item(itemName+"hg", f.getName()+"_hg.png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));
+		
+	
 	}
 	public int componentsMoreThanOneNode(List<List<ProteinVertex>> components){
 		int compMoreThan1Node = 0;
