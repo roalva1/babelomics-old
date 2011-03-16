@@ -232,36 +232,8 @@ public abstract class SnowTool extends BabelomicsTool{
 			bpc.addSeries(list2, legend2, legend2);
 		if(!list1.isEmpty())
 			bpc.addSeries(list1, legend1, legend1);
-		bpc.setOrientation(PlotOrientation.HORIZONTAL);
 		bpc.save(f.getAbsolutePath()+".png", 300, 250, "png");
-
 		result.addOutputItem(new Item(itemName, f.getName()+".png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));		
-		
-		HistogramChart hc = new HistogramChart("Histogram", xAxis, "Nodes");
-		
-		LogAxis logAxis = new LogAxis();
-		double max = Math.max(list1.size(), list2.size());
-		logAxis.setRange( 0, max);
-		hc.getXYPlot().setRangeAxis(logAxis);		
-	
-//		if(xAxis.equalsIgnoreCase("Connections")){
-//			hc.getXYPlot().getDomainAxis().setMinorTickCount( 10);
-//			hc.getXYPlot().getDomainAxis().setTickLabelsVisible(true);
-//		}
-		int bins = (int)(Math.sqrt(list2.size()));
-		hc.getDataset().addSeries(legend1, ListUtils.toDoubleArray(list1),bins);
-		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
-		
-		hc.getDataset().addSeries(legend2, ListUtils.toDoubleArray(list2), bins);
-		hc.getXYPlot().setRenderer(hc.getDataset().getSeriesCount()-1, hc.getRenderer());
-		
-		hc.getRenderer().setShadowVisible(false);
-		hc.getXYPlot().setForegroundAlpha(0.75f);
-		
-
-		hc.save(f.getAbsolutePath()+"_hg.png", 300, 250,"png");
-		result.addOutputItem(new Item(itemName+"hg", f.getName()+"_hg.png", itemLabel, TYPE.IMAGE, new ArrayList<String>(), new HashMap<String, String>(2), itemGroup));
-		
 	
 	}
 	public int componentsMoreThanOneNode(List<List<ProteinVertex>> components){
