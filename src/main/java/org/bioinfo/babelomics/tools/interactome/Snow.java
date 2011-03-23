@@ -1006,7 +1006,7 @@ public class Snow  extends BabelomicsTool{
 	private StringBuilder createComponentsHeader(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("#CN: Component number").append(System.getProperty("line.separator"));
-		sb.append("#Subnet\tCN\tDiametre\tSize\tNodes").append(System.getProperty("line.separator"));
+		sb.append("#Subnet\tCN\tDiameter\tSize\tNodes").append(System.getProperty("line.separator"));
 		return sb;
 	}
 
