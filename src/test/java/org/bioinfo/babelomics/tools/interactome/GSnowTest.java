@@ -6,6 +6,27 @@ import org.bioinfo.babelomics.BabelomicsMain;
 import org.junit.Test;
 
 public class GSnowTest {
+	
+	@Test
+	public void luzBug(){
+		//./babelomics.sh --tool network-miner --type genes --species hsa --select-mcn rel-min --randoms 1000 --interactome hsa --list ~/projects/essential_genes_cancer2011/cancer_commons/essential_genes_all_lines.txt --o-name essential_genes_all_lines -o ~/projects/essential_genes_cancer2011/cancer_commons/essential_genes_all_lines/all1/  --intermediate 1 --group all
+		String outdir = "/tmp/gsnow/example1";
+		new File(outdir).mkdirs();
+
+		String []args = {
+				"--tool", "network-miner", 
+				"-o", outdir, 
+				"--o-name","CML_LYMPH",
+				"--interactome","hsa",
+				"--select-mcn", "rel-min",
+				"--type", "genes",
+				"--group", "all",
+				"--intermediate","1",
+				"--randoms","1000",
+				"--list","/mnt/commons/babelomics/tests/snow2/listas/hsa/genes/CML_LYMPH.txt",
+				"--home", System.getenv("BABELOMICS_HOME")};
+		main(args);
+	}
 	@Test
 	public void test(){};
 	//@Test

@@ -102,7 +102,7 @@ public class GSnow extends SnowTool{
 			cutOff = commandLine.hasOption("cut-off") ? Double.parseDouble(commandLine.getOptionValue("cut-off")) : Double.NaN;
 			significantValue = commandLine.hasOption("significant-value") ? Double.parseDouble(commandLine.getOptionValue("significant-value")) : defaultSignificantValue;
 
-			selectOption = commandLine.hasOption("select-option") ? commandLine.getOptionValue("select-option") : "abs-min";
+			selectOption = commandLine.hasOption("select-mcn") ? commandLine.getOptionValue("select-mcn") : "abs-min";
 
 			
 			dbConnector = new DBConnector(interactome, new File(babelomicsHomePath + "/conf/infrared.properties"));
@@ -307,72 +307,6 @@ public class GSnow extends SnowTool{
 		}
 	}
 	
-	//5º Here we get the significant item in significantItem from gsnowItems
-//	private GSnowItem getSignificantValue() {
-//		GSnowItem significantItemLocal = new GSnowItem();
-//		List<Node> nodes = new ArrayList<Node>();
-//		List<Double> componentsSizeGSnowItem = null;
-//		
-//		//This is a pointer to the elements that all their components are smaller than 5 elements
-//		List<Integer> pointer = new ArrayList<Integer>();
-//		
-//		double significantValue = Double.MAX_VALUE;
-//		double currentValue;
-//		Max maxUtil = null;
-//		boolean componentsBiggerThan5Elements = false;
-//		for(int i = numberOfStartingNodes; i <= this.listInfo.getNodes().size(); i++){
-//			if(!componentsBiggerThan5Elements){
-//				//This is the weird case, if all the sizes have all component smaller than 5 elements
-//				maxUtil = new Max();
-//				componentsSizeGSnowItem = gsnowItems.get(i).getComponentsSize();
-////				System.out.println(i+":"+componentsSizeGSnowItem);
-//				if(maxUtil.evaluate(ListUtils.toDoubleArray(componentsSizeGSnowItem))<5){
-//					pointer.add(i);
-//					continue;
-//				}
-//				else
-//					componentsBiggerThan5Elements = true;	
-//			}
-//			//This is the normal case, if all the sizes have at least one component bigger than 5 elements
-//			
-//			currentValue = gsnowItems.get(i).getComparedValue();
-//			/**/
-//			componentsSizeGSnowItem = gsnowItems.get(i).getComponentsSize();
-////			System.out.println(i+":"+componentsSizeGSnowItem);
-//			/**/
-//			if(currentValue < significantValue){
-//				significantValue = currentValue;
-//				nodes = gsnowItems.get(i).getNodes();
-//			}
-//			else if(currentValue == significantValue){
-//				if(gsnowItems.get(i).getNodes().size() < nodes.size()){
-//					significantValue = currentValue;
-//					nodes = gsnowItems.get(i).getNodes();
-//				}
-//			}
-//		}
-//		if(!componentsBiggerThan5Elements){
-//			double max = Double.MIN_VALUE;
-//			for(int i : pointer){
-//				for(double componentSize : gsnowItems.get(i).getComponentsSize()){
-//					if(componentSize > max){
-//						max = componentSize;
-//						significantValue = gsnowItems.get(i).getComparedValue();
-//						nodes = gsnowItems.get(i).getNodes();
-//					}
-//					else if(componentSize == max){
-//						if(gsnowItems.get(i).getNodes().size() < nodes.size()){
-//							significantValue = gsnowItems.get(i).getComparedValue();
-//							nodes = gsnowItems.get(i).getNodes();
-//						}
-//					}
-//				}
-//			}
-//		}
-//		significantItemLocal.setNodes(nodes);
-//		significantItemLocal.setComparedValue(significantValue);
-//		return significantItemLocal;
-//	}
 	
 	//5º Here we get the significant item in significantItem from gsnowItems
 	private GSnowItem getSignificatValueAbsMinOption() {
@@ -439,9 +373,19 @@ public class GSnow extends SnowTool{
 		List<Integer> pointerSmallerThanInitSizeElements = new ArrayList<Integer>();
 		int initSizeElements = 5;
 		double currentValue;
+		double nextCurrentValue;
 		Max maxUtil = new Max();
 		for(int i = numberOfStartingNodes; i <= this.listInfo.getNodes().size(); i++){
 			currentValue = gsnowItems.get(i).getComparedValue();
+			if(gsnowItems.get(i+1) != null){
+				nextCurrentValue = gsnowItems.get(i+1).getComparedValue();
+			}
+			else{
+				//It is the last item 
+				nextCurrentValue = currentValue;
+			}
+			if(nextCurrentValue <= currentValue)
+				continue;
 			componentsSizeGSnowItem = gsnowItems.get(i).getComponentsSize();
 			if(currentValue <= this.significantValue)
 				if(maxUtil.evaluate(ListUtils.toDoubleArray(componentsSizeGSnowItem)) < initSizeElements)
