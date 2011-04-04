@@ -181,7 +181,10 @@ public class GSnow extends SnowTool{
 			
 			System.out.println("Significant value:"+significantItem.getComparedValue());
 			System.out.println("Significant size:"+significantItem.getNodes().size());
-			result.addOutputItem(new Item("significant_value", StringUtils.decimalFormat(significantItem.getComparedValue(), decimalFormat), "pval of MCN chosen", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));
+			String significantStringItem = StringUtils.decimalFormat(significantItem.getComparedValue(), decimalFormat);
+			if(significantStringItem.equals("0.0000"))
+				significantStringItem = "0.0001";
+			result.addOutputItem(new Item("significant_value", "<"+significantStringItem, "pval of MCN chosen", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));
 			result.addOutputItem(new Item("significant_size", Integer.toString(significantItem.getNodes().size()), "size of MCN chosen", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));
 			
 			// starting SNOW analyses
@@ -384,7 +387,7 @@ public class GSnow extends SnowTool{
 				//It is the last item 
 				nextCurrentValue = currentValue;
 			}
-			if(nextCurrentValue <= currentValue)
+			if(nextCurrentValue < currentValue)
 				continue;
 			componentsSizeGSnowItem = gsnowItems.get(i).getComponentsSize();
 			if(currentValue <= this.significantValue)
