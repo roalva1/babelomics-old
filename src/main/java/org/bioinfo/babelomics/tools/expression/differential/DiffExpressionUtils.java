@@ -539,11 +539,11 @@ public class DiffExpressionUtils {
 				}
 			}
 
-			if (numberSigValues > maxDisplay) {
-				tool.getResult().addOutputItem(new Item("sig_results", "" + numberSigValues + " (" + maxDisplay + " most significative values will be displayed)", "Number of significative results (adj. p-value = " + pValue + ")", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));																				
-			} else {
-				tool.getResult().addOutputItem(new Item("sig_results", "" + numberSigValues, "Number of significative results (adj. p-value = " + pValue + ")", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));																									
-			}
+//			if (numberSigValues > maxDisplay) {
+//				tool.getResult().addOutputItem(new Item("sig_results", "" + numberSigValues + " (" + maxDisplay + " most significative values will be displayed)", "Number of significative results (adj. p-value = " + pValue + ")", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));																				
+//			} else {
+//				tool.getResult().addOutputItem(new Item("sig_results", "" + numberSigValues, "Number of significative results (adj. p-value = " + pValue + ")", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));																									
+//			}
 
 			// adding dataset to results
 			//
@@ -552,17 +552,17 @@ public class DiffExpressionUtils {
 			sigDataset.setVariables(subDataset.getVariables());
 			sigDataset.validate();
 			sigDataset.save(file);
-			if (file.exists()) {
-				String tags = "datamatrix,expression";
-				tool.getResult().addOutputItem(new Item(test + "_sig_dataset", file.getName(), "Significative values dataset (adj. p-value = " + pValue + ")", TYPE.DATA, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Significative results"));											
-
-				File redirectionFile = new File(tool.getOutdir() + "/clustering.redirection");
-				createClusteringRedirectionFile(redirectionFile, file);
-				if ( redirectionFile.exists() ) {
-					tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to Clustering tool...)";
-					tool.getResult().addOutputItem(new Item(test + "_sig_dataset", file.getName(), "Significative values dataset (adj. p-value = " + pValue + ")", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Significative results"));											
-				}
-			}
+//			if (file.exists()) {
+//				String tags = "datamatrix,expression";
+//				tool.getResult().addOutputItem(new Item(test + "_sig_dataset", file.getName(), "Significative values dataset (adj. p-value = " + pValue + ")", TYPE.DATA, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Significative results"));											
+//
+//				File redirectionFile = new File(tool.getOutdir() + "/clustering.redirection");
+//				createClusteringRedirectionFile(redirectionFile, file);
+//				if ( redirectionFile.exists() ) {
+//					tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to Clustering tool...)";
+//					tool.getResult().addOutputItem(new Item(test + "_sig_dataset", file.getName(), "Significative values dataset (adj. p-value = " + pValue + ")", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Significative results"));											
+//				}
+//			}
 
 
 			int[] rowOrder = null;
@@ -600,35 +600,37 @@ public class DiffExpressionUtils {
 				} else if (isRegression) {
 					table = "REGRESSION_TABLE";
 				}
-				tool.getResult().addOutputItem(new Item(test + "_table", file.getName(), "Significative values table (adj, p-value = " + pValue + ")", TYPE.FILE, StringUtils.toList("TABLE," + table, ","), new HashMap<String, String>(2), "Significative results"));											
+				//tool.getResult().addOutputItem(new Item(test + "_table", file.getName(), "Significative values table (adj, p-value = " + pValue + ")", TYPE.FILE, StringUtils.toList("TABLE," + table, ","), new HashMap<String, String>(2), "Significative results"));											
 			}
 
 			// adding heatmap to results
 			//
-			Canvas sigHeatmap = null;
-			if (isCox || isCorrelation || isRegression) {
-				sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, label1, ListUtils.toDoubleArray(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toIntArray(sigRowIndexes))), adjPValLabel, ListUtils.toDoubleArray(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toIntArray(sigRowIndexes))));
-			} else {
-				sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, statLabel, ListUtils.toDoubleArray(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toIntArray(sigRowIndexes))), adjPValLabel, ListUtils.toDoubleArray(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toIntArray(sigRowIndexes))));
-			}
-			if (sigHeatmap == null) {
-				tool.printError("ioexception_executet_classcomparison", "ERROR", "Error generating heatmap image");
-			} else {
-				try {
-					File sigHeatmapFile = new File(tool.getOutdir() + "/" + test + "_significative_heatmap.png");
-					sigHeatmap.save(sigHeatmapFile.getAbsolutePath());
-					if (sigHeatmapFile.exists()) {
-						tool.getResult().addOutputItem(new Item(test + "_significative_heatmap", sigHeatmapFile.getName(), test.toUpperCase() + " heatmap with significative values (adj. p-value = " + pValue + ")", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Significative results"));
-					}
-				} catch (IOException e) {
-					tool.printError("ioexception_executet_classcomparison", "ERROR", "Error saving heatmap image");
-				}
-			}
-			//createFatiGoRedirection(dataFrame.getRowNames(), dataFrame.getColumnAsDoubleArray(statLabel), test, tool.getResult(), tool.getOutdir());
-			createFatiGoRedirection(ListUtils.ordered(subDataset.getFeatureNames(), sigOrder), ListUtils.toDoubleArray(ListUtils.ordered(ArrayUtils.toList(statistics), sigOrder)), test, tool.getResult(), tool.getOutdir());
+//			Canvas sigHeatmap = null;
+//			if (isCox || isCorrelation || isRegression) {
+//				sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, label1, ListUtils.toDoubleArray(ListUtils.subList(ArrayUtils.toList(values1), ListUtils.toIntArray(sigRowIndexes))), adjPValLabel, ListUtils.toDoubleArray(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toIntArray(sigRowIndexes))));
+//			} else {
+//				sigHeatmap = DiffExpressionUtils.generateHeatmap(sigDataset, className, columnOrder, rowOrder, statLabel, ListUtils.toDoubleArray(ListUtils.subList(ArrayUtils.toList(statistics), ListUtils.toIntArray(sigRowIndexes))), adjPValLabel, ListUtils.toDoubleArray(ListUtils.subList(ArrayUtils.toList(adjPValues), ListUtils.toIntArray(sigRowIndexes))));
+//			}
+//			if (sigHeatmap == null) {
+//				tool.printError("ioexception_executet_classcomparison", "ERROR", "Error generating heatmap image");
+//			} else {
+//				try {
+//					File sigHeatmapFile = new File(tool.getOutdir() + "/" + test + "_significative_heatmap.png");
+//					sigHeatmap.save(sigHeatmapFile.getAbsolutePath());
+//					if (sigHeatmapFile.exists()) {
+//						tool.getResult().addOutputItem(new Item(test + "_significative_heatmap", sigHeatmapFile.getName(), test.toUpperCase() + " heatmap with significative values (adj. p-value = " + pValue + ")", TYPE.IMAGE, new ArrayList<String>(2), new HashMap<String, String>(2), "Significative results"));
+//					}
+//				} catch (IOException e) {
+//					tool.printError("ioexception_executet_classcomparison", "ERROR", "Error saving heatmap image");
+//				}
+//			}
+//			createFatiGoRedirection(ListUtils.ordered(subDataset.getFeatureNames(), sigOrder), ListUtils.toDoubleArray(ListUtils.ordered(ArrayUtils.toList(statistics), sigOrder)), test, tool.getResult(), tool.getOutdir());
 		} else {
-			tool.getResult().addOutputItem(new Item("no_sig_results", "No significative results (p-value = " + pValue + ")", "Significative results", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));															
+//			tool.getResult().addOutputItem(new Item("no_sig_results", "No significative results (p-value = " + pValue + ")", "Significative results", TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(2), "Significative results"));															
 		}	
+		
+		String json = "{\\\"paramfilename\\\": \\\"input_params.txt\\\", \\\"testfilename\\\": \\\"" + test + ".txt\\\"}";
+		tool.getResult().addOutputItem(new Item("diff_expr_" + StringUtils.randomString(8), json, "Significative results", TYPE.FILE, StringUtils.toList("DIFF_EXPRESSION_VIEWER"), new HashMap<String, String>(), "Significative results"));															
 	}
 
 	public static void createClusteringRedirectionFile(File redirectionFile, File fileToRedirect) {

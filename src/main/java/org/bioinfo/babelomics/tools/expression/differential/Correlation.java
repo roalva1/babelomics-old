@@ -120,7 +120,8 @@ public class Correlation extends BabelomicsTool {
 			// create output file
 			//
 			int[] columnOrder = ListUtils.order(dataset.getVariables().getByName(className).getValues());
-			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
+			//int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
+			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getCorrelations()), true);
 
 			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
@@ -160,7 +161,8 @@ public class Correlation extends BabelomicsTool {
 			// create output file
 			//
 			int[] columnOrder = ListUtils.order(dataset.getVariables().getByName(className).getValues());
-			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
+			//int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
+			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getSlopes()), true);
 
 			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));

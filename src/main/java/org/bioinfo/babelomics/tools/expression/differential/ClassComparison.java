@@ -342,9 +342,16 @@ public class ClassComparison extends BabelomicsTool {
 		IOUtils.write(file, dataFrame.toString(true, true));
 		//featureData.save(file);
 		if ( file.exists() ) {
-			result.addOutputItem(new Item(test + "_foldchange", file.getName(), testLabel + " fold-change output file", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), testLabel + " fold-change.Output files"));											
+			result.addOutputItem(new Item(test + "_foldchange", file.getName(), testLabel + " fold-change output file", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), testLabel + " fold-change.Output files"));			
+		
+			String json = "{\\\"paramfilename\\\": \\\"input_params.txt\\\", \\\"testfilename\\\": \\\"" + file.getName() + "\\\"}";
+			result.addOutputItem(new Item("diff_expr_" + StringUtils.randomString(8), json, "Significative results", TYPE.FILE, StringUtils.toList("DIFF_EXPRESSION_VIEWER"), new HashMap<String, String>(), testLabel + " fold-change. Significative results"));
+			
+			DiffExpressionUtils.createFatiScanRedirection(dataFrame, test, test, result, outdir, testLabel + " fold-change.");
 		}
 		
+		
+/*		
 		List<Double> orderedRes = ListUtils.ordered(ArrayUtils.toList(res), rowOrder);
 		int posValues = 0;
 		int negValues = 0;
@@ -406,21 +413,12 @@ public class ClassComparison extends BabelomicsTool {
 			}
 		}
 		
-		
 		rowOrder = ListUtils.order(ListUtils.subList(ArrayUtils.toList(res), ListUtils.toIntArray(sigRowIndexes)), true);	
-		
-//		System.out.println("dataset feature names = " + ListUtils.toString(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), "\n"));
-//		System.out.println("dataset feature names = " + ListUtils.toString(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), "\n"));
-//		System.out.println("dataframe sublit feature names = " + ListUtils.toString(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), "\n"));
-//		System.out.println("dataframe ordered feature names = " + ListUtils.toString(ListUtils.ordered(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), rowOrder), "\n"));
-		
+				
 		DataFrame sigDataFrame = new DataFrame(sigDataset.getFeatureNames().size(), 0);
 		
 		sigDataFrame.addColumn(test, ListUtils.toStringList(ListUtils.ordered(ListUtils.subList(ArrayUtils.toList(res), ListUtils.toIntArray(sigRowIndexes)), rowOrder)));
 		sigDataFrame.setRowNames(ListUtils.ordered(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toIntArray(sigRowIndexes)), rowOrder));
-
-		//System.out.println("names from data frame :\n" + ListUtils.toString(ListUtils.subList(subDataset.getFeatureNames(), ListUtils.toArray(sigRowIndexes)), "\n"));
-		//System.out.println("names from data set   :\n" + ListUtils.toString(sigDataset.getFeatureNames(), "\n"));
 
 		// adding table to results
 		//
@@ -447,7 +445,8 @@ public class ClassComparison extends BabelomicsTool {
 			}
 		}
 		DiffExpressionUtils.createFatiGoRedirection(dataFrame.getRowNames(), dataFrame.getColumnAsDoubleArray(test), test, result, outdir, testLabel + " fold-change.");
-		DiffExpressionUtils.createFatiScanRedirection(sigDataFrame, test, test, result, outdir, testLabel + " fold-change.");			
+		DiffExpressionUtils.createFatiScanRedirection(sigDataFrame, test, test, result, outdir, testLabel + " fold-change.");
+*/			
 	}
 
 	/**
