@@ -493,24 +493,36 @@ public class GSnow extends SnowTool{
 		
 		StringBuilder sb = new StringBuilder();
 		String tab = "\t";
-		sb.append("#input_id").append(tab).append("id").append(tab).append("type").append(tab).append("bet").append(tab).append("clust").append(tab);
+		sb.append("#input_id").append(tab).append("id").append(tab).append("type").append(tab).append("rank").append(tab).append("bet").append(tab).append("clust").append(tab);
 		sb.append("conn").append(tab).append("go").append(tab).append("kegg").append(System.getProperty("line.separator"));
 		for(ProteinVertex vertex :subProteinNetwork.getInteractomeGraph().getVertices()){
+			Node affectedNode = null;
 			for(Node node : this.significantItem.getNodes()){
 				if(node.getId().equals(vertex.getId())){
-					sb.append(node.getOriginalId()).append(tab);
+					affectedNode = node;
+					break;
 				}
 			}
-			sb.append(vertex.getId()).append(tab);
-			if(intermediates.contains(vertex.getId()))
-				sb.append("external");
-			else
-				sb.append("list");
-			sb.append(tab);
+			
+			if(intermediates.contains(vertex.getId())){
+				sb.append("-").append(tab);
+				sb.append(vertex.getId()).append(tab);
+				sb.append("external").append(tab);
+			}
+			else{
+				sb.append(affectedNode.getOriginalId()).append(tab);
+				sb.append(vertex.getId()).append(tab);
+				sb.append("list").append(tab);
+			}
+			if(affectedNode != null){
+				sb.append(affectedNode.getValue()).append(tab);
+			}
+			else{
+				sb.append("-").append(tab);
+			}
 			sb.append(vertex.getRelativeBetweenness()).append(tab);
 			sb.append(vertex.getClusteringCoefficient()).append(tab);
 			sb.append(subProteinNetwork.getInteractomeGraph().getDegree(vertex)).append(tab);
-			
 			
 			if(xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null){
 				List<String> dbNames = new ArrayList<String>();
@@ -525,7 +537,7 @@ public class GSnow extends SnowTool{
 						GO go = gof.getByAccesion(xrefitem.getDisplayName());
 						sb.append(go.getName()).append(",");
 					}
-					sb = this.deleteLastCh(sb, ",");//hsa00010
+					sb = this.deleteLastCh(sb, ",");
 				}
 				
 				List<XRefItem> xrefitemListKegg = xrefEns.getXrefItems().get("kegg");
