@@ -140,7 +140,8 @@ public class Survival extends BabelomicsTool {
 
 			// create output file
 			//
-			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
+			//int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getStatistics()), true);
+			int[] rowOrder = ListUtils.order(ArrayUtils.toList(res.getCoefs()), true);
 			
 			DataFrame dataFrame = new DataFrame(dataset.getFeatureNames().size(), 0);
 			dataFrame.addColumn("statistic", ListUtils.toStringList(ListUtils.ordered(ArrayUtils.toList(res.getStatistics()), rowOrder)));
