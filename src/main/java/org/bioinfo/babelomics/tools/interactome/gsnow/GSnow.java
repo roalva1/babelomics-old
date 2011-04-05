@@ -182,7 +182,8 @@ public class GSnow extends SnowTool{
 			System.out.println("Significant value:"+significantItem.getComparedValue());
 			System.out.println("Significant size:"+significantItem.getNodes().size());
 			String significantStringItem = StringUtils.decimalFormat(significantItem.getComparedValue(), decimalFormat);
-			if(significantStringItem.equals("0.0000"))
+			
+			if(significantItem.getComparedValue() == 0)
 				significantStringItem = "0.0001";
 			result.addOutputItem(new Item("significant_value", "<"+significantStringItem, "pval of MCN chosen", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));
 			result.addOutputItem(new Item("significant_size", Integer.toString(significantItem.getNodes().size()), "size of MCN chosen", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));
