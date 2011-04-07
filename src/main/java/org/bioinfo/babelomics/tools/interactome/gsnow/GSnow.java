@@ -39,6 +39,7 @@ import org.bioinfo.networks.protein.ProteinVertex;
 import org.bioinfo.networks.protein.files.Sif;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
+import org.bioinfo.tool.result.Item.TYPE;
 
 
 public class GSnow extends SnowTool{
@@ -94,6 +95,7 @@ public class GSnow extends SnowTool{
 	
 	private void executeGSnow(){
 		try {
+			
 			SnowPrinter snowPrinter = new SnowPrinter();
 			String interactomeMsg = getInteractomeMsg();
 //			filterList = commandLine.hasOption("filter-list") ? commandLine.getOptionValue("filter-list") : "wholeList";
@@ -173,6 +175,13 @@ public class GSnow extends SnowTool{
 			f = new File(outputFileName+"_all.txt");
 			IOUtils.write(f.getAbsoluteFile(), snowPrinter.printGsnowItems(gsnowItems, numberOfStartingNodes));
 			result.addOutputItem(new Item("all_results", f.getName(), "All results", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));
+			
+			f = new File(outputFileName+"_size_pvalue.json");
+			IOUtils.write(f.getAbsoluteFile(), snowPrinter.getJsonSizePValue(gsnowItems, numberOfStartingNodes));
+			List<String> tags = new ArrayList<String>();
+			tags.add("SIZE_PVALUE");
+			result.addOutputItem(new Item("size_pvalue", f.getName(), "Plot", TYPE.IMAGE, tags, new HashMap<String, String>(2), "Results"));
+
 			
 			if(significantItem.getComparedValue() > significantValue){
 				result.addOutputItem(new Item("significant_value", " There is no significant minimal connected network", "Significant value", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));

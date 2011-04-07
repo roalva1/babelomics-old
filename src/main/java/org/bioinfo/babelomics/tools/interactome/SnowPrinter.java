@@ -1,6 +1,7 @@
 package org.bioinfo.babelomics.tools.interactome;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,6 +13,8 @@ import org.bioinfo.data.graph.SimpleUndirectedGraph;
 import org.bioinfo.data.graph.edge.DefaultEdge;
 import org.bioinfo.networks.protein.ProteinNetwork;
 import org.bioinfo.networks.protein.ProteinVertex;
+
+import com.google.gson.Gson;
 
 public class SnowPrinter {
 
@@ -205,6 +208,21 @@ public class SnowPrinter {
 		sb.append(gsnowItem.getNodesIds()).append(tab);
 		sb.append(gsnowItem.getComparedValue());
 		return sb.toString();
+	}
+	public String getJsonSizePValue(Map<Integer, GSnowItem> gsnowItems, int numberOfStartingNodes){
+		Integer[] array = gsnowItems.keySet().toArray(new Integer[0]);
+		Map<Integer, Double> json = new HashMap<Integer, Double>(); 
+		List<Integer> orderedList = ArrayUtils.toList(array);
+		Collections.sort(orderedList);
+		GSnowItem gsnowItem;
+		for(int i : orderedList){
+			if(i >= numberOfStartingNodes){
+				gsnowItem = gsnowItems.get(i);
+				json.put(gsnowItem.getNodes().size(), gsnowItem.getComparedValue());
+			}
+		}
+		Gson gson = new Gson();
+		return gson.toJson(json);
 	}
 	public String printNodesList(List<Node> nodes){
 		StringBuilder sb = new StringBuilder();

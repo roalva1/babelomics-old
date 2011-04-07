@@ -127,7 +127,6 @@ public abstract class SnowTool extends BabelomicsTool{
 				interactomeGraph = InteractomeParser.parseFromSifFile(parseFromSifFile);
 				System.out.println("Interactome read: "+interactome+"_alldb_"+group+"physical_"+localType+"_interactome_nr.sif");
 				proteinNetwork = new ProteinNetwork(interactomeGraph);
-				System.out.println("Interactome topo values read: "+interactome+"_alldb_"+group+"physical_"+localType+"_interactome_nr_topo.txt");
 				proteinNetwork.loadTopologicalValues(folderInteractions+interactome+"_alldb_"+group+"physical_"+localType+"_interactome_nr_topo.txt");
 				System.out.println("Interactome topo values read: "+interactome+"_alldb_"+group+"physical_"+localType+"_interactome_nr_topo.txt");
 			}

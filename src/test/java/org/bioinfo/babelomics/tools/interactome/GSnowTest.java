@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class GSnowTest {
 	
-	@Test
+	//@Test
 	public void luzBug(){
 		//./babelomics.sh --tool network-miner --type genes --species hsa --select-mcn rel-min --randoms 1000 --interactome hsa --list ~/projects/essential_genes_cancer2011/cancer_commons/essential_genes_all_lines.txt --o-name essential_genes_all_lines -o ~/projects/essential_genes_cancer2011/cancer_commons/essential_genes_all_lines/all1/  --intermediate 1 --group all
 		String outdir = "/tmp/gsnow/example1";
@@ -22,7 +22,7 @@ public class GSnowTest {
 				"--select-mcn", "rel-min",
 				"--type", "genes",
 				"--group", "all",
-				"--intermediate","1",
+				"--intermediate","0",
 				"--randoms","1000",
 				"--list","/mnt/commons/babelomics/tests/snow2/listas/hsa/genes/CML_LYMPH.txt",
 				"--home", System.getenv("BABELOMICS_HOME")};
@@ -45,7 +45,7 @@ public class GSnowTest {
 				"--type", "genes",
 				"--group", "curated",
 				"--intermediate","0",
-				"--randoms","1000",
+				"--randoms","1",
 				"--components","true",
 				"--order","ascendant",
 				"--significant-value","0.05",
@@ -53,7 +53,7 @@ public class GSnowTest {
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
-	//@Test
+	@Test
 	public void example2(){
 		// Genes_up_in_control_Vs_case_Hirschsprung_disease
 		// /opt/babelomics/babelomics.sh --tool network-miner --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5879 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5879/job.log --order descendant --significant-value 0.05 --list /opt/babelomics/example/Genes_up_in_control_Vs_case_Hirschsprung_disease.txt --randoms 1000 --interactome hsa --components true --intermediate 1 --group curated --type genes --o-name result
