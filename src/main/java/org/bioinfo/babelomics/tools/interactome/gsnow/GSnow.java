@@ -176,12 +176,7 @@ public class GSnow extends SnowTool{
 			IOUtils.write(f.getAbsoluteFile(), snowPrinter.printGsnowItems(gsnowItems, numberOfStartingNodes));
 			result.addOutputItem(new Item("all_results", f.getName(), "All results", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));
 			
-			f = new File(outputFileName+"_size_pvalue.json");
-			IOUtils.write(f.getAbsoluteFile(), snowPrinter.getJsonSizePValue(gsnowItems, numberOfStartingNodes));
-			List<String> tags = new ArrayList<String>();
-			tags.add("SIZE_PVALUE");
-			result.addOutputItem(new Item("size_pvalue", f.getName(), "Plot", TYPE.IMAGE, tags, new HashMap<String, String>(2), "Results"));
-
+			
 			
 			if(significantItem.getComparedValue() > significantValue){
 				result.addOutputItem(new Item("significant_value", " There is no significant minimal connected network", "Significant value", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));
@@ -197,6 +192,12 @@ public class GSnow extends SnowTool{
 			result.addOutputItem(new Item("significant_value", "<"+significantStringItem, "pval of MCN chosen", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));
 			result.addOutputItem(new Item("significant_size", Integer.toString(significantItem.getNodes().size()), "size of MCN chosen", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));
 			
+			f = new File(outputFileName+"_size_pvalue.json");
+			IOUtils.write(f.getAbsoluteFile(), snowPrinter.getJsonSizePValue(gsnowItems, numberOfStartingNodes));
+			List<String> tags = new ArrayList<String>();
+			tags.add("NETWORKMINER_SIZE_PVALUE");
+			result.addOutputItem(new Item("plot_size_pvalue", f.getName(), "Plot", TYPE.IMAGE, tags, new HashMap<String, String>(2), "Results"));
+
 			// starting SNOW analyses
 			this.executeSnow();
 			
@@ -478,7 +479,7 @@ public class GSnow extends SnowTool{
 		subProteinNetwork.calcTopologicalMeanValues();
 		
 		IOUtils.write(f.getAbsoluteFile(), this.getMcnInteractors(subProteinNetwork, intermediates));
-		result.addOutputItem(new Item("mcn_interactors", f.getName(), "Minimun Connected Network interactors", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Minimun Connected Network selected"));
+		result.addOutputItem(new Item("mcn_interactors", f.getName(), "Minimun Connected Network interactors", Item.TYPE.FILE,StringUtils.toList("TABLE,NETWORKMINER_TABLE", ",") ,new HashMap<String,String>(),"Minimun Connected Network selected"));
 		if(intermediate && intermediates != null){
 			SnowPrinter snowPrinter = new SnowPrinter();
 			f = new File(outputFileName+"_external_nodes_added.txt");
