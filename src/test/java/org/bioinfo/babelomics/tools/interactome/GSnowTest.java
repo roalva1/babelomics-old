@@ -29,7 +29,7 @@ public class GSnowTest {
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
-	//@Test
+	@Test
 	public void test(){};
 	//@Test
 	public void example1(){
@@ -54,7 +54,7 @@ public class GSnowTest {
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
-	@Test
+	//@Test
 	public void example2(){
 		// Genes_up_in_control_Vs_case_Hirschsprung_disease
 		// /opt/babelomics/babelomics.sh --tool network-miner --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5879 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5879/job.log --order descendant --significant-value 0.05 --list /opt/babelomics/example/Genes_up_in_control_Vs_case_Hirschsprung_disease.txt --randoms 1000 --interactome hsa --components true --intermediate 1 --group curated --type genes --o-name result
