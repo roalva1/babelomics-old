@@ -181,7 +181,8 @@ public class GSnowPreprocessing {
 					notMatchNodes.add(node.getId());
 				
 			} catch (Exception e) {
-				e.printStackTrace();
+				System.out.println("Problems matching "+node+": "+e.getMessage());
+				//e.printStackTrace();
 			}
 		}
 		listInfoLocal.setNodes(curatedListNodes);

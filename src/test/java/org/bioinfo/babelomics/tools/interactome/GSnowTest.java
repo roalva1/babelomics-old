@@ -19,16 +19,17 @@ public class GSnowTest {
 				"-o", outdir, 
 				"--o-name","result",
 				"--interactome","hsa",
-				"--select-mcn", "rel-min",
+//				"--select-mcn", "rel-min",
 				"--type", "genes",
-				"--group", "all",
-				"--intermediate","0",
-				"--randoms","1000",
-				"--list","/mnt/commons/babelomics/tests/snow2/listas/hsa/genes/CML_LYMPH.txt",
+				"--group", "curated",
+				"--intermediate","1",
+				"--randoms","1",
+				"--number-items","10",
+				"--list","/home/ralonso/CML_LYMPH.txt",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
-	@Test
+	//@Test
 	public void test(){};
 	//@Test
 	public void example1(){
@@ -142,7 +143,7 @@ public class GSnowTest {
 			
 	}
 	
-//	@Test
+	//@Test
 	public void testGsnowRandomsGenerator(){
 
 		String outdir = "/tmp/gsnow/testGenerator";
@@ -155,10 +156,10 @@ public class GSnowTest {
 				"--interactome","hsa",
 				"--type", "proteins",
 				"--group", "all",
-				"--intermediate","0",
-				"--size-min","30",
-				"--size-max","40",
-				"--randoms","5",
+				"--intermediate","1",
+				"--size-min","100",
+				"--size-max","101",
+				"--randoms","2000",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}

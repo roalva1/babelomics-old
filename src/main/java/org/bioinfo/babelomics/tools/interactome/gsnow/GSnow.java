@@ -339,6 +339,8 @@ public class GSnow extends SnowTool{
 			currentValue = gsnowItems.get(i).getComparedValue();
 			componentsSizeGSnowItem = gsnowItems.get(i).getComponentsSize();
 			if(currentValue <= this.significantValue)
+				System.out.println("size: "+i+", max component:"+maxUtil.evaluate(ListUtils.toDoubleArray(componentsSizeGSnowItem)) );
+				// La siguiente linea: cogemos el componente con más elemenentos y vemos si es mayor o menor que initSizeElements
 				if(maxUtil.evaluate(ListUtils.toDoubleArray(componentsSizeGSnowItem)) < initSizeElements)
 					pointerSmallerThanInitSizeElements.add(i);
 				else
@@ -346,14 +348,14 @@ public class GSnow extends SnowTool{
 		}
 		
 		double min = Double.MAX_VALUE;
-		double maxSizeComponent = Double.MIN_VALUE;
+		//double maxSizeComponent = Double.MIN_VALUE;
 		int pointerToMin = 0;
 		for(int i : pointerBiggerThanInitSizeElements){
 			currentValue = gsnowItems.get(i).getComparedValue();
 			componentsSizeGSnowItem = gsnowItems.get(i).getComponentsSize();
-			if(currentValue <= min && maxUtil.evaluate(ListUtils.toDoubleArray(componentsSizeGSnowItem)) >  maxSizeComponent){
+			if(currentValue < min /*&& maxUtil.evaluate(ListUtils.toDoubleArray(componentsSizeGSnowItem)) >  maxSizeComponent*/){
 				min = currentValue;
-				maxSizeComponent = maxUtil.evaluate(ListUtils.toDoubleArray(componentsSizeGSnowItem));
+				//maxSizeComponent = maxUtil.evaluate(ListUtils.toDoubleArray(componentsSizeGSnowItem));
 				pointerToMin = i;
 			}
 			
