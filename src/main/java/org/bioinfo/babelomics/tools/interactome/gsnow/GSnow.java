@@ -224,14 +224,17 @@ public class GSnow extends SnowTool{
 			gsnowItem = new GSnowItem();
 			gsnowItem.setNodes(auxNodes);
 			gsnowItems.put(i+1, gsnowItem);
-//			System.out.println(gsnowItems.get(i+1));
 		}
+		
+		
 		return gsnowItems;
 	}
 	
 	// 2º Here the map is (size of list, value of this list)
 	// This method will fill Map<Integer, GSnowItem> gsnowItems with its raw value
+	// Este es el que más tarda sin duda
 	private void getDataMatrixList(){
+		
 		List<ProteinVertex> nodes = new ArrayList<ProteinVertex>();
 		List<List<ProteinVertex>> componentsList;
 		List<Double> componentsSize;
@@ -245,9 +248,7 @@ public class GSnow extends SnowTool{
 		for(int i=numberOfStartingNodes; i <= this.listInfo.getNodes().size(); i++){
 			subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), nodes);
 			if(intermediate){
-//				System.out.println("Nodes size before intermediate: "+subgraph.getVertices().size());
 				Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
-//				System.out.println("Nodes size after intermediate: "+subgraph.getVertices().size());
 			}
 			componentsSize = new ArrayList<Double>();
 			componentsList = subgraph.getAllInformationComponents(true);
@@ -256,16 +257,16 @@ public class GSnow extends SnowTool{
 			rawValue = (double)subgraph.getVertices().size()/(double)componentsList.size();
 			gsnowItems.get(i).setRawValue(rawValue);
 			gsnowItems.get(i).setComponentsSize(componentsSize);
-			//System.out.println("Size: "+gsnowItems.get(i).getNodes().size()+":"+rawValue);
 			if(i < listInfo.getNodes().size())
 				nodes.add(new ProteinVertex(listInfo.getNodes().get(i).getId()));
 		}
+		
 	}
 	
 	// 3º Here the map is (size of list, value of this list of each random)
 	// Here we will load the data of the randoms in Map<Integer, List<Double>>
 	public Map<Integer, List<Double>> getDataMatrixRandoms(String folder) throws IOException{
-		
+
 		Map<Integer, List<Double>> values1 = new HashMap<Integer, List<Double>>();
 		List<Double> values2 = null;
 		TextFileReader tfr = new TextFileReader(folder);
@@ -284,16 +285,16 @@ public class GSnow extends SnowTool{
 			}
 		}
 		tfr.close();
+		
 		return values1;
 	}
 	
 	// 4º Here the map is (size of list, value of this list comparing with randoms)
 	// Here we will get the compared value against the randoms
 	private void compareDataMatrixListRandoms( Map<Integer, List<Double>> dataMatrixRandoms){
+		
 		for(int i = numberOfStartingNodes; i <= this.listInfo.getNodes().size(); i++){
 			double rawValue = gsnowItems.get(i).getRawValue();
-//			if(i==134)
-//				System.out.println(gsnowItems.get(i).getRawValue());
 			List<Double> valueList = dataMatrixRandoms.get(i);
 //			System.out.println("("+i+")List["+gsnowItems.get(i).getNodes().size()+"]:"+rndValue);
 			List<Double> intValue = new ArrayList<Double>();
@@ -311,19 +312,15 @@ public class GSnow extends SnowTool{
 				}
 					
 			}
-//			if(i==134){
-//				System.out.println("rawBiggerValue:"+rawBiggerValue);
-//				System.out.println("valueBiggerRaw:"+valueBiggerRaw);
-//				System.out.println(1-MathUtils.mean(ListUtils.toDoubleArray(intValue)));
-//			}
-				
-			gsnowItems.get(i).setComparedValue(1-MathUtils.mean(ListUtils.toDoubleArray(intValue)));
+			gsnowItems.get(i).setComparedValue(1 - MathUtils.mean(ListUtils.toDoubleArray(intValue)));
 		}
+		
 	}
 	
 	
 	//5º Here we get the significant item in significantItem from gsnowItems
 	private GSnowItem getSignificatValueAbsMinOption() {
+		
 		GSnowItem significantItemLocal = new GSnowItem();
 		List<Node> significantNodes = new ArrayList<Node>();
 		double significantValue = Double.MAX_VALUE;
@@ -375,7 +372,11 @@ public class GSnow extends SnowTool{
 		}
 		significantItemLocal.setNodes(significantNodes);
 		significantItemLocal.setComparedValue(significantValue);
+		
+		
 		return significantItemLocal;
+		
+		
 	}
 	private GSnowItem getSignificatValueRelMinOption() {
 		GSnowItem significantItemLocal = new GSnowItem();

@@ -191,7 +191,7 @@ public class SnowPrinter {
 		Integer[] array = gsnowItems.keySet().toArray(new Integer[0]);
 		List<Integer> orderedList = ArrayUtils.toList(array);
 		Collections.sort(orderedList);
-		sb.append("#Size").append(tab).append("Nodes").append(tab).append("P-value").append(lineSeparator);
+		sb.append("#Size").append(tab).append("Nodes").append(tab).append("P-value").append(tab).append("RawValue").append(lineSeparator);
 		GSnowItem gsnowItem;
 		for(int i : orderedList){
 			if(i >= numberOfStartingNodes){
@@ -206,7 +206,8 @@ public class SnowPrinter {
 		StringBuilder sb = new StringBuilder();
 		sb.append(gsnowItem.getNodes().size()).append(tab);
 		sb.append(gsnowItem.getNodesIds()).append(tab);
-		sb.append(gsnowItem.getComparedValue());
+		sb.append(gsnowItem.getComparedValue()).append(tab);
+		sb.append(gsnowItem.getRawValue());
 		return sb.toString();
 	}
 	public String getJsonSizePValue(Map<Integer, GSnowItem> gsnowItems, int numberOfStartingNodes){
