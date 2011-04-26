@@ -191,7 +191,7 @@ public class SnowPrinter {
 		Integer[] array = gsnowItems.keySet().toArray(new Integer[0]);
 		List<Integer> orderedList = ArrayUtils.toList(array);
 		Collections.sort(orderedList);
-		sb.append("#Size").append(tab).append("Nodes").append(tab).append("P-value").append(tab).append("RawValue").append(lineSeparator);
+		sb.append("#Size").append(tab).append("Nodes").append(tab).append("P-value").append(tab).append("number of nodes / number of components").append(lineSeparator);
 		GSnowItem gsnowItem;
 		for(int i : orderedList){
 			if(i >= numberOfStartingNodes){
