@@ -7,13 +7,10 @@ import org.junit.Test;
 
 public class GSnowTest {
 	
-	//@Test
+	@Test
 	public void luzBug(){
-		//./babelomics.sh --tool network-miner --type genes --species hsa --select-mcn rel-min --randoms 1000 --interactome hsa --list ~/projects/essential_genes_cancer2011/cancer_commons/essential_genes_all_lines.txt --o-name essential_genes_all_lines -o ~/projects/essential_genes_cancer2011/cancer_commons/essential_genes_all_lines/all1/  --intermediate 1 --group all
 		String outdir = "/tmp/gsnow/example1";
 		new File(outdir).mkdirs();
-//CML_LYMPH.txt
-//essential_genes_all_lines.txt		
 		String []args = {
 				"--tool", "network-miner", 
 				"-o", outdir, 
@@ -21,17 +18,16 @@ public class GSnowTest {
 				"--interactome","hsa",
 //				"--select-mcn", "rel-min",
 				"--type", "genes",
-				"--group", "curated",
+				"--group", "all",
 				"--intermediate","1",
 				"--randoms","1",
-				"--number-items","10",
-				"--list","/home/ralonso/CML_LYMPH.txt",
+				"--list","/home/ralonso/Desktop/essential_genes_all_lines.txt",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}
 	@Test
 	public void test(){};
-	@Test
+//	@Test
 	public void example1(){
 		// Essential_genes_in_cancer_cell_line_K562
 		// /opt/babelomics/babelomics.sh --tool network-miner --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5880 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5880/job.log --order ascendant --significant-value 0.05 --list /opt/babelomics/example/K562_symbol.txt --randoms 1000 --components true --interactome hsa --intermediate 0 --group curated --type genes --o-name result
