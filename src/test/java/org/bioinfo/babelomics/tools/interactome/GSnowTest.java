@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class GSnowTest {
 	
-	@Test
+	//@Test
 	public void luzBug(){
 		String outdir = "/tmp/gsnow/example1";
 		new File(outdir).mkdirs();
@@ -21,6 +21,7 @@ public class GSnowTest {
 				"--group", "all",
 				"--intermediate","1",
 				"--randoms","1",
+				"--select-mcn","rel-min",
 				"--list","/home/ralonso/Desktop/essential_genes_all_lines.txt",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);

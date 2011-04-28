@@ -400,7 +400,7 @@ public class GSnow extends SnowTool{
 				//It is the last item 
 				nextCurrentValue = currentValue;
 			}
-			if(nextCurrentValue < currentValue)
+			if(nextCurrentValue <= currentValue)
 				continue;
 			componentsSizeGSnowItem = gsnowItems.get(i).getComponentsSize();
 			if(currentValue <= this.significantValue)
