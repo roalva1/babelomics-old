@@ -681,7 +681,7 @@ public class Snow  extends BabelomicsTool{
 			int  randomVertex = (int) (Math.random() * proteinNetwork.getInteractomeGraph().getVertices().size());
 			ProteinVertex v = proteinNetwork.getInteractomeGraph().getVertices().get(randomVertex);
 			relBetRandoms.add(v.getRelativeBetweenness());
-			connRandoms.add(Double.parseDouble(Integer.toString(proteinNetwork.getInteractomeGraph().getDegree(v))));
+			connRandoms.add(Double.parseDouble(Integer.toString(proteinNetwork.getInteractomeGraph().getDegreeOf(v))));
 			clustRandoms.add(v.getClusteringCoefficient());
 		}
 
@@ -907,7 +907,7 @@ public class Snow  extends BabelomicsTool{
 //			logger.debug("Randoms["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getEdges().size());
 			if(intermediate) {
 				Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
-				logger.debug("Randoms intermediate["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getEdges().size());
+				logger.debug("Randoms intermediate["+i+"]: V = "+subgraph.getVertices().size()+" E = "+subgraph.getAllEdges().size());
 			}
 			ProteinNetwork subProteinNetwork = createSubnet(subgraph);
 			logger.debug("Subnet created");
@@ -1024,7 +1024,7 @@ public class Snow  extends BabelomicsTool{
 			}
 			
 			sb.append(inputId+proteinVertex.getId()).append("\t");
-			sb.append(proteinVertex.getRelativeBetweenness()).append("\t").append(subProteinNetwork.getInteractomeGraph().getDegree(proteinVertex)).append("\t").append(proteinVertex.getClusteringCoefficient());
+			sb.append(proteinVertex.getRelativeBetweenness()).append("\t").append(subProteinNetwork.getInteractomeGraph().getDegreeOf(proteinVertex)).append("\t").append(proteinVertex.getClusteringCoefficient());
 			sb.append(System.getProperty("line.separator"));
 		}
 		if(!sb.toString().equals(""))
@@ -1038,7 +1038,7 @@ public class Snow  extends BabelomicsTool{
 				continue;
 			sb.append("sn"+(subnet)).append("\t");
 			sb.append(proteinVertex.getId()).append("\t");
-			sb.append(proteinVertex.getRelativeBetweenness()).append("\t").append(subProteinNetwork.getInteractomeGraph().getDegree(proteinVertex)).append("\t").append(proteinVertex.getClusteringCoefficient());
+			sb.append(proteinVertex.getRelativeBetweenness()).append("\t").append(subProteinNetwork.getInteractomeGraph().getDegreeOf(proteinVertex)).append("\t").append(proteinVertex.getClusteringCoefficient());
 			sb.append(System.getProperty("line.separator"));
 		}
 		if(!sb.toString().equals(""))

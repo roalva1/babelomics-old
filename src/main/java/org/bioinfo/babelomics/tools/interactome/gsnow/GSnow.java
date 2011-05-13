@@ -535,7 +535,7 @@ public class GSnow extends SnowTool{
 			}
 			sb.append(vertex.getRelativeBetweenness()).append(tab);
 			sb.append(vertex.getClusteringCoefficient()).append(tab);
-			sb.append(subProteinNetwork.getInteractomeGraph().getDegree(vertex)).append(tab);
+			sb.append(subProteinNetwork.getInteractomeGraph().getDegreeOf(vertex)).append(tab);
 			
 			if(xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null){
 				List<String> dbNames = new ArrayList<String>();
@@ -593,7 +593,7 @@ public class GSnow extends SnowTool{
 			int  randomVertex = (int) (Math.random() * proteinNetwork.getInteractomeGraph().getVertices().size());
 			ProteinVertex v = proteinNetwork.getInteractomeGraph().getVertices().get(randomVertex);
 			relBetRandoms.add(v.getRelativeBetweenness());
-			connRandoms.add(Double.parseDouble(Integer.toString(proteinNetwork.getInteractomeGraph().getDegree(v))));
+			connRandoms.add(Double.parseDouble(Integer.toString(proteinNetwork.getInteractomeGraph().getDegreeOf(v))));
 			clustRandoms.add(v.getClusteringCoefficient());
 			componentsRandoms[randonNumber] = (double)proteinNetwork.getInteractomeGraph().getAllInformationComponents(true).size();
 			randonNumber++;

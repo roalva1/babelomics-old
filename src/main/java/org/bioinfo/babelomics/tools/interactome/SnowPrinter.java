@@ -86,7 +86,7 @@ public class SnowPrinter {
 			 *  }
 			 ***/
 			sb.append(inputId+proteinVertex.getId()).append("\t");
-			sb.append(proteinVertex.getRelativeBetweenness()).append("\t").append(subProteinNetwork.getInteractomeGraph().getDegree(proteinVertex)).append("\t").append(proteinVertex.getClusteringCoefficient());
+			sb.append(proteinVertex.getRelativeBetweenness()).append("\t").append(subProteinNetwork.getInteractomeGraph().getDegreeOf(proteinVertex)).append("\t").append(proteinVertex.getClusteringCoefficient());
 			sb.append(lineSeparator);
 		}
 		if(!sb.toString().equals(""))
