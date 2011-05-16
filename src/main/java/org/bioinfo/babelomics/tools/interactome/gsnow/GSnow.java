@@ -244,12 +244,22 @@ public class GSnow extends SnowTool{
 		}
 		SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph;
 		
+		double tFinal = 0.0;
 		//this.listInfo.getNodes().size() is always <= numberOfMaxNodes, because I cut the list (if it is longer than numberOfMaxNodes) in the preprocessing
 		for(int i=numberOfStartingNodes; i <= this.listInfo.getNodes().size(); i++){
 			subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), nodes);
+		
+			double tIni = System.currentTimeMillis();
+			System.out.println("Before Intermediate:"+subgraph.getVertices().size());
 			if(intermediate){
-				Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
+				Set<String> aux = Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
+				System.out.println("Intermediates:"+aux.size());
 			}
+			System.out.println("Graph vertices:"+subgraph.getVertices().size());
+			
+			double tFin = System.currentTimeMillis();
+			tFinal += (tFin-tIni);
+			
 			componentsSize = new ArrayList<Double>();
 			componentsList = subgraph.getAllInformationComponents(true);
 			for(List<ProteinVertex> component : componentsList)
@@ -260,6 +270,7 @@ public class GSnow extends SnowTool{
 			if(i < listInfo.getNodes().size())
 				nodes.add(new ProteinVertex(listInfo.getNodes().get(i).getId()));
 		}
+		System.out.println("tiempo:" +tFinal/1000);
 		
 	}
 	
