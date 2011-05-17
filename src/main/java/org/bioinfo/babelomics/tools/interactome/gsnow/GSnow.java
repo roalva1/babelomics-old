@@ -244,21 +244,21 @@ public class GSnow extends SnowTool{
 		}
 		SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph;
 		
-		double tFinal = 0.0;
+		//double tFinal = 0.0;
 		//this.listInfo.getNodes().size() is always <= numberOfMaxNodes, because I cut the list (if it is longer than numberOfMaxNodes) in the preprocessing
 		for(int i=numberOfStartingNodes; i <= this.listInfo.getNodes().size(); i++){
 			subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), nodes);
 		
-			double tIni = System.currentTimeMillis();
-			System.out.println("Before Intermediate:"+subgraph.getVertices().size());
+			//double tIni = System.currentTimeMillis();
+			//System.out.println("Before Intermediate:"+subgraph.getVertices().size());
 			if(intermediate){
-				Set<String> aux = Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
-				System.out.println("Intermediates:"+aux.size());
+				Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
+				//System.out.println("Intermediates:"+aux.size());
 			}
-			System.out.println("Graph vertices:"+subgraph.getVertices().size());
+			//System.out.println("Graph vertices:"+subgraph.getVertices().size());
 			
-			double tFin = System.currentTimeMillis();
-			tFinal += (tFin-tIni);
+			//double tFin = System.currentTimeMillis();
+			//tFinal += (tFin-tIni);
 			
 			componentsSize = new ArrayList<Double>();
 			componentsList = subgraph.getAllInformationComponents(true);
@@ -270,7 +270,7 @@ public class GSnow extends SnowTool{
 			if(i < listInfo.getNodes().size())
 				nodes.add(new ProteinVertex(listInfo.getNodes().get(i).getId()));
 		}
-		System.out.println("tiempo:" +tFinal/1000);
+		//System.out.println("tiempo:" +tFinal/1000);
 		
 	}
 	
@@ -485,9 +485,7 @@ public class GSnow extends SnowTool{
 		
 
 		f = new File(outputFileName+"_mcn_interactors.txt");
-		
 		ProteinNetwork subProteinNetwork = new ProteinNetwork(subgraph);
-		
 		subProteinNetwork.calcTopologicalValues();
 		subProteinNetwork.calcTopologicalMeanValues();
 		
@@ -506,7 +504,6 @@ public class GSnow extends SnowTool{
 		if(subProteinNetwork != null){
 			names.add(auxFile.getName() + "_list1.json");
 			createJson(subProteinNetwork, outputFileName+"_list1.dot", components, intermediates, 1, this.mapNames);
-			
 			auxFile = new File(outputFileName+"_list1.json");
 			addOutputSvgViewer(auxFile, 1);
 		}
