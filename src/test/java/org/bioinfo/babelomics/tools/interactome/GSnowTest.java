@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class GSnowTest {
 	
-	//@Test
+	@Test
 	public void luzBug(){
 		String outdir = "/tmp/gsnow/example1";
 		new File(outdir).mkdirs();

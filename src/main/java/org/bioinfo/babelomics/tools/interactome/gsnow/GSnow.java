@@ -20,6 +20,7 @@ import org.bioinfo.babelomics.tools.interactome.gsnow.GSnowPreprocessing.Node;
 import org.bioinfo.commons.io.TextFileReader;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.log.Logger;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.graph.SimpleUndirectedGraph;
@@ -303,8 +304,11 @@ public class GSnow extends SnowTool{
 	// 4º Here the map is (size of list, value of this list comparing with randoms)
 	// Here we will get the compared value against the randoms
 	private void compareDataMatrixListRandoms( Map<Integer, List<Double>> dataMatrixRandoms){
-		
 		for(int i = numberOfStartingNodes; i <= this.listInfo.getNodes().size(); i++){
+			if(dataMatrixRandoms.get(i) == null ){
+				logger.info("Warning: component with size "+i+" has not been found.");
+				continue;
+			}
 			double rawValue = gsnowItems.get(i).getRawValue();
 			List<Double> valueList = dataMatrixRandoms.get(i);
 //			System.out.println("("+i+")List["+gsnowItems.get(i).getNodes().size()+"]:"+rndValue);
