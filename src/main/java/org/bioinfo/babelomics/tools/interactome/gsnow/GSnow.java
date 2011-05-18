@@ -20,7 +20,6 @@ import org.bioinfo.babelomics.tools.interactome.gsnow.GSnowPreprocessing.Node;
 import org.bioinfo.commons.io.TextFileReader;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.commons.log.Logger;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.graph.SimpleUndirectedGraph;
@@ -52,9 +51,10 @@ public class GSnow extends SnowTool{
 	private XRefDBManager xrefDBMan;
 	private GODBManager gof;
 	private int numberOfStartingNodes = 10; // Here we indicate the number of nodes from where we will start the GSnow
-	private static int numberOfMaxNodes = 200; // Here we indicate the max number of nodes that we will analyse
+	private static int numberOfMaxNodes = 500; // Here we indicate the max number of nodes that we will analyse
 	private double significantValue; // Here we indicate which is the minimum significant value that we are interested in.
 	private static double defaultSignificantValue = 0.05; // Here we indicate the default significant value that we are interested in.
+	private int maxNumberOfRandomsComponents; // Here we indicate the maximum size of the randoms from the components
 	private String order;
 	private Integer numberItems;
 	private double cutOff;
@@ -174,7 +174,7 @@ public class GSnow extends SnowTool{
 			
 			
 			f = new File(outputFileName+"_all.txt");
-			IOUtils.write(f.getAbsoluteFile(), snowPrinter.printGsnowItems(gsnowItems, numberOfStartingNodes));
+			IOUtils.write(f.getAbsoluteFile(), snowPrinter.printGsnowItems(gsnowItems, numberOfStartingNodes, this.maxNumberOfRandomsComponents));
 			result.addOutputItem(new Item("all_results", f.getName(), "All results", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));
 			
 			
@@ -284,7 +284,7 @@ public class GSnow extends SnowTool{
 		TextFileReader tfr = new TextFileReader(folder);
 		String line = null;
 		String[] fields;
-		int size=0;;
+		int size=0;
 		while((line = tfr.readLine()) != null) {
 			if(!line.startsWith("#")){
 				values2 = new ArrayList<Double>();
@@ -297,7 +297,7 @@ public class GSnow extends SnowTool{
 			}
 		}
 		tfr.close();
-		
+		this.maxNumberOfRandomsComponents = size;
 		return values1;
 	}
 	

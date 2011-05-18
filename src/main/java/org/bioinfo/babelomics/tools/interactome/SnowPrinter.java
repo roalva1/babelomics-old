@@ -185,7 +185,7 @@ public class SnowPrinter {
 		return sb.deleteCharAt(sb.length()-1);
 	}
 	
-	public String printGsnowItems(Map<Integer, GSnowItem> gsnowItems, int numberOfStartingNodes){
+	public String printGsnowItems(Map<Integer, GSnowItem> gsnowItems, int numberOfStartingNodes, int numberOfEndingNodes){
 		
 		StringBuilder sb = new StringBuilder();
 		Integer[] array = gsnowItems.keySet().toArray(new Integer[0]);
@@ -194,7 +194,7 @@ public class SnowPrinter {
 		sb.append("#Size").append(tab).append("Nodes").append(tab).append("P-value").append(tab).append("number of nodes / number of components").append(lineSeparator);
 		GSnowItem gsnowItem;
 		for(int i : orderedList){
-			if(i >= numberOfStartingNodes){
+			if(i >= numberOfStartingNodes && i <= numberOfEndingNodes ){
 				gsnowItem = gsnowItems.get(i);
 				sb.append(printGsnowItem(gsnowItem)).append(lineSeparator);
 			}
