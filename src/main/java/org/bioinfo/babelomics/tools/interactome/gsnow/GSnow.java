@@ -50,7 +50,7 @@ public class GSnow extends SnowTool{
 	private DBConnector dbConnector;
 	private XRefDBManager xrefDBMan;
 	private GODBManager gof;
-	private int numberOfStartingNodes; // Here we indicate the number of nodes from where we will start the GSnow
+	private int numberOfMinNodes; // Here we indicate the number of nodes from where we will start the GSnow
 	private int numberOfMaxNodes; // Here we indicate the max number of nodes that we will analyse
 	private double significantValue; // Here we indicate which is the minimum significant value that we are interested in.
 	private double defaultSignificantValue = 0.05; // Here we indicate the default significant value that we are interested in.
@@ -75,7 +75,6 @@ public class GSnow extends SnowTool{
 		options.addOption(OptionFactory.createOption("significant-value", "Here we indicate the significant value", false, true));
 		options.addOption(OptionFactory.createOption("select-mcn", "Here we indicate how we can select the chosen network. By the most important value or by the most inportant value considering the 'significant-value'(abs-min, rel-min)", false, true));
 		options.addOption(OptionFactory.createOption("snow", "Here if there is this option we calculate a SNOW", false, false));
-		options.addOption(OptionFactory.createOption("max-nodes", "Here if there is this option we calculate a SNOW", false, false));
 
 		//		options.addOption(OptionFactory.createOption("filter-list", "Here we indicate if we won't filter(default) or filter by number of items or filter by cutting from a value", false, true));
 
@@ -152,9 +151,9 @@ public class GSnow extends SnowTool{
 			result.addOutputItem(new Item("list_info_repeated_nodes", (listInfo.getRepeatedNodes().size()==0) ? "0" : listInfo.getRepeatedNodes().toString(), "Duplicated nodes", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Summary"));
 			//result.addOutputItem(new Item("list_info_cutted_nodes", listInfo.getCuttedNodes().toString(), "Not considered nodes because the list is too big", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Summary"));
 			
-			if(listInfo.getNodes().size() < this.numberOfStartingNodes){
-				logger.info("List to small after preprocessing it. The size should have at least "+numberOfStartingNodes+" after preprocessing. ");
-				result.addOutputItem(new Item("small_size_list_error", "List to small after preprocessing it. The size should have at least "+numberOfStartingNodes+" after preprocessing. ", "An error occurred", Item.TYPE.MESSAGE, Arrays.asList("ERROR"), new HashMap<String, String>(), "Error")); 
+			if(listInfo.getNodes().size() < this.numberOfMinNodes){
+				logger.info("List to small after preprocessing it. The size should have at least "+numberOfMinNodes+" after preprocessing. ");
+				result.addOutputItem(new Item("small_size_list_error", "List to small after preprocessing it. The size should have at least "+numberOfMinNodes+" after preprocessing. ", "An error occurred", Item.TYPE.MESSAGE, Arrays.asList("ERROR"), new HashMap<String, String>(), "Error")); 
 				return;
 			}
 			// 2º Here the map is (size of list, nodes of list)
@@ -180,7 +179,7 @@ public class GSnow extends SnowTool{
 			
 			
 			f = new File(outputFileName+"_all.txt");
-			IOUtils.write(f.getAbsoluteFile(), snowPrinter.printGsnowItems(gsnowItems, numberOfStartingNodes));
+			IOUtils.write(f.getAbsoluteFile(), snowPrinter.printGsnowItems(gsnowItems, numberOfMinNodes));
 			result.addOutputItem(new Item("all_results", f.getName(), "All results", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));
 			
 			
@@ -200,7 +199,7 @@ public class GSnow extends SnowTool{
 			result.addOutputItem(new Item("significant_size", Integer.toString(significantItem.getNodes().size()), "size of MCN chosen", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));
 			
 			f = new File(outputFileName+"_size_pvalue.json");
-			IOUtils.write(f.getAbsoluteFile(), snowPrinter.getJsonSizePValue(gsnowItems, numberOfStartingNodes));
+			IOUtils.write(f.getAbsoluteFile(), snowPrinter.getJsonSizePValue(gsnowItems, numberOfMinNodes));
 			List<String> tags = new ArrayList<String>();
 			tags.add("NETWORKMINER_SIZE_PVALUE");
 			result.addOutputItem(new Item("plot_size_pvalue", f.getName(), "Plot", TYPE.IMAGE, tags, new HashMap<String, String>(2), "Results"));
@@ -245,7 +244,7 @@ public class GSnow extends SnowTool{
 				values1.put(size, values2);
 				if(!minimunSize){
 					//here we take the minimun size of the randoms
-					this.numberOfStartingNodes = size;
+					this.numberOfMinNodes = size;
 					minimunSize = true;
 				}
 			}
@@ -286,14 +285,14 @@ public class GSnow extends SnowTool{
 		List<List<ProteinVertex>> componentsList;
 		List<Double> componentsSize;
 		double rawValue;
-		for(int i=0; i < numberOfStartingNodes; i++){
+		for(int i=0; i < numberOfMinNodes; i++){
 			nodes.add(new ProteinVertex(listInfo.getNodes().get(i).getId()));
 		}
 		SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph;
 		
 		//double tFinal = 0.0;
 		//this.listInfo.getNodes().size() is always <= numberOfMaxNodes, because I cut the list (if it is longer than numberOfMaxNodes) in the preprocessing
-		for(int i=numberOfStartingNodes; i <= this.listInfo.getNodes().size(); i++){
+		for(int i=numberOfMinNodes; i <= this.listInfo.getNodes().size(); i++){
 			subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), nodes);
 		
 			//double tIni = System.currentTimeMillis();
@@ -326,7 +325,7 @@ public class GSnow extends SnowTool{
 	// 4º Here the map is (size of list, value of this list comparing with randoms)
 	// Here we will get the compared value against the randoms
 	private void compareDataMatrixListRandoms( Map<Integer, List<Double>> dataMatrixRandoms){
-		for(int i = numberOfStartingNodes; i <= this.listInfo.getNodes().size(); i++){
+		for(int i = numberOfMinNodes; i <= this.listInfo.getNodes().size(); i++){
 			if(dataMatrixRandoms.get(i) == null ){
 				logger.info("Warning: component with size "+i+" has not been found.");
 				continue;
@@ -369,7 +368,7 @@ public class GSnow extends SnowTool{
 		int initSizeElements = 5;
 		double currentValue;
 		Max maxUtil = new Max();
-		for(int i = numberOfStartingNodes; i <= this.listInfo.getNodes().size(); i++){
+		for(int i = numberOfMinNodes; i <= this.listInfo.getNodes().size(); i++){
 			currentValue = gsnowItems.get(i).getComparedValue();
 			componentsSizeGSnowItem = gsnowItems.get(i).getComponentsSize();
 			if(currentValue <= this.significantValue)
@@ -428,7 +427,7 @@ public class GSnow extends SnowTool{
 		double currentValue;
 		double nextCurrentValue;
 		Max maxUtil = new Max();
-		for(int i = numberOfStartingNodes; i <= this.listInfo.getNodes().size(); i++){
+		for(int i = numberOfMinNodes; i <= this.listInfo.getNodes().size(); i++){
 			currentValue = gsnowItems.get(i).getComparedValue();
 			if(gsnowItems.get(i+1) != null){
 				nextCurrentValue = gsnowItems.get(i+1).getComparedValue();
