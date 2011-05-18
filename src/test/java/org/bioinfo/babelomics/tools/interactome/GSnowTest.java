@@ -10,6 +10,7 @@ public class GSnowTest {
 	@Test
 	public void luzBug(){
 		String outdir = "/tmp/gsnow/example1";
+		System.out.println("Resutls allocated in: "+outdir);
 		new File(outdir).mkdirs();
 		String []args = {
 				"--tool", "network-miner", 
@@ -22,6 +23,7 @@ public class GSnowTest {
 				"--intermediate","1",
 				"--randoms","1",
 				"--select-mcn","rel-min",
+				"--snow",
 				"--list","/home/ralonso/Desktop/essential_genes_all_lines.txt",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);

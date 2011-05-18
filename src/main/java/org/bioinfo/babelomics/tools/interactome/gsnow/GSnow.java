@@ -50,15 +50,16 @@ public class GSnow extends SnowTool{
 	private DBConnector dbConnector;
 	private XRefDBManager xrefDBMan;
 	private GODBManager gof;
-	private int numberOfStartingNodes = 10; // Here we indicate the number of nodes from where we will start the GSnow
-	private static int numberOfMaxNodes = 500; // Here we indicate the max number of nodes that we will analyse
+	private int numberOfStartingNodes; // Here we indicate the number of nodes from where we will start the GSnow
+	private int numberOfMaxNodes; // Here we indicate the max number of nodes that we will analyse
 	private double significantValue; // Here we indicate which is the minimum significant value that we are interested in.
-	private static double defaultSignificantValue = 0.05; // Here we indicate the default significant value that we are interested in.
-	private int maxNumberOfRandomsComponents; // Here we indicate the maximum size of the randoms from the components
+	private double defaultSignificantValue = 0.05; // Here we indicate the default significant value that we are interested in.
+	//private int maxNumberOfRandomsComponents; // Here we indicate the maximum size of the randoms from the components
 	private String order;
 	private Integer numberItems;
 	private double cutOff;
 	private String selectOption;
+	private boolean snow;
 	
 	//Important info mapNames<String,String> = <Ensenbl_gen, normal_name>
 	private Map<String, String> mapNames; 
@@ -73,6 +74,8 @@ public class GSnow extends SnowTool{
 		options.addOption(OptionFactory.createOption("cut-off", "Here we indicate where we cut the list from (considering the order)", false, true));
 		options.addOption(OptionFactory.createOption("significant-value", "Here we indicate the significant value", false, true));
 		options.addOption(OptionFactory.createOption("select-mcn", "Here we indicate how we can select the chosen network. By the most important value or by the most inportant value considering the 'significant-value'(abs-min, rel-min)", false, true));
+		options.addOption(OptionFactory.createOption("snow", "Here if there is this option we calculate a SNOW", false, false));
+		options.addOption(OptionFactory.createOption("max-nodes", "Here if there is this option we calculate a SNOW", false, false));
 
 		//		options.addOption(OptionFactory.createOption("filter-list", "Here we indicate if we won't filter(default) or filter by number of items or filter by cutting from a value", false, true));
 
@@ -101,32 +104,35 @@ public class GSnow extends SnowTool{
 			String interactomeMsg = getInteractomeMsg();
 //			filterList = commandLine.hasOption("filter-list") ? commandLine.getOptionValue("filter-list") : "wholeList";
 			order = commandLine.hasOption("order") ? commandLine.getOptionValue("order") : "ascendant";
-			numberItems = commandLine.hasOption("number-items") ? Integer.parseInt(commandLine.getOptionValue("number-items")) : numberOfMaxNodes;
 			cutOff = commandLine.hasOption("cut-off") ? Double.parseDouble(commandLine.getOptionValue("cut-off")) : Double.NaN;
 			significantValue = commandLine.hasOption("significant-value") ? Double.parseDouble(commandLine.getOptionValue("significant-value")) : defaultSignificantValue;
 
 			selectOption = commandLine.hasOption("select-mcn") ? commandLine.getOptionValue("select-mcn") : "abs-min";
-
+			snow = commandLine.hasOption("snow") ? true : false;
 			
 			dbConnector = new DBConnector(interactome, new File(babelomicsHomePath + "/conf/infrared.properties"));
 			xrefDBMan = new XRefDBManager(dbConnector);
 			gof = new GODBManager(dbConnector);
 			logger.debug("Starting list.........");
 			String nodeFile = commandLine.getOptionValue("list");
-
 			
+			String folder = loadFile();
+			System.out.println(folder);
+			
+			// 1º Here the map is (size of list, value of this list of each random)
+			Map<Integer, List<Double>> dataMatrixRandoms = getDataMatrixRandoms(folder);
+			numberItems = commandLine.hasOption("number-items") ? Integer.parseInt(commandLine.getOptionValue("number-items")) : numberOfMaxNodes;
+
 			GSnowPreprocessing preprocessing = new GSnowPreprocessing(proteinNetwork, type, xrefDBMan, /*numberOfStartingNodes,*/ numberOfMaxNodes, order, numberItems, cutOff);
 			
 			result.addOutputItem(new Item("interactome_param", interactomeMsg, "Interactome", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 			result.addOutputItem(new Item("group_param", group, "Interactome group (curated or all)", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 			result.addOutputItem(new Item("intermediate_param", (intermediate ? "1" : "0"), "Number of external proteins introduced", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 //			result.addOutputItem(new Item("select_option", selectOption, "Option", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
-
-			String folder = loadFile();
-			System.out.println(folder);
 			
 			FileUtils.checkFile(new File(nodeFile));
 			listInfo = preprocessing.preprocess(nodeFile);
+			
 			
 			mapNames = new HashMap<String, String>();
 			
@@ -147,20 +153,20 @@ public class GSnow extends SnowTool{
 			//result.addOutputItem(new Item("list_info_cutted_nodes", listInfo.getCuttedNodes().toString(), "Not considered nodes because the list is too big", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Summary"));
 			
 			if(listInfo.getNodes().size() < this.numberOfStartingNodes){
-				result.addOutputItem(new Item("small_size_list_error", "List to small after preprocessing it. The size should have at least "+numberOfStartingNodes+" after preprocessing ", "An error occurred", Item.TYPE.MESSAGE, Arrays.asList("ERROR"), new HashMap<String, String>(), "Error")); 
+				logger.info("List to small after preprocessing it. The size should have at least "+numberOfStartingNodes+" after preprocessing. ");
+				result.addOutputItem(new Item("small_size_list_error", "List to small after preprocessing it. The size should have at least "+numberOfStartingNodes+" after preprocessing. ", "An error occurred", Item.TYPE.MESSAGE, Arrays.asList("ERROR"), new HashMap<String, String>(), "Error")); 
 				return;
 			}
-			// 1º Here the map is (size of list, nodes of list)
+			// 2º Here the map is (size of list, nodes of list)
 			gsnowItems = getGSnowItems();
 			updateJobStatus("10","List preprocessed");
 		
-			// 2º Here the map is (size of list, value of this list)
+			// 3º Here the map is (size of list, value of this list)
 			getDataMatrixList();
 			updateJobStatus("15","List preprocessed");
 			
-			// 3º Here the map is (size of list, value of this list of each random)
-			Map<Integer, List<Double>> dataMatrixRandoms = getDataMatrixRandoms(folder);
-			updateJobStatus("20","List preprocessed");
+			
+			//updateJobStatus("20","List preprocessed");
 			
 			// 4º Here the map is (size of list, value of this list compared with randoms)
 			compareDataMatrixListRandoms(dataMatrixRandoms);
@@ -174,7 +180,7 @@ public class GSnow extends SnowTool{
 			
 			
 			f = new File(outputFileName+"_all.txt");
-			IOUtils.write(f.getAbsoluteFile(), snowPrinter.printGsnowItems(gsnowItems, numberOfStartingNodes, this.maxNumberOfRandomsComponents));
+			IOUtils.write(f.getAbsoluteFile(), snowPrinter.printGsnowItems(gsnowItems, numberOfStartingNodes));
 			result.addOutputItem(new Item("all_results", f.getName(), "All results", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Results"));
 			
 			
@@ -200,7 +206,12 @@ public class GSnow extends SnowTool{
 			result.addOutputItem(new Item("plot_size_pvalue", f.getName(), "Plot", TYPE.IMAGE, tags, new HashMap<String, String>(2), "Results"));
 
 			// starting SNOW analyses
-			this.executeSnow();
+			if(snow){
+				System.out.println("Executing SNOW");
+				this.executeSnow();
+			}
+			else
+				System.out.println("Not SNOW executed");
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -210,7 +221,42 @@ public class GSnow extends SnowTool{
 	}
 	
 	
-	// 1º Here the map is (size of list, nodes of list)
+	
+	// 1º Here the map is (size of list, value of this list of each random)
+	// Here we will load the data of the randoms in Map<Integer, List<Double>>
+	public Map<Integer, List<Double>> getDataMatrixRandoms(String folder) throws IOException{
+
+		Map<Integer, List<Double>> values1 = new HashMap<Integer, List<Double>>();
+		List<Double> values2 = null;
+		TextFileReader tfr = new TextFileReader(folder);
+		String line = null;
+		String[] fields;
+		int size=0;
+		boolean minimunSize = false;
+		while((line = tfr.readLine()) != null) {
+			if(!line.startsWith("#")){
+				
+				values2 = new ArrayList<Double>();
+				fields = line.split("\t");
+				size = Integer.parseInt(fields[0]);
+				for(int i=1; i <fields.length; i++){
+					values2.add(Double.parseDouble(fields[i]));
+				}
+				values1.put(size, values2);
+				if(!minimunSize){
+					//here we take the minimun size of the randoms
+					this.numberOfStartingNodes = size;
+					minimunSize = true;
+				}
+			}
+		}
+		tfr.close();
+		//here we take the maximum0 size of the randoms
+		this.numberOfMaxNodes = size;
+		return values1;
+	}
+	
+	// 2º Here the map is (size of list, nodes of list)
 	// This method will have each size[0...listInfo.getNodes().size()] of listInfo with its GSnowItems
 	private Map<Integer, GSnowItem> getGSnowItems() {
 		
@@ -231,7 +277,7 @@ public class GSnow extends SnowTool{
 		return gsnowItems;
 	}
 	
-	// 2º Here the map is (size of list, value of this list)
+	// 3º Here the map is (size of list, value of this list)
 	// This method will fill Map<Integer, GSnowItem> gsnowItems with its raw value
 	// Este es el que más tarda sin duda
 	private void getDataMatrixList(){
@@ -275,31 +321,7 @@ public class GSnow extends SnowTool{
 		
 	}
 	
-	// 3º Here the map is (size of list, value of this list of each random)
-	// Here we will load the data of the randoms in Map<Integer, List<Double>>
-	public Map<Integer, List<Double>> getDataMatrixRandoms(String folder) throws IOException{
-
-		Map<Integer, List<Double>> values1 = new HashMap<Integer, List<Double>>();
-		List<Double> values2 = null;
-		TextFileReader tfr = new TextFileReader(folder);
-		String line = null;
-		String[] fields;
-		int size=0;
-		while((line = tfr.readLine()) != null) {
-			if(!line.startsWith("#")){
-				values2 = new ArrayList<Double>();
-				fields = line.split("\t");
-				size = Integer.parseInt(fields[0]);
-				for(int i=1; i <fields.length; i++){
-					values2.add(Double.parseDouble(fields[i]));
-				}
-				values1.put(size, values2);
-			}
-		}
-		tfr.close();
-		this.maxNumberOfRandomsComponents = size;
-		return values1;
-	}
+	
 	
 	// 4º Here the map is (size of list, value of this list comparing with randoms)
 	// Here we will get the compared value against the randoms
@@ -415,7 +437,9 @@ public class GSnow extends SnowTool{
 				//It is the last item 
 				nextCurrentValue = currentValue;
 			}
-			if(nextCurrentValue <= currentValue)
+			//if the current values is minor than the currentValue and if we are not in the last node. This last case tha graph es like this \____
+			//so we choose the last item
+			if(nextCurrentValue <= currentValue && gsnowItems.get(i+1) != null )
 				continue;
 			componentsSizeGSnowItem = gsnowItems.get(i).getComponentsSize();
 			if(currentValue <= this.significantValue)
