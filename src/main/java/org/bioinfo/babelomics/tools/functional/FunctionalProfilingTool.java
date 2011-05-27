@@ -79,7 +79,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 	public void initOptions() {
 
 		// commons options
-		getOptions().addOption(OptionFactory.createOption("fisher", "the Fisher test mode, valid values: less, greater, two_sided. By default, two_sided", false));
+		getOptions().addOption(OptionFactory.createOption("fisher", "the Fisher test mode, valid values: less, greater, two-tailed. By default, two-tailed", false));
 		getOptions().addOption(OptionFactory.createOption("go-dag", "Compute DAG for significant GO terms", false));
 		
 		// GO biological process options
@@ -133,11 +133,15 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		// species
 		setSpecies(commandLine.getOptionValue("species","hsa"));
 		
-		// fisher test
+		// fisher test		
 		String testMode = commandLine.getOptionValue("fisher", "two-tailed");
-		if(testMode.equals("less")) setTestMode(FisherExactTest.LESS);
+		if(testMode.equals("less") || testMode.equals("lower")) setTestMode(FisherExactTest.LESS);
 		if(testMode.equals("greater")) setTestMode(FisherExactTest.GREATER);
-		if(testMode.equals("two-tailed")) setTestMode(FisherExactTest.TWO_SIDED);
+		if(testMode.equals("two-tailed") || testMode.equals("two_sided") ) setTestMode(FisherExactTest.TWO_SIDED);
+		if(getTestMode()==0){
+			logger.warn("Unknown fisher test mode. Set Two tailed instead.");
+			setTestMode(FisherExactTest.TWO_SIDED);			
+		}
 		
 		filterList = new ArrayList<FunctionalFilter>();
 		
@@ -394,8 +398,7 @@ public abstract class FunctionalProfilingTool extends BabelomicsTool {
 		for(TwoListFisherTestResult test: raw){			
 			GeneSetAnalysisTestResult gseaTest = new GeneSetAnalysisTestResult(test);
 			result.add(gseaTest);
-		}
-		System.err.println("que e lo que pasa: " + result.size());
+		}		
 		return createGseaGoGraph(result,pvalue,filterInfo);
 	}
 	
