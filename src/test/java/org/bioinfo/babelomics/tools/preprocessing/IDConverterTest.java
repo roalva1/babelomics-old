@@ -59,7 +59,7 @@ public class IDConverterTest {
 		String outdir = "/tmp/IDConverterTest2";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "id-converter","--log-level", "2", "--species", "sce", "--listfile", dataset, "--db-names", "go,entrezgene,interpro", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
+		String []args = { "--tool", "id-converter","--log-level", "2", "--species", "sce", "--id-file", dataset, "--db-names", "go,entrezgene,interpro", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("ID Converter Test, args : " + Arrays.toString(args));
 		try {
@@ -77,7 +77,7 @@ public class IDConverterTest {
 		String outdir = "/tmp/IDConverterTest3";
 		new File(outdir).mkdir();
 
-		String []args = { "--tool", "id-converter","--log-level", "2", "--species", "sce", "--listfile", dataset, "--db-names", "ensembl_gene", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
+		String []args = { "--tool", "id-converter","--log-level", "2", "--species", "sce", "--id-file", dataset, "--db-names", "ensembl_gene", "-o", outdir, "--home", System.getenv("BABELOMICS_HOME")};
 
 		System.out.println("ID Converter Test, args : " + Arrays.toString(args));
 		try {
