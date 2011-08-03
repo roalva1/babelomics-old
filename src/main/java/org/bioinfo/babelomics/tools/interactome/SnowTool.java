@@ -74,10 +74,6 @@ public abstract class SnowTool extends BabelomicsTool{
 	
 	public void initExecute(){
 		
-//		dbConnector = new DBConnector(interactome, new File(babelomicsHomePath + "/conf/infrared.properties"));
-//		xrefDBMan = new XRefDBManager(dbConnector);
-		
-		
 		interactome = commandLine.getOptionValue("interactome");
 		if(commandLine.hasOption("randoms"))
 			randoms = Integer.parseInt(commandLine.getOptionValue("randoms"));
@@ -272,7 +268,7 @@ public abstract class SnowTool extends BabelomicsTool{
 		layoutsName.add("neato");
 
 		File f = new File(outputFileName+"_list"+node+".json");
-		IOUtils.write(f.getAbsoluteFile(), json.toJson(this.interactome, fileList, layoutsName, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub,mapList));
+		IOUtils.write(f.getAbsoluteFile(), json.toJson(this.interactome, fileList, layoutsName, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub, mapList));
 	}
 	protected void addOutputSvgViewer(File jsonFile, int index) {
 		List<String> tags = new ArrayList<String>();

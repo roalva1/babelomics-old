@@ -8,22 +8,23 @@ import org.junit.Test;
 public class GSnowTest {
 	
 	@Test
-	public void luzBug(){
+	public void testNew(){
 		String outdir = "/tmp/gsnow/example1";
-		System.out.println("Resutls allocated in: "+outdir);
+		System.out.println("Results allocated in: "+outdir);
 		new File(outdir).mkdirs();
 		String []args = {
 				"--tool", "network-miner", 
 				"-o", outdir, 
 				"--o-name","result",
 				"--interactome","hsa",
-//				"--select-mcn", "rel-min",
 				"--type", "genes",
-				"--group", "all",
-				"--intermediate","1",
+				"--group", "curated",
+				"--intermediate","0",
 				"--randoms","1",
-				"--select-mcn","rel-min",
+				"--order","ascending",
 				"--snow",
+//				"--list","/home/ralonso/Desktop/pruebasGsnow.txt",
+//				"--plist","/home/ralonso/Desktop/prPruebasGsnow.txt",
 				"--list","/home/ralonso/Desktop/essential_genes_all_lines.txt",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
@@ -164,8 +165,9 @@ public class GSnowTest {
 	}
 	public void main(String []args){
 		try {
-//			for(String arg : args)
-//				System.out.println(arg);
+			System.out.print("./babelomics.sh ");
+			for(String arg : args)
+				System.out.print(arg+" ");
 			BabelomicsMain.main(args);
 	
 		} catch (Exception e) {

@@ -28,6 +28,7 @@ public class GSnowPreprocessing {
 	private double cutOff;
 	private ProteinNetwork proteinNetwork;
 	
+	
 	public GSnowPreprocessing(ProteinNetwork proteinNetwork, String type, XRefDBManager xrefDBMan/*, int minPreprocessingSize*/, int maxPreprocessingSize, String order, /*boolean wholeList,*/ int numberItems, double cutOff){
 		this.type = type;
 		this.xrefDBMan = xrefDBMan;
@@ -42,25 +43,19 @@ public class GSnowPreprocessing {
 		this.cutOff = cutOff;
 		this.proteinNetwork = proteinNetwork;
 	}
-	
-	public ListInfo preprocess(String filePath) {
+	/** Priority file pFilePath, normal file: filePath **/
+	public ListInfo preprocess(String pFilePath, String filePath) {
 		try{
 			ListInfo listInfo = new ListInfo();
-			List<Node> nodes = parseFile("#", filePath);
-			listInfo.setNodes(nodes);
+			listInfo = parseFile("#", pFilePath, filePath);
 			orderNodes(listInfo);
-//			System.out.println(listInfo.getNodes().toString());
-			
-//			if(listInfo.getNodes().size() < this.minPreprocessingSize)
-//				throw new Exception("[ERROR] List size too small, minimun size permitted "+this.minPreprocessingSize);
-//			if(listInfo.getNodes().size() > maxSize){
-//				System.err.println("[WARNING] List size too long, maximun size permitted "+maxSize+". GSnow will keep running with the "+maxSize+" firsts elements.");
-//			}
-			
+
 			System.out.println("Matched nodes after parsing file: "+listInfo.getNodes().size());
+			
 			listInfo = deleteDuplicates(listInfo);
 			System.out.println("Matched nodes after deleting repeteated nodes: "+listInfo.getNodes().size());
 			System.out.println("Repeated nodes: "+listInfo.getRepeatedNodes().size());
+			
 			listInfo =  matchingDBAndInteractome(listInfo);
 			System.out.println("Matched nodes after matching with db: "+listInfo.getNodes().size());
 			System.out.println("Not matched nodes: "+listInfo.getNotMatchNodes().size());
@@ -74,6 +69,8 @@ public class GSnowPreprocessing {
 			System.out.println("Repeated nodes: "+listInfo.getRepeatedNodes().size());
 			if(!Double.isNaN(cutOff))
 				listInfo = cutOff(listInfo);
+			
+			listInfo = fillSeedNodes(listInfo);
 			return listInfo;
 		}catch(Exception e)
 		{
@@ -86,27 +83,36 @@ public class GSnowPreprocessing {
 	}
 	
 	
-
-	private List<Node> parseFile(String comment, String nodeFile) throws NumberFormatException, IOException{
-		BufferedReader br = new BufferedReader(new FileReader(nodeFile));
+	private ListInfo parseFile(String comment, String pFilePath, String filePath) throws NumberFormatException, IOException{
+		ListInfo listInfo = new ListInfo();
+		double position = 0;
+		BufferedReader br;
 		List<Node> nodes = new ArrayList<Node>();
 		String line = "";
 		String fields[];
-		boolean length2 = false, length1 = false, error = false;
-		double position = 0;
+		boolean length2 = false;
+		boolean length1 = false;
+		boolean error = false;
+		double minValue = Double.MAX_VALUE;/** These two values tells the range of the filePath file, with this, we can put the pFilePath in the top of the list, depending on the order  **/
+		double maxValue = -Double.MAX_VALUE;/** **/
+		br = new BufferedReader(new FileReader(filePath));
+		
 		while((line = br.readLine()) != null) {
 			if(!line.startsWith(comment) && !line.trim().equals("")) {
 				fields = line.split("\t");
 				if(fields.length == 2){
 					length2 = true;
 					position = Double.parseDouble(fields[1]);
+					listInfo.setRanked(true);
+					
 				}
 				else if(fields.length == 1){
 					length1 = true;
 					position = nodes.size();
+					listInfo.setRanked(false);
 				}
 				else{
-					System.err.println("[ERROR] Format problems detected, two many fields in: "+line);
+					System.err.println("[ERROR] Format problems detected, two many fields in: "+filePath+" line "+line);
 					error = true;
 				}
 				if(length1 == true && length2 == true){
@@ -119,12 +125,44 @@ public class GSnowPreprocessing {
 					error = false;
 					continue;
 				}
-				// - Adding node
+				if(position > maxValue)
+					maxValue = position;
+				if(position < minValue)
+					minValue = position;
+				/** - Adding node **/
 				Node node = new Node(fields[0], position);
 				nodes.add(node);
 			}
 		}
-		return nodes;
+		
+		/** There is no seed file **/
+		if(pFilePath.equals("")){
+			listInfo.setNodes(nodes);
+			return listInfo;
+		}
+		br = new BufferedReader(new FileReader(pFilePath));
+		if(order.equals("ascending")) {
+			position = minValue-1;
+		}
+		if(order.equals("descending")) {
+			position = maxValue+1;
+		}
+		/** Reading seed file **/
+		while((line = br.readLine()) != null) {
+			if(!line.startsWith(comment) && !line.trim().equals("")) {
+				fields = line.split("\t");
+				if(fields.length == 1){
+					Node node = new Node(fields[0], position);
+					nodes.add(node);
+					node.setSeed(true);
+				}
+				else{
+					System.err.println("[ERROR] Format problems detected, two many fields in : "+pFilePath+" line "+ line);
+				}
+			}
+		}
+		listInfo.setNodes(nodes);
+		return listInfo;
 	}
 	
 	private ListInfo deleteDuplicates(ListInfo listInfo){
@@ -132,6 +170,8 @@ public class GSnowPreprocessing {
 		List<Node> nonDuplicatedNodes = new ArrayList<Node>();
 		Set<String> repeatedNodes = new HashSet<String>();
 		Set<String> idSetString = new HashSet<String>();
+		/** Aqui es donde pondré si hay duplicados entre la lista de asociados y la lista de rankeados: Como se ordenan nodos en principio no hay que 
+		 ** tocar este código **/
 		for(Node node : rawNodes){
 			if(!idSetString.contains(node.id)){
 				nonDuplicatedNodes.add(node);
@@ -169,6 +209,7 @@ public class GSnowPreprocessing {
 					for(XRefItem xrefitem : xrefitemList){
 						String nodeId = xrefitem.getDisplayName();
 						n = new Node(nodeId, node.getValue(), node.getId());
+						n.setSeed(node.isSeed());
 						if(proteinNetwork.getInteractomeGraph().getVertex(nodeId) != null)
 							curatedListNodes.add(n);
 						else
@@ -219,16 +260,25 @@ public class GSnowPreprocessing {
 		List<Node> localNodes = new ArrayList<Node>();
 		localNodes.addAll(nodes);
 		for(Node node : nodes){
-			if(order.equalsIgnoreCase("ascendant")){
+			if(order.equalsIgnoreCase("ascending")){
 				if(node.getValue() > cutOff)
 					localNodes.remove(node);
 			}
-			if(order.equalsIgnoreCase("descendant")){
+			if(order.equalsIgnoreCase("descending")){
 				if(node.getValue() < cutOff)
 					localNodes.remove(node);
 			}
 		}
 		listInfo.setNodes(localNodes);
+		return listInfo;
+	}
+	private ListInfo fillSeedNodes(ListInfo listInfo) {
+		Set<String> seedNodes = new HashSet<String>();
+		for(Node node : listInfo.getNodes()){
+			if(node.isSeed())
+				seedNodes.add(node.getId());
+		}
+		listInfo.setSeedNodes(seedNodes);
 		return listInfo;
 	}
 	public class ListInfo{
@@ -237,15 +287,16 @@ public class GSnowPreprocessing {
 		private Set<String> notMatchNodes;
 		private Set<String> repeatedNodes;
 		private Set<String> cuttedNodes;
-
-		//this is the original list size after the entire preprocessing, we don't count intermediates
-//		private int processedNodesSize;
+		private Set<String> seedNodes;
+		private boolean ranked;
 		
 		public ListInfo(){
 			nodes = new ArrayList<Node>();
 			notMatchNodes = new HashSet<String>();
 			repeatedNodes = new HashSet<String>();
 			cuttedNodes = new HashSet<String>();
+			seedNodes = new HashSet<String>();
+			ranked = false;
 
 		}
 		public void setNodes(List<Node> nodes) {
@@ -272,32 +323,34 @@ public class GSnowPreprocessing {
 		public void setCuttedNodes(Set<String> cuttedNodes) {
 			this.cuttedNodes = cuttedNodes;
 		}
-//		public int getProcessedNodesSize() {
-//			return processedNodesSize;
-//		}
-//		public void setProcessedNodesSize(int processedNodesSize) {
-//			this.processedNodesSize = processedNodesSize;
-//		}
+		public Set<String> getSeedNodes() {
+			return seedNodes;
+		}
+		public void setSeedNodes(Set<String> seedNodes) {
+			this.seedNodes = seedNodes;
+		}
+		public boolean isRanked() {
+			return ranked;
+		}
+		public void setRanked(boolean ranked) {
+			this.ranked = ranked;
+		}
 		
 		
 	}
 	
 	public class Node implements Comparable<Node> {
 		
-		//this id is retrieved by the database
+		/** this id is retrieved by the database **/
 		private String id;
-		//this id is the one coming from the user
+		/** this id is the one coming from the user **/
 		private String originalId;
-		//this is the position/p-value of the node in the input list
+		/** this is the position/p-value of the node in the input list **/
 		private double value;
-
-//		private int connections;
-//		private double cluster;
-//		private double bet;
-//		
-//		private List<String> go;
-//		private List<String> kegg;
+		/** This attribute says if it is an seed node or not **/
+		boolean seed;
 		
+
 		public Node(String id, double value){
 			this(id, value, id);
 		}
@@ -305,8 +358,7 @@ public class GSnowPreprocessing {
 			this.id = id;
 			this.value = value;
 			this.originalId = originalId;
-//			go = new ArrayList<String>();
-//			kegg = new ArrayList<String>();
+			this.seed = false;
 		}
 		
 		public String getId() {
@@ -323,7 +375,12 @@ public class GSnowPreprocessing {
 		public void setOriginalId(String originalId) {
 			this.originalId = originalId;
 		}
-		
+		public boolean isSeed() {
+			return seed;
+		}
+		public void setSeed(boolean seed) {
+			this.seed = seed;
+		}
 		@Override
 		public String toString(){
 			return id+"\t"+originalId+"\t"+value;
@@ -332,13 +389,13 @@ public class GSnowPreprocessing {
 		@Override
 		public int compareTo(Node o) {
 			if(value > o.value){
-				if(order.equals("ascendant"))
+				if(order.equals("ascending"))
 					return 1;
 				else 
 					return 0;
 			}
 			else{
-				if(order.equals("ascendant"))
+				if(order.equals("ascending"))
 					return 0;
 				else
 					return 1;
