@@ -11,7 +11,6 @@ import java.util.Set;
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.babelomics.tools.interactome.gsnow.GSnowPreprocessing.Node;
 import org.bioinfo.chart.BoxPlotChart;
-import org.bioinfo.chart.HistogramChart;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
@@ -31,8 +30,6 @@ import org.bioinfo.networks.protein.files.Svg;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
-import org.jfree.chart.axis.LogAxis;
-import org.jfree.chart.plot.PlotOrientation;
 
 public abstract class SnowTool extends BabelomicsTool{
 
@@ -274,6 +271,8 @@ public abstract class SnowTool extends BabelomicsTool{
 		List<String> tags = new ArrayList<String>();
 		
 		tags.add("INTERACTOME_VIEWER");
+		//tags.add(this.type);
+		//tags.add("REDIRECT_TOOL");
 		if (jsonFile.exists()) {
 			String list = "list";
 			if(index==1)
@@ -281,7 +280,7 @@ public abstract class SnowTool extends BabelomicsTool{
 			if(index==2)
 				list+="2";
 			tags.add(list);
-			result.addOutputItem(new Item("svg_viewer" + index + "_param", jsonFile.getName(), "Svg Viewer for network #" + index, TYPE.FILE, tags, new HashMap<String, String>(2), "Network viewer for the minimal connected network"));
+			result.addOutputItem(new Item("svg_viewer" + index + "_param", jsonFile.getName(), "Svg Viewer for network #" + index, TYPE.FILE, tags, new HashMap<String, String>(2), "Results: Minimum Connected Network selected.Viewer"));
 
 //			url = "SnowViewer2?filename=" + jsonFile.getName();
 //			result.addOutputItem(new Item("svg_viewer" + index + "_param_new_window", url, "Open svg for network #" + index + " in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS,SNOW", ","), new HashMap<String, String>(2), "Network viewer 2"));

@@ -22,7 +22,7 @@ public class GSnowTest {
 				"--intermediate","0",
 				"--randoms","1",
 				"--order","ascending",
-				"--snow",
+				"--snow", "0",
 //				"--list","/home/ralonso/Desktop/pruebasGsnow.txt",
 //				"--plist","/home/ralonso/Desktop/prPruebasGsnow.txt",
 				"--list","/home/ralonso/Desktop/essential_genes_all_lines.txt",
