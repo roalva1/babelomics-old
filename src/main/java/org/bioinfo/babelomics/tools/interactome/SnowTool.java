@@ -37,19 +37,12 @@ public abstract class SnowTool extends BabelomicsTool{
 	protected String outputFileName;
 	protected String type;
 	protected String group;
-//	protected String side;
-//	protected int randomSize;
 	protected int randoms;
 	protected boolean components;
 	protected boolean bicomponents;
 	protected boolean intermediate;
 	protected ProteinNetwork proteinNetwork;
 	protected List<ProteinNetwork> subProteinNetworkRandoms;
-	//protected Set<String> intermediatesSub1, intermediatesSub2; 
-	//protected List<List<ProteinVertex>> componentsListSub1, componentsListSub2;
-	
-//	protected DBConnector dbConnector;
-//	protected XRefDBManager xrefDBMan;
 	
 	
 	public SnowTool(){
@@ -142,6 +135,8 @@ public abstract class SnowTool extends BabelomicsTool{
 			interactomeMsg = "Mus musculus";
 		} else if ("ath".equalsIgnoreCase(interactome)) {
 			interactomeMsg = "Arabidopsis thaliana";
+		} else if ("eco".equalsIgnoreCase(interactome)) {
+			interactomeMsg = "Escherichia coli";
 		} else if ("own".equalsIgnoreCase(interactome)) {
 			interactomeMsg = new File(commandLine.getOptionValue("sif-file")).getName();
 		} else {
@@ -267,20 +262,21 @@ public abstract class SnowTool extends BabelomicsTool{
 		File f = new File(outputFileName+"_list"+node+".json");
 		IOUtils.write(f.getAbsoluteFile(), json.toJson(this.interactome, fileList, layoutsName, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub, mapList));
 	}
-	protected void addOutputSvgViewer(File jsonFile, int index) {
+	protected void addOutputSvgViewer(File file, int index) {
 		List<String> tags = new ArrayList<String>();
 		
 		tags.add("INTERACTOME_VIEWER");
 		//tags.add(this.type);
 		//tags.add("REDIRECT_TOOL");
-		if (jsonFile.exists()) {
+		if (file.exists()) {
 			String list = "list";
 			if(index==1)
 				list+="1";
 			if(index==2)
 				list+="2";
 			tags.add(list);
-			result.addOutputItem(new Item("svg_viewer" + index + "_param", jsonFile.getName(), "Svg Viewer for network #" + index, TYPE.FILE, tags, new HashMap<String, String>(2), "Results: Minimum Connected Network selected.Viewer"));
+			tags.add(this.interactome);
+			result.addOutputItem(new Item("svg_viewer" + index + "_param", file.getName(), "Minimun Connected Network interactions", TYPE.FILE, tags, new HashMap<String, String>(2), "Results: Minimum Connected Network selected.Viewer"));
 
 //			url = "SnowViewer2?filename=" + jsonFile.getName();
 //			result.addOutputItem(new Item("svg_viewer" + index + "_param_new_window", url, "Open svg for network #" + index + " in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS,SNOW", ","), new HashMap<String, String>(2), "Network viewer 2"));

@@ -6,30 +6,77 @@ import org.bioinfo.babelomics.BabelomicsMain;
 import org.junit.Test;
 
 public class GSnowTest {
+
+	String BABELOMICS_HOME = System.getenv("BABELOMICS_HOME");
 	
 	@Test
-	public void testNew(){
+	public void testExample1(){
 		String outdir = "/tmp/gsnow/example1";
 		System.out.println("Results allocated in: "+outdir);
 		new File(outdir).mkdirs();
 		String []args = {
-				"--tool", "network-miner", 
+				"--tool", "network-miner",
+				//"--jobname", "Genes_up_in_control_Vs_case_Hirschsprung_disease",
 				"-o", outdir, 
 				"--o-name","result",
 				"--interactome","hsa",
 				"--type", "genes",
 				"--group", "curated",
-				"--intermediate","0",
+				"--intermediate","1",
 				"--randoms","1",
 				"--order","ascending",
-				"--snow", "0",
-//				"--list","/home/ralonso/Desktop/pruebasGsnow.txt",
+//				"--snow", "0",
+//				"--list","/tmp/gsnow/example1/prueba.txt",
 //				"--plist","/home/ralonso/Desktop/prPruebasGsnow.txt",
-				"--list","/home/ralonso/Desktop/essential_genes_all_lines.txt",
-				"--home", System.getenv("BABELOMICS_HOME")};
+				"--list",BABELOMICS_HOME+"/example/Genes_up_in_control_Vs_case_Hirschsprung_disease.txt",
+				"--home", BABELOMICS_HOME};
 		main(args);
 	}
-	@Test
+	//@Test
+	public void testExample2(){
+		String outdir = "/tmp/gsnow/example2";
+		System.out.println("Results allocated in: "+outdir);
+		new File(outdir).mkdirs();
+		String []args = {
+				"--tool", "network-miner",
+				//"--jobname", "Genes_up_in_control_Vs_case_Hirschsprung_disease",
+				"-o", outdir, 
+				"--o-name","result",
+				"--interactome","hsa",
+				"--type", "genes",
+				"--group", "curated",
+				"--intermediate","1",
+				"--randoms","1",
+				"--order","ascending",
+//				"--snow", "0",
+//				"--list","/tmp/gsnow/example1/prueba.txt",
+//				"--plist","/home/ralonso/Desktop/prPruebasGsnow.txt",
+				"--list",BABELOMICS_HOME+"/example/K562_symbol.txt",
+				"--home", BABELOMICS_HOME};
+		main(args);
+	}
+	
+	//@Test
+	public void test3(){
+		String outdir = "/tmp/gsnow/example1";
+		System.out.println("Results allocated in: "+outdir);
+		new File(outdir).mkdirs();
+		String []args = {
+				"--tool", "network-miner",
+				"-o", outdir, 
+				"--o-name","result",
+				"--interactome","sce",
+				"--type", "genes",
+				"--group", "all",
+				"--intermediate","0",
+//				"--randoms","1",
+				"--order","ascending",
+				"--list","/home/ralonso/Desktop/sce_example.txt",
+				"--home", BABELOMICS_HOME};
+		main(args);
+	}
+	
+	//@Test
 	public void test(){};
 	//@Test
 	public void example1(){

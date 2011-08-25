@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.babelomics.tools.interactome.gsnow.GSnowPreprocessing.Node;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
@@ -446,62 +447,20 @@ public class Snow  extends BabelomicsTool{
 //				logger.error("Not correct arguments for statistic test");
 //				return;
 //			}
-			if(json){
 				
-				File auxFile = new File(outputFileName);
-				List<String> names = new ArrayList<String>();
-				if(subProteinNetwork1 != null){
-					names.add(auxFile.getName() + "_list1.json");
-					createJson(subProteinNetwork1, outputFileName+"_list1.dot", componentsListSub1, intermediatesSub1, 1, this.mapList1);
-					
-					auxFile = new File(outputFileName+"_list1.json");
-					addOutputSvgViewer(auxFile, 1);
-				}
-				if(subProteinNetwork2 != null){
-					names.add(auxFile.getName() + "_list2.json");
-					createJson(subProteinNetwork2, outputFileName+"_list2.dot", componentsListSub2, intermediatesSub2, 2, this.mapList2);
-					
-					auxFile = new File(outputFileName+"_list2.json");
-					addOutputSvgViewer(auxFile, 2);
-				}
-
-			}
-//			if(xml){
-//				File xmlFile = null;
-//				Xml xmlObject;
-//				if(interactome.equalsIgnoreCase("own"))
-//					xmlObject = new Xml();
-//				else
-//					xmlObject = new Xml(this.dbConnector);
-//				if(subProteinNetwork1 != null){
-//					xmlFile = new File(outdir+"/subnetwork1.xml");
-//					
-//					xmlObject.graphToXML(xmlFile.getAbsolutePath(),subProteinNetwork1.getInteractomeGraph(), intermediatesSub1, componentsListSub1, type, this.mapList1);
-//					addOutputAppletItem(xmlFile, 1);
-//				}
-//				if(subProteinNetwork2 != null){
-//					xmlFile = new File(outdir+"/subnetwork2.xml");
-//					xmlObject.graphToXML(xmlFile.getAbsolutePath(),subProteinNetwork2.getInteractomeGraph(), intermediatesSub2, componentsListSub2, type, this.mapList2);
-//					addOutputAppletItem(xmlFile, 2);
-//				}
-//			}
-
-			if(sif){
-				Sif sifObject = new Sif();
+			if(subProteinNetwork1 != null){
 				File fSif;
-				if(subProteinNetwork1 != null){
-					fSif = new File(outputFileName+"_subnetwork1.sif");
-					IOUtils.write(fSif.getAbsoluteFile(), sifObject.graphToSif(subProteinNetwork1.getInteractomeGraph()));
-					result.addOutputItem(new Item("subnetwork1.sif", fSif.getName(), "subnetwork1 sif file", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Sif network file"));
-
-				}
-				if(subProteinNetwork2 != null){
-					fSif = new File(outputFileName+"_subnetwork2.sif");
-					IOUtils.write(fSif.getAbsoluteFile(), sifObject.graphToSif(subProteinNetwork2.getInteractomeGraph()));
-					result.addOutputItem(new Item("subnetwork2.sif", fSif.getName(), "subnetwork2 sif file", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Sif network file"));
-
-				}
+				fSif = new File(outputFileName+"_subnetwork1.sif");
+				IOUtils.write(fSif.getAbsoluteFile(), graphToSif(subProteinNetwork1.getInteractomeGraph(), mapList1));
+				addOutputSvgViewer(fSif, 1);
 			}
+			if(subProteinNetwork2 != null){
+				File fSif;
+				fSif = new File(outputFileName+"_subnetwork2.sif");
+				IOUtils.write(fSif.getAbsoluteFile(), graphToSif(subProteinNetwork2.getInteractomeGraph(), mapList2));
+				addOutputSvgViewer(fSif, 2);
+			}
+
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -1136,20 +1095,46 @@ public class Snow  extends BabelomicsTool{
 //			result.addOutputItem(new Item("viewer" + index + "_param_new_window", url, "Open applet for network #" + index + " in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Network viewer"));
 //		}
 //	}
-	public void addOutputSvgViewer(File jsonFile, int index) {
+	public String graphToSif(SimpleUndirectedGraph<ProteinVertex, DefaultEdge> graph, Map<String, String> mapList){
+		StringBuilder sb = new StringBuilder();
+		String source = "";
+		String target = "";
+		/**Non Isolated vertices **/
+		for (DefaultEdge e : graph.getAllEdges()) {
+			source = graph.getVertex(e.getSource()).getId();
+			target = graph.getVertex(e.getTarget()).getId();
+			if(mapList.containsKey(source))
+				source = mapList.get(source);
+			if(mapList.containsKey(target))
+				target = mapList.get(target);
+			sb.append(source).append("\t").append("pp").append("\t").append(target);
+			sb.append(System.getProperty("line.separator"));
+		}
+		/** Isolated vertices **/
+		for(ProteinVertex vertex : graph.getAllVertices()){
+			if(graph.getDegreeOf(vertex) == 0){
+				if(mapList.containsKey(vertex.getId()))
+					sb.append(mapList.get(vertex.getId())).append(System.getProperty("line.separator"));
+			}
+		}
+		if(!sb.toString().equals(""))
+			sb.deleteCharAt(sb.lastIndexOf(System.getProperty("line.separator")));
+		return sb.toString();
+	}
+	public void addOutputSvgViewer(File file, int index) {
 		List<String> tags = new ArrayList<String>();
-		
-		tags.add("INTERACTOME_VIEWER");
-		if (jsonFile.exists()) {
+		//tags.add(this.type);
+		//tags.add("REDIRECT_TOOL");
+		if (file.exists()) {
 			String list = "list";
 			if(index==1)
 				list+="1";
 			if(index==2)
 				list+="2";
+			tags.add("INTERACTOME_VIEWER");
 			tags.add(list);
-			String url = "SnowViewer2?filename=" + jsonFile.getName() + "&width=600&height=600";
-			result.addOutputItem(new Item("svg_viewer" + index + "_param", jsonFile.getName(), "Svg Viewer for network #" + index, TYPE.FILE, tags, new HashMap<String, String>(2), "Network viewer for the minimal connected network"));
-			//result.addOutputItem(new Item("svg_viewer" + index + "_param", "", "Svg Viewer for network #" + index, TYPE.FILE, tags, new HashMap<String, String>(2), "Network viewer for the minimal connected network"));
+			tags.add(this.interactome);
+			result.addOutputItem(new Item("svg_viewer" + index + "_param", file.getName(), "Minimun Connected Network interactions", TYPE.FILE, tags, new HashMap<String, String>(2), "Network viewer "+list));
 
 //			url = "SnowViewer2?filename=" + jsonFile.getName();
 //			result.addOutputItem(new Item("svg_viewer" + index + "_param_new_window", url, "Open svg for network #" + index + " in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS,SNOW", ","), new HashMap<String, String>(2), "Network viewer 2"));

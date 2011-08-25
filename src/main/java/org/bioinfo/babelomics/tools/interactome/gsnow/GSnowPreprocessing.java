@@ -3,6 +3,7 @@ package org.bioinfo.babelomics.tools.interactome.gsnow;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -10,30 +11,24 @@ import java.util.List;
 import java.util.Set;
 
 import org.bioinfo.infrared.core.XRefDBManager;
+import org.bioinfo.infrared.core.feature.DBName;
 import org.bioinfo.infrared.core.feature.XRef;
 import org.bioinfo.infrared.core.feature.XRef.XRefItem;
 import org.bioinfo.networks.protein.ProteinNetwork;
 
 public class GSnowPreprocessing {
 
-//	private ListInfo listInfo;
 	private String type;
 	private XRefDBManager xrefDBMan;
-//	private int minPreprocessingSize;
-//	private int maxPreprocessingSize;
 	private static int maxSize;// = 200;
 	private String order;
-//	private boolean wholeList;
 	private int numberItems;
 	private double cutOff;
 	private ProteinNetwork proteinNetwork;
 	
-	
-	public GSnowPreprocessing(ProteinNetwork proteinNetwork, String type, XRefDBManager xrefDBMan/*, int minPreprocessingSize*/, int maxPreprocessingSize, String order, /*boolean wholeList,*/ int numberItems, double cutOff){
+	public GSnowPreprocessing(ProteinNetwork proteinNetwork, String type, XRefDBManager xrefDBMan, int maxPreprocessingSize, String order, int numberItems, double cutOff){
 		this.type = type;
 		this.xrefDBMan = xrefDBMan;
-		//this.minPreprocessingSize = minPreprocessingSize;
-		/*this.maxPreprocessingSize = maxPreprocessingSize;*/
 		this.order = order;
 		maxSize = maxPreprocessingSize;
 		if(numberItems > maxSize)
@@ -44,31 +39,38 @@ public class GSnowPreprocessing {
 		this.proteinNetwork = proteinNetwork;
 	}
 	/** Priority file pFilePath, normal file: filePath **/
-	public ListInfo preprocess(String pFilePath, String filePath) {
+	public ListInfo preprocess(String seedFilePath, String filePath) {
 		try{
 			ListInfo listInfo = new ListInfo();
-			listInfo = parseFile("#", pFilePath, filePath);
+			listInfo = parseFile("#", seedFilePath, filePath);
 			orderNodes(listInfo);
 
-			System.out.println("Matched nodes after parsing file: "+listInfo.getNodes().size());
+			System.out.println("Correct nodes after parsing file: "+listInfo.getNodes().size());
 			
 			listInfo = deleteDuplicates(listInfo);
 			System.out.println("Matched nodes after deleting repeteated nodes: "+listInfo.getNodes().size());
 			System.out.println("Repeated nodes: "+listInfo.getRepeatedNodes().size());
 			
 			listInfo =  matchingDBAndInteractome(listInfo);
+			
 			System.out.println("Matched nodes after matching with db: "+listInfo.getNodes().size());
 			System.out.println("Not matched nodes: "+listInfo.getNotMatchNodes().size());
-			if(listInfo.getNotMatchNodes().size() < 100)
+			
+			if(listInfo.getNotMatchNodes().size() < 20)
 				System.out.println("Not matched nodes: "+listInfo.getNotMatchNodes());
+			
 			listInfo = cutList(listInfo);
+			
 			if(listInfo.getCuttedNodes().size() > 0){
 				System.out.println("Nodes after cutting the list: "+listInfo.getNodes().size());
 				System.out.println("List of cutted nodes: "+listInfo.getCuttedNodes().size());
 			}
+			
 			System.out.println("Repeated nodes: "+listInfo.getRepeatedNodes().size());
 			if(!Double.isNaN(cutOff))
 				listInfo = cutOff(listInfo);
+			
+			/** Summary **/
 			
 			listInfo = fillSeedNodes(listInfo);
 			return listInfo;
@@ -83,7 +85,7 @@ public class GSnowPreprocessing {
 	}
 	
 	
-	private ListInfo parseFile(String comment, String pFilePath, String filePath) throws NumberFormatException, IOException{
+	private ListInfo parseFile(String comment, String seedFilePath, String filePath) throws NumberFormatException, IOException{
 		ListInfo listInfo = new ListInfo();
 		double position = 0;
 		BufferedReader br;
@@ -136,11 +138,11 @@ public class GSnowPreprocessing {
 		}
 		
 		/** There is no seed file **/
-		if(pFilePath.equals("")){
+		if(seedFilePath.equals("")){
 			listInfo.setNodes(nodes);
 			return listInfo;
 		}
-		br = new BufferedReader(new FileReader(pFilePath));
+		br = new BufferedReader(new FileReader(seedFilePath));
 		if(order.equals("ascending")) {
 			position = minValue-1;
 		}
@@ -157,7 +159,7 @@ public class GSnowPreprocessing {
 					node.setSeed(true);
 				}
 				else{
-					System.err.println("[ERROR] Format problems detected, two many fields in : "+pFilePath+" line "+ line);
+					System.err.println("[ERROR] Format problems detected, two many fields in : "+seedFilePath+" line "+ line);
 				}
 			}
 		}
@@ -184,8 +186,21 @@ public class GSnowPreprocessing {
 		listInfo.setRepeatedNodes(repeatedNodes);
 		return listInfo;
 	}
-	
-	private ListInfo matchingDBAndInteractome(ListInfo listInfo) {
+	/** Here we discover the type of input id, if it is uniprot, ensembl_gene, hgnc_symbol 
+	 **/
+	private DBName getOriginalDbName(ListInfo listInfo) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
+		for(Node node : listInfo.getNodes()){
+			List<DBName> dbnames = xrefDBMan.getAllDBNamesById(node.getOriginalId());
+			if(dbnames.size() == 1){
+				System.out.println("DbName: "+dbnames.get(0));
+				return dbnames.get(0);
+			}
+				
+		}
+		return null;
+	}
+	private ListInfo matchingDBAndInteractome(ListInfo listInfo) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
+		
 		String dbName = "";
 		if(type.equalsIgnoreCase("proteins") || type.equalsIgnoreCase("transcripts"))
 			dbName = "uniprot_swissprot_accession";
@@ -195,19 +210,43 @@ public class GSnowPreprocessing {
 		List<Node> nodes = listInfo.getNodes();
 		List<Node> curatedListNodes = new ArrayList<Node>();
 		Set<String> notMatchNodes = new HashSet<String>();
+		
+		/** idsAlreadyMatched: Esta es una variable que nos dice si ya se ha recuperado un id de un originalId, entonces no se inserta en la bbdd
+		 * x ejemplo si BRCA2 y BRCA1 dan ensemble_gene: ENSG00001, solo se introduce ENSG00001 una vez, correspondiente a BRCA2, que estaba antes **/
+		Set<String> idsAlreadyMatched = new HashSet<String>();
 		ListInfo listInfoLocal = listInfo;
+		listInfoLocal.setOriginalDbName(getOriginalDbName(listInfo));
+		
 		Node n = null;
 		for(Node node : nodes){
 			try {
-				XRef xrefEns = null;
-				List<XRefItem> xrefitemList = new ArrayList<XRefItem>();//xrefDBMan.getDBConnector().getDbConnection().getDatabase == homo_sapiens
+				//XRef xrefEns = null;
+				//List<XRefItem> xrefitemList = new ArrayList<XRefItem>();//xrefDBMan.getDBConnector().getDbConnection().getDatabase == homo_sapiens
+				List<XRef> xrefList = null;
 				if(xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null){
-					xrefEns  = xrefDBMan.getByDBName(node.getId(), dbName);
-					xrefitemList = xrefEns.getXrefItems().get(dbName);
+					List<String> list = new ArrayList<String>();
+					list.add(node.getId());
+					xrefList = xrefDBMan.getAllIdentifiersByIds(list);
+					
+					//xrefEns  = xrefDBMan.getByDBName(node.getId(), dbName);
+					//xrefitemList = xrefEns.getXrefItems().get(dbName);
 				}
-				if(xrefEns != null && !xrefitemList.isEmpty()){
-					for(XRefItem xrefitem : xrefitemList){
-						String nodeId = xrefitem.getDisplayName();
+				if(xrefList != null && !xrefList.isEmpty()){
+
+					boolean matched = false;
+					for(XRef xref : xrefList){
+						if(xref.getXrefItems().get(dbName).size()>1)
+							System.out.println("ori id:"+node.getOriginalId()+" size: "+xref.getXrefItems().get(dbName).size());
+						String nodeId = xref.getXrefItems().get(dbName).get(0).getDisplayName();
+						
+						if(!idsAlreadyMatched.contains(nodeId)){
+							matched = true;
+							idsAlreadyMatched.add(nodeId);
+						}
+						else{
+							//System.out.println("Nodes con id ya introducido "+node.getId()+": "+nodeId);
+							continue;
+						}
 						n = new Node(nodeId, node.getValue(), node.getId());
 						n.setSeed(node.isSeed());
 						if(proteinNetwork.getInteractomeGraph().getVertex(nodeId) != null)
@@ -215,6 +254,8 @@ public class GSnowPreprocessing {
 						else
 							notMatchNodes.add(node.getId());
 					}
+					if(!matched)
+						notMatchNodes.add(node.getId());
 				}
 				else if(proteinNetwork.getInteractomeGraph().getVertex(node.getId()) != null)
 					curatedListNodes.add(node);
@@ -290,6 +331,9 @@ public class GSnowPreprocessing {
 		private Set<String> seedNodes;
 		private boolean ranked;
 		
+		/** Es la base de datos con la que coincide los inputs id, por ejemplo: si la lista de entrada es BRCA2... entonces: originalDbName = 'hgnc_symbol'**/
+		private DBName originalDbName;
+		
 		public ListInfo(){
 			nodes = new ArrayList<Node>();
 			notMatchNodes = new HashSet<String>();
@@ -297,6 +341,7 @@ public class GSnowPreprocessing {
 			cuttedNodes = new HashSet<String>();
 			seedNodes = new HashSet<String>();
 			ranked = false;
+			originalDbName = null;
 
 		}
 		public void setNodes(List<Node> nodes) {
@@ -335,6 +380,12 @@ public class GSnowPreprocessing {
 		public void setRanked(boolean ranked) {
 			this.ranked = ranked;
 		}
+		public DBName getOriginalDbName() {
+			return originalDbName;
+		}
+		public void setOriginalDbName(DBName originalDbName) {
+			this.originalDbName = originalDbName;
+		}
 		
 		
 	}
@@ -343,10 +394,13 @@ public class GSnowPreprocessing {
 		
 		/** this id is retrieved by the database **/
 		private String id;
+		
 		/** this id is the one coming from the user **/
 		private String originalId;
+		
 		/** this is the position/p-value of the node in the input list **/
 		private double value;
+		
 		/** This attribute says if it is an seed node or not **/
 		boolean seed;
 		

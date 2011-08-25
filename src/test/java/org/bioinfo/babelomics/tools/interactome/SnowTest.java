@@ -21,7 +21,7 @@ public class SnowTest {
 		String []args = {
 				"--tool", "snow", 
 				"-o", outdir, 
-				"--randoms", "1000",
+				"--randoms", "10",
 				"--o-name","result",
 				"--interactome","hsa",
 				"--group","curated",
