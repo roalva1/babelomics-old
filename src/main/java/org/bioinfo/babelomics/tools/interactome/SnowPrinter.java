@@ -186,49 +186,61 @@ public class SnowPrinter {
 		return sb.deleteCharAt(sb.length()-1);
 	}
 	
-	public String printGsnowItems(Map<Integer, GSnowItem> gsnowItems){
-		List<Double> orderedList1 = new ArrayList<Double>();
-		StringBuilder sb1 = new StringBuilder();
-		for(int i : gsnowItems.keySet()){
-			orderedList1.add(gsnowItems.get(i).getScore());
-		}
-		GSnowItem gsnowItem1;
-		Collections.sort(orderedList1);
-		for(double d : orderedList1){
-			for(int i : gsnowItems.keySet()){
-				if(d == gsnowItems.get(i).getScore()){
-					gsnowItem1 = gsnowItems.get(i);
-					sb1.insert(0, printGsnowItem(gsnowItem1)+lineSeparator);
-					//sb1.append(printGsnowItem(gsnowItem1)).append(lineSeparator);
-				}
-			}
-		}
-		sb1.insert(0,"#Size"+tab+"Nodes"+tab+"P-value"+tab+"NodesNumber/ComponentsNumber"+tab+"Score"+lineSeparator);
-		sb1 = deleteLastCh(sb1);
-		return sb1.toString();
-		
-//		StringBuilder sb = new StringBuilder();
-//		Integer[] array = gsnowItems.keySet().toArray(new Integer[0]);
-//		List<Integer> orderedList = ArrayUtils.toList(array);
-//		Collections.sort(orderedList);
-//		sb.append("#Size").append(tab).append("Nodes").append(tab).append("P-value").append(tab).append("number of nodes / number of components").append(tab).append("score").append(lineSeparator);
-//		GSnowItem gsnowItem;
-//		for(int i : orderedList){
-//			if(i >= numberOfStartingNodes/* && i <= numberOfEndingNodes */){
-//				gsnowItem = gsnowItems.get(i);
-//				sb.append(printGsnowItem(gsnowItem)).append(lineSeparator);
+//	public String printGsnowItems(Map<Integer, GSnowItem> gsnowItems){
+//		List<Double> orderedList1 = new ArrayList<Double>();
+//		StringBuilder sb1 = new StringBuilder();
+//		for(int i : gsnowItems.keySet()){
+//			orderedList1.add(gsnowItems.get(i).getScore());
+//		}
+//		GSnowItem gsnowItem1;
+//		Collections.sort(orderedList1);
+//		for(double d : orderedList1){
+//			for(int i : gsnowItems.keySet()){
+//				if(d == gsnowItems.get(i).getScore()){
+//					gsnowItem1 = gsnowItems.get(i);
+//					sb1.insert(0, printGsnowItem(gsnowItem1)+lineSeparator);
+//					//sb1.append(printGsnowItem(gsnowItem1)).append(lineSeparator);
+//				}
 //			}
 //		}
-//		sb = deleteLastCh(sb);
-//		return sb.toString();
+//		sb1.insert(0,"#Size"+tab+"Nodes"+tab+"P-value"+tab+"NodesNumber/ComponentsNumber"+tab+"Score"+lineSeparator);
+//		sb1 = deleteLastCh(sb1);
+//		return sb1.toString();
+//		
+//	}
+	public String printGsnowItems(List<GSnowItem> gsnowItems){
+		StringBuilder sb = new StringBuilder();
+		sb.append("#Size"+tab+"Nodes"+tab+"P-value"+tab+"NodesNumber/ComponentsNumber"+tab+"Score"+lineSeparator);
+		for (GSnowItem gSnowItem : gsnowItems) {
+			sb.append(printGsnowItem(gSnowItem)).append(lineSeparator);
+		}
+		sb = deleteLastCh(sb);
+		return sb.toString();
 	}
+//	public String printGsnowItem(GSnowItem gsnowItem){
+//		return printGsnowItem(gsnowItem, true);
+//	}
 	public String printGsnowItem(GSnowItem gsnowItem){
+		/** Cuando printPvalue es false, si el pvalue es 0, pondremos un - (se hace para la seed list)**/
+		String pValue = "-";
+		String rawValue = "-";
+		String score="-";
+		if(gsnowItem.getComparedValue() != null){
+			pValue = Double.toString(gsnowItem.getComparedValue());
+		}
+		if(gsnowItem.getRawValue() != null){
+			rawValue = Double.toString(gsnowItem.getRawValue());
+		}
+		if(gsnowItem.getScore() != null){
+			score = Double.toString(gsnowItem.getScore());
+		}
+		String separator = ",";
 		StringBuilder sb = new StringBuilder();
 		sb.append(gsnowItem.getNodes().size()).append(tab);
-		sb.append(gsnowItem.getNodesIds()).append(tab);
-		sb.append(gsnowItem.getComparedValue()).append(tab);
-		sb.append(gsnowItem.getRawValue()).append(tab);
-		sb.append(gsnowItem.getScore());
+		sb.append(gsnowItem.getNodesIds(separator)).append(tab);
+		sb.append(pValue).append(tab);
+		sb.append(rawValue).append(tab);
+		sb.append(score);
 		return sb.toString();
 	}
 	public String gsnowItemToJson(Map<Integer, GSnowItem> gsnowItems, int numberOfStartingNodes){

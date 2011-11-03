@@ -2,14 +2,18 @@ package org.bioinfo.babelomics.tools.interactome;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
+import org.bioinfo.babelomics.tools.interactome.gsnow.GSnowPreprocessing.ListInfo;
 import org.bioinfo.babelomics.tools.interactome.gsnow.GSnowPreprocessing.Node;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.commons.io.utils.FileUtils;
@@ -22,7 +26,12 @@ import org.bioinfo.data.graph.alg.Calc;
 import org.bioinfo.data.graph.edge.DefaultEdge;
 import org.bioinfo.infrared.common.DBConnector;
 import org.bioinfo.infrared.core.XRefDBManager;
+import org.bioinfo.infrared.core.feature.DBName;
 import org.bioinfo.infrared.core.feature.XRef;
+import org.bioinfo.infrared.core.feature.XRef.XRefItem;
+import org.bioinfo.infrared.core.funcannot.GO;
+import org.bioinfo.infrared.funcannot.AnnotationDBManager;
+import org.bioinfo.infrared.funcannot.GODBManager;
 import org.bioinfo.math.util.MathUtils;
 import org.bioinfo.networks.protein.InteractomeParser;
 import org.bioinfo.networks.protein.KSTest;
@@ -31,7 +40,6 @@ import org.bioinfo.networks.protein.ProteinNetworkToFile;
 import org.bioinfo.networks.protein.ProteinVertex;
 import org.bioinfo.networks.protein.files.Dot;
 import org.bioinfo.networks.protein.files.Json;
-import org.bioinfo.networks.protein.files.Sif;
 import org.bioinfo.networks.protein.files.Svg;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
@@ -58,12 +66,15 @@ public class Snow  extends BabelomicsTool{
 	private List<List<ProteinVertex>> componentsListSub1, componentsListSub2;
 	private int bicomponentsNumberList1, bicomponentsNumberList2;
 	private int randomSize;
+	/** ensembl_gene, input_id**/
 	private Map<String, String> mapList1, mapList2;
 	
 	private DBConnector dbConnector;
 	private XRefDBManager xrefDBMan;
 	private String decimalFormat;
 	private int listMaxSize;
+	
+	private DBName dbName;
 
 	//private String wBinPath;
 
@@ -128,6 +139,8 @@ public class Snow  extends BabelomicsTool{
 		dbConnector = new DBConnector(interactome, new File(babelomicsHomePath + "/conf/infrared.properties"));
 		xrefDBMan = new XRefDBManager(dbConnector);
 		
+		
+		
 		result.addOutputItem(new Item("interactome_param", interactomeMsg, "Species", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String,String>(), "Input parameters"));
 
 		String side = !commandLine.hasOption("side") ? "less" : commandLine.getOptionValue("side");
@@ -144,6 +157,8 @@ public class Snow  extends BabelomicsTool{
 
 		ProteinNetworkToFile file = new ProteinNetworkToFile();
 
+		intermediatesSub1 = new HashSet<String>();
+		intermediatesSub2 = new HashSet<String>();
 		try {
 
 			String folderInteractions = this.babelomicsHomePath + "/conf/interactions/";
@@ -229,8 +244,14 @@ public class Snow  extends BabelomicsTool{
 				SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), toVertex(listToVertex1));
 				System.out.println("Before intermediate: "+subgraph.getVertices().size()+" nodes");
 				this.randomSize = subgraph.getVertices().size();
+				dbName = getOriginalDbName(mapList1.values());
+				
 				if(intermediate){
 					intermediatesSub1 = Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
+					
+					for (String id : intermediatesSub1) {
+						mapList1.put(id, getIdToDbName(id));
+					}
 //					if(intermediatesSub1.size()>0)
 //						result.addOutputItem(new Item("external_nodes_list_"+node, intermediatesSub1.toString().substring(1, intermediatesSub1.toString().length()-1), "External nodes added", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),categoryOutput));
 //					else
@@ -239,8 +260,6 @@ public class Snow  extends BabelomicsTool{
 				}
 				
 				subProteinNetwork1 = createSubnet(subgraph);
-				
-				
 
 //				sbTopo.append(getTopologicalValues(subProteinNetwork1, node, false));
 //				f = new File(outputFileName+"_sn_nodeFile"+node+"_topo.txt");
@@ -350,6 +369,9 @@ public class Snow  extends BabelomicsTool{
 
 				if(intermediate){
 					intermediatesSub2 = Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
+					for (String id : intermediatesSub2) {
+						mapList2.put(id, getIdToDbName(id));
+					}
 //					if(intermediatesSub2.size()>0)
 //						result.addOutputItem(new Item("external_nodes_list_"+node, intermediatesSub2.toString().substring(1, intermediatesSub2.toString().length()-1), "External nodes added", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),categoryOutput));
 //					else
@@ -449,20 +471,46 @@ public class Snow  extends BabelomicsTool{
 //			}
 				
 			if(subProteinNetwork1 != null){
+				Set<String> convertedIntermediates = new HashSet<String>();
+				for(String key : intermediatesSub1){
+					
+					convertedIntermediates.add(mapList1.get(key));
+				}
 				File fSif;
 				fSif = new File(outputFileName+"_subnetwork1.sif");
 				IOUtils.write(fSif.getAbsoluteFile(), graphToSif(subProteinNetwork1.getInteractomeGraph(), mapList1));
-				addOutputSvgViewer(fSif, 1);
+				addOutputSvgViewer(fSif, 1, convertedIntermediates);
+				try {
+					String mcnInteractors =	getMcnInteractors(subProteinNetwork1, intermediatesSub1, mapList1);
+					String googleTable="NETWORKMINERNOTRANKED_TABLE"; 
+					f = new File(outputFileName+"_mcn_interactors_list1.txt");
+					IOUtils.write(f.getAbsoluteFile(), mcnInteractors);
+					result.addOutputItem(new Item("mcn_interactors_list1", f.getName(), "Minimun Connected Network interactors", Item.TYPE.FILE,StringUtils.toList("TABLE,"+googleTable, ",") ,new HashMap<String,String>(),"Interactors list 1"));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			if(subProteinNetwork2 != null){
+				Set<String> convertedIntermediates = new HashSet<String>();
+				for(String key : intermediatesSub2){
+					convertedIntermediates.add(mapList2.get(key));
+				}
 				File fSif;
 				fSif = new File(outputFileName+"_subnetwork2.sif");
 				IOUtils.write(fSif.getAbsoluteFile(), graphToSif(subProteinNetwork2.getInteractomeGraph(), mapList2));
-				addOutputSvgViewer(fSif, 2);
+				addOutputSvgViewer(fSif, 2, convertedIntermediates);
 			}
 
 			
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
 			e.printStackTrace();
 		}
 			
@@ -900,7 +948,7 @@ public class Snow  extends BabelomicsTool{
 //		result.addOutputItem(new Item("comp_more_than_1_node", Integer.toString(compMoreThan1Node), "Number of components with more than 1 node", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Minimal Connected Network topological evaluation"));
 //
 //	}
-	public int componentsMoreThanOneNode(List<List<ProteinVertex>> components){
+	private int componentsMoreThanOneNode(List<List<ProteinVertex>> components){
 		int compMoreThan1Node = 0;
 		for(List<ProteinVertex> comp : components){
 			if(comp.size() > 1)
@@ -908,7 +956,7 @@ public class Snow  extends BabelomicsTool{
 		}
 		return compMoreThan1Node;
 	}
-	public int[] getRange(double []componentsRandoms){
+	private int[] getRange(double []componentsRandoms){
 		int[] resultRange = new int[2]; 
 		resultRange[0] = (int)MathUtils.percentile(componentsRandoms, 2.5);
 		resultRange[1] = (int)MathUtils.percentile(componentsRandoms, 97.5);
@@ -1095,7 +1143,7 @@ public class Snow  extends BabelomicsTool{
 //			result.addOutputItem(new Item("viewer" + index + "_param_new_window", url, "Open applet for network #" + index + " in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS", ","), new HashMap<String, String>(2), "Network viewer"));
 //		}
 //	}
-	public String graphToSif(SimpleUndirectedGraph<ProteinVertex, DefaultEdge> graph, Map<String, String> mapList){
+	private String graphToSif(SimpleUndirectedGraph<ProteinVertex, DefaultEdge> graph, Map<String, String> mapList){
 		StringBuilder sb = new StringBuilder();
 		String source = "";
 		String target = "";
@@ -1121,10 +1169,12 @@ public class Snow  extends BabelomicsTool{
 			sb.deleteCharAt(sb.lastIndexOf(System.getProperty("line.separator")));
 		return sb.toString();
 	}
-	public void addOutputSvgViewer(File file, int index) {
+	private void addOutputSvgViewer(File file, int index, Set<String> intermediates) {
 		List<String> tags = new ArrayList<String>();
-		//tags.add(this.type);
-		//tags.add("REDIRECT_TOOL");
+		String intermediateTag = "";
+		for(String intermediate : intermediates)
+			intermediateTag+=intermediate+"|";
+		
 		if (file.exists()) {
 			String list = "list";
 			if(index==1)
@@ -1134,12 +1184,155 @@ public class Snow  extends BabelomicsTool{
 			tags.add("INTERACTOME_VIEWER");
 			tags.add(list);
 			tags.add(this.interactome);
+			tags.add(intermediateTag);
 			result.addOutputItem(new Item("svg_viewer" + index + "_param", file.getName(), "Minimun Connected Network interactions", TYPE.FILE, tags, new HashMap<String, String>(2), "Network viewer "+list));
 
 //			url = "SnowViewer2?filename=" + jsonFile.getName();
 //			result.addOutputItem(new Item("svg_viewer" + index + "_param_new_window", url, "Open svg for network #" + index + " in a new window", TYPE.LINK, StringUtils.toList("SERVER,INCLUDE_REFS,SNOW", ","), new HashMap<String, String>(2), "Network viewer 2"));
 		}
 	}
-
+	
+	private String getMcnInteractors(ProteinNetwork subProteinNetwork, Set<String> intermediates, Map<String, String> mapList) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException{
+		
+		StringBuilder sb = new StringBuilder();
+		String tab = "\t";
+		sb.append("#input_id").append(tab).append("id").append(tab).append("type").append(tab).append("rank").append(tab).append("bet").append(tab).append("clust").append(tab);
+		sb.append("conn").append(tab).append("go").append(tab).append("kegg").append(System.getProperty("line.separator"));
+		
+		/** First significant no external nodes **/
+		for(ProteinVertex pr : subProteinNetwork.getInteractomeGraph().getAllVertices()){
+			
+			String id = "-";
+			if(mapList.get(pr.getId()) != null)
+				id = mapList.get(pr.getId());
+			sb.append(id).append(tab);
+			sb.append(pr.getId()).append(tab);
+			String listType = "list";
+			if(intermediates.contains(pr.getId()))
+				listType = "external";
+			sb.append(listType).append(tab);
+			sb.append(pr.getRelativeBetweenness()).append(tab);
+			sb.append(getSigleMcnInteractors(subProteinNetwork,pr.getId()));
+			sb.append(System.getProperty("line.separator"));
+		}
+//		/** Second significant external nodes **/
+//		for(String id : intermediates){
+//			String convertedId = "-";
+//			if(mapNames.get(id) != null)
+//				convertedId = mapNames.get(id);
+//			sb.append(convertedId).append(tab);
+//			sb.append(id).append(tab);
+//			sb.append("external").append(tab);
+//			/** Input value **/
+//			sb.append("-").append(tab);
+//			sb.append(getSigleMcnInteractors(subProteinNetwork, id));
+//			sb.append(System.getProperty("line.separator"));
+//		}
+		return sb.toString();
+	}
+	private String getSigleMcnInteractors(ProteinNetwork subProteinNetwork, String id) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException{
+		GODBManager gof = new GODBManager(dbConnector);
+		StringBuilder sb = new StringBuilder();
+		String tab = "\t";
+		ProteinVertex prVertex = subProteinNetwork.getInteractomeGraph().getVertex(id);
+		sb.append(prVertex.getRelativeBetweenness()).append(tab);
+		sb.append(prVertex.getClusteringCoefficient()).append(tab);
+		sb.append(subProteinNetwork.getInteractomeGraph().getDegreeOf(prVertex)).append(tab);
+		
+		if(xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null){
+			List<String> dbNames = new ArrayList<String>();
+			dbNames.add("go");
+			dbNames.add("kegg");
+			AnnotationDBManager annotationMng = new AnnotationDBManager(dbConnector);
+			Map<String, String> keggItems  = annotationMng.getAnnotationTermNames("kegg");
+			XRef xrefEns  = xrefDBMan.getByDBName(id, dbNames);
+			List<XRefItem> xrefitemListGO = xrefEns.getXrefItems().get("go");
+			if(xrefitemListGO != null && !xrefitemListGO.isEmpty()){
+				for(XRefItem xrefitem : xrefitemListGO){
+					GO go = gof.getByAccesion(xrefitem.getDisplayName());
+					sb.append(go.getName()).append(",");
+				}
+				sb = this.deleteLastCh(sb, ",");
+			}
+			
+			List<XRefItem> xrefitemListKegg = xrefEns.getXrefItems().get("kegg");
+			if(xrefitemListKegg != null && !xrefitemListKegg.isEmpty()){
+				sb.append(tab);
+				for(XRefItem xrefitem : xrefitemListKegg){
+					if(keggItems.containsKey(xrefitem.getDisplayName())){
+						sb.append(keggItems.get(xrefitem.getDisplayName())).append(",");
+					}
+				}
+				sb = this.deleteLastCh(sb, ",");
+			}
+		}
+		return sb.toString();
+	}
+	/** Here we discover the type of input id, if it is uniprot, ensembl_gene, hgnc_symbol 
+	 **/
+	private DBName getOriginalDbName(Collection<String> list)  {
+		Map<String, Integer> dbNameNumber = new HashMap<String, Integer>();
+		int recognized = 0;
+		if(xrefDBMan.getDBConnector().getDbConnection().getDatabase() == null){
+			return null;
+		}
+		int max = Integer.MIN_VALUE;
+		DBName dbNameReturn = null;
+		for(String node : list){
+			List<DBName> dbnames;
+			try {
+				dbnames = xrefDBMan.getAllDBNamesById(node);
+				if(dbnames.size() > 0){
+					for (DBName dbName : dbnames) {
+						String name = dbName.getDbname();
+						int number = 1;
+						if( !dbNameNumber.containsKey(name) ){
+								dbNameNumber.put(name, number);
+						}
+						else{
+							number = dbNameNumber.get(name);
+							number++;
+							dbNameNumber.put(name, number);
+						}
+						if(number >= max){
+							max = number;
+							dbNameReturn = dbName;
+						}
+					}
+				}
+			} catch (Exception e) {
+				recognized++;
+				/** Esto ocurre cuando no tenemos la especie en infrared, por ejemplo ECO **/
+				//System.err.println("Error GsnowPreprocessin getOriginalDbName: "+node.getOriginalId()+" error: "+e.getLocalizedMessage());
+			}
+		}
+		System.out.println("no recognized: "+recognized);
+		System.out.println("DB Matched: "+dbNameReturn);
+		return dbNameReturn;
+	}
+	private String getIdToDbName(String id) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
+		String nodeId = "-";
+		String dbName = this.dbName.getDbname();
+		if(xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null){
+			List<String> dbNames = new ArrayList<String>();
+			dbNames.add(dbName);
+			XRef xrefEns  = xrefDBMan.getByDBName(id, dbNames);
+			List<XRefItem> xrefitemList = xrefEns.getXrefItems().get(dbName);
+			if(xrefitemList != null && !xrefitemList.isEmpty()){
+				for(XRefItem xrefitem : xrefitemList){
+					nodeId = xrefitem.getDisplayName();
+				}
+			}
+		}
+		return nodeId;
+	}
+	private StringBuilder deleteLastCh(StringBuilder sb, String ch){
+		StringBuilder sbReturn = new StringBuilder();
+		if(!sb.toString().equals("")){
+			//System.out.println(sb);
+			sb.deleteCharAt(sb.lastIndexOf(ch));
+		}
+		return sbReturn.append(sb.toString());
+	}
 }
 

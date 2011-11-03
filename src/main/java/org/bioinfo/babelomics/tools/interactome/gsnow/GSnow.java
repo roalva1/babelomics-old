@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +17,8 @@ import org.bioinfo.babelomics.tools.interactome.SnowPrinter;
 import org.bioinfo.babelomics.tools.interactome.SnowTool;
 import org.bioinfo.babelomics.tools.interactome.gsnow.GSnowPreprocessing.ListInfo;
 import org.bioinfo.babelomics.tools.interactome.gsnow.GSnowPreprocessing.Node;
+import org.bioinfo.babelomics.tools.interactome.gsnow.annovar.AnnovarInterface;
+import org.bioinfo.babelomics.tools.interactome.gsnow.annovar.Vcf;
 import org.bioinfo.commons.io.TextFileReader;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
@@ -48,8 +51,8 @@ public class GSnow extends SnowTool{
 	private DBConnector dbConnector;
 	private XRefDBManager xrefDBMan;
 	private GODBManager gof;
-	private int numberOfMinNodes; 					/** Here we indicate the number of nodes from where we will start the GSnow **/
-	private int numberOfMaxNodes; 					/** Here we indicate the max number of nodes that we will analyse **/
+	private int numberOfMinNodes = 0; 					/** Here we indicate the number of nodes from where we will start the GSnow, in case of no seed list it will get calculate automatically **/
+	private int numberOfMaxNodes = 200; 					/** Here we indicate the max number of nodes that we will analyse,  in case of no seed list it will get calculate automatically **/
 	private double significantValue; 				/** Here we indicate which is the minimum significant value that we are interested in. **/
 	private double defaultSignificantValue = 0.05; 	/** Here we indicate the default significant value that we are interested in. **/
 	//private int maxNumberOfRandomsComponents; // Here we indicate the maximum size of the randoms from the components
@@ -80,7 +83,9 @@ public class GSnow extends SnowTool{
 	protected void execute() {
 		this.decimalFormat = "#.####";
 		initExecute();
-		if(commandLine.hasOption("list") && !(commandLine.hasOption("size-min") && commandLine.hasOption("size-max")))
+//		if(commandLine.hasOption("list") && !(commandLine.hasOption("size-min") && commandLine.hasOption("size-max")))
+//			executeGSnow();
+		if(commandLine.hasOption("list"))
 			executeGSnow();
 		else if(options.hasOption("size-min") && options.hasOption("size-max"))
 			executeGenerateRandoms();
@@ -94,13 +99,13 @@ public class GSnow extends SnowTool{
 			
 			SnowPrinter snowPrinter = new SnowPrinter();
 			String interactomeMsg = getInteractomeMsg();
+			
 			order = commandLine.hasOption("order") ? commandLine.getOptionValue("order") : "ascending";
 			cutOff = commandLine.hasOption("cut-off") ? Double.parseDouble(commandLine.getOptionValue("cut-off")) : Double.NaN;
 			significantValue = commandLine.hasOption("significant-value") ? Double.parseDouble(commandLine.getOptionValue("significant-value")) : defaultSignificantValue;
 //			snow = commandLine.hasOption("snow") ? true : false;
 //			snow = (commandLine.hasOption("snow") && !(commandLine.getOptionValue("snow").equalsIgnoreCase("0")));
 
-//			System.out.println("opcion de snow:"+snow);
 			dbConnector = new DBConnector(interactome, new File(babelomicsHomePath + "/conf/infrared.properties"));
 			xrefDBMan = new XRefDBManager(dbConnector);
 			gof = new GODBManager(dbConnector);
@@ -113,44 +118,91 @@ public class GSnow extends SnowTool{
 			String folder = loadFile();
 			System.out.println(folder);
 			
+			String seedListFile = "";
+			if(commandLine.hasOption("seed-list") && !commandLine.getOptionValue("seed-list").equalsIgnoreCase("none")){
+				seedListFile = commandLine.getOptionValue("seed-list");
+				FileUtils.checkFile(new File(seedListFile));
+				
+			}
+			
+			String nodeFile = commandLine.getOptionValue("list");
+			/** Si no hay vcf seguimos el flujo normal del programa**/
+			if(type.equalsIgnoreCase("vcf")){
+				Vcf vcf = new Vcf(nodeFile);
+				AnnovarInterface annovar = new AnnovarInterface("/home/ralonso/annovar", "/home/ralonso/annovar/humandb");
+				List<String> list = annovar.annotate(vcf, outdir);
+				nodeFile = outputFileName+"_list.txt";
+				File f = new File(nodeFile);
+				IOUtils.write(f.getAbsoluteFile(), list);
+				FileUtils.checkFile(f);
+			}
+			
+			Map<Integer, List<Double>> dataMatrixRandoms = null;
+			
 			/** 1º Here the map is (size of list, value of this list of each random) **/
-			Map<Integer, List<Double>> dataMatrixRandoms = getDataMatrixRandoms(folder);
+			if(seedListFile.equalsIgnoreCase("")){
+				dataMatrixRandoms = getDataMatrixRandoms(folder);
+			}
 			numberItems = commandLine.hasOption("number-items") ? Integer.parseInt(commandLine.getOptionValue("number-items")) : numberOfMaxNodes;
 
-			GSnowPreprocessing preprocessing = new GSnowPreprocessing(proteinNetwork, type, xrefDBMan, /*numberOfStartingNodes,*/ numberOfMaxNodes, order, numberItems, cutOff);
-			String pNodeFile = "";
+			GSnowPreprocessing preprocessing = new GSnowPreprocessing(proteinNetwork, type, xrefDBMan, numberOfMaxNodes, order, numberItems, cutOff);
 			
-			if(commandLine.hasOption("seed-list") && !commandLine.getOptionValue("seed-list").equalsIgnoreCase("none")){
-				pNodeFile = commandLine.getOptionValue("seed-list");
-				FileUtils.checkFile(new File(pNodeFile));
-			}
-			String nodeFile = commandLine.getOptionValue("list");
+//			String nodeFile = commandLine.getOptionValue("list");
 			FileUtils.checkFile(new File(nodeFile));
-			listInfo = preprocessing.preprocess(pNodeFile, nodeFile);
+			listInfo = preprocessing.preprocess(seedListFile, nodeFile);
 			
 			mapNames = new HashMap<String, String>();
 			
 			for(Node n : listInfo.getNodes()){
+//				if(n.getOriginalId().equals("NOD2"))
+//					System.out.println("hola");
 				mapNames.put(n.getId(), n.getOriginalId());
 			}
 			updateJobStatus("5","List preprocessed");
-			
+			String inputDataTitle = "Input data";
+			String seedInputDataTitle = inputDataTitle+". Seed List";
+			if(!seedListFile.equalsIgnoreCase("")){
+				inputDataTitle = inputDataTitle+". List";
+			}
 			File f = new File(outputFileName+"_nodes.txt");
 			IOUtils.write(f.getAbsoluteFile(), snowPrinter.printNodesList(listInfo.getNodes()));
-			result.addOutputItem(new Item("nodes_file", f.getName(), "Final list file", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Input data"));
-			result.addOutputItem(new Item("nodes_file_number", String.valueOf(listInfo.getNodes().size()), "Final list number", Item.TYPE.TEXT, new ArrayList<String>(),new HashMap<String,String>(),"Input data"));
+			result.addOutputItem(new Item("nodes_file", f.getName(), "Final list file", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),inputDataTitle));
+			result.addOutputItem(new Item("nodes_file_number", String.valueOf(listInfo.getNodes().size()), "Final list number", Item.TYPE.TEXT, new ArrayList<String>(),new HashMap<String,String>(),inputDataTitle));
 			
 			f = new File(outputFileName+"_not_matched_nodes.txt");
 			IOUtils.write(f.getAbsoluteFile(), snowPrinter.printNodes(listInfo.getNotMatchNodes()));
-			result.addOutputItem(new Item("list_info_not_matched_nodes", f.getName(), "Not matched nodes file", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Input data"));
-			result.addOutputItem(new Item("list_info_not_matched_nodes_number", String.valueOf(listInfo.getNotMatchNodes().size()), "Not matched nodes number", Item.TYPE.TEXT, new ArrayList<String>(), new HashMap<String,String>(), "Input data"));
+			result.addOutputItem(new Item("list_info_not_matched_nodes", f.getName(), "Not matched nodes file", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), inputDataTitle));
+			result.addOutputItem(new Item("list_info_not_matched_nodes_number", String.valueOf(listInfo.getNotMatchNodes().size()), "Not matched nodes number", Item.TYPE.TEXT, new ArrayList<String>(), new HashMap<String,String>(), inputDataTitle));
 
 			f = new File(outputFileName+"_repeated_nodes.txt");
 			IOUtils.write(f.getAbsoluteFile(), snowPrinter.printNodes(listInfo.getRepeatedNodes()));
-			result.addOutputItem(new Item("list_info_repeated_nodes_file", f.getName(), "Duplicated nodes file", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), "Input data"));
-			result.addOutputItem(new Item("list_info_repeated_nodes", (listInfo.getRepeatedNodes().size()==0) ? "0" : String.valueOf(listInfo.getRepeatedNodes().size()), "Duplicated nodes number", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Input data"));
+			result.addOutputItem(new Item("list_info_repeated_nodes_file", f.getName(), "Duplicated nodes file", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), inputDataTitle));
+			result.addOutputItem(new Item("list_info_repeated_nodes", (listInfo.getRepeatedNodes().size()==0) ? "0" : String.valueOf(listInfo.getRepeatedNodes().size()), "Duplicated nodes number", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), inputDataTitle));
 			
-			if(listInfo.getNodes().size() < this.numberOfMinNodes){
+			if(!seedListFile.equalsIgnoreCase("")){
+				f = new File(outputFileName+"_seed_nodes.txt");
+				List<Node> seedNodes = new ArrayList<Node>();
+				for (Node node : listInfo.getNodes()) {
+					if(node.isSeed())
+						seedNodes.add(node);
+				}
+				IOUtils.write(f.getAbsoluteFile(), snowPrinter.printNodesList(seedNodes));
+				result.addOutputItem(new Item("seed_nodes_file", f.getName(), "Final list file", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),seedInputDataTitle));
+				result.addOutputItem(new Item("seed_nodes_file_number", String.valueOf(listInfo.getSeedNodes().size()), "Final list number", Item.TYPE.TEXT, new ArrayList<String>(),new HashMap<String,String>(),seedInputDataTitle));
+				
+				f = new File(outputFileName+"_not_matched_seed_nodes.txt");
+				IOUtils.write(f.getAbsoluteFile(), snowPrinter.printNodes(listInfo.getSeedNodesNotMatched()));
+				result.addOutputItem(new Item("list_info_not_matched_seed_nodes", f.getName(), "Not matched nodes file", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), seedInputDataTitle));
+				result.addOutputItem(new Item("list_info_not_matched_seed_nodes_number", String.valueOf(listInfo.getSeedNodesNotMatched().size()), "Not matched nodes number", Item.TYPE.TEXT, new ArrayList<String>(), new HashMap<String,String>(), seedInputDataTitle));
+
+				f = new File(outputFileName+"_repeated_seed_nodes.txt");
+				IOUtils.write(f.getAbsoluteFile(), snowPrinter.printNodes(listInfo.getSeedNodesDuplicates()));
+				result.addOutputItem(new Item("list_info_repeated_seed_nodes_file", f.getName(), "Duplicated nodes file", Item.TYPE.FILE, new ArrayList<String>(), new HashMap<String,String>(), seedInputDataTitle));
+				result.addOutputItem(new Item("list_info_repeated_seed_nodes", (listInfo.getSeedNodesDuplicates().size()==0) ? "0" : String.valueOf(listInfo.getSeedNodesDuplicates().size()), "Duplicated nodes number", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), seedInputDataTitle));
+			
+			}
+			
+			if(listInfo.getNodes().size() == 0 || listInfo.getNodes().size() < this.numberOfMinNodes){
 				logger.info("List to small after preprocessing it. The size should have at least "+numberOfMinNodes+" after preprocessing. ");
 				result.addOutputItem(new Item("small_size_list_error", "List to small after preprocessing it. The size should have at least "+numberOfMinNodes+" after preprocessing. ", "An error occurred", Item.TYPE.MESSAGE, Arrays.asList("ERROR"), new HashMap<String, String>(), "Error")); 
 				return;
@@ -163,12 +215,21 @@ public class GSnow extends SnowTool{
 			getDataMatrixList();
 			updateJobStatus("15","List preprocessed");
 			
-			/** 4º Here the map is (size of list, value of this list compared with randoms) **/
-			compareDataMatrixListRandoms(dataMatrixRandoms);
-			updateJobStatus("25","List preprocessed");
+			/** 3.1 In case of seed list we have to get another  dataMatrixRandoms**/
+			if(!seedListFile.equalsIgnoreCase("")){
+				significantItem = getSeedPvalue();
+			}
+			else{
+				/** 4º Here the map is (size of list, value of this list compared with randoms) **/
+				compareDataMatrixListRandoms(dataMatrixRandoms);
+				updateJobStatus("25","List preprocessed");
+				
+				/** 5º Here we calculate the significant item from gsnowItems the **/
+				significantItem = getSignificatValue();
+			}
 			
-			/** 5º Here we calculate the significant item from gsnowItems the **/
-			significantItem = getSignificatValue();
+			
+			
 			
 			if(significantItem != null)
 				/** En el siguiente método se dibuja la tabla y el network visualizator, dentro se comprueba si se ha pedido un snow o no para dibujar las estadísticas**/
@@ -236,18 +297,7 @@ public class GSnow extends SnowTool{
 		/** Here we indicate the numberOfMinNodes, that was really calculated before with the randoms **/
 		if( this.listInfo.getSeedNodes().size() > this.numberOfMinNodes )
 			 this.numberOfMinNodes = this.listInfo.getSeedNodes().size();
-		
-//		/** It means that there is no seed list **/
-//		if(this.listInfo.getseedNodes().isEmpty()){
-//			for(int i = 0; i < this.listInfo.getNodes().size(); i++){ 
-//				nodes.add(this.listInfo.getNodes().get(i));
-//				auxNodes = new ArrayList<Node>();
-//				auxNodes.addAll(nodes);
-//				gsnowItem = new GSnowItem();
-//				gsnowItem.setNodes(auxNodes);
-//				gsnowItems.put(i+1, gsnowItem);
-//			}
-//		}
+
 		/** For the seed list, we start the gsnowItems from the size of the seed list **/ 
 		if(!this.listInfo.getSeedNodes().isEmpty()){
 			for(int i = 0; i <  this.listInfo.getSeedNodes().size(); i++)
@@ -305,21 +355,78 @@ public class GSnow extends SnowTool{
 			componentsList = subgraph.getAllInformationComponents(true);
 			for(List<ProteinVertex> component : componentsList)
 				componentsSize.add((double)component.size());
-			rawValue = (double)subgraph.getVertices().size()/(double)componentsList.size();
+			rawValue = getRawValue(subgraph, componentsList);
 			
 			gsnowItems.get(i).setRawValue(rawValue);
 			gsnowItems.get(i).setComponentsSize(componentsSize);
 			
 			/** Calculating pendiente for the score **/
 			double score = 0.0;
-			score = (rawValue-1)/(gsnowItems.get(i).getNodes().size()-1);
+			score = getScore(rawValue, gsnowItems.get(i).getNodes().size());
+//			score = (rawValue-1)/(gsnowItems.get(i).getNodes().size()-1);
 			gsnowItems.get(i).setScore(score);
 			
 			if(i < listInfo.getNodes().size())
 				nodes.add(new ProteinVertex(listInfo.getNodes().get(i).getId()));
 		}
 	}
-	
+	private double getRawValue(SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph, List<List<ProteinVertex>> componentsList){
+		return (double)subgraph.getVertices().size()/(double)componentsList.size();
+	}
+	private double getScore(double rawValue, int size){
+		return (rawValue-1)/(size-1);
+	}
+	private GSnowItem getSeedPvalue() throws IOException{
+		GSnowItem significantItemLocal = null;
+//		Map<Integer, GSnowItem> gsnowItemsMap = new HashMap<Integer, GSnowItem>();
+		List<ProteinVertex> seedList = new ArrayList<ProteinVertex>();
+		for (String seed : listInfo.getSeedNodes()) {
+			seedList.add(new ProteinVertex(seed));
+		}
+		/** This variable is used for knowing the size of the random**/
+		int sizeRandomCutoffValue = 50;
+		/** This variable is used for knowing the amount of executions that we are runnning **/
+		int maxExecutions = 5;
+		List<GSnowItem> gsnowItemsList = getMaxRelatives();
+		Collections.sort(gsnowItemsList);
+		
+		//boolean found = false;
+		for (int i = 0; i < maxExecutions; i++) {
+			GSnowItem gSnowItem = gsnowItemsList.get(i);
+//			gsnowItemsMap.put(gSnowItem.getNodes().size(), gSnowItem);
+//			if(found)
+//				continue;
+			int randomsNumber = 500;
+			if( gSnowItem.getNodes().size() < sizeRandomCutoffValue ||  gSnowItem.getNodes().size() == sizeRandomCutoffValue) {
+				randomsNumber = 1000;
+			}
+			int vertexToAdd =  gSnowItem.getNodes().size() - seedList.size();
+			List<Double> valueList = new ArrayList<Double>();
+			for (int j = 0; j < randomsNumber; j++) {
+				SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), seedList, vertexToAdd);
+				if(intermediate){
+					Subgraph.OneIntermediateList(proteinNetwork.getInteractomeGraph(), subgraph);
+				}
+				List<Double> componentsSize = new ArrayList<Double>();
+				List<List<ProteinVertex>> componentsList = subgraph.getAllInformationComponents(true);
+				for(List<ProteinVertex> component : componentsList)
+					componentsSize.add((double)component.size());
+				double rawValue = getRawValue(subgraph, componentsList);
+				valueList.add(rawValue);
+			}
+			double comparedValue = getComparedValue(valueList, gSnowItem.getRawValue());
+			if(comparedValue <= this.significantValue){
+				significantItemLocal = gSnowItem;
+				significantItemLocal.setComparedValue(comparedValue);
+//				found = true;
+				break;
+			}
+		}
+		significantItemLocal = siginificantItemOutputs(significantItemLocal);
+		if(significantItemLocal != null)
+			printGSnowItems(gsnowItemsList);
+		return significantItemLocal;
+	}
 	/** 4º Here the map is (size of list, value of this list comparing with randoms) **/
 	/** Here we will get the compared value against the randoms **/
 	private void compareDataMatrixListRandoms( Map<Integer, List<Double>> dataMatrixRandoms){
@@ -333,71 +440,76 @@ public class GSnow extends SnowTool{
 			}
 			double rawValue = gsnowItems.get(i).getRawValue();
 			List<Double> valueList = dataMatrixRandoms.get(i);
-			List<Double> intValue = new ArrayList<Double>();
-			int rawBiggerValue = 0;
-			int valueBiggerRaw = 0;
-			for(double value : valueList){
-				if(rawValue > value){
-					intValue.add(1.0);
-					rawBiggerValue++;
-				}
-				else{
-					intValue.add(0.0);
-					valueBiggerRaw++;
-				}
-			}
-			gsnowItems.get(i).setComparedValue(1 - MathUtils.mean(ListUtils.toDoubleArray(intValue)));
+			double comparedValue = getComparedValue(valueList, rawValue);
+			System.out.println(comparedValue);
+			gsnowItems.get(i).setComparedValue(comparedValue);
 		}
 		
 	}
-	
+	private double getComparedValue(List<Double> valueList, double rawValue){
+		Double comparedValue = null;
+		List<Double> intValue = new ArrayList<Double>();
+		int rawBiggerValue = 0;
+		int valueBiggerRaw = 0;
+		for(double value : valueList){
+			if(rawValue > value){
+				intValue.add(1.0);
+				rawBiggerValue++;
+			}
+			else{
+				intValue.add(0.0);
+				valueBiggerRaw++;
+			}
+		}
+		comparedValue = (1 - MathUtils.mean(ListUtils.toDoubleArray(intValue)));
+		return comparedValue;
+	}
 	/** 5º Here we get the significant item in significantItem from gsnowItems **/
 	private GSnowItem getSignificatValue() throws IOException {
-		/** Cogemos los máximos relativos del rawValue **/
+		GSnowItem significantItemLocal = null;
+		List<GSnowItem> gsnowItemsList = getMaxRelatives();
+		Collections.sort(gsnowItemsList);
+		
+		if(gsnowItemsList.isEmpty())
+			return null;
+		
+		for (GSnowItem gSnowItem : gsnowItemsList) {
+			if(gSnowItem.getComparedValue() <= this.significantValue){
+				significantItemLocal =  gSnowItem;
+				break;
+			}
+		}
+		significantItemLocal = siginificantItemOutputs(significantItemLocal);
+
+		if(significantItemLocal != null)
+			printGSnowItems(gsnowItemsList);
+		
+		return significantItemLocal;
+	}
+	private List<GSnowItem> getMaxRelatives(){
 		double currentValue;
 		double nextCurrentValue;
 		double previousCurrentValue;
-		GSnowItem significantItemLocal = null;
-		Map<Integer, GSnowItem> gsnowItemsMap = new HashMap<Integer, GSnowItem>();
-		Map<Integer, GSnowItem> gsnowItemsMapAll = new HashMap<Integer, GSnowItem>();
-		List<Integer> maxRelPointer = new ArrayList<Integer>();
-
+		List<GSnowItem> gsnowItemsList = new ArrayList<GSnowItem>();
 		/** Aquí cogemos los picos, ahora los no significativos y los significativos, ¿sería necesario unicamente los significativos? **/
-		/** For the non-seed list **/
-		/** for(int i = numberOfMinNodes + 1; i < this.listInfo.getNodes().size(); i++){ **/
-		/** For the seed list **/
 		for(int i = this.numberOfMinNodes + 1; i < this.listInfo.getNodes().size(); i++){
 			/** Cojemos el rawValue de la lista con size i-1, i y i+1 **/
 			previousCurrentValue = gsnowItems.get(i-1).getRawValue();
 			currentValue = gsnowItems.get(i).getRawValue();
 			nextCurrentValue = gsnowItems.get(i+1).getRawValue();
 			if(previousCurrentValue < currentValue && currentValue > nextCurrentValue ){
-				maxRelPointer.add(i);
-				gsnowItemsMap.put(i, gsnowItems.get(i));
-			}
-			gsnowItemsMapAll.put(i, gsnowItems.get(i));
-		}
-		
-		
-		/** Sacamos el valor siginificativo: De los máximos relativos nos quedamos con el de mayor score y que sea sifnificativo **/
-		double minScore = Double.MIN_VALUE;
-		for (Integer index : maxRelPointer) {
-			double score = gsnowItems.get(index).getScore();
-			if(score > minScore &&  gsnowItems.get(index).getComparedValue() <= this.significantValue){
-				significantItemLocal =  gsnowItems.get(index);
-				minScore = score;
+				gsnowItemsList.add(gsnowItems.get(i));
 			}
 		}
-		
-		if(significantItemLocal != null)
-			significantItemLocal.setSignificant(true);
-		
+		return gsnowItemsList;
+	}
+	private GSnowItem siginificantItemOutputs(GSnowItem significantItemLocal) throws IOException{
 		if(significantItemLocal == null){
 			logger.info("There is no significant minimal connected network");
 			result.addOutputItem(new Item("significant_value", " There is no significant minimal connected network", "Significant value", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Results: Minimum Connected Network selected"));
 			return null;
 		}
-		
+		significantItemLocal.setSignificant(true);
 		/** We write on web page the results **/
 		logger.info("Significant value:"+significantItemLocal.getComparedValue()+", Significant size: "+significantItemLocal.getNodes().size());
 		String significantStringItem = StringUtils.decimalFormat(significantItemLocal.getComparedValue(), decimalFormat);
@@ -406,7 +518,7 @@ public class GSnow extends SnowTool{
 			significantStringItem = "0.0001";
 		result.addOutputItem(new Item("significant_value", "<"+significantStringItem, "MCN selected pval", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Results: Minimum Connected Network selected.All results"));
 		result.addOutputItem(new Item("significant_size", Integer.toString(significantItemLocal.getNodes().size()), "MCN selected size", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Results: Minimum Connected Network selected.All results"));
-		
+	
 		/** We draw the plot **/
 		SnowPrinter snowPrinter = new SnowPrinter();
 		File f = new File(outputFileName+"_size_pvalue.json");
@@ -414,18 +526,17 @@ public class GSnow extends SnowTool{
 		List<String> tags = new ArrayList<String>();
 		tags.add("NETWORKMINER_JSON");
 		result.addOutputItem(new Item("plot_size_pvalue", f.getName(), "Plot", TYPE.IMAGE, tags, new HashMap<String, String>(2), "Results: Minimum Connected Network selected.All results"));
-		
-		/** We write the file on web page **/
-		//printGSnowItems(gsnowItemsMap);
-		printGSnowItems(gsnowItemsMapAll);
-		
 		return significantItemLocal;
 	}
-	private void printGSnowItems(Map<Integer, GSnowItem> gsnowItemsLocal){
+	
+//	private void printGSnowItems(List<GSnowItem> gsnowItemsList){
+//		printGSnowItems(gsnowItemsList, true);
+//	}
+	private void printGSnowItems(List<GSnowItem> gsnowItemsList){
 		try {
 			SnowPrinter snowPrinter = new SnowPrinter();
 			File f = new File(outputFileName+"_all.txt");
-			IOUtils.write(f.getAbsoluteFile(), snowPrinter.printGsnowItems(gsnowItemsLocal));
+			IOUtils.write(f.getAbsoluteFile(), snowPrinter.printGsnowItems(gsnowItemsList));
 			result.addOutputItem(new Item("all_results", f.getName(), "All results", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Results: Minimum Connected Network selected.All results"));
 
 		} catch (IOException e) {
@@ -448,7 +559,6 @@ public class GSnow extends SnowTool{
 		Set<String> intermediates = new HashSet<String>();
 //		List<List<ProteinVertex>> components = new ArrayList<List<ProteinVertex>>();
 		SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph = (SimpleUndirectedGraph<ProteinVertex, DefaultEdge>) Subgraph.randomSubgraph(proteinNetwork.getInteractomeGraph(), nodes);
-		
 		if(intermediate){
 			System.out.println("Antes intermediario ["+subgraph.getVertices().size()+"]: "+subgraph.getVertices().size());
 			//boolean found = false;
@@ -461,6 +571,8 @@ public class GSnow extends SnowTool{
 			for(String id : intermediates){
 				/** Get the input_id identifier for the intermediates **/
 				String convertedId = id;
+				if(this.listInfo.getOriginalDbName() == null)
+					continue;
 				if(xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null){
 					List<String> dbNames = new ArrayList<String>();
 					String originalDbName = this.listInfo.getOriginalDbName().getDbname();
@@ -475,8 +587,9 @@ public class GSnow extends SnowTool{
 				}
 				mapNames.put(id, convertedId);
 			}
+			System.out.println("Despues intermediario ["+subgraph.getVertices().size()+"]: "+subgraph.getVertices().size());
 		}
-		System.out.println("Despues intermediario ["+subgraph.getVertices().size()+"]: "+subgraph.getVertices().size());
+		
 //		components = subgraph.getAllInformationComponents(true);
 		updateJobStatus("35","List preprocessed");
 		
@@ -493,17 +606,20 @@ public class GSnow extends SnowTool{
 		subProteinNetwork.calcTopologicalValues();
 		subProteinNetwork.calcTopologicalMeanValues();
 		File f;
-		//File auxFile = new File(outputFileName);
-		//List<String> names = new ArrayList<String>();
 		
 		if(subProteinNetwork != null){
-			//names.add(auxFile.getName() + "_list1.json");
-			//createJson(subProteinNetwork, outputFileName+"_list1.dot", components, intermediates, 1, this.mapNames);
-			//auxFile = new File(outputFileName+"_list1.json");
+			Set<String> convertedIntermediates = new HashSet<String>();
+			for(String key : intermediates){
+				convertedIntermediates.add(mapNames.get(key));
+			}
+			Set<String> convertedSeed = new HashSet<String>();
+			for(String key : listInfo.getSeedNodes()){
+				convertedSeed.add(mapNames.get(key));
+			}
+				
 			f = new File(outputFileName+"_mcn.sif");
 			IOUtils.write(f.getAbsoluteFile(), graphToSif(significantItem, subgraph));
-			addOutputSvgViewer(f, 1);
-			//result.addOutputItem(new Item("mcn.sif", f.getName(), "Minimun Connected Network interactions", Item.TYPE.FILE, new ArrayList<String>(),new HashMap<String,String>(),"Results: Minimum Connected Network selected.Viewer"));
+			addOutputSvgViewer(f, 1, convertedIntermediates, convertedSeed);
 		}
 		
 		String googleTable="NETWORKMINERRANKED_TABLE"; 
@@ -522,32 +638,17 @@ public class GSnow extends SnowTool{
 		result.addOutputItem(new Item("mcn_interactors", f.getName(), "Minimun Connected Network interactors", Item.TYPE.FILE,StringUtils.toList("TABLE,"+googleTable, ",") ,new HashMap<String,String>(),"Results: Minimum Connected Network selected.Interactors"));
 		
 		
-		/** This method gets the list of the INTERCTORS if the genome and write them in a file 
-		 * tener mucho cuidado xq es exactamente el mismo nombre que luego va a leer el newtworkwidget.js, ahí tb hay que cambiarlo**/ 
-		String versionGenome = "ene11";
-		String genomeFileName = "interactome_interactors_"+this.interactome+"_"+versionGenome+"_"+this.type+"_"+this.group+".txt";
-		f = new File(outdir + "/"+genomeFileName);
-		List<String> genomeInteractors = new ArrayList<String>();
-		for(ProteinVertex p : proteinNetwork.getInteractomeGraph().getVertices()){
-			genomeInteractors.add(p.getId());
-		}
-		IOUtils.write(f, genomeInteractors);
-		/****/
-		
 		/** Here we will put the redirections**/
-		/** This method gets the list of the inputs id + external ids **/
-		List<String> listOfInteractors = getListOfInteractors(significantList,intermediates);
-		f = new File(outputFileName+"_interactorsid_list.txt");
-		IOUtils.write(f.getAbsoluteFile(), listOfInteractors);
 		
-		List<String> tags = new ArrayList<String>();
-		tags.add("REDIRECT_TOOL");
-		tags.add(this.interactome);
-		tags.add(this.type);
-		tags.add(genomeFileName);
-		result.addOutputItem(new Item("mcn_id_interactors", f.getName(), "Interactors id file list", Item.TYPE.FILE, tags, new HashMap<String,String>(),"Results: Minimum Connected Network selected.Continue processing"));
+		/** 	Redirect to SNOW **/
+		String listOfInteractors = "";
+		listOfInteractors = significantItem.getNodesOriginalIds();
+		redirect("REDIRECT_TOOL_SNOW",outputFileName+"_interactorsid_list_snow.txt", listOfInteractors);
 		
-//		if(snow){
+		listOfInteractors = ListUtils.toString(getListOfInteractors(subgraph), System.getProperty("line.separator"));
+		redirect("REDIRECT_TOOL_FATIGO",outputFileName+"_interactorsid_list_fatigo.txt", listOfInteractors);
+
+		//		if(snow){
 //			System.out.println("Excuting statsTest");
 //			statsTest(subProteinNetwork, components);
 //		}
@@ -556,18 +657,50 @@ public class GSnow extends SnowTool{
 //		}
 		
 	}
+	private void redirect(String tool, String fileName, String fileContent) throws IOException{
+		String genomeFileName = writeGenomeInServer();
+		File f = new File(fileName);
+		IOUtils.write(f.getAbsoluteFile(), fileContent);
+		
+		List<String> tags = new ArrayList<String>();
+		tags.add(tool);
+		tags.add(this.interactome);
+		tags.add(this.type);
+		tags.add(this.group);
+		tags.add(genomeFileName);
+		String intermediate = this.intermediate  ? "1" : "0";
+		tags.add(intermediate);
+		result.addOutputItem(new Item("mcn_id_interactors", f.getName(), "Interactors", Item.TYPE.FILE, tags, new HashMap<String,String>(),"Results: Minimum Connected Network selected.Continue processing"));
+	
+	}
+	
+	private String writeGenomeInServer() throws IOException{
+		/** This method gets the list of the INTERCTORS if the genome and write them in a file 
+		 * tener mucho cuidado xq es exactamente el mismo nombre que luego va a leer el newtworkwidget.js, ahí tb hay que cambiarlo**/ 
+		String versionGenome = "ene11";
+		String genomeFileName = "interactome_interactors_"+this.interactome+"_"+versionGenome+"_"+this.type+"_"+this.group+".txt";
+		File f = new File(outdir + "/"+genomeFileName);
+		List<String> genomeInteractors = getListOfInteractors(proteinNetwork.getInteractomeGraph());
+		IOUtils.write(f, genomeInteractors);
+		return genomeFileName;
+	}
 	/**
 	 * This method gets the list of the inputs id + external ids
 	 */
-	private List<String> getListOfInteractors(List<Node> significantList, Set<String> intermediates){
-		List<String> list = new ArrayList<String>();
-		for(Node node : significantList){
-			list.add(node.getOriginalId());
+	private List<String> getListOfInteractors(SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph){
+		
+		List<String> graph = new ArrayList<String>();
+		for (DefaultEdge e : subgraph.getAllEdges()) {
+			String source = subgraph.getVertex(e.getSource()).getId();
+			String target = subgraph.getVertex(e.getTarget()).getId();
+			if(mapNames.get(source) != null)
+				source = mapNames.get(source);
+			if(mapNames.get(target) != null)
+				target = mapNames.get(target);
+			graph.add(source);
+			graph.add(target);
 		}
-		for(String node : intermediates){
-			list.add(node);
-		}
-		return list;
+		return graph;
 	}
 	private String getMcnInteractors(ProteinNetwork subProteinNetwork, Set<String> intermediates) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException{
 		
@@ -580,7 +713,8 @@ public class GSnow extends SnowTool{
 		for(Node node : this.significantItem.getNodes()){
 			sb.append(node.getOriginalId()).append(tab);
 			sb.append(node.getId()).append(tab);
-			sb.append("list").append(tab);
+			String listType = node.isSeed() ? "seed-list" : "list";
+			sb.append(listType).append(tab);
 			sb.append(node.getValue()).append(tab);
 			sb.append(getSigleMcnInteractors(subProteinNetwork,node.getId()));
 			sb.append(System.getProperty("line.separator"));
@@ -708,7 +842,7 @@ public class GSnow extends SnowTool{
 		logger.debug("Finished 2nd Analysis..................");
 	}
 
-	public String graphToSif(GSnowItem significantItem, SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph){
+	private String graphToSif(GSnowItem significantItem, SimpleUndirectedGraph<ProteinVertex, DefaultEdge> subgraph){
 		StringBuilder sb = new StringBuilder();
 		 /** Vertices with edges **/
 		for (DefaultEdge e : subgraph.getAllEdges()) {
@@ -718,12 +852,6 @@ public class GSnow extends SnowTool{
 				source = mapNames.get(source);
 			if(mapNames.get(target) != null)
 				target = mapNames.get(target);
-//			for (Node n  : significantItem.getNodes()) {
-//				if(n.getId().equalsIgnoreCase(source))
-//					source = n.getOriginalId();
-//				if(n.getId().equalsIgnoreCase(target))
-//					target = n.getOriginalId();
-//			}
 			sb.append(source).append("\t").append("pp").append("\t").append(target);
 			sb.append(System.getProperty("line.separator"));
 			
@@ -741,7 +869,6 @@ public class GSnow extends SnowTool{
 			sb.deleteCharAt(sb.lastIndexOf(System.getProperty("line.separator")));
 		return sb.toString();
 	}
-	
 	public void executeGenerateRandoms(){
 		try {
 			SnowPrinter snowPrinter = new SnowPrinter();
@@ -790,24 +917,29 @@ public class GSnow extends SnowTool{
 			localType = "proteins";
 			logger.debug("Transcripts recognised, loading "+localType+" randoms");
 		}
+		if(type.equals("vcf")){
+			localType = "genes";
+			logger.debug("vcf recognised, loading "+localType+" randoms");
+		}
+		
 		folder += interactome+"_"+localType+"_"+group+"db_"+intermediateString+".txt";
 		return folder;
 		
 	}
 	
-	public class GSnowItem{
+	public class GSnowItem implements Comparable<GSnowItem>{
 
 		/** List<Node> nodes; **/
 		List<Node> nodes;
 		
 		/** This is the value(vertices/components) before compared with randoms **/
-		double rawValue;
+		Double rawValue;
 		
 		/** This is the value(mean of significant values) after compared with randoms **/
-		double comparedValue;
+		Double comparedValue;
 		
 		/** This is the value :(1-rawValue)/(1-List<Node>.size) **/
-		double score;
+		Double score;
 		
 		/** This says if this is a significant item or not **/
 		boolean significant;
@@ -818,6 +950,9 @@ public class GSnow extends SnowTool{
 			nodes = new ArrayList<Node>();
 			componentsSize = new ArrayList<Double>();
 			significant = false;
+			comparedValue = null;
+			rawValue = null;
+			score = null;
 			
 		}
 		public List<Node> getNodes() {
@@ -826,22 +961,22 @@ public class GSnow extends SnowTool{
 		public void setNodes(List<Node> nodes) {
 			this.nodes = nodes;
 		}
-		public double getRawValue() {
+		public Double getRawValue() {
 			return rawValue;
 		}
-		public void setRawValue(double rawValue) {
+		public void setRawValue(Double rawValue) {
 			this.rawValue = rawValue;
 		}
-		public double getComparedValue() {
+		public Double getComparedValue() {
 			return comparedValue;
 		}
-		public void setComparedValue(double comparedValue) {
+		public void setComparedValue(Double comparedValue) {
 			this.comparedValue = comparedValue;
 		}
-		public double getScore() {
+		public Double getScore() {
 			return score;
 		}
-		public void setScore(double score) {
+		public void setScore(Double score) {
 			this.score = score;
 		}
 		public List<Double> getComponentsSize() {
@@ -861,14 +996,37 @@ public class GSnow extends SnowTool{
 		public String toString(){
 			return "{"+nodes.toString()+" - rawValue = "+rawValue+" - comparedValue = "+comparedValue+"}";
 		}
-		public String getNodesIds(){
+		public String getNodesOriginalIds(){
+			String separator = System.getProperty("line.separator");
+			return getNodesOriginalIds(separator);
+		}
+		public String getNodesOriginalIds(String separator){
 			StringBuilder sb = new StringBuilder();
 			for(Node n : nodes){
-				sb.append(n.getId()).append(",");
+				sb.append(n.getOriginalId()).append(separator);
 			}
 			if(sb.toString().equals(""))
 				return sb.toString();
 			return sb.substring(0,sb.toString().length()-1);
+		}
+		public String getNodesIds(){
+			String separator = System.getProperty("line.separator");
+			return getNodesIds(separator);
+		}
+		public String getNodesIds(String separator){
+			StringBuilder sb = new StringBuilder();
+			for(Node n : nodes){
+				sb.append(n.getId()).append(separator);
+			}
+			if(sb.toString().equals(""))
+				return sb.toString();
+			return sb.substring(0,sb.toString().length()-1);
+		}
+		@Override
+		public int compareTo(GSnowItem o) {
+			if(score < o.score)
+				return 1;
+			return 0;
 		}
 	}
 	

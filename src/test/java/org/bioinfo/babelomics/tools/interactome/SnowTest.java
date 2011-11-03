@@ -6,7 +6,7 @@ import org.bioinfo.babelomics.BabelomicsMain;
 import org.junit.Test;
 
 public class SnowTest {
-
+	String BABELOMICS_HOME = System.getenv("BABELOMICS_HOME");
 	@Test
 	public void testTest(){
 	 System.out.println("I am a test!!");	
@@ -21,18 +21,19 @@ public class SnowTest {
 		String []args = {
 				"--tool", "snow", 
 				"-o", outdir, 
-				"--randoms", "10",
+				"--randoms", "500",
 				"--o-name","result",
 				"--interactome","hsa",
 				"--group","curated",
 				"--type", "genes",
 				"--list1","/mnt/commons/babelomics/tests/snow2/listas/hsa/genes/brca1_overexp_up.txt",
+//				"--list1",BABELOMICS_HOME+"/example/K562_symbol.txt",
 				"--side", "less",
-				"--intermediate","0",
+				"--intermediate","1",
 				"--components","true",
 				//"--xml",
 				"--images",
-				"--json",
+//				"--json",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
 	}

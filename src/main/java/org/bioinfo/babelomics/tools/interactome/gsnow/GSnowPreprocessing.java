@@ -6,14 +6,15 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.bioinfo.infrared.core.XRefDBManager;
 import org.bioinfo.infrared.core.feature.DBName;
 import org.bioinfo.infrared.core.feature.XRef;
-import org.bioinfo.infrared.core.feature.XRef.XRefItem;
 import org.bioinfo.networks.protein.ProteinNetwork;
 
 public class GSnowPreprocessing {
@@ -43,6 +44,8 @@ public class GSnowPreprocessing {
 		try{
 			ListInfo listInfo = new ListInfo();
 			listInfo = parseFile("#", seedFilePath, filePath);
+			if(listInfo.getNodes().isEmpty())
+				return listInfo;
 			orderNodes(listInfo);
 
 			System.out.println("Correct nodes after parsing file: "+listInfo.getNodes().size());
@@ -103,6 +106,11 @@ public class GSnowPreprocessing {
 			if(!line.startsWith(comment) && !line.trim().equals("")) {
 				fields = line.split("\t");
 				if(fields.length == 2){
+					/** If first field is empty, but it has pval **/
+					if(fields[0].trim().equalsIgnoreCase("")){
+						listInfo.getNotIdNodes().add(Double.parseDouble(fields[1]));
+						continue;
+					}
 					length2 = true;
 					position = Double.parseDouble(fields[1]);
 					listInfo.setRanked(true);
@@ -136,12 +144,13 @@ public class GSnowPreprocessing {
 				nodes.add(node);
 			}
 		}
-		
 		/** There is no seed file **/
-		if(seedFilePath.equals("")){
+		if(seedFilePath.equals("") || nodes.isEmpty()){
 			listInfo.setNodes(nodes);
 			return listInfo;
 		}
+		
+		/** There is seed file **/
 		br = new BufferedReader(new FileReader(seedFilePath));
 		if(order.equals("ascending")) {
 			position = minValue-1;
@@ -149,67 +158,124 @@ public class GSnowPreprocessing {
 		if(order.equals("descending")) {
 			position = maxValue+1;
 		}
+		Set<String> repeatedSeedNodes = new HashSet<String>();
+		Set<String> noRepeatedSeedNodes = new HashSet<String>();
 		/** Reading seed file **/
 		while((line = br.readLine()) != null) {
 			if(!line.startsWith(comment) && !line.trim().equals("")) {
 				fields = line.split("\t");
 				if(fields.length == 1){
-					Node node = new Node(fields[0], position);
-					nodes.add(node);
-					node.setSeed(true);
+					if(noRepeatedSeedNodes.contains(fields[0])){
+						repeatedSeedNodes.add(fields[0]);
+					}
+					else{
+						Node node = new Node(fields[0], position);
+						nodes.add(node);
+						node.setSeed(true);
+						noRepeatedSeedNodes.add(fields[0]);
+					}
 				}
 				else{
-					System.err.println("[ERROR] Format problems detected, two many fields in : "+seedFilePath+" line "+ line);
+					System.err.println("[ERROR] Format problems detected, two many fields in seedFile: "+seedFilePath+" line "+ line);
 				}
 			}
 		}
+		listInfo.setSeedNodesDuplicates(repeatedSeedNodes);
 		listInfo.setNodes(nodes);
 		return listInfo;
 	}
 	
 	private ListInfo deleteDuplicates(ListInfo listInfo){
-		List<Node> rawNodes = listInfo.getNodes();
-		List<Node> nonDuplicatedNodes = new ArrayList<Node>();
+//		List<Node> rawNodes = listInfo.getNodes();
+		List<Node> rawNodes = new ArrayList<Node>();
+		
+		/** We get nodes not seed **/
+		for (Node node : listInfo.getNodes()) {
+			if(!node.isSeed()){
+				rawNodes.add(node);
+			}
+		}
+
+		/** We remove duplicates from no seed **/
 		Set<String> repeatedNodes = new HashSet<String>();
 		Set<String> idSetString = new HashSet<String>();
-		/** Aqui es donde pondré si hay duplicados entre la lista de asociados y la lista de rankeados: Como se ordenan nodos en principio no hay que 
-		 ** tocar este código **/
 		for(Node node : rawNodes){
 			if(!idSetString.contains(node.id)){
-				nonDuplicatedNodes.add(node);
+				//nonRepeatedNodes.add(node);
 				idSetString.add(node.id);
 			}
 			else
 				repeatedNodes.add(node.id);
 		}
-		listInfo.setNodes(nonDuplicatedNodes);
 		listInfo.setRepeatedNodes(repeatedNodes);
+		
+		/** We take the final list with seed and no seed **/
+		List<Node> nonRepeatedNodes = new ArrayList<Node>();
+		idSetString = new HashSet<String>();
+		for(Node node : listInfo.getNodes()){
+			if(!idSetString.contains(node.id)){
+				nonRepeatedNodes.add(node);
+				idSetString.add(node.id);
+			}
+		}
+		listInfo.setNodes(nonRepeatedNodes);
+
 		return listInfo;
 	}
 	/** Here we discover the type of input id, if it is uniprot, ensembl_gene, hgnc_symbol 
 	 **/
-	private DBName getOriginalDbName(ListInfo listInfo) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
-		for(Node node : listInfo.getNodes()){
-			List<DBName> dbnames = xrefDBMan.getAllDBNamesById(node.getOriginalId());
-			if(dbnames.size() == 1){
-				System.out.println("DbName: "+dbnames.get(0));
-				return dbnames.get(0);
-			}
-				
+	private DBName getOriginalDbName(ListInfo listInfo)  {
+		Map<String, Integer> dbNameNumber = new HashMap<String, Integer>();
+		int recognized = 0;
+		if(xrefDBMan.getDBConnector().getDbConnection().getDatabase() == null){
+			return null;
 		}
-		return null;
+		int max = Integer.MIN_VALUE;
+		DBName dbNameReturn = null;
+		for(Node node : listInfo.getNodes()){
+			List<DBName> dbnames;
+			try {
+				dbnames = xrefDBMan.getAllDBNamesById(node.getOriginalId());
+				if(dbnames.size() > 0){
+					for (DBName dbName : dbnames) {
+						String name = dbName.getDbname();
+						int number = 1;
+						if( !dbNameNumber.containsKey(name) ){
+								dbNameNumber.put(name, number);
+						}
+						else{
+							number = dbNameNumber.get(name);
+							number++;
+							dbNameNumber.put(name, number);
+						}
+						if(number >= max){
+							max = number;
+							dbNameReturn = dbName;
+						}
+					}
+				}
+			} catch (Exception e) {
+				recognized++;
+				/** Esto ocurre cuando no tenemos la especie en infrared, por ejemplo ECO **/
+				//System.err.println("Error GsnowPreprocessin getOriginalDbName: "+node.getOriginalId()+" error: "+e.getLocalizedMessage());
+			}
+		}
+		System.out.println("no recognized: "+recognized);
+		System.out.println("DB Matched: "+dbNameReturn);
+		return dbNameReturn;
 	}
 	private ListInfo matchingDBAndInteractome(ListInfo listInfo) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 		
 		String dbName = "";
 		if(type.equalsIgnoreCase("proteins") || type.equalsIgnoreCase("transcripts"))
 			dbName = "uniprot_swissprot_accession";
-		else if(type.equalsIgnoreCase("genes") )
+		else if(type.equalsIgnoreCase("genes") || type.equalsIgnoreCase("vcf") )
 			dbName = "ensembl_gene";
 //		System.out.println("DBNAME:"+dbName);
 		List<Node> nodes = listInfo.getNodes();
 		List<Node> curatedListNodes = new ArrayList<Node>();
 		Set<String> notMatchNodes = new HashSet<String>();
+		Set<String> notMatchSeedNodes = new HashSet<String>();
 		
 		/** idsAlreadyMatched: Esta es una variable que nos dice si ya se ha recuperado un id de un originalId, entonces no se inserta en la bbdd
 		 * x ejemplo si BRCA2 y BRCA1 dan ensemble_gene: ENSG00001, solo se introduce ENSG00001 una vez, correspondiente a BRCA2, que estaba antes **/
@@ -235,8 +301,11 @@ public class GSnowPreprocessing {
 
 					boolean matched = false;
 					for(XRef xref : xrefList){
-						if(xref.getXrefItems().get(dbName).size()>1)
-							System.out.println("ori id:"+node.getOriginalId()+" size: "+xref.getXrefItems().get(dbName).size());
+						if(xref.getXrefItems().isEmpty()){
+							continue;
+						}
+//						if(xref.getXrefItems().get(dbName).size()>1)
+//							System.out.println("ori id:"+node.getOriginalId()+" size: "+xref.getXrefItems().get(dbName).size());
 						String nodeId = xref.getXrefItems().get(dbName).get(0).getDisplayName();
 						
 						if(!idsAlreadyMatched.contains(nodeId)){
@@ -251,24 +320,37 @@ public class GSnowPreprocessing {
 						n.setSeed(node.isSeed());
 						if(proteinNetwork.getInteractomeGraph().getVertex(nodeId) != null)
 							curatedListNodes.add(n);
-						else
-							notMatchNodes.add(node.getId());
+						else{
+							if(!node.isSeed())
+								notMatchNodes.add(node.getId());
+							else
+								notMatchSeedNodes.add(node.getOriginalId());
+						}
 					}
-					if(!matched)
-						notMatchNodes.add(node.getId());
+					if(!matched){
+						if(!node.isSeed())
+							notMatchNodes.add(node.getId());
+						else
+							notMatchSeedNodes.add(node.getOriginalId());
+					}
 				}
 				else if(proteinNetwork.getInteractomeGraph().getVertex(node.getId()) != null)
 					curatedListNodes.add(node);
-				else
-					notMatchNodes.add(node.getId());
+				else{
+					if(!node.isSeed())
+						notMatchNodes.add(node.getId());
+					else
+						notMatchSeedNodes.add(node.getOriginalId());
+				}
 				
 			} catch (Exception e) {
-				System.out.println("Problems matching "+node+": "+e.getMessage());
-				//e.printStackTrace();
+				if(node.isSeed())
+					System.out.println("Problems matching "+node+": "+e.getMessage());
 			}
 		}
 		listInfoLocal.setNodes(curatedListNodes);
 		listInfoLocal.setNotMatchNodes(notMatchNodes);
+		listInfoLocal.setSeedNodesNotMatched(notMatchSeedNodes);
 		return listInfoLocal;
 	}
 	private void orderNodes(ListInfo listInfo) {
@@ -325,23 +407,38 @@ public class GSnowPreprocessing {
 	public class ListInfo{
 		
 		private List<Node> nodes;
+		
 		private Set<String> notMatchNodes;
 		private Set<String> repeatedNodes;
 		private Set<String> cuttedNodes;
+		
 		private Set<String> seedNodes;
+		private Set<String> seedNodesNotMatched;
+		private Set<String> seedNodesDuplicates;
+		
 		private boolean ranked;
 		
 		/** Es la base de datos con la que coincide los inputs id, por ejemplo: si la lista de entrada es BRCA2... entonces: originalDbName = 'hgnc_symbol'**/
 		private DBName originalDbName;
 		
+		/** Nodes without id, but with score**/
+		private Set<Double> notIdNodes;
+		
 		public ListInfo(){
 			nodes = new ArrayList<Node>();
+			
 			notMatchNodes = new HashSet<String>();
 			repeatedNodes = new HashSet<String>();
 			cuttedNodes = new HashSet<String>();
+			
 			seedNodes = new HashSet<String>();
+			seedNodesNotMatched = new HashSet<String>();
+			seedNodesDuplicates = new HashSet<String>();
+			
 			ranked = false;
 			originalDbName = null;
+			
+			notIdNodes = new HashSet<Double>();
 
 		}
 		public void setNodes(List<Node> nodes) {
@@ -374,6 +471,18 @@ public class GSnowPreprocessing {
 		public void setSeedNodes(Set<String> seedNodes) {
 			this.seedNodes = seedNodes;
 		}
+		public Set<String> getSeedNodesNotMatched() {
+			return seedNodesNotMatched;
+		}
+		public void setSeedNodesNotMatched(Set<String> seedNodesNotMatched) {
+			this.seedNodesNotMatched = seedNodesNotMatched;
+		}
+		public Set<String> getSeedNodesDuplicates() {
+			return seedNodesDuplicates;
+		}
+		public void setSeedNodesDuplicates(Set<String> seedNodesDuplicates) {
+			this.seedNodesDuplicates = seedNodesDuplicates;
+		}
 		public boolean isRanked() {
 			return ranked;
 		}
@@ -385,6 +494,12 @@ public class GSnowPreprocessing {
 		}
 		public void setOriginalDbName(DBName originalDbName) {
 			this.originalDbName = originalDbName;
+		}
+		public Set<Double> getNotIdNodes() {
+			return notIdNodes;
+		}
+		public void setNotIdNodes(Set<Double> notIdNodes) {
+			this.notIdNodes = notIdNodes;
 		}
 		
 		

@@ -9,6 +9,27 @@ public class GSnowTest {
 
 	String BABELOMICS_HOME = System.getenv("BABELOMICS_HOME");
 	
+	//@Test
+	public void otherExample1(){
+		String outdir = "/tmp/gsnow/example1";
+		System.out.println("Results allocated in: "+outdir);
+		new File(outdir).mkdirs();
+		String []args = {
+				"--tool", "network-miner",
+				"-o", outdir, 
+				"--o-name","result",
+				"--interactome","hsa",
+				"--list-tags", "idlist,gene",
+				"--group", "all",
+				"--intermediate","1",
+				"--order","ascending",
+				"--significant-value", "1",
+				"--list","/home/ralonso/proyectos/Gsnow/listas/translated_plink_correct.assoc",
+				"--seed-list","/home/ralonso/proyectos/Gsnow/listas/bipolarDisorder-associatedgenes-uniprot.txt",
+				"--home", BABELOMICS_HOME};
+		main(args);
+	}
+	
 	@Test
 	public void testExample1(){
 		String outdir = "/tmp/gsnow/example1";
@@ -16,19 +37,14 @@ public class GSnowTest {
 		new File(outdir).mkdirs();
 		String []args = {
 				"--tool", "network-miner",
-				//"--jobname", "Genes_up_in_control_Vs_case_Hirschsprung_disease",
 				"-o", outdir, 
 				"--o-name","result",
 				"--interactome","hsa",
-				"--type", "genes",
+				"--list-tags", "idlist,gene",
 				"--group", "curated",
 				"--intermediate","1",
-				"--randoms","1",
 				"--order","ascending",
-//				"--snow", "0",
-//				"--list","/tmp/gsnow/example1/prueba.txt",
-//				"--plist","/home/ralonso/Desktop/prPruebasGsnow.txt",
-				"--list",BABELOMICS_HOME+"/example/Genes_up_in_control_Vs_case_Hirschsprung_disease.txt",
+				"--list",BABELOMICS_HOME+"/example/K562_symbol.txt",
 				"--home", BABELOMICS_HOME};
 		main(args);
 	}
@@ -39,25 +55,21 @@ public class GSnowTest {
 		new File(outdir).mkdirs();
 		String []args = {
 				"--tool", "network-miner",
-				//"--jobname", "Genes_up_in_control_Vs_case_Hirschsprung_disease",
 				"-o", outdir, 
 				"--o-name","result",
-				"--interactome","hsa",
-				"--type", "genes",
-				"--group", "curated",
-				"--intermediate","1",
+				"--interactome","eco",
+				"--list-tags", "gene,idlist",
+				"--group", "all",
+				"--intermediate","0",
 				"--randoms","1",
 				"--order","ascending",
-//				"--snow", "0",
-//				"--list","/tmp/gsnow/example1/prueba.txt",
-//				"--plist","/home/ralonso/Desktop/prPruebasGsnow.txt",
-				"--list",BABELOMICS_HOME+"/example/K562_symbol.txt",
+				"--list","/home/ralonso/Desktop/eco_example.txt",
 				"--home", BABELOMICS_HOME};
 		main(args);
 	}
 	
 	//@Test
-	public void test3(){
+	public void testSeed(){
 		String outdir = "/tmp/gsnow/example1";
 		System.out.println("Results allocated in: "+outdir);
 		new File(outdir).mkdirs();
@@ -65,13 +77,32 @@ public class GSnowTest {
 				"--tool", "network-miner",
 				"-o", outdir, 
 				"--o-name","result",
-				"--interactome","sce",
-				"--type", "genes",
+				"--interactome","hsa",
+				"--list-tags", "idlist,gene",
 				"--group", "all",
-				"--intermediate","0",
-//				"--randoms","1",
-				"--order","ascending",
-				"--list","/home/ralonso/Desktop/sce_example.txt",
+				"--intermediate","1",
+				"--order","descending",
+				"--list","/home/ralonso/proyectos/Gsnow/listas/ensg-affyID-statistic.txt",
+				"--seed-list","/home/ralonso/proyectos/Gsnow/listas/associated-genes-ensg.txt",
+				"--home", BABELOMICS_HOME};
+		main(args);
+	}
+	//@Test
+	public void testVCF(){
+		String outdir = "/tmp/gsnow/example1";
+		System.out.println("Results allocated in: "+outdir);
+		new File(outdir).mkdirs();
+		String []args = {
+				"--tool", "network-miner",
+				"-o", outdir, 
+				"--o-name","result",
+				"--interactome","hsa",
+				"--list-tags", "other,vcf",
+				"--group", "all",
+				"--intermediate","1",
+				"--order","descending",
+				"--list","/home/ralonso/1542.bfast_a2.gatk.recalibrated_snps_filtered.vcf",
+				"--seed-list","/home/ralonso/proyectos/Gsnow/listas/associated-genes-ensg.txt",
 				"--home", BABELOMICS_HOME};
 		main(args);
 	}
@@ -171,7 +202,7 @@ public class GSnowTest {
 				"-o", outdir, 
 				"--o-name","output",
 				"--interactome","hsa",
-				"--type", "proteins",
+				"--list-tags", "proteins",
 				"--group", "all",
 				"--intermediate","1",
 //				"--side","less",
@@ -194,6 +225,7 @@ public class GSnowTest {
 	public void testGsnowRandomsGenerator(){
 
 		String outdir = "/tmp/gsnow/testGenerator";
+		System.out.println("Writing in: "+outdir);
 		new File(outdir).mkdirs();
 
 		String []args = {
@@ -201,11 +233,11 @@ public class GSnowTest {
 				"-o", outdir, 
 				"--o-name","valores.txt",
 				"--interactome","hsa",
-				"--type", "proteins",
+				"--list-tags", "protein",
 				"--group", "all",
 				"--intermediate","1",
-				"--size-min","100",
-				"--size-max","101",
+				"--size-min","1",
+				"--size-max","9",
 				"--randoms","2000",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);

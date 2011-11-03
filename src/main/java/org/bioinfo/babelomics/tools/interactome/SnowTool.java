@@ -5,14 +5,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.bioinfo.babelomics.tools.BabelomicsTool;
 import org.bioinfo.babelomics.tools.interactome.gsnow.GSnowPreprocessing.Node;
 import org.bioinfo.chart.BoxPlotChart;
 import org.bioinfo.commons.io.utils.FileUtils;
-import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.data.graph.SimpleUndirectedGraph;
@@ -24,9 +22,6 @@ import org.bioinfo.networks.protein.InteractomeParser;
 import org.bioinfo.networks.protein.ProteinNetwork;
 import org.bioinfo.networks.protein.ProteinNetworkToFile;
 import org.bioinfo.networks.protein.ProteinVertex;
-import org.bioinfo.networks.protein.files.Dot;
-import org.bioinfo.networks.protein.files.Json;
-import org.bioinfo.networks.protein.files.Svg;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
@@ -51,7 +46,9 @@ public abstract class SnowTool extends BabelomicsTool{
 	
 	public void initSnowToolOptions() {
 		options.addOption(OptionFactory.createOption("interactome", "Interactome: hsa, sce or own (for you own interactome)", true, true));
-		options.addOption(OptionFactory.createOption("type", "An argument saying if you want genes, proteins(default) or transcripts", false, true));
+		//options.addOption(OptionFactory.createOption("type", "An argument saying if you want genes, proteins(default) or transcripts", false, true));
+		///** List tags lo manda la web, por lo tanto no hace falta que use type, sin embargo si se usa **/
+		options.addOption(OptionFactory.createOption("list-tags", "An argument saying if you want genes, proteins(default) or transcripts", false, true));
 		options.addOption(OptionFactory.createOption("components", "If we want the number of components we put 1, otherwise we put 0", false, true));
 		options.addOption(OptionFactory.createOption("bicomponents", "If we want the number of bicomponents we put 1, otherwise we put 0", false, true));
 		options.addOption(OptionFactory.createOption("o-name", "If there is this argument, it will create an output .cmp file for the information of each component", false, true));
@@ -68,7 +65,21 @@ public abstract class SnowTool extends BabelomicsTool{
 		if(commandLine.hasOption("randoms"))
 			randoms = Integer.parseInt(commandLine.getOptionValue("randoms"));
 		
-		type = !commandLine.hasOption("type") ? "proteins":commandLine.getOptionValue("type");
+		//type = !commandLine.hasOption("type") ? "proteins":commandLine.getOptionValue("type");
+		String listTags = !commandLine.hasOption("list-tags") ? "proteins":commandLine.getOptionValue("list-tags");
+		String listTagsArray[] = listTags.split(",");
+		for (int i = 0; i < listTagsArray.length; i++) {
+			if(listTagsArray[i].equalsIgnoreCase("protein") || listTagsArray[i].equalsIgnoreCase("transcript"))
+				type = "proteins";
+			if(listTagsArray[i].equalsIgnoreCase("gene"))
+				type = "genes";
+			if(listTagsArray[i].equalsIgnoreCase("ranked"))
+				type = "genes";
+			if(listTagsArray[i].contains("vcf"))
+				type = "vcf";
+		}
+		
+		//type = !commandLine.hasOption("type") ? "proteins":commandLine.getOptionValue("type");
 		group = !commandLine.hasOption("group") ? "all": commandLine.getOptionValue("group");
 		components = (commandLine.hasOption("components") && !"0".equalsIgnoreCase(commandLine.getOptionValue("components")));
 		bicomponents = (commandLine.hasOption("bicomponents") && !"0".equalsIgnoreCase(commandLine.getOptionValue("bicomponents")));
@@ -106,8 +117,10 @@ public abstract class SnowTool extends BabelomicsTool{
 				}
 			} else {
 				//you have to be very strict with the name of the files, otherwise the program won't work fine
-				String localType = "genes";
-				if(!type.equalsIgnoreCase("genes"))
+				String localType = "";
+				if(type.equalsIgnoreCase("genes") || type.equalsIgnoreCase("vcf"))
+					localType = "genes";
+				if(type.equalsIgnoreCase("proteins") || type.equalsIgnoreCase("transcripts"))
 					localType = "proteins";
 				String parseFromSifFile = folderInteractions+interactome+"_alldb_"+group+"physical_"+localType+"_interactome_nr.sif";
 				interactomeGraph = InteractomeParser.parseFromSifFile(parseFromSifFile);
@@ -241,29 +254,44 @@ public abstract class SnowTool extends BabelomicsTool{
 		
 	}
 	
-	protected void createJson(ProteinNetwork proteinNetwork, String sourceDotFile, List<List<ProteinVertex>> componentsListSub, Set<String> intermediatesSub, int node, Map<String, String> mapList) throws IOException{
-
-		Dot<ProteinVertex, DefaultEdge> dot = new Dot<ProteinVertex, DefaultEdge>();
-		Svg svg = new Svg();
-		Json<ProteinVertex, DefaultEdge> json = new Json<ProteinVertex, DefaultEdge>();
-		List<File> fileList = new ArrayList<File>();
-		List<String> layoutsName = new ArrayList<String>();
-
-		if(componentsListSub == null)
-			logger.error("not components calculated, please, set the --components option");
-
-		IOUtils.write(sourceDotFile, dot.toDot(proteinNetwork.getInteractomeGraph()));
-
-		File neatoFile = new File(outputFileName+"_list"+node+"_dot.svg");
-		IOUtils.write(neatoFile, svg.toSvg(sourceDotFile, "neato"));
-		fileList.add(neatoFile);
-		layoutsName.add("neato");
-
-		File f = new File(outputFileName+"_list"+node+".json");
-		IOUtils.write(f.getAbsoluteFile(), json.toJson(this.interactome, fileList, layoutsName, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub, mapList));
-	}
-	protected void addOutputSvgViewer(File file, int index) {
+//	protected void createJson(ProteinNetwork proteinNetwork, String sourceDotFile, List<List<ProteinVertex>> componentsListSub, Set<String> intermediatesSub, int node, Map<String, String> mapList) throws IOException{
+//
+//		Dot<ProteinVertex, DefaultEdge> dot = new Dot<ProteinVertex, DefaultEdge>();
+//		Svg svg = new Svg();
+//		Json<ProteinVertex, DefaultEdge> json = new Json<ProteinVertex, DefaultEdge>();
+//		List<File> fileList = new ArrayList<File>();
+//		List<String> layoutsName = new ArrayList<String>();
+//
+//		if(componentsListSub == null)
+//			logger.error("not components calculated, please, set the --components option");
+//
+//		IOUtils.write(sourceDotFile, dot.toDot(proteinNetwork.getInteractomeGraph()));
+//
+//		File neatoFile = new File(outputFileName+"_list"+node+"_dot.svg");
+//		IOUtils.write(neatoFile, svg.toSvg(sourceDotFile, "neato"));
+//		fileList.add(neatoFile);
+//		layoutsName.add("neato");
+//
+//		File f = new File(outputFileName+"_list"+node+".json");
+//		IOUtils.write(f.getAbsoluteFile(), json.toJson(this.interactome, fileList, layoutsName, proteinNetwork.getInteractomeGraph(), intermediatesSub, componentsListSub, mapList));
+//	}
+	protected void addOutputSvgViewer(File file, int index, Set<String> intermediates, Set<String> seedList) {
 		List<String> tags = new ArrayList<String>();
+		String intermediateTag = "";
+		String seedTag = "";
+		for(String intermediate : intermediates)
+			intermediateTag+=intermediate+"|";
+		for(String seed : seedList)
+			seedTag+=seed+"|";
+		
+		/** Borro la última coma **/
+		if(!intermediateTag.equals("")){
+			intermediateTag = intermediateTag.substring(0,intermediateTag.length()-1);
+		}
+		/** Borro la última coma **/
+		if(!seedTag.equals("")){
+			seedTag = seedTag.substring(0,seedTag.length()-1);
+		}
 		
 		tags.add("INTERACTOME_VIEWER");
 		//tags.add(this.type);
@@ -276,6 +304,8 @@ public abstract class SnowTool extends BabelomicsTool{
 				list+="2";
 			tags.add(list);
 			tags.add(this.interactome);
+			tags.add(intermediateTag);
+			tags.add(seedTag);
 			result.addOutputItem(new Item("svg_viewer" + index + "_param", file.getName(), "Minimun Connected Network interactions", TYPE.FILE, tags, new HashMap<String, String>(2), "Results: Minimum Connected Network selected.Viewer"));
 
 //			url = "SnowViewer2?filename=" + jsonFile.getName();
