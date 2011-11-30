@@ -93,6 +93,7 @@ public class FatiScan extends GeneSetAnalysis {
 		double inc = -(double)(statistic.get(0)-statistic.get(statistic.size()-1))/(numberOfPartitions+1);
 		double acum = statistic.get(0) + inc;
 		
+		System.err.println("test mode: " + testMode);
 		// test each partition	
 		for(int i=0; i<numberOfPartitions; i++){
 			

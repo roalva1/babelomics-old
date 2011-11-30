@@ -213,7 +213,7 @@ public class ExpressionNormalizationTool extends BabelomicsTool {
 		String bgCorrection = commandLine.getOptionValue("bg-correction", "minimum");
 		String waNormalization = commandLine.getOptionValue("wa-normalization", "median");
 		String baNormalization = commandLine.getOptionValue("ba-normalization", "none");
-		boolean flagsNotFitted = commandLine.hasOption("flags-not-fitted");
+		boolean flagsNotFitted = commandLine.hasOption("flags-no-fitted");
 		boolean flagsAsMissing = commandLine.hasOption("flags-as-missing");
 
 		if (rawFileNames.size() == 1) {
