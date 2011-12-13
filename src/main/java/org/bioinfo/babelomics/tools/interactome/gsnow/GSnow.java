@@ -121,8 +121,11 @@ public class GSnow extends SnowTool{
 			String seedListFile = "";
 			if(commandLine.hasOption("seedlist") && !commandLine.getOptionValue("seedlist").equalsIgnoreCase("none")){
 				seedListFile = commandLine.getOptionValue("seedlist");
+				logger.info("Working with seedlist: "+seedListFile);
 				FileUtils.checkFile(new File(seedListFile));
 				
+			}else{
+				logger.info("Not working with seedlist"+commandLine.getOptionValue("seedlist"));
 			}
 			
 			String nodeFile = commandLine.getOptionValue("list");

@@ -9,7 +9,7 @@ public class GSnowTest {
 
 	String BABELOMICS_HOME = System.getenv("BABELOMICS_HOME");
 	
-	//@Test
+	@Test
 	public void otherExample1(){
 		String outdir = "/tmp/gsnow/example1";
 		System.out.println("Results allocated in: "+outdir);
@@ -25,12 +25,12 @@ public class GSnowTest {
 				"--order","ascending",
 				"--significant-value", "1",
 				"--list","/home/ralonso/proyectos/Gsnow/listas/translated_plink_correct.assoc",
-				"--seed-list","/home/ralonso/proyectos/Gsnow/listas/bipolarDisorder-associatedgenes-uniprot.txt",
+				"--seedlist","/home/ralonso/proyectos/Gsnow/listas/bipolarDisorder-associatedgenes-uniprot.txt",
 				"--home", BABELOMICS_HOME};
 		main(args);
 	}
 	
-	@Test
+	//@Test
 	public void testExample1(){
 		String outdir = "/tmp/gsnow/example1";
 		System.out.println("Results allocated in: "+outdir);
