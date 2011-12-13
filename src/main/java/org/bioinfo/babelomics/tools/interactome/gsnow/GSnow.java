@@ -399,7 +399,7 @@ public class GSnow extends SnowTool{
 //			gsnowItemsMap.put(gSnowItem.getNodes().size(), gSnowItem);
 //			if(found)
 //				continue;
-			int randomsNumber = 500;
+			int randomsNumber = 500+500/** le sumo 500 luego lo bajaremos despues de los referees, hablar Luz **/;
 			if( gSnowItem.getNodes().size() < sizeRandomCutoffValue ||  gSnowItem.getNodes().size() == sizeRandomCutoffValue) {
 				randomsNumber = 1000;
 			}
