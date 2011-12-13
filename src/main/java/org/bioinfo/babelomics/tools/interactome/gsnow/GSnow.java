@@ -67,7 +67,7 @@ public class GSnow extends SnowTool{
 	public void initOptions() {
 		
 		options.addOption(OptionFactory.createOption("list", "An input file containing a node per line", false, true));
-		options.addOption(OptionFactory.createOption("seed-list", "An input file containing a node per line. This is a seed list", false, true));
+		options.addOption(OptionFactory.createOption("seedlist", "An input file containing a node per line. This is a seed list", false, true));
 		options.addOption(OptionFactory.createOption("order", "Here we indicate wether we want to order the list ascending(default) or descending", false, true));
 		options.addOption(OptionFactory.createOption("number-items", "Here we indicate how many nodes we want to process", false, true));
 		options.addOption(OptionFactory.createOption("cut-off", "Here we indicate where we cut the list from (considering the order)", false, true));
@@ -119,8 +119,8 @@ public class GSnow extends SnowTool{
 			System.out.println(folder);
 			
 			String seedListFile = "";
-			if(commandLine.hasOption("seed-list") && !commandLine.getOptionValue("seed-list").equalsIgnoreCase("none")){
-				seedListFile = commandLine.getOptionValue("seed-list");
+			if(commandLine.hasOption("seedlist") && !commandLine.getOptionValue("seedlist").equalsIgnoreCase("none")){
+				seedListFile = commandLine.getOptionValue("seedlist");
 				FileUtils.checkFile(new File(seedListFile));
 				
 			}
@@ -713,7 +713,7 @@ public class GSnow extends SnowTool{
 		for(Node node : this.significantItem.getNodes()){
 			sb.append(node.getOriginalId()).append(tab);
 			sb.append(node.getId()).append(tab);
-			String listType = node.isSeed() ? "seed-list" : "list";
+			String listType = node.isSeed() ? "seedlist" : "list";
 			sb.append(listType).append(tab);
 			sb.append(node.getValue()).append(tab);
 			sb.append(getSigleMcnInteractors(subProteinNetwork,node.getId()));
