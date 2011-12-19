@@ -444,7 +444,7 @@ public class GSnow extends SnowTool{
 			double rawValue = gsnowItems.get(i).getRawValue();
 			List<Double> valueList = dataMatrixRandoms.get(i);
 			double comparedValue = getComparedValue(valueList, rawValue);
-			System.out.println(comparedValue);
+			//System.out.println(comparedValue);
 			gsnowItems.get(i).setComparedValue(comparedValue);
 		}
 		

@@ -10,6 +10,25 @@ public class GSnowTest {
 	String BABELOMICS_HOME = System.getenv("BABELOMICS_HOME");
 	
 	@Test
+	public void testOtherSpecie(){
+		String outdir = "/tmp/gsnow/testOtherSpecie";
+		System.out.println("Results allocated in: "+outdir);
+		new File(outdir).mkdirs();
+		String []args = {
+				"--tool", "network-miner",
+				"-o", outdir, 
+				"--o-name","result",
+				"--interactome","sce",
+				"--list-tags", "idlist,gene",
+				"--group", "all",
+				"--intermediate","0",
+				"--order","ascending",
+				"--significant-value", "1",
+				"--list","/home/ralonso/proyectos/Gsnow/listas/sce-genes.txt",
+				"--home", BABELOMICS_HOME};
+		main(args);
+	}
+	//@Test
 	public void otherExample1(){
 		String outdir = "/tmp/gsnow/example1";
 		System.out.println("Results allocated in: "+outdir);
@@ -25,7 +44,7 @@ public class GSnowTest {
 				"--order","ascending",
 				"--significant-value", "1",
 				"--list","/home/ralonso/proyectos/Gsnow/listas/translated_plink_correct.assoc",
-				"--seedlist","/home/ralonso/proyectos/Gsnow/listas/bipolarDisorder-associatedgenes-uniprot.txt",
+				//"--seedlist","/home/ralonso/proyectos/Gsnow/listas/bipolarDisorder-associatedgenes-uniprot.txt",
 				"--home", BABELOMICS_HOME};
 		main(args);
 	}
@@ -202,7 +221,7 @@ public class GSnowTest {
 				"-o", outdir, 
 				"--o-name","output",
 				"--interactome","hsa",
-				"--list-tags", "proteins",
+				"--list-tags", "protein",
 				"--group", "all",
 				"--intermediate","1",
 //				"--side","less",
@@ -222,25 +241,52 @@ public class GSnowTest {
 	}
 	
 	//@Test
-	public void testGsnowRandomsGenerator(){
+	public void testGsnowRandomsGenerator(String interactome, String type, String group, String intermediateValue){
 
-		String outdir = "/tmp/gsnow/testGenerator";
+		String outdir = "/home/ralonso/appl/babelomics/";
 		System.out.println("Writing in: "+outdir);
 		new File(outdir).mkdirs();
 
+//		String interactome = "ath";
+//		String type = "protein";
+//		String group = "curated";//all
+		String intermediateString = "";
+//		String intermediateValue = "0";
+		if(intermediateValue.equals("0"))
+			intermediateString = "nointermediate";
+		if(intermediateValue.equals("1"))
+			intermediateString = "intermediate";
+		
+		
 		String []args = {
 				"--tool", "network-miner", 
 				"-o", outdir, 
-				"--o-name","valores.txt",
-				"--interactome","hsa",
-				"--list-tags", "protein",
-				"--group", "all",
-				"--intermediate","1",
+				"--o-name",interactome+"_"+type+"s_"+group+"db_"+intermediateString+".txt",
+				"--interactome",interactome,
+				"--list-tags", type,
+				"--group", group,
+				"--intermediate",intermediateValue,
 				"--size-min","1",
-				"--size-max","9",
+				"--size-max","200",
 				"--randoms","2000",
 				"--home", System.getenv("BABELOMICS_HOME")};
 		main(args);
+	}
+	//@Test
+	public void testGsnowRandomsGeneratorAth(){
+		String species = "mmu";
+		
+		String type = "protein";
+		testGsnowRandomsGenerator(species,type,"all","1");
+		testGsnowRandomsGenerator(species,type,"all","0");
+		testGsnowRandomsGenerator(species,type,"curated","1");
+		testGsnowRandomsGenerator(species,type,"curated","0");
+		
+		type = "gene";
+		testGsnowRandomsGenerator(species,type,"all","1");
+		testGsnowRandomsGenerator(species,type,"all","0");
+		testGsnowRandomsGenerator(species,type,"curated","1");
+		testGsnowRandomsGenerator(species,type,"curated","0");
 	}
 	public void main(String []args){
 		try {

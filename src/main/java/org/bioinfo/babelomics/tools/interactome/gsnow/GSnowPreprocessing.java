@@ -306,6 +306,7 @@ public class GSnowPreprocessing {
 						}
 //						if(xref.getXrefItems().get(dbName).size()>1)
 //							System.out.println("ori id:"+node.getOriginalId()+" size: "+xref.getXrefItems().get(dbName).size());
+						//System.out.println(xref.getXrefItems().get(dbName));
 						String nodeId = xref.getXrefItems().get(dbName).get(0).getDisplayName();
 						
 						if(!idsAlreadyMatched.contains(nodeId)){
@@ -344,6 +345,7 @@ public class GSnowPreprocessing {
 				}
 				
 			} catch (Exception e) {
+				//e.printStackTrace();
 				if(node.isSeed())
 					System.out.println("Problems matching "+node+": "+e.getMessage());
 			}
