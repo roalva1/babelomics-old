@@ -1,6 +1,13 @@
 package org.bioinfo.babelomics.methods.functional;
 
 import java.io.IOException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import org.bioinfo.babelomics.utils.AnnotationManager;
+
 import java.sql.SQLException;
 import java.util.*;
 
@@ -16,6 +23,7 @@ import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.stats.inference.FisherExactTest;
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class FatiGO {
 
@@ -34,6 +42,9 @@ public class FatiGO {
     private int duplicatesMode;
     private boolean isYourAnnotations;
     private Logger logger;
+
+    private String species;
+    private String db;
 
     // test
     private TwoListFisherTest fisher;
@@ -57,6 +68,8 @@ public class FatiGO {
     private int list2SizeBeforeDuplicates;
     private int list2SizeAfterDuplicates;
 
+    private String babelomicsHome = System.getenv("BABELOMICS_HOME");
+
 
     // Two list constructor
     public FatiGO(List<String> list1, List<String> list2, FunctionalFilter filter, DBConnector dbConnector, int testMode, int duplicatesMode) {
@@ -76,7 +89,7 @@ public class FatiGO {
         /** Leer el fichero del genoma **/
         try {
 
-            this.list2 = IOUtils.readLines("/home/ralonso/appl/babelomics-old/babelomics-old/example/genome.txt");
+            this.list2 = IOUtils.readLines(this.babelomicsHome + "/conf/data/genome.txt");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -121,6 +134,14 @@ public class FatiGO {
         return idList;
     }
 
+    public void setSpecies(String species) {
+        this.species = species;
+    }
+
+    public void setDb(String db) {
+        this.db = db;
+    }
+
     public void run() throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, InvalidParameterException, IOException {
 
         if (logger == null) logger = new Logger("FatiGO");
@@ -142,70 +163,67 @@ public class FatiGO {
         // annotation
         logger.print("getting annotations from file system");
         if (!isYourAnnotations) {
-            if (filter instanceof GOFilter) {
-                filter = (GOFilter) filter;
-                ((GOFilter) filter).getNamespace();
-            }
-            System.out.println("\n\n filter= " + filter.getMaxNumberGenes());
+
+            List<String> list1Annot = new ArrayList<String>();
+            List<String> list2Annot = new ArrayList<String>();
+
+            Client client = Client.create();
+
+            int numberIds = 0;
+            StringBuilder batch = new StringBuilder();
+            for (String id : list1) {
+                if (numberIds == 200) {
+                    int lastIndexOfComma = batch.lastIndexOf(",");
+                    batch.deleteCharAt(lastIndexOfComma);
+                    WebResource webResource = client.resource("https://www.ebi.ac.uk/cellbase/webservices/rest/v3/hsapiens/feature/id/" + batch.toString() + "/xref?dbname=ensembl_transcript");
 
 
-            List<String> annots = IOUtils.readLines("/home/ralonso/appl/babelomics-old/babelomics-old/example/go_biological_process_3_9.annot");
-            /** Remove duplicates annotation**/
-            Set<String> uniqAnnots = new HashSet<String>();
 
-            for (String annot : annots) {
-                if (annot.startsWith("#") || !annot.contains("\t")) {
-                    continue;
+                    batch = new StringBuilder();
                 }
-                if (!uniqAnnots.contains(annot))
-                    uniqAnnots.add(annot);
+                batch.append(id);
+                batch.append(",");
+                numberIds++;
+
             }
-            System.out.println("uniqAnnots.size() = " + uniqAnnots.size());
-            /** Get [annotation:features] map **/
-            Map<String, List<String>> annotFeature = new HashMap<String, List<String>>();
-            for (String uniqs : uniqAnnots) {
-                String uniqsArr[] = uniqs.split("\t");
-                String feature = uniqsArr[0];
-                String annot = uniqsArr[1];
-                List<String> features = new ArrayList<String>();
-                if (!annotFeature.containsKey(annot)) {
-                    annotFeature.put(annot, features);
-                } else {
-                    features = annotFeature.get(annot);
-
-                }
-                features.add(feature);
-                annotFeature.put(annot, features);
-            }
-
-            /** Filter annotation **/
-            annotations = new FeatureList<AnnotationItem>();
-            for (String annot : annotFeature.keySet()) {
-                List<String> features = annotFeature.get(annot);
-                /** Size filter **/
-                if (filter.getMinNumberGenes() <= features.size() && features.size() <= filter.getMaxNumberGenes()) {
-                    for (String feature : features) {
-                        annotations.add(new AnnotationItem(feature, annot));
-                    }
-                }
-            }
-
-
-//            // init annotation object
-//            annotations = new FeatureList<AnnotationItem>();
-//            // init map to detect duplicated annotations
-//            Map<String, Boolean> uniqAnnots = new HashMap<String, Boolean>();
+            int lastIndexOfComma = batch.lastIndexOf(",");
+            batch.deleteCharAt(lastIndexOfComma);
+            WebResource webResource = client.resource("https://www.ebi.ac.uk/cellbase/webservices/rest/v3/hsapiens/feature/id/" + batch.toString() + "/xref?dbname=ensembl_transcript");
+//            WebResource webResource = client.resource("https://www.ebi.ac.uk/cellbase/webservices/rest/v3/hsapiens/feature/id/BRCA2/xref?dbname=ensembl_transcript");
+            ClientResponse response = webResource.get(ClientResponse.class);
+            String resp = response.getEntity(String.class);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode actualObj = mapper.readTree(resp);
+            JsonNode jsonResp = actualObj.get("response");
+//            actualObj.get("response").get(0).get("result")
+            Iterator<JsonNode> it = actualObj.get("response").get(0).get("result").iterator();
+            int cont = 0;
+            while (it.hasNext()) {
+                JsonNode node = it.next();
+                System.out.println("node.get() = " + node.get("id"));
+//                if (snp.get("numResults").asInt() > 0) {
+//                    Iterator<JsonNode> itResults = snp.get("result").iterator();
 //
-//            String[] fields;
-//            for (String annot : annots) {
-//                if (!uniqAnnots.containsKey(annot)) {
-//                    if (!annot.startsWith("#") && annot.contains("\t")) {
-//                        fields = annot.split("\t");
-//                        annotations.add(new AnnotationItem(fields[0], fields[1]));
-//                        uniqAnnots.put(annot, true);
+//                    // TODO Accept multiple identifiers via xrefs
+////                    while (itResults.hasNext()) {
+//                    if (itResults.hasNext()) {
+//                        String rs = itResults.next().get("id").asText();
+//                        if (rs.startsWith("rs")) {
+////                            batch.get(cont).addId(rs);
+//                            batch.get(cont).setId(rs);
+//                        }
 //                    }
 //                }
-//            }
+                cont++;
+            }
+            String db = "";
+            if (filter instanceof GOFilter) {
+                db = ((GOFilter) filter).getNamespace();
+            }
+            String annotationFile = this.babelomicsHome + "/conf/annotations/" + this.species + "/" + db + ".txt";
+            AnnotationManager annoManager = new AnnotationManager(annotationFile);
+            annoManager.process();
+            annotations = annoManager.filter(filter);
 //            annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
         }
 
@@ -214,9 +232,7 @@ public class FatiGO {
         computeAnnotateds();
 
         // run test
-        fisher = new
-
-                TwoListFisherTest();
+        fisher = new TwoListFisherTest();
 
         logger.print("executing fisher test...");
         fisher.test(list1, list2, annotations, testMode, termSizes);

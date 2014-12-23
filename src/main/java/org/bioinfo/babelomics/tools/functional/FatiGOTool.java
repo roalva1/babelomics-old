@@ -226,6 +226,8 @@ public class FatiGOTool extends FunctionalProfilingTool{
 		fatigo.setTermSizes(termSizes);
 
 		// run test
+//		String species = commandLine.getOptionValue("species", "unknown");
+		fatigo.setSpecies(this.species);
 		fatigo.run();
 
 		// save results

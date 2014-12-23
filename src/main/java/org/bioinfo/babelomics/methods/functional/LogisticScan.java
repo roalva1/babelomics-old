@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.bioinfo.babelomics.exception.EmptyAnnotationException;
 import org.bioinfo.babelomics.utils.RCommand;
+import org.bioinfo.babelomics.utils.AnnotationManager;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.StringUtils;
@@ -27,6 +28,8 @@ public class LogisticScan extends GeneSetAnalysis{
 	private String annotationFileName;
 	private String rankedListFileName;
 	private String outputFileName;
+
+	private String babelomicsHome = System.getenv("BABELOMICS_HOME");
 	
 
 	// Infrared annotation constructor
@@ -84,7 +87,12 @@ public class LogisticScan extends GeneSetAnalysis{
 		prepare();
 		
 		// annotation		
-		if(!isYourAnnotations) annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);
+		if(!isYourAnnotations) {
+			 AnnotationManager annoManager = new AnnotationManager(this.babelomicsHome + "/conf/data/go_biological_process_3_9_fatiscan.annot");
+            annoManager.process();
+            annotations = annoManager.filter(filter);
+//			annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);
+		}
 	
 		// prepare files		
 		saveRankedList();
