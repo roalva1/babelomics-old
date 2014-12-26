@@ -28,6 +28,7 @@ public class AnnotationManager {
         }
     }
 
+
     public void process() {
         uniqAnnots = removeDuplicates();
         annotFeature = getAnnotationFeatures();
@@ -83,4 +84,8 @@ public class AnnotationManager {
         }
         return annotations;
     }
+    public List<String> getRawAnnots(){
+        return this.rawAnnots;
+    }
+
 }

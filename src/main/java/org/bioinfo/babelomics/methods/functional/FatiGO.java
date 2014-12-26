@@ -7,6 +7,8 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import org.bioinfo.babelomics.utils.AnnotationManager;
+import org.bioinfo.babelomics.utils.XrefManager;
+import org.bioinfo.babelomics.utils.Prueba;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -162,68 +164,17 @@ public class FatiGO {
 
         // annotation
         logger.print("getting annotations from file system");
+        System.out.println("");
         if (!isYourAnnotations) {
+             String db = "";
 
-            List<String> list1Annot = new ArrayList<String>();
-            List<String> list2Annot = new ArrayList<String>();
-
-            Client client = Client.create();
-
-            int numberIds = 0;
-            StringBuilder batch = new StringBuilder();
-            for (String id : list1) {
-                if (numberIds == 200) {
-                    int lastIndexOfComma = batch.lastIndexOf(",");
-                    batch.deleteCharAt(lastIndexOfComma);
-                    WebResource webResource = client.resource("https://www.ebi.ac.uk/cellbase/webservices/rest/v3/hsapiens/feature/id/" + batch.toString() + "/xref?dbname=ensembl_transcript");
-
-
-
-                    batch = new StringBuilder();
-                }
-                batch.append(id);
-                batch.append(",");
-                numberIds++;
-
-            }
-            int lastIndexOfComma = batch.lastIndexOf(",");
-            batch.deleteCharAt(lastIndexOfComma);
-            WebResource webResource = client.resource("https://www.ebi.ac.uk/cellbase/webservices/rest/v3/hsapiens/feature/id/" + batch.toString() + "/xref?dbname=ensembl_transcript");
-//            WebResource webResource = client.resource("https://www.ebi.ac.uk/cellbase/webservices/rest/v3/hsapiens/feature/id/BRCA2/xref?dbname=ensembl_transcript");
-            ClientResponse response = webResource.get(ClientResponse.class);
-            String resp = response.getEntity(String.class);
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode actualObj = mapper.readTree(resp);
-            JsonNode jsonResp = actualObj.get("response");
-//            actualObj.get("response").get(0).get("result")
-            Iterator<JsonNode> it = actualObj.get("response").get(0).get("result").iterator();
-            int cont = 0;
-            while (it.hasNext()) {
-                JsonNode node = it.next();
-                System.out.println("node.get() = " + node.get("id"));
-//                if (snp.get("numResults").asInt() > 0) {
-//                    Iterator<JsonNode> itResults = snp.get("result").iterator();
-//
-//                    // TODO Accept multiple identifiers via xrefs
-////                    while (itResults.hasNext()) {
-//                    if (itResults.hasNext()) {
-//                        String rs = itResults.next().get("id").asText();
-//                        if (rs.startsWith("rs")) {
-////                            batch.get(cont).addId(rs);
-//                            batch.get(cont).setId(rs);
-//                        }
-//                    }
-//                }
-                cont++;
-            }
-            String db = "";
             if (filter instanceof GOFilter) {
                 db = ((GOFilter) filter).getNamespace();
             }
-            String annotationFile = this.babelomicsHome + "/conf/annotations/" + this.species + "/" + db + ".txt";
-            AnnotationManager annoManager = new AnnotationManager(annotationFile);
-            annoManager.process();
-            annotations = annoManager.filter(filter);
+
+//            String annotationFile = this.babelomicsHome + "/conf/annotations/" + this.species + "/" + db + ".txt";
+            Prueba p = new Prueba(all, this.species, db, filter);
+            annotations = p.getAnnotations();
 //            annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
         }
 

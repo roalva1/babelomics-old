@@ -293,7 +293,7 @@ public class GSnowPreprocessing {
 					List<String> list = new ArrayList<String>();
 					list.add(node.getId());
 					xrefList = xrefDBMan.getAllIdentifiersByIds(list);
-					
+
 					//xrefEns  = xrefDBMan.getByDBName(node.getId(), dbName);
 					//xrefitemList = xrefEns.getXrefItems().get(dbName);
 				}

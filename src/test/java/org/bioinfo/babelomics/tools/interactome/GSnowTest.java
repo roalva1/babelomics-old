@@ -9,7 +9,7 @@ public class GSnowTest {
 
 	String BABELOMICS_HOME = System.getenv("BABELOMICS_HOME");
 	
-	@Test
+//	@Test
 	public void testOtherSpecie(){
 		String outdir = "/tmp/gsnow/testOtherSpecie";
 		System.out.println("Results allocated in: "+outdir);
@@ -28,7 +28,7 @@ public class GSnowTest {
 				"--home", BABELOMICS_HOME};
 		main(args);
 	}
-	//@Test
+//	/@Test
 	public void otherExample1(){
 		String outdir = "/tmp/gsnow/example1";
 		System.out.println("Results allocated in: "+outdir);
@@ -49,7 +49,7 @@ public class GSnowTest {
 		main(args);
 	}
 	
-	//@Test
+	@Test
 	public void testExample1(){
 		String outdir = "/tmp/gsnow/example1";
 		System.out.println("Results allocated in: "+outdir);
