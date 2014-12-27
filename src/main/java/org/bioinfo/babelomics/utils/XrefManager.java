@@ -21,24 +21,28 @@ public class XrefManager {
     private String species;
     private String dbname;
     private int requests;
-    private Map<String, Set<String>> listXref;
+    private Map<String, List<String>> listXref;
 
     private String uri;
     private String babelomicsHome = System.getenv("BABELOMICS_HOME");
 
 
-    public XrefManager(List<String> list, String species) {
-        this(list, species, "ensembl_transcript");
-
-    }
+//    public XrefManager(List<String> list, String species) {
+//        this(list, species, "ensembl_transcript");
+//
+//    }
 
 
     public XrefManager(List<String> list, String species, String dbname) {
         this.list = list;
         this.species = species;
         this.dbname = dbname;
-        this.listXref = new HashMap<String, Set<String>>();
+        this.listXref = new HashMap<String, List<String>>();
+        this.process();
 
+    }
+
+    private void process() {
         Properties prop = new Properties();
         InputStream input = null;
 
@@ -62,7 +66,12 @@ public class XrefManager {
         }
     }
 
-    public Map<String, Set<String>> getXrefs() {
+    /**
+     * Get map with this structure: [featureId:anotationsList] *
+     */
+
+
+    public Map<String, List<String>> getXrefs() {
         int numberIds = 0;
         StringBuilder batch = new StringBuilder();
         for (String id : list) {
@@ -86,6 +95,7 @@ public class XrefManager {
         batch.deleteCharAt(lastIndexOfComma);
 
         String uri = this.uri + batch.toString() + "/xref?dbname=" + this.dbname;
+        System.out.println("uri = " + uri);
 //                WebResource webResource = client.resource("https://www.ebi.ac.uk/cellbase/webservices/rest/v3/hsapiens/feature/id/" + batch.toString() + "/xref?dbname=ensembl_transcript");
         WebResource webResource = client.resource(uri);
         ClientResponse response = webResource.get(ClientResponse.class);
@@ -100,7 +110,7 @@ public class XrefManager {
         for (JsonNode jnode : actualObj) {
             if (listXref.containsKey(jnode.get("id")))
                 continue;
-            Set<String> ids = new HashSet<String>();
+            List<String> ids = new ArrayList<String>();
             listXref.put(jnode.get("id").asText(), ids);
             Iterator<JsonNode> it = jnode.get("result").iterator();
             while (it.hasNext()) {

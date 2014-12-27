@@ -8,6 +8,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import org.bioinfo.babelomics.utils.AnnotationManager;
 import org.bioinfo.babelomics.utils.XrefManager;
+import org.bioinfo.babelomics.utils.XrefManager2;
 import org.bioinfo.babelomics.utils.Prueba;
 
 import java.sql.SQLException;
@@ -166,15 +167,15 @@ public class FatiGO {
         logger.print("getting annotations from file system");
         System.out.println("");
         if (!isYourAnnotations) {
-             String db = "";
+            String db = "";
 
             if (filter instanceof GOFilter) {
                 db = ((GOFilter) filter).getNamespace();
             }
 
-//            String annotationFile = this.babelomicsHome + "/conf/annotations/" + this.species + "/" + db + ".txt";
-            Prueba p = new Prueba(all, this.species, db, filter);
-            annotations = p.getAnnotations();
+            XrefManager2 xrefManager = new XrefManager2(all, this.species);
+            Map<String, List<String>> xrefs = xrefManager.getXrefs(db);
+            annotations = xrefManager.filter(xrefs, filter);
 //            annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
         }
 

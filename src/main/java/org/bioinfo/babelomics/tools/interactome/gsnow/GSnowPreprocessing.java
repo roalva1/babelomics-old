@@ -16,6 +16,8 @@ import org.bioinfo.infrared.core.XRefDBManager;
 import org.bioinfo.infrared.core.feature.DBName;
 import org.bioinfo.infrared.core.feature.XRef;
 import org.bioinfo.networks.protein.ProteinNetwork;
+import org.bioinfo.babelomics.utils.XrefManager2;
+
 
 public class GSnowPreprocessing {
 
@@ -286,29 +288,21 @@ public class GSnowPreprocessing {
 		Node n = null;
 		for(Node node : nodes){
 			try {
-				//XRef xrefEns = null;
-				//List<XRefItem> xrefitemList = new ArrayList<XRefItem>();//xrefDBMan.getDBConnector().getDbConnection().getDatabase == homo_sapiens
-				List<XRef> xrefList = null;
-				if(xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null){
+//				List<XRef> xrefList = null;
+				Map<String, List<String>> xrefList = null;
+//				if(xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null){
 					List<String> list = new ArrayList<String>();
 					list.add(node.getId());
-					xrefList = xrefDBMan.getAllIdentifiersByIds(list);
-
-					//xrefEns  = xrefDBMan.getByDBName(node.getId(), dbName);
-					//xrefitemList = xrefEns.getXrefItems().get(dbName);
-				}
-				if(xrefList != null && !xrefList.isEmpty()){
+//					xrefList = xrefDBMan.getAllIdentifiersByIds(list);
+					XrefManager2 xrefManager = new XrefManager2(list, xrefDBMan.getDBConnector().getSpecies());
+					xrefList = xrefManager.getXrefs(dbName);
+//				}
+				if(xrefList != null && !xrefList.get(node.getId()).isEmpty()){
 
 					boolean matched = false;
-					for(XRef xref : xrefList){
-						if(xref.getXrefItems().isEmpty()){
-							continue;
-						}
-//						if(xref.getXrefItems().get(dbName).size()>1)
-//							System.out.println("ori id:"+node.getOriginalId()+" size: "+xref.getXrefItems().get(dbName).size());
-						//System.out.println(xref.getXrefItems().get(dbName));
-						String nodeId = xref.getXrefItems().get(dbName).get(0).getDisplayName();
-						
+					for(String xref : xrefList.keySet()){
+						String nodeId = xrefList.get(xref).get(0);
+
 						if(!idsAlreadyMatched.contains(nodeId)){
 							matched = true;
 							idsAlreadyMatched.add(nodeId);

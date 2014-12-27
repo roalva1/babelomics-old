@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.bioinfo.babelomics.exception.EmptyAnnotationException;
 import org.bioinfo.babelomics.utils.RCommand;
-import org.bioinfo.babelomics.utils.AnnotationManager;
-import org.bioinfo.babelomics.utils.Prueba;
+import org.bioinfo.babelomics.utils.XrefManager2;
 
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
@@ -99,8 +99,12 @@ public class LogisticScan extends GeneSetAnalysis {
             }
             String species = this.dbConnector.getSpecies();
 //            String annotationFile = this.babelomicsHome + "/conf/annotations/" + this.species + "/" + db + ".txt";
-            Prueba p = new Prueba(idList, species, db, filter);
-            annotations = p.getAnnotations();
+//            Prueba p = new Prueba(idList, species, db, filter);
+//            annotations = p.getAnnotations();
+
+            XrefManager2 xrefManager = new XrefManager2(idList, species);
+            Map<String, List<String>> xrefs = xrefManager.getXrefs(db);
+            annotations = xrefManager.filter(xrefs, filter);
 //			 AnnotationManager annoManager = new AnnotationManager(this.babelomicsHome + "/conf/data/go_biological_process_3_9_fatiscan.annot");
 //            annoManager.process();
 //            annotations = annoManager.filter(filter);

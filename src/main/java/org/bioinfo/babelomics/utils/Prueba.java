@@ -48,10 +48,11 @@ public class Prueba {
         /** Parse Xref **/
         //    public XrefManager(List<String> list, String species) {
 
-        XrefManager xrefManager = new XrefManager(list, species);
-        Map<String, Set<String>> list1Xref = xrefManager.getXrefs();
+        XrefManager xrefManager = new XrefManager(list, species,"ensembl_transcript");
+        Map<String, List<String>> list1Xref = xrefManager.getXrefs();
 
         /** Get map with this structure: [featureId in ENSTRANSCRIPT: anotationsList] **/
+//        esto a lo mejor lo puedo pasar a xref
         Map<String, List<String>> featAnnot = parseFeatureAnnotations();
 
         /** Get map with the annotations related to the original id with this structure: [annotationId: originalIdList ]**/
@@ -61,12 +62,33 @@ public class Prueba {
         FeatureList<AnnotationItem> annotations = this.filter(annotFeat);
         return annotations;
     }
+    public Map<String, List<String>> parseFeatureAnnotations() {
+        Map<String, List<String>> featureAnnot = new HashMap<String, List<String>>();
+        for (String raw : rawAnnots) {
+            if (raw.startsWith("#") || !raw.contains("\t")) {
+                continue;
+            }
+            String fields[] = raw.split("\t");
+            String feature = fields[0];
+            String annot = fields[1];
+            List<String> annotations = new ArrayList<String>();
+            if (!featureAnnot.containsKey(feature)) {
+                featureAnnot.put(feature, annotations);
+            } else {
+                annotations = featureAnnot.get(feature);
 
-    public Map<String, Set<String>> parseAnnotationsOriginalId(Map<String, Set<String>> list1Xref, Map<String, List<String>> featAnnot) {
+            }
+            annotations.add(annot);
+            featureAnnot.put(feature, annotations);
+
+        }
+        return featureAnnot;
+    }
+    public Map<String, Set<String>> parseAnnotationsOriginalId(Map<String, List<String>> list1Xref, Map<String, List<String>> featAnnot) {
         Map<String, Set<String>> annotFeat = new HashMap<String, Set<String>>();
 
         for (String id : list1Xref.keySet()) {
-            Set<String> xrefs = list1Xref.get(id);
+            List<String> xrefs = list1Xref.get(id);
             for (String xref : xrefs) {
                 if (featAnnot.containsKey(xref)) {
                     for (String annot : featAnnot.get(xref)) {
@@ -102,29 +124,5 @@ public class Prueba {
         return annotations;
     }
 
-    /**
-     * Get map with this structure: [featureId:anotationsList] *
-     */
-    public Map<String, List<String>> parseFeatureAnnotations() {
-        Map<String, List<String>> featureAnnot = new HashMap<String, List<String>>();
-        for (String raw : rawAnnots) {
-            if (raw.startsWith("#") || !raw.contains("\t")) {
-                continue;
-            }
-            String fields[] = raw.split("\t");
-            String feature = fields[0];
-            String annot = fields[1];
-            List<String> annotations = new ArrayList<String>();
-            if (!featureAnnot.containsKey(feature)) {
-                featureAnnot.put(feature, annotations);
-            } else {
-                annotations = featureAnnot.get(feature);
 
-            }
-            annotations.add(annot);
-            featureAnnot.put(feature, annotations);
-
-        }
-        return featureAnnot;
-    }
 }
