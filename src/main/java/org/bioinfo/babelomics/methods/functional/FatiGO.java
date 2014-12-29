@@ -4,6 +4,9 @@ import java.io.IOException;
 
 import org.bioinfo.babelomics.utils.XrefManager;
 
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -83,6 +86,7 @@ public class FatiGO {
         try {
 
             this.list2 = IOUtils.readLines(this.babelomicsHome + "/conf/data/genome.txt");
+//            this.list2 = Files.readAllLines(Paths.get(this.babelomicsHome + "/conf/data/genome.txt"), Charset.defaultCharset());
 
         } catch (IOException e) {
             e.printStackTrace();
