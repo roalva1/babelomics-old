@@ -31,6 +31,12 @@ public class XrefManager {
     private int requests;
     private String babelomicsHome = System.getenv("BABELOMICS_HOME");
 
+    public XrefManager(String id, String species) {
+        this.list = new ArrayList<String>();
+        this.list.add(id);
+        this.species = species;
+        this.listXref = new HashMap<String, List<String>>();
+    }
     public XrefManager(List<String> list, String species) {
         this.list = list;
         this.species = species;

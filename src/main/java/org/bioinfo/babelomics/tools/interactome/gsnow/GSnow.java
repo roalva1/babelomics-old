@@ -795,8 +795,8 @@ public class GSnow extends SnowTool {
             XrefManager xrefManager = new XrefManager(ids, this.interactome);
             Map<String, List<String>> xrefs = xrefManager.getXrefs("go");
             for (String key : xrefs.keySet()) {
-                System.out.println("key = " + key);
-                System.out.println("xrefs.get(key) = " + xrefs.get(key));
+//                System.out.println("key = " + key);
+//                System.out.println("xrefs.get(key) = " + xrefs.get(key));
                 sb.append(xrefs.get(key)).append(",");
             }
 
