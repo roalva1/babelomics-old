@@ -14,9 +14,7 @@ import java.util.Set;
 
 import org.bioinfo.infrared.core.XRefDBManager;
 import org.bioinfo.infrared.core.feature.DBName;
-import org.bioinfo.infrared.core.feature.XRef;
 import org.bioinfo.networks.protein.ProteinNetwork;
-import org.bioinfo.babelomics.utils.XrefManager2;
 
 
 public class GSnowPreprocessing {
@@ -294,7 +292,7 @@ public class GSnowPreprocessing {
 					List<String> list = new ArrayList<String>();
 					list.add(node.getId());
 //					xrefList = xrefDBMan.getAllIdentifiersByIds(list);
-					XrefManager2 xrefManager = new XrefManager2(list, xrefDBMan.getDBConnector().getSpecies());
+					org.bioinfo.babelomics.utils.XrefManager xrefManager = new org.bioinfo.babelomics.utils.XrefManager(list, xrefDBMan.getDBConnector().getSpecies());
 					xrefList = xrefManager.getXrefs(dbName);
 //				}
 				if(xrefList != null && !xrefList.get(node.getId()).isEmpty()){

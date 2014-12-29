@@ -19,7 +19,6 @@ import org.bioinfo.babelomics.tools.interactome.gsnow.GSnowPreprocessing.ListInf
 import org.bioinfo.babelomics.tools.interactome.gsnow.GSnowPreprocessing.Node;
 import org.bioinfo.babelomics.tools.interactome.gsnow.annovar.AnnovarInterface;
 import org.bioinfo.babelomics.tools.interactome.gsnow.annovar.Vcf;
-import org.bioinfo.babelomics.utils.XrefManager2;
 import org.bioinfo.commons.io.TextFileReader;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
@@ -30,10 +29,6 @@ import org.bioinfo.data.graph.Subgraph;
 import org.bioinfo.data.graph.edge.DefaultEdge;
 import org.bioinfo.infrared.common.DBConnector;
 import org.bioinfo.infrared.core.XRefDBManager;
-import org.bioinfo.infrared.core.feature.XRef;
-import org.bioinfo.infrared.core.feature.XRef.XRefItem;
-import org.bioinfo.infrared.core.funcannot.GO;
-import org.bioinfo.infrared.funcannot.AnnotationDBManager;
 import org.bioinfo.infrared.funcannot.GODBManager;
 import org.bioinfo.math.result.KolmogorovSmirnovTestResult;
 import org.bioinfo.math.util.MathUtils;
@@ -42,7 +37,7 @@ import org.bioinfo.networks.protein.ProteinVertex;
 import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
-
+import org.bioinfo.babelomics.utils.XrefManager;
 
 public class GSnow extends SnowTool {
 
@@ -615,7 +610,7 @@ public class GSnow extends SnowTool {
                     List<String> list = new ArrayList<String>();
                     list.add(id);
 //					xrefList = xrefDBMan.getAllIdentifiersByIds(list);
-                    XrefManager2 xrefManager = new XrefManager2(list, this.interactome);
+                    org.bioinfo.babelomics.utils.XrefManager xrefManager = new org.bioinfo.babelomics.utils.XrefManager(list, this.interactome);
                     Map<String, List<String>> xrefList = xrefManager.getXrefs(originalDbName);
                     if (!xrefList.get(id).isEmpty())
                         convertedId = xrefList.get(id).get(0);
@@ -797,7 +792,7 @@ public class GSnow extends SnowTool {
 
             List<String> ids = new ArrayList<String>();
             ids.add(id);
-            XrefManager2 xrefManager = new XrefManager2(ids, this.interactome);
+            XrefManager xrefManager = new XrefManager(ids, this.interactome);
             Map<String, List<String>> xrefs = xrefManager.getXrefs("go");
             for (String key : xrefs.keySet()) {
                 System.out.println("key = " + key);

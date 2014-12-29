@@ -2,23 +2,14 @@ package org.bioinfo.babelomics.methods.functional;
 
 import java.io.IOException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import org.bioinfo.babelomics.utils.AnnotationManager;
 import org.bioinfo.babelomics.utils.XrefManager;
-import org.bioinfo.babelomics.utils.XrefManager2;
-import org.bioinfo.babelomics.utils.Prueba;
 
 import java.sql.SQLException;
 import java.util.*;
 
-import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.log.Logger;
 import org.bioinfo.commons.utils.ListUtils;
-import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.infrared.common.DBConnector;
 import org.bioinfo.infrared.core.common.FeatureList;
 import org.bioinfo.infrared.core.funcannot.AnnotationItem;
@@ -26,7 +17,6 @@ import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.stats.inference.FisherExactTest;
-import com.fasterxml.jackson.databind.JsonNode;
 
 public class FatiGO {
 
@@ -173,7 +163,7 @@ public class FatiGO {
                 db = ((GOFilter) filter).getNamespace();
             }
 
-            XrefManager2 xrefManager = new XrefManager2(all, this.species);
+            XrefManager xrefManager = new XrefManager(all, this.species);
             Map<String, List<String>> xrefs = xrefManager.getXrefs(db);
             annotations = xrefManager.filter(xrefs, filter);
 //            annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);

@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.bioinfo.babelomics.exception.EmptyAnnotationException;
 import org.bioinfo.babelomics.utils.RCommand;
-import org.bioinfo.babelomics.utils.XrefManager2;
 
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
@@ -20,7 +19,7 @@ import org.bioinfo.infrared.core.common.FeatureList;
 import org.bioinfo.infrared.core.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
-
+import org.bioinfo.babelomics.utils.XrefManager;
 
 public class LogisticScan extends GeneSetAnalysis {
 
@@ -102,7 +101,7 @@ public class LogisticScan extends GeneSetAnalysis {
 //            Prueba p = new Prueba(idList, species, db, filter);
 //            annotations = p.getAnnotations();
 
-            XrefManager2 xrefManager = new XrefManager2(idList, species);
+            XrefManager xrefManager = new XrefManager(idList, species);
             Map<String, List<String>> xrefs = xrefManager.getXrefs(db);
             annotations = xrefManager.filter(xrefs, filter);
 //			 AnnotationManager annoManager = new AnnotationManager(this.babelomicsHome + "/conf/data/go_biological_process_3_9_fatiscan.annot");
