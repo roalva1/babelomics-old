@@ -25,6 +25,8 @@ public class XrefManager {
     private List<String> list;
     private String species;
     private Map<String, List<String>> listXref;
+    /** file system databases **/
+    private Set<String> fsDb;
 
     /****/
     private String uri;
@@ -34,15 +36,26 @@ public class XrefManager {
     public XrefManager(String id, String species) {
         this.list = new ArrayList<String>();
         this.list.add(id);
-        this.species = species;
-        this.listXref = new HashMap<String, List<String>>();
-    }
-    public XrefManager(List<String> list, String species) {
-        this.list = list;
-        this.species = species;
-        this.listXref = new HashMap<String, List<String>>();
+        this.init(species);
     }
 
+    public XrefManager(List<String> list, String species) {
+        this.list = list;
+        this.init(species);
+    }
+
+    private void init(String species){
+
+        this.species = species;
+        this.listXref = new HashMap<String, List<String>>();
+
+        /** This should be red from a file **/
+        this.fsDb = new HashSet<String>();
+        this.fsDb.add("biological_process");
+        this.fsDb.add("cellular_component");
+        this.fsDb.add("molecular_function");
+        this.fsDb.add("go");
+    }
     public void fillXref(StringBuilder batch, String db) {
         Client client = Client.create();
 
@@ -78,7 +91,7 @@ public class XrefManager {
     public Map<String, List<String>> getXrefs(String db) {
         this.resolveUri();
         String oriDb = db;
-        if (db.equalsIgnoreCase("biological_process") || db.equalsIgnoreCase("cellular_component") || db.equalsIgnoreCase("molecular_function") || db.equalsIgnoreCase("go")) {
+        if (this.fsDb.contains(db)) {
             db = "ensembl_transcript";
         }
         int numberIds = 0;
@@ -96,7 +109,7 @@ public class XrefManager {
         this.fillXref(batch, db);
 
         /** if we want go, kegg... keep going**/
-        if (oriDb.equalsIgnoreCase("biological_process") || oriDb.equalsIgnoreCase("cellular_component") || oriDb.equalsIgnoreCase("molecular_function") || oriDb.equalsIgnoreCase("go")) {
+        if (this.fsDb.contains(db))  {
             listXref = this.getXrefsFileSystem(oriDb);
         }
         return listXref;
