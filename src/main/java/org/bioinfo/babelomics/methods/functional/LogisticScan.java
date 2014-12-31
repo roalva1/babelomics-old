@@ -3,6 +3,7 @@ package org.bioinfo.babelomics.methods.functional;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,14 +35,16 @@ public class LogisticScan extends GeneSetAnalysis {
 
     private String babelomicsHome = System.getenv("BABELOMICS_HOME");
 
+    private String species;
 
     // Infrared annotation constructor
-    public LogisticScan(FeatureData rankedList, FunctionalFilter filter, DBConnector dbConnector, int order) {
+    public LogisticScan(FeatureData rankedList, FunctionalFilter filter, String species, int order) {
 
         // params
         this.rankedList = rankedList;
         this.filter = filter;
-        this.dbConnector = dbConnector;
+//        this.dbConnector = dbConnector;
+        this.species = species;
         this.order = order;
         this.isYourAnnotations = false;
 
@@ -87,7 +90,7 @@ public class LogisticScan extends GeneSetAnalysis {
     public void run() throws InvalidIndexException, SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException, IOException, EmptyAnnotationException {
 
         // prepare list
-        prepare();
+        prepare(species);
 
         // annotation
         if (!isYourAnnotations) {
@@ -96,7 +99,6 @@ public class LogisticScan extends GeneSetAnalysis {
             if (filter instanceof GOFilter) {
                 db = ((GOFilter) filter).getNamespace();
             }
-            String species = this.dbConnector.getSpecies();
 //            String annotationFile = this.babelomicsHome + "/conf/annotations/" + this.species + "/" + db + ".txt";
 //            Prueba p = new Prueba(idList, species, db, filter);
 //            annotations = p.getAnnotations();
@@ -109,7 +111,7 @@ public class LogisticScan extends GeneSetAnalysis {
 //            annotations = annoManager.filter(filter);
 //			annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);
         }
-
+        this.termSizes = getYourAnnotationsTermSizes();
         // prepare files
         saveRankedList();
         saveAnnotations();
@@ -128,6 +130,23 @@ public class LogisticScan extends GeneSetAnalysis {
         // Load results
         loadResults();
 
+    }
+
+    protected Map<String, Integer> getYourAnnotationsTermSizes() {
+        Map<String, Integer> termSizes = new HashMap<String, Integer>();
+        String termId;
+        int cont;
+        for (AnnotationItem annotation : annotations) {
+            termId = annotation.getFunctionalTermId();
+            if (termSizes.containsKey(termId)) {
+                cont = termSizes.get(termId);
+                termSizes.put(termId, cont + 1);
+            } else {
+                termSizes.put(termId, 1);
+            }
+        }
+        logger.println("OK");
+        return termSizes;
     }
 
 

@@ -25,11 +25,12 @@ public class FatiScanTest {
         String outdir = "/tmp/fatiscan";
         new File(outdir).mkdir();
 
-        String list1 = "/home/ralonso/babelomics5/data/fatiscanmini.txt";
+//        String list1 = "/home/ralonso/babelomics5/data/fatiscanmini.txt";
+        String list1 = "/opt/babelomics/example/fatiscan_diabetesAffy.txt";
 
 //		String []args = {"--tool", "fatigo" ,"--list1", list1, "--list2", list2, "-o", "/tmp/fatigo"};
 
-        String cli = "--tool fatiscan --outdir " + outdir + " --species hsa --ranked-list " + list1 + " --method logistic --go-bp --go-bp-min-num-genes 5 --go-bp-max-num-genes 1000 --home " + System.getenv("BABELOMICS_HOME");
+        String cli = "--tool fatiscan --outdir " + outdir + " --species hsa --ranked-list " + list1 + " --method logistic --go-bp go-bp --go-bp-min-num-genes 5 --go-bp-max-num-genes 1000 --home " + System.getenv("BABELOMICS_HOME");
 //        String[] args = {"--tool", "fatigo", "--list1", list1, "--list2", list2, "--go-bp", "--kegg", "-o", outdir, "--species", "hsa", "--home", System.getenv("BABELOMICS_HOME")};
         String[] args = cli.split(" ");
         try {

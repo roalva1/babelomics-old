@@ -32,8 +32,8 @@ public class FatiGOTest {
 //    }
 
 
-    @Test
-    public void TestGenome() {
+        @Test
+    public void TestList1List2Hsa() {
         String outdir = "/tmp/fatigo";
         new File(outdir).mkdir();
 
@@ -43,7 +43,7 @@ public class FatiGOTest {
 //		String list2 = "/mnt/commons/test/example.apoptosis";
         String list2 = "/home/ralonso/appl/babelomics-old/babelomics-old/example/example.apoptosis";
 
-        String[] args = {"--tool", "fatigo", "--list1", list1, "--list2", list2, "--go-bp", "--go-bp-min-num-genes", "5", "--go-bp-max-num-genes", "1000","-o", outdir, "--species", "hsa", "--home", System.getenv("BABELOMICS_HOME")};
+        String[] args = {"--tool", "fatigo", "--list1", list1, "--list2", list2, "--go-bp", "--go-mf","--go-bp-min-num-genes", "5", "--go-bp-max-num-genes", "1000", "-o", outdir, "--species", "hsa", "--home", System.getenv("BABELOMICS_HOME")};
         try {
             FatiGOTool fatigo = (FatiGOTool) BabelomicsFactory.createTool("fatigo");
             fatigo.parse(args);
@@ -54,6 +54,50 @@ public class FatiGOTest {
             e.printStackTrace();
         }
     }
+
+    // @Test
+    public void TestList1List2Mmu() {
+        String outdir = "/tmp/fatigo";
+        new File(outdir).mkdir();
+
+
+//        String list1 = "/mnt/commons/test/example.motor";
+        String list1 = "/home/ralonso/appl/babelomics-old/babelomics-old/example/mmu_list1.txt";
+//		String list2 = "/mnt/commons/test/example.apoptosis";
+        String list2 = "/home/ralonso/appl/babelomics-old/babelomics-old/example/mmu_list2.txt";
+
+        String[] args = {"--tool", "fatigo", "--list1", list1, "--list2", list2, "--go-bp", "--go-mf","--go-bp-min-num-genes", "5", "--go-bp-max-num-genes", "1000", "-o", outdir, "--species", "mmu", "--home", System.getenv("BABELOMICS_HOME")};
+        try {
+            FatiGOTool fatigo = (FatiGOTool) BabelomicsFactory.createTool("fatigo");
+            fatigo.parse(args);
+            fatigo.run();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+//    @Test
+    public void TestList1GenomeHsa() {
+        String outdir = "/tmp/fatigo";
+        new File(outdir).mkdir();
+
+
+        String list1 = "/home/ralonso/appl/babelomics-old/babelomics-old/example/example.motor";
+
+        String[] args = {"--tool", "fatigo", "--list1", list1, "--genome", "--go-bp", "--go-bp-min-num-genes", "5", "--go-bp-max-num-genes", "1000", "-o", outdir, "--species", "hsa", "--home", System.getenv("BABELOMICS_HOME")};
+        try {
+            FatiGOTool fatigo = (FatiGOTool) BabelomicsFactory.createTool("fatigo");
+            fatigo.parse(args);
+            fatigo.run();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     //	@Test
     public void Test0() {

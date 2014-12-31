@@ -25,7 +25,9 @@ public class XrefManager {
     private List<String> list;
     private String species;
     private Map<String, List<String>> listXref;
-    /** file system databases **/
+    /**
+     * file system databases *
+     */
     private Set<String> fsDb;
 
     /****/
@@ -44,7 +46,7 @@ public class XrefManager {
         this.init(species);
     }
 
-    private void init(String species){
+    private void init(String species) {
 
         this.species = species;
         this.listXref = new HashMap<String, List<String>>();
@@ -56,6 +58,7 @@ public class XrefManager {
         this.fsDb.add("molecular_function");
         this.fsDb.add("go");
     }
+
     public void fillXref(StringBuilder batch, String db) {
         Client client = Client.create();
 
@@ -64,7 +67,7 @@ public class XrefManager {
 
         String uri = this.uri + batch.toString() + "/xref?dbname=" + db;
         System.out.println("uri = " + uri);
-//                WebResource webResource = client.resource("https://www.ebi.ac.uk/cellbase/webservices/rest/v3/hsapiens/feature/id/" + batch.toString() + "/xref?dbname=ensembl_transcript");
+//      WebResource webResource = client.resource("https://www.ebi.ac.uk/cellbase/webservices/rest/v3/hsapiens/feature/id/" + batch.toString() + "/xref?dbname=ensembl_transcript");
         WebResource webResource = client.resource(uri);
         ClientResponse response = webResource.get(ClientResponse.class);
         String resp = response.getEntity(String.class);
@@ -97,6 +100,8 @@ public class XrefManager {
         int numberIds = 0;
         StringBuilder batch = new StringBuilder();
         for (String id : list) {
+            if(id.contains("/"))
+                continue;
             if (numberIds == requests) {
                 this.fillXref(batch, db);
                 numberIds = 0;
@@ -109,7 +114,7 @@ public class XrefManager {
         this.fillXref(batch, db);
 
         /** if we want go, kegg... keep going**/
-        if (this.fsDb.contains(db))  {
+        if (this.fsDb.contains(oriDb)) {
             listXref = this.getXrefsFileSystem(oriDb);
         }
         return listXref;
@@ -196,6 +201,7 @@ public class XrefManager {
                 }
             }
         }
+//        System.out.println("annotations = " + ann*otations);
         return annotations;
     }
 
@@ -234,8 +240,15 @@ public class XrefManager {
             this.uri = prop.getProperty("HOST");
             String auxSpecies = species;
 
+            /** This should be in a file **/
             if (species.equalsIgnoreCase("hsa"))
                 auxSpecies = "hsapiens";
+            if (species.equalsIgnoreCase("dre"))
+                auxSpecies = "drerio";
+            if (species.equalsIgnoreCase("mmu"))
+                auxSpecies = "mmusculus";
+            if (species.equalsIgnoreCase("rno"))
+                auxSpecies = "rnorvegicus";
 
             this.uri += auxSpecies + "/feature/id/";
 

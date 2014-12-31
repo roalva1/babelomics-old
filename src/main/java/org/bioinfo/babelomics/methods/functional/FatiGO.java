@@ -33,7 +33,7 @@ public class FatiGO {
     private List<String> list1;
     private List<String> list2;
     private FunctionalFilter filter;
-    private DBConnector dbConnector;
+    //    private DBConnector dbConnector;
     private int testMode;
     private int duplicatesMode;
     private boolean isYourAnnotations;
@@ -68,31 +68,31 @@ public class FatiGO {
 
 
     // Two list constructor
-    public FatiGO(List<String> list1, List<String> list2, FunctionalFilter filter, DBConnector dbConnector, int testMode, int duplicatesMode) {
+    public FatiGO(List<String> list1, List<String> list2, FunctionalFilter filter, String species, int testMode, int duplicatesMode) {
         this.list1 = list1;
         this.list2 = list2;
         this.filter = filter;
-        this.dbConnector = dbConnector;
+        this.species = species;
         this.testMode = testMode;
         this.duplicatesMode = duplicatesMode;
         this.isYourAnnotations = false;
     }
 
     // One list against Genome constructor
-    public FatiGO(List<String> list1, FunctionalFilter filter, DBConnector dbConnector) {
+    public FatiGO(List<String> list1, FunctionalFilter filter, String species) {
         this.list1 = list1;
 //		this.list2 = InfraredUtils.getGenome(dbConnector);
         /** Leer el fichero del genoma **/
         try {
 
-            this.list2 = IOUtils.readLines(this.babelomicsHome + "/conf/data/genome.txt");
+            this.list2 = IOUtils.readLines(this.babelomicsHome + "/conf/annotations/" + species + "/genome.txt");
 //            this.list2 = Files.readAllLines(Paths.get(this.babelomicsHome + "/conf/data/genome.txt"), Charset.defaultCharset());
 
         } catch (IOException e) {
             e.printStackTrace();
         }
         this.filter = filter;
-        this.dbConnector = dbConnector;
+        this.species = species;
         this.testMode = FisherExactTest.GREATER;
         this.duplicatesMode = REMOVE_GENOME;
         this.isYourAnnotations = false;
@@ -158,21 +158,21 @@ public class FatiGO {
         //logger.println("list2_annotation.size: " + InfraredUtils.getAnnotations(dbConnector, list2, filter).size());
 
         // annotation
-        logger.print("getting annotations from file system");
-        System.out.println("");
+        logger.println("getting annotations from file system");
         if (!isYourAnnotations) {
             String db = "";
 
             if (filter instanceof GOFilter) {
                 db = ((GOFilter) filter).getNamespace();
             }
-
             XrefManager xrefManager = new XrefManager(all, this.species);
             Map<String, List<String>> xrefs = xrefManager.getXrefs(db);
             annotations = xrefManager.filter(xrefs, filter);
+            /** Set term sizes **/
 //            annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
         }
 
+        this.termSizes = getYourAnnotationsTermSizes();
         logger.println("OK");
 
         computeAnnotateds();
@@ -193,6 +193,22 @@ public class FatiGO {
         logger.println("end of FatiGO test...");
     }
 
+    protected Map<String, Integer> getYourAnnotationsTermSizes() {
+        Map<String, Integer> termSizes = new HashMap<String, Integer>();
+        String termId;
+        int cont;
+        for (AnnotationItem annotation : annotations) {
+            termId = annotation.getFunctionalTermId();
+            if (termSizes.containsKey(termId)) {
+                cont = termSizes.get(termId);
+                termSizes.put(termId, cont + 1);
+            } else {
+                termSizes.put(termId, 1);
+            }
+        }
+        logger.println("OK");
+        return termSizes;
+    }
 
     public void removeDuplicates() {
         // before
@@ -216,7 +232,13 @@ public class FatiGO {
         //genome
         if (duplicatesMode == REMOVE_GENOME) {
             list1 = ListUtils.unique(list1);
-            List<String> ensemblList1 = InfraredUtils.toEnsemblId(dbConnector, list1);
+            XrefManager xrefManager = new XrefManager(list1, this.species);
+            Map<String, List<String>> xrefs = xrefManager.getXrefs("ensembl_transcript");
+            List<String> ensemblList1 = new ArrayList<String>();
+            for (String xref : xrefs.keySet()) {
+                ensemblList1.addAll(xrefs.get(xref));
+            }
+            ensemblList1 = ListUtils.unique(ensemblList1);
             for (String id : ensemblList1) {
                 if (list2.contains(id)) {
                     list2.remove(id);
