@@ -21,7 +21,9 @@ import org.bioinfo.infrared.core.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.bioinfo.babelomics.utils.XrefManager;
-
+import org.bioinfo.infrared.funcannot.filter.GOSlimFilter;
+import org.bioinfo.infrared.funcannot.filter.InterproFilter;
+import org.bioinfo.babelomics.utils.filters.ReconFilter;
 public class LogisticScan extends GeneSetAnalysis {
 
     // working paths
@@ -99,16 +101,19 @@ public class LogisticScan extends GeneSetAnalysis {
             if (filter instanceof GOFilter) {
                 db = ((GOFilter) filter).getNamespace();
             }
-//            String annotationFile = this.babelomicsHome + "/conf/annotations/" + this.species + "/" + db + ".txt";
-//            Prueba p = new Prueba(idList, species, db, filter);
-//            annotations = p.getAnnotations();
+            if (filter instanceof ReconFilter) {
+                db = "recon";
+            }
+            if (filter instanceof GOSlimFilter) {
+                db = "go_slim";
+            }
+            if (filter instanceof InterproFilter) {
+                db = "interpro";
+            }
 
             XrefManager xrefManager = new XrefManager(idList, species);
             Map<String, List<String>> xrefs = xrefManager.getXrefs(db);
             annotations = xrefManager.filter(xrefs, filter);
-//			 AnnotationManager annoManager = new AnnotationManager(this.babelomicsHome + "/conf/data/go_biological_process_3_9_fatiscan.annot");
-//            annoManager.process();
-//            annotations = annoManager.filter(filter);
 //			annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);
         }
         this.termSizes = getYourAnnotationsTermSizes();

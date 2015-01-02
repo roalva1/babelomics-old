@@ -10,6 +10,7 @@ import org.bioinfo.infrared.core.common.FeatureList;
 import org.bioinfo.infrared.core.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.bioinfo.infrared.funcannot.filter.Filter;
+import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -53,10 +54,13 @@ public class XrefManager {
 
         /** This should be red from a file **/
         this.fsDb = new HashSet<String>();
+        this.fsDb.add("recon");
         this.fsDb.add("biological_process");
         this.fsDb.add("cellular_component");
         this.fsDb.add("molecular_function");
+        this.fsDb.add("go_slim");
         this.fsDb.add("go");
+        this.fsDb.add("interpro");
     }
 
     public void fillXref(StringBuilder batch, String db) {
@@ -179,7 +183,7 @@ public class XrefManager {
         return annotFeat;
     }
 
-    public FeatureList<AnnotationItem> filter(Map<String, List<String>> oriIdAnnotation, Filter filter) {
+    public FeatureList<AnnotationItem> filter(Map<String, List<String>> oriIdAnnotation, FunctionalFilter filter) {
         Map<String, List<String>> annotFeature = parseAnnotationsOriginalId(oriIdAnnotation);
 //
 //        for (String id: annotFeature.keySet()){
@@ -187,20 +191,31 @@ public class XrefManager {
 //            System.out.println("annotFeature = " + annotFeature.get(id));
 //        }
 
+
         FeatureList<AnnotationItem> annotations = new FeatureList<AnnotationItem>();
-        if (filter instanceof GOFilter) {
-            int maxNumberGenes = ((GOFilter) filter).getMaxNumberGenes();
-            int minNumberGenes = ((GOFilter) filter).getMinNumberGenes();
-            for (String annot : annotFeature.keySet()) {
-                List<String> features = annotFeature.get(annot);
-                /** Size filter **/
-                if (minNumberGenes <= features.size() && features.size() <= maxNumberGenes) {
-                    for (String feature : features) {
-                        annotations.add(new AnnotationItem(feature, annot));
-                    }
+        for (String annot : annotFeature.keySet()) {
+            List<String> features = annotFeature.get(annot);
+            /** Size filter **/
+            if (filter.getMinNumberGenes() <= features.size() && features.size() <= filter.getMaxNumberGenes()) {
+                for (String feature : features) {
+                    annotations.add(new AnnotationItem(feature, annot));
                 }
             }
         }
+
+//        if (filter instanceof GOFilter) {
+//            int maxNumberGenes = ((GOFilter) filter).getMaxNumberGenes();
+//            int minNumberGenes = ((GOFilter) filter).getMinNumberGenes();
+//            for (String annot : annotFeature.keySet()) {
+//                List<String> features = annotFeature.get(annot);
+//                /** Size filter **/
+//                if (minNumberGenes <= features.size() && features.size() <= maxNumberGenes) {
+//                    for (String feature : features) {
+//                        annotations.add(new AnnotationItem(feature, annot));
+//                    }
+//                }
+//            }
+//        }
 //        System.out.println("annotations = " + ann*otations);
         return annotations;
     }

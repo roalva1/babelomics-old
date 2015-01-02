@@ -18,8 +18,12 @@ import org.bioinfo.infrared.core.common.FeatureList;
 import org.bioinfo.infrared.core.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
+import org.bioinfo.infrared.funcannot.filter.GOSlimFilter;
+import org.bioinfo.infrared.funcannot.filter.InterproFilter;
 import org.bioinfo.math.exception.InvalidParameterException;
 import org.bioinfo.math.stats.inference.FisherExactTest;
+import org.bioinfo.babelomics.utils.filters.ReconFilter;
+
 
 public class FatiGO {
 
@@ -28,6 +32,12 @@ public class FatiGO {
     public static final int REMOVE_REF = 2;
     public static final int REMOVE_GENOME = 3;
     public static final int REMOVE_ALL = 4;
+
+    private enum modeTypes {
+        list2list, list2genome, list2rest
+    }
+
+    private String mode;
 
     // input params
     private List<String> list1;
@@ -76,6 +86,7 @@ public class FatiGO {
         this.testMode = testMode;
         this.duplicatesMode = duplicatesMode;
         this.isYourAnnotations = false;
+        this.mode = modeTypes.list2list.name();
     }
 
     // One list against Genome constructor
@@ -86,6 +97,7 @@ public class FatiGO {
         try {
 
             this.list2 = IOUtils.readLines(this.babelomicsHome + "/conf/annotations/" + species + "/genome.txt");
+            this.mode = modeTypes.list2genome.name();
 //            this.list2 = Files.readAllLines(Paths.get(this.babelomicsHome + "/conf/data/genome.txt"), Charset.defaultCharset());
 
         } catch (IOException e) {
@@ -108,7 +120,7 @@ public class FatiGO {
         this.isYourAnnotations = true;
     }
 
-    // Your anntoations one list constructor
+    // Your annotations one list constructor
     public FatiGO(List<String> list1, FeatureList<AnnotationItem> annotations) {
         this.list1 = list1;
         this.list2 = getAnnotationIds(annotations);
@@ -165,6 +177,17 @@ public class FatiGO {
             if (filter instanceof GOFilter) {
                 db = ((GOFilter) filter).getNamespace();
             }
+            if (filter instanceof ReconFilter) {
+                db = "recon";
+            }
+            if (filter instanceof GOSlimFilter) {
+                db = "go_slim";
+            }
+            if (filter instanceof InterproFilter) {
+                db = "interpro";
+            }
+
+            System.out.println("db = " + db);
             XrefManager xrefManager = new XrefManager(all, this.species);
             Map<String, List<String>> xrefs = xrefManager.getXrefs(db);
             annotations = xrefManager.filter(xrefs, filter);

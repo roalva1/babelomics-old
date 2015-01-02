@@ -44,9 +44,9 @@ public class GSnow extends SnowTool {
     private ListInfo listInfo;
     private GSnowItem significantItem;
     private Map<Integer, GSnowItem> gsnowItems;
-    private DBConnector dbConnector;
-    private XRefDBManager xrefDBMan;
-    private GODBManager gof;
+//    private DBConnector dbConnector;
+//    private XRefDBManager xrefDBMan;
+//    private GODBManager gof;
     private int numberOfMinNodes = 0;
     /**
      * Here we indicate the number of nodes from where we will start the GSnow, in case of no seed list it will get calculate automatically *
@@ -117,9 +117,9 @@ public class GSnow extends SnowTool {
 //			snow = commandLine.hasOption("snow") ? true : false;
 //			snow = (commandLine.hasOption("snow") && !(commandLine.getOptionValue("snow").equalsIgnoreCase("0")));
 
-            dbConnector = new DBConnector(interactome, new File(babelomicsHomePath + "/conf/infrared.properties"));
-            xrefDBMan = new XRefDBManager(dbConnector);
-            gof = new GODBManager(dbConnector);
+//            dbConnector = new DBConnector(interactome, new File(babelomicsHomePath + "/conf/infrared.properties"));
+//            xrefDBMan = new XRefDBManager(dbConnector);
+//            gof = new GODBManager(dbConnector);
             logger.debug("Starting list.........");
 
             result.addOutputItem(new Item("interactome_param", interactomeMsg, "Interactome", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String, String>(), "Input parameters"));
@@ -159,7 +159,7 @@ public class GSnow extends SnowTool {
             }
             numberItems = commandLine.hasOption("number-items") ? Integer.parseInt(commandLine.getOptionValue("number-items")) : numberOfMaxNodes;
 
-            GSnowPreprocessing preprocessing = new GSnowPreprocessing(proteinNetwork, type, xrefDBMan, numberOfMaxNodes, order, numberItems, cutOff);
+            GSnowPreprocessing preprocessing = new GSnowPreprocessing(proteinNetwork, type, interactome, numberOfMaxNodes, order, numberItems, cutOff);
 
 //			String nodeFile = commandLine.getOptionValue("list");
             FileUtils.checkFile(new File(nodeFile));
@@ -600,7 +600,8 @@ public class GSnow extends SnowTool {
                 String convertedId = id;
                 if (this.listInfo.getOriginalDbName() == null)
                     continue;
-                if (xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null) {
+//                if (xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null) {
+                if (this.interactome != null) {
                     List<String> dbNames = new ArrayList<String>();
                     String originalDbName = this.listInfo.getOriginalDbName().getDbname();
 //					dbNames.add(originalDbName);
@@ -610,7 +611,7 @@ public class GSnow extends SnowTool {
                     List<String> list = new ArrayList<String>();
                     list.add(id);
 //					xrefList = xrefDBMan.getAllIdentifiersByIds(list);
-                    org.bioinfo.babelomics.utils.XrefManager xrefManager = new org.bioinfo.babelomics.utils.XrefManager(list, this.interactome);
+                    XrefManager xrefManager = new XrefManager(list, this.interactome);
                     Map<String, List<String>> xrefList = xrefManager.getXrefs(originalDbName);
                     if (!xrefList.get(id).isEmpty())
                         convertedId = xrefList.get(id).get(0);
@@ -782,7 +783,8 @@ public class GSnow extends SnowTool {
         sb.append(prVertex.getClusteringCoefficient()).append(tab);
         sb.append(subProteinNetwork.getInteractomeGraph().getDegreeOf(prVertex)).append(tab);
 
-        if (xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null) {
+//        if (xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null) {
+        if (this.interactome != null) {
 //            List<String> dbNames = new ArrayList<String>();
 //            dbNames.add("go");
 //            dbNames.add("kegg");

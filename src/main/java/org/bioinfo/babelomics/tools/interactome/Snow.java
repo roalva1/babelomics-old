@@ -73,8 +73,8 @@ public class Snow extends BabelomicsTool {
      */
     private Map<String, String> mapList1, mapList2;
 
-    private DBConnector dbConnector;
-    private XRefDBManager xrefDBMan;
+//    private DBConnector dbConnector;
+//    private XRefDBManager xrefDBMan;
     private String decimalFormat;
     private int listMaxSize;
 
@@ -141,8 +141,8 @@ public class Snow extends BabelomicsTool {
 
         interactome = commandLine.getOptionValue("interactome");
         String interactomeMsg = getInteractomeMsg();
-        dbConnector = new DBConnector(interactome, new File(babelomicsHomePath + "/conf/infrared.properties"));
-        xrefDBMan = new XRefDBManager(dbConnector);
+//        dbConnector = new DBConnector(interactome, new File(babelomicsHomePath + "/conf/infrared.properties"));
+//        xrefDBMan = new XRefDBManager(dbConnector);
 
 
         result.addOutputItem(new Item("interactome_param", interactomeMsg, "Species", Item.TYPE.MESSAGE, Arrays.asList("INPUT_PARAM"), new HashMap<String, String>(), "Input parameters"));
@@ -1245,7 +1245,7 @@ public class Snow extends BabelomicsTool {
     }
 
     private String getSigleMcnInteractors(ProteinNetwork subProteinNetwork, String id) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
-        GODBManager gof = new GODBManager(dbConnector);
+//        GODBManager gof = new GODBManager(dbConnector);
         StringBuilder sb = new StringBuilder();
         String tab = "\t";
         ProteinVertex prVertex = subProteinNetwork.getInteractomeGraph().getVertex(id);
@@ -1253,7 +1253,8 @@ public class Snow extends BabelomicsTool {
         sb.append(prVertex.getClusteringCoefficient()).append(tab);
         sb.append(subProteinNetwork.getInteractomeGraph().getDegreeOf(prVertex)).append(tab);
 
-        if (xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null) {
+        if (this.interactome != null) {
+//        if (xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null) {
 
             List<String> ids = new ArrayList<String>();
             ids.add(id);
@@ -1299,60 +1300,74 @@ public class Snow extends BabelomicsTool {
      * Here we discover the type of input id, if it is uniprot, ensembl_gene, hgnc_symbol
      */
     private DBName getOriginalDbName(Collection<String> list) {
-        Map<String, Integer> dbNameNumber = new HashMap<String, Integer>();
-        int recognized = 0;
-        if (xrefDBMan.getDBConnector().getDbConnection().getDatabase() == null) {
-            return null;
-        }
-        int max = Integer.MIN_VALUE;
-        DBName dbNameReturn = null;
-        for (String node : list) {
-            List<DBName> dbnames;
-            try {
-                dbnames = xrefDBMan.getAllDBNamesById(node);
-                if (dbnames.size() > 0) {
-                    for (DBName dbName : dbnames) {
-                        String name = dbName.getDbname();
-                        int number = 1;
-                        if (!dbNameNumber.containsKey(name)) {
-                            dbNameNumber.put(name, number);
-                        } else {
-                            number = dbNameNumber.get(name);
-                            number++;
-                            dbNameNumber.put(name, number);
-                        }
-                        if (number >= max) {
-                            max = number;
-                            dbNameReturn = dbName;
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                recognized++;
-                /** Esto ocurre cuando no tenemos la especie en infrared, por ejemplo ECO **/
-                //System.err.println("Error GsnowPreprocessin getOriginalDbName: "+node.getOriginalId()+" error: "+e.getLocalizedMessage());
-            }
-        }
-        System.out.println("no recognized: " + recognized);
-        System.out.println("DB Matched: " + dbNameReturn);
+//        Map<String, Integer> dbNameNumber = new HashMap<String, Integer>();
+//        int recognized = 0;
+//        if (xrefDBMan.getDBConnector().getDbConnection().getDatabase() == null) {
+//            return null;
+//        }
+//        int max = Integer.MIN_VALUE;
+//        DBName dbNameReturn = null;
+//        for (String node : list) {
+//            List<DBName> dbnames;
+//            try {
+//                dbnames = xrefDBMan.getAllDBNamesById(node);
+//                if (dbnames.size() > 0) {
+//                    for (DBName dbName : dbnames) {
+//                        String name = dbName.getDbname();
+//                        int number = 1;
+//                        if (!dbNameNumber.containsKey(name)) {
+//                            dbNameNumber.put(name, number);
+//                        } else {
+//                            number = dbNameNumber.get(name);
+//                            number++;
+//                            dbNameNumber.put(name, number);
+//                        }
+//                        if (number >= max) {
+//                            max = number;
+//                            dbNameReturn = dbName;
+//                        }
+//                    }
+//                }
+//            } catch (Exception e) {
+//                recognized++;
+//                /** Esto ocurre cuando no tenemos la especie en infrared, por ejemplo ECO **/
+//                //System.err.println("Error GsnowPreprocessin getOriginalDbName: "+node.getOriginalId()+" error: "+e.getLocalizedMessage());
+//            }
+//        }
+//        System.out.println("no recognized: " + recognized);
+//        System.out.println("DB Matched: " + dbNameReturn);
+
+        /** babelomics 5**/
+        String dbName = "";
+        if(type.equalsIgnoreCase("proteins") || type.equalsIgnoreCase("transcripts"))
+            dbName = "uniprot_swissprot_accession";
+        else if(type.equalsIgnoreCase("genes") || type.equalsIgnoreCase("vcf") )
+            dbName = "ensembl_gene";
+        DBName dbNameReturn = new DBName(dbName, dbName, dbName);
+        /** end babelomics 5 **/
         return dbNameReturn;
     }
 
     private String getIdToDbName(String id) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
-        String nodeId = "-";
-        String dbName = this.dbName.getDbname();
-        if (xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null) {
-            List<String> dbNames = new ArrayList<String>();
-            dbNames.add(dbName);
-            XRef xrefEns = xrefDBMan.getByDBName(id, dbNames);
-            List<XRefItem> xrefitemList = xrefEns.getXrefItems().get(dbName);
-            if (xrefitemList != null && !xrefitemList.isEmpty()) {
-                for (XRefItem xrefitem : xrefitemList) {
-                    nodeId = xrefitem.getDisplayName();
-                }
-            }
-        }
-        return nodeId;
+//        String nodeId = "-";
+//        String dbName = this.dbName.getDbname();
+////        if (xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null) {
+//        if (this.interactome != null) {
+//            List<String> dbNames = new ArrayList<String>();
+//            dbNames.add(dbName);
+//            XRef xrefEns = xrefDBMan.getByDBName(id, dbNames);
+//            List<XRefItem> xrefitemList = xrefEns.getXrefItems().get(dbName);
+//            if (xrefitemList != null && !xrefitemList.isEmpty()) {
+//                for (XRefItem xrefitem : xrefitemList) {
+//                    nodeId = xrefitem.getDisplayName();
+//                }
+//            }
+//        }
+//        return nodeId;
+
+        /** Babelomics 5**/
+        return id;
+        /** end Babelomics 5**/
     }
 
     private StringBuilder deleteLastCh(StringBuilder sb, String ch) {

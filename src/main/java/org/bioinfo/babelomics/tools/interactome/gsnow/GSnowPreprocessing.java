@@ -20,16 +20,18 @@ import org.bioinfo.babelomics.utils.XrefManager;
 public class GSnowPreprocessing {
 
 	private String type;
-	private XRefDBManager xrefDBMan;
+//	private XRefDBManager xrefDBMan;
 	private static int maxSize;// = 200;
 	private String order;
 	private int numberItems;
 	private double cutOff;
 	private ProteinNetwork proteinNetwork;
+	private String interactome;
 	
-	public GSnowPreprocessing(ProteinNetwork proteinNetwork, String type, XRefDBManager xrefDBMan, int maxPreprocessingSize, String order, int numberItems, double cutOff){
+	public GSnowPreprocessing(ProteinNetwork proteinNetwork, String type, String interactome, int maxPreprocessingSize, String order, int numberItems, double cutOff){
 		this.type = type;
-		this.xrefDBMan = xrefDBMan;
+//		this.xrefDBMan = xrefDBMan;
+		this.interactome = interactome;
 		this.order = order;
 		maxSize = maxPreprocessingSize;
 		if(numberItems > maxSize)
@@ -225,43 +227,52 @@ public class GSnowPreprocessing {
 	/** Here we discover the type of input id, if it is uniprot, ensembl_gene, hgnc_symbol 
 	 **/
 	private DBName getOriginalDbName(ListInfo listInfo)  {
-		Map<String, Integer> dbNameNumber = new HashMap<String, Integer>();
-		int recognized = 0;
-		if(xrefDBMan.getDBConnector().getDbConnection().getDatabase() == null){
-			return null;
-		}
-		int max = Integer.MIN_VALUE;
-		DBName dbNameReturn = null;
-		for(Node node : listInfo.getNodes()){
-			List<DBName> dbnames;
-			try {
-				dbnames = xrefDBMan.getAllDBNamesById(node.getOriginalId());
-				if(dbnames.size() > 0){
-					for (DBName dbName : dbnames) {
-						String name = dbName.getDbname();
-						int number = 1;
-						if( !dbNameNumber.containsKey(name) ){
-								dbNameNumber.put(name, number);
-						}
-						else{
-							number = dbNameNumber.get(name);
-							number++;
-							dbNameNumber.put(name, number);
-						}
-						if(number >= max){
-							max = number;
-							dbNameReturn = dbName;
-						}
-					}
-				}
-			} catch (Exception e) {
-				recognized++;
-				/** Esto ocurre cuando no tenemos la especie en infrared, por ejemplo ECO **/
-				//System.err.println("Error GsnowPreprocessin getOriginalDbName: "+node.getOriginalId()+" error: "+e.getLocalizedMessage());
-			}
-		}
-		System.out.println("no recognized: "+recognized);
-		System.out.println("DB Matched: "+dbNameReturn);
+//		Map<String, Integer> dbNameNumber = new HashMap<String, Integer>();
+//		int recognized = 0;
+//		if(xrefDBMan.getDBConnector().getDbConnection().getDatabase() == null){
+//			return null;
+//		}
+//		int max = Integer.MIN_VALUE;
+//		DBName dbNameReturn = null;
+//		for(Node node : listInfo.getNodes()){
+//			List<DBName> dbnames;
+//			try {
+//				dbnames = xrefDBMan.getAllDBNamesById(node.getOriginalId());
+//				if(dbnames.size() > 0){
+//					for (DBName dbName : dbnames) {
+//						String name = dbName.getDbname();
+//						int number = 1;
+//						if( !dbNameNumber.containsKey(name) ){
+//								dbNameNumber.put(name, number);
+//						}
+//						else{
+//							number = dbNameNumber.get(name);
+//							number++;
+//							dbNameNumber.put(name, number);
+//						}
+//						if(number >= max){
+//							max = number;
+//							dbNameReturn = dbName;
+//						}
+//					}
+//				}
+//			} catch (Exception e) {
+//				recognized++;
+//				/** Esto ocurre cuando no tenemos la especie en infrared, por ejemplo ECO **/
+//				//System.err.println("Error GsnowPreprocessin getOriginalDbName: "+node.getOriginalId()+" error: "+e.getLocalizedMessage());
+//			}
+//		}
+//		System.out.println("no recognized: "+recognized);
+//		System.out.println("DB Matched: "+dbNameReturn);
+
+		/** babelomics 5**/
+		String dbName = "";
+		if(type.equalsIgnoreCase("proteins") || type.equalsIgnoreCase("transcripts"))
+			dbName = "uniprot_swissprot_accession";
+		else if(type.equalsIgnoreCase("genes") || type.equalsIgnoreCase("vcf") )
+			dbName = "ensembl_gene";
+		DBName dbNameReturn = new DBName(dbName, dbName, dbName);
+		/** end babelomics 5 **/
 		return dbNameReturn;
 	}
 	private ListInfo matchingDBAndInteractome(ListInfo listInfo) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
@@ -292,7 +303,7 @@ public class GSnowPreprocessing {
 					List<String> list = new ArrayList<String>();
 					list.add(node.getId());
 //					xrefList = xrefDBMan.getAllIdentifiersByIds(list);
-					XrefManager xrefManager = new XrefManager(list, xrefDBMan.getDBConnector().getSpecies());
+					XrefManager xrefManager = new XrefManager(list, interactome);
 					xrefList = xrefManager.getXrefs(dbName);
 //				}
 				if(xrefList != null && !xrefList.get(node.getId()).isEmpty()){

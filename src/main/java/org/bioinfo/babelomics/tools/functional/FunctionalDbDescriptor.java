@@ -10,6 +10,8 @@ import org.bioinfo.infrared.funcannot.filter.KeggFilter;
 import org.bioinfo.infrared.funcannot.filter.MiRnaTargetFilter;
 import org.bioinfo.infrared.funcannot.filter.OregannoFilter;
 import org.bioinfo.infrared.funcannot.filter.ReactomeFilter;
+import org.bioinfo.babelomics.utils.filters.ReconFilter;
+
 
 public class FunctionalDbDescriptor {
 
@@ -110,6 +112,12 @@ public class FunctionalDbDescriptor {
 			title = "ORegAnno";
 			name = "oreganno";
 			prefix = "oreganno";
+			description = getDefaultDescription(filter, title);
+		}
+		else if(filter instanceof ReconFilter) {
+			title = "Recon";
+			name = "recon";
+			prefix = "recon";
 			description = getDefaultDescription(filter, title);
 		}
 	
