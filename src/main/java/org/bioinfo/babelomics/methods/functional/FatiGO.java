@@ -3,6 +3,7 @@ package org.bioinfo.babelomics.methods.functional;
 import java.io.IOException;
 
 import org.bioinfo.babelomics.utils.XrefManager;
+import org.bioinfo.babelomics.utils.AnnotationManager;
 
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -171,8 +172,8 @@ public class FatiGO {
 
         // annotation
         logger.println("getting annotations from file system");
+        String db = "";
         if (!isYourAnnotations) {
-            String db = "";
 
             if (filter instanceof GOFilter) {
                 db = ((GOFilter) filter).getNamespace();
@@ -195,7 +196,7 @@ public class FatiGO {
 //            annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
         }
 
-        this.termSizes = getYourAnnotationsTermSizes();
+        this.termSizes = getAnnotationsTermSizesInGenome(db, this.species);
         logger.println("OK");
 
         computeAnnotateds();
@@ -216,19 +217,18 @@ public class FatiGO {
         logger.println("end of FatiGO test...");
     }
 
-    protected Map<String, Integer> getYourAnnotationsTermSizes() {
+    protected Map<String, Integer> getAnnotationsTermSizesInGenome(String db, String species) {
         Map<String, Integer> termSizes = new HashMap<String, Integer>();
+        AnnotationManager annotationManager = new AnnotationManager(species);
+        Map<String, List<String>> annots = annotationManager.getAnnotationIdsGenome(db);
         String termId;
-        int cont;
         for (AnnotationItem annotation : annotations) {
             termId = annotation.getFunctionalTermId();
-            if (termSizes.containsKey(termId)) {
-                cont = termSizes.get(termId);
-                termSizes.put(termId, cont + 1);
-            } else {
-                termSizes.put(termId, 1);
+            if (annots.containsKey(termId)) {
+                termSizes.put(termId, annots.get(termId).size());
             }
         }
+
         logger.println("OK");
         return termSizes;
     }

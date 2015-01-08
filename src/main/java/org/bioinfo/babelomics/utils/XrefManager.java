@@ -166,7 +166,7 @@ public class XrefManager {
         return annotOriId;
     }
 
-    private Map<String, List<String>> parseAnnotationsOriginalId(Map<String, List<String>> oriIdAnnotation) {
+    public Map<String, List<String>> parseAnnotationsOriginalId(Map<String, List<String>> oriIdAnnotation) {
         Map<String, List<String>> annotFeat = new HashMap<String, List<String>>();
 
         for (String id : oriIdAnnotation.keySet()) {
@@ -203,20 +203,6 @@ public class XrefManager {
             }
         }
 
-//        if (filter instanceof GOFilter) {
-//            int maxNumberGenes = ((GOFilter) filter).getMaxNumberGenes();
-//            int minNumberGenes = ((GOFilter) filter).getMinNumberGenes();
-//            for (String annot : annotFeature.keySet()) {
-//                List<String> features = annotFeature.get(annot);
-//                /** Size filter **/
-//                if (minNumberGenes <= features.size() && features.size() <= maxNumberGenes) {
-//                    for (String feature : features) {
-//                        annotations.add(new AnnotationItem(feature, annot));
-//                    }
-//                }
-//            }
-//        }
-//        System.out.println("annotations = " + ann*otations);
         return annotations;
     }
 

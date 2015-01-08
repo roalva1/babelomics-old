@@ -21,9 +21,11 @@ import org.bioinfo.infrared.core.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.bioinfo.babelomics.utils.XrefManager;
+import org.bioinfo.babelomics.utils.AnnotationManager;
 import org.bioinfo.infrared.funcannot.filter.GOSlimFilter;
 import org.bioinfo.infrared.funcannot.filter.InterproFilter;
 import org.bioinfo.babelomics.utils.filters.ReconFilter;
+
 public class LogisticScan extends GeneSetAnalysis {
 
     // working paths
@@ -95,8 +97,8 @@ public class LogisticScan extends GeneSetAnalysis {
         prepare(species);
 
         // annotation
+        String db = "";
         if (!isYourAnnotations) {
-            String db = "";
 
             if (filter instanceof GOFilter) {
                 db = ((GOFilter) filter).getNamespace();
@@ -116,7 +118,7 @@ public class LogisticScan extends GeneSetAnalysis {
             annotations = xrefManager.filter(xrefs, filter);
 //			annotations = InfraredUtils.getAnnotations(dbConnector, idList, filter);
         }
-        this.termSizes = getYourAnnotationsTermSizes();
+        this.termSizes = getAnnotationsTermSizesInGenome(db, species);
         // prepare files
         saveRankedList();
         saveAnnotations();
@@ -137,19 +139,18 @@ public class LogisticScan extends GeneSetAnalysis {
 
     }
 
-    protected Map<String, Integer> getYourAnnotationsTermSizes() {
+    protected Map<String, Integer> getAnnotationsTermSizesInGenome(String db, String species) {
         Map<String, Integer> termSizes = new HashMap<String, Integer>();
+        AnnotationManager annotationManager = new AnnotationManager(species);
+        Map<String, List<String>> annots = annotationManager.getAnnotationIdsGenome(db);
         String termId;
-        int cont;
         for (AnnotationItem annotation : annotations) {
             termId = annotation.getFunctionalTermId();
-            if (termSizes.containsKey(termId)) {
-                cont = termSizes.get(termId);
-                termSizes.put(termId, cont + 1);
-            } else {
-                termSizes.put(termId, 1);
+            if (annots.containsKey(termId)) {
+                termSizes.put(termId, annots.get(termId).size());
             }
         }
+
         logger.println("OK");
         return termSizes;
     }

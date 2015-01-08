@@ -38,10 +38,8 @@ public class FatiGOTest {
         new File(outdir).mkdir();
 
 
-//        String list1 = "/mnt/commons/test/example.motor";
-        String list1 = "/opt/babelomics/conf/annotations/hsa/list1.txt";
-//		String list2 = "/mnt/commons/test/example.apoptosis";
-        String list2 = "/opt/babelomics/conf/annotations/hsa/list2.txt";
+        String list1 = "/opt/babelomics/example/example.motor";
+        String list2 = "/opt/babelomics/example/example.apoptosis";
 
         String[] args = {"--tool", "fatigo", "--list1", list1, "--list2", list2, "--recon","--recon-min-num-genes", "0", "--recon-max-num-genes", "1000",  "-o", outdir, "--species", "hsa", "--home", System.getenv("BABELOMICS_HOME")};
         try {
