@@ -11,6 +11,7 @@ import org.bioinfo.infrared.core.funcannot.AnnotationItem;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.bioinfo.infrared.funcannot.filter.Filter;
 import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
+import org.bioinfo.babelomics.utils.GOManager;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,6 +27,7 @@ public class XrefManager {
     private List<String> list;
     private String species;
     private Map<String, List<String>> listXref;
+    private String db;
     /**
      * file system databases *
      */
@@ -96,6 +98,7 @@ public class XrefManager {
     }
 
     public Map<String, List<String>> getXrefs(String db) {
+        this.db = db;
         this.resolveUri();
         String oriDb = db;
         if (this.fsDb.contains(db)) {
@@ -104,7 +107,7 @@ public class XrefManager {
         int numberIds = 0;
         StringBuilder batch = new StringBuilder();
         for (String id : list) {
-            if(id.contains("/"))
+            if (id.contains("/"))
                 continue;
             if (numberIds == requests) {
                 this.fillXref(batch, db);
@@ -199,6 +202,7 @@ public class XrefManager {
             if (filter.getMinNumberGenes() <= features.size() && features.size() <= filter.getMaxNumberGenes()) {
                 for (String feature : features) {
                     annotations.add(new AnnotationItem(feature, annot));
+
                 }
             }
         }
@@ -209,10 +213,10 @@ public class XrefManager {
     public Map<String, List<String>> parseFeatureAnnotations(List<String> rawAnnots) {
         Map<String, List<String>> featureAnnot = new HashMap<String, List<String>>();
         for (String raw : rawAnnots) {
-            if (raw.startsWith("#") || !raw.contains("\t")) {
+            String fields[] = raw.split("\t");
+            if (raw.startsWith("#") || !raw.contains("\t") || fields.length < 2) {
                 continue;
             }
-            String fields[] = raw.split("\t");
             String feature = fields[0];
             String annot = fields[1];
             List<String> annotations = new ArrayList<String>();

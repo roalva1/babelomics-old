@@ -22,6 +22,7 @@ import org.bioinfo.infrared.funcannot.filter.FunctionalFilter;
 import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.bioinfo.babelomics.utils.XrefManager;
 import org.bioinfo.babelomics.utils.AnnotationManager;
+import org.bioinfo.babelomics.utils.GOManager;
 import org.bioinfo.infrared.funcannot.filter.GOSlimFilter;
 import org.bioinfo.infrared.funcannot.filter.InterproFilter;
 import org.bioinfo.babelomics.utils.filters.ReconFilter;
@@ -183,6 +184,11 @@ public class LogisticScan extends GeneSetAnalysis {
         List<String> list1Ids;
         List<String> list2Ids;
 
+
+        GOManager goManager = new GOManager();
+        Map<String, List<String>> goTerms = new HashMap<String, List<String>>();
+        goTerms = goManager.getTerms();
+
         // run rows
         int termSize, termSizeInGenome;
         List<String> genes;
@@ -212,6 +218,11 @@ public class LogisticScan extends GeneSetAnalysis {
                     termSizeInGenome = termSizes.get(term);
                 } else {
                     termSizeInGenome = 0;
+                }
+
+                if (goTerms.containsKey(term)) {
+                    String name = goTerms.get(term).get(0);
+                    term = name + "(" + term + ")";
                 }
                 GeneSetAnalysisTestResult gseaTest = new GeneSetAnalysisTestResult(term, termSize, termSizeInGenome, genes, converged, logRatio, adjPValue);
                 results.add(gseaTest);

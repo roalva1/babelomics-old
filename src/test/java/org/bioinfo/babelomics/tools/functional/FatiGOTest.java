@@ -41,7 +41,7 @@ public class FatiGOTest {
         String list1 = "/opt/babelomics/example/example.motor";
         String list2 = "/opt/babelomics/example/example.apoptosis";
 
-        String[] args = {"--tool", "fatigo", "--list1", list1, "--list2", list2, "--recon","--recon-min-num-genes", "0", "--recon-max-num-genes", "1000",  "-o", outdir, "--species", "hsa", "--home", System.getenv("BABELOMICS_HOME")};
+        String[] args = {"--tool", "fatigo", "--list1", list1, "--list2", list2, "--go-slim","--go-slim-min-num-genes", "5", "--go-slim-max-num-genes", "1000",  "-o", outdir, "--species", "hsa", "--home", System.getenv("BABELOMICS_HOME")};
         try {
             FatiGOTool fatigo = (FatiGOTool) BabelomicsFactory.createTool("fatigo");
             fatigo.parse(args);

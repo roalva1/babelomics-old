@@ -96,10 +96,10 @@ public class AnnotationManager {
     private Map<String, List<String>> parseFeatureAnnotations(List<String> rawAnnots) {
         Map<String, List<String>> featureAnnot = new HashMap<String, List<String>>();
         for (String raw : rawAnnots) {
-            if (raw.startsWith("#") || !raw.contains("\t")) {
+            String fields[] = raw.split("\t");
+            if (raw.startsWith("#") || !raw.contains("\t") || fields.length < 2) {
                 continue;
             }
-            String fields[] = raw.split("\t");
             String feature = fields[0];
             String annot = fields[1];
             List<String> annotations = new ArrayList<String>();

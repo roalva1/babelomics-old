@@ -4,7 +4,9 @@ import java.io.IOException;
 
 import org.bioinfo.babelomics.utils.XrefManager;
 import org.bioinfo.babelomics.utils.AnnotationManager;
+import org.bioinfo.babelomics.utils.GOManager;
 
+import java.lang.annotation.Annotation;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -192,11 +194,28 @@ public class FatiGO {
             XrefManager xrefManager = new XrefManager(all, this.species);
             Map<String, List<String>> xrefs = xrefManager.getXrefs(db);
             annotations = xrefManager.filter(xrefs, filter);
+
+
             /** Set term sizes **/
 //            annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
         }
 
         this.termSizes = getAnnotationsTermSizesInGenome(db, this.species);
+
+        /** Add go name to id **/
+//        Map<String, List<String>> goTerms = new HashMap<String, List<String>>();
+//        if (db.equalsIgnoreCase("biological_process") || db.equalsIgnoreCase("cellular_component") || db.equalsIgnoreCase("molecular_function")) {
+//            GOManager goManager = new GOManager();
+//            goTerms = goManager.getTerms();
+//        }
+//        for (AnnotationItem annot : annotations) {
+//            if (goTerms.containsKey(annot.getFunctionalTermId())) {
+//                String descTerm = goTerms.get(annot.getFunctionalTermId()).get(0) + "(" + annot + ")";
+//                annot.setFunctionalTermId(descTerm);
+//
+//            }
+//        }
+
         logger.println("OK");
 
         computeAnnotateds();
