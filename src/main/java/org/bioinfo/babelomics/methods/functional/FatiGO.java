@@ -194,6 +194,7 @@ public class FatiGO {
             XrefManager xrefManager = new XrefManager(all, this.species);
             Map<String, List<String>> xrefs = xrefManager.getXrefs(db);
             annotations = xrefManager.filter(xrefs, filter);
+//            System.out.println("annotations = " + annotations);
 
 
             /** Set term sizes **/

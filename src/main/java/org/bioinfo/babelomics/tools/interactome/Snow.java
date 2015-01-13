@@ -45,6 +45,7 @@ import org.bioinfo.tool.OptionFactory;
 import org.bioinfo.tool.result.Item;
 import org.bioinfo.tool.result.Item.TYPE;
 import org.bioinfo.babelomics.utils.XrefManager;
+import org.bioinfo.babelomics.utils.GOManager;
 
 
 public class Snow extends BabelomicsTool {
@@ -73,7 +74,7 @@ public class Snow extends BabelomicsTool {
      */
     private Map<String, String> mapList1, mapList2;
 
-//    private DBConnector dbConnector;
+    //    private DBConnector dbConnector;
 //    private XRefDBManager xrefDBMan;
     private String decimalFormat;
     private int listMaxSize;
@@ -525,7 +526,7 @@ public class Snow extends BabelomicsTool {
                 Map<String, List<String>> xrefs = xrefManager.getXrefs("uniprot_swissprot_accession");
 //                if (xrefEns != null && !xrefEns.getXrefItems().get("uniprot_swissprot_accession").isEmpty() /*&& !xrefEns.getXrefItems().get("uniprot_swissprot_accession").get(0).equals(id)*/)
 //                    map.put(xrefEns.getXrefItems().get("uniprot_swissprot_accession").get(0).getDisplayName(), id);
-                if(!xrefs.isEmpty() && xrefs.get(id).size() > 0)
+                if (!xrefs.isEmpty() && xrefs.get(id).size() > 0)
                     map.put(xrefs.get(id).get(0), id);
             } catch (Exception e) {
                 map.put(id, id);
@@ -1135,8 +1136,11 @@ public class Snow extends BabelomicsTool {
 //                if (xrefsEns != null && !xrefsEns.getXrefItems().get("ensembl_gene").isEmpty() /*&& !xrefsEns.getXrefItems().get("ensembl_gene").get(0).getDisplayName().equals(proteinName)*/)
 //                    listGenEnsembl.put(xrefsEns.getXrefItems().get("ensembl_gene").get(0).getDisplayName(), proteinName);
                 XrefManager xrefManager = new XrefManager(proteinName, this.interactome);
+                if (proteinName.equalsIgnoreCase("")) {
+                    continue;
+                }
                 Map<String, List<String>> xrefs = xrefManager.getXrefs("ensembl_gene");
-                if(!xrefs.isEmpty() && xrefs.get(proteinName).size() > 0)
+                if (!xrefs.isEmpty() && xrefs.get(proteinName).size() > 0)
                     listGenEnsembl.put(xrefs.get(proteinName).get(0), proteinName);
             } catch (Exception e) {
                 listGenEnsembl.put(proteinName, proteinName);
@@ -1210,8 +1214,9 @@ public class Snow extends BabelomicsTool {
         StringBuilder sb = new StringBuilder();
         String tab = "\t";
         sb.append("#input_id").append(tab).append("id").append(tab).append("type").append(tab).append("rank").append(tab).append("bet").append(tab).append("clust").append(tab);
-        sb.append("conn").append(tab).append("go").append(tab).append("kegg").append(System.getProperty("line.separator"));
-
+        sb.append("conn").append(tab).append("go_name").append(tab).append("go_id").append(System.getProperty("line.separator"));
+        GOManager goManager = new GOManager();
+        Map<String, List<String>> goTerms = goManager.getTerms();
         /** First significant no external nodes **/
         for (ProteinVertex pr : subProteinNetwork.getInteractomeGraph().getAllVertices()) {
 
@@ -1225,7 +1230,7 @@ public class Snow extends BabelomicsTool {
                 listType = "external";
             sb.append(listType).append(tab);
             sb.append(pr.getRelativeBetweenness()).append(tab);
-            sb.append(getSigleMcnInteractors(subProteinNetwork, pr.getId()));
+            sb.append(getSingleMcnInteractors(subProteinNetwork, pr.getId(), goTerms));
             sb.append(System.getProperty("line.separator"));
         }
 //		/** Second significant external nodes **/
@@ -1244,7 +1249,7 @@ public class Snow extends BabelomicsTool {
         return sb.toString();
     }
 
-    private String getSigleMcnInteractors(ProteinNetwork subProteinNetwork, String id) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
+    private String getSingleMcnInteractors(ProteinNetwork subProteinNetwork, String id, Map<String, List<String>> goTerms) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 //        GODBManager gof = new GODBManager(dbConnector);
         StringBuilder sb = new StringBuilder();
         String tab = "\t";
@@ -1254,17 +1259,27 @@ public class Snow extends BabelomicsTool {
         sb.append(subProteinNetwork.getInteractomeGraph().getDegreeOf(prVertex)).append(tab);
 
         if (this.interactome != null) {
-//        if (xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null) {
+
 
             List<String> ids = new ArrayList<String>();
             ids.add(id);
             XrefManager xrefManager = new XrefManager(ids, this.interactome);
             Map<String, List<String>> xrefs = xrefManager.getXrefs("go");
-            for (String key : xrefs.keySet()) {
+            String goNames = "";
+            String goIds = "";
+            if (!xrefs.isEmpty()) {
+                for (String goId : xrefs.get(id)) {
 //                System.out.println("key = " + key);
 //                System.out.println("xrefs.get(key) = " + xrefs.get(key));
-                sb.append(xrefs.get(key)).append(",");
+                    goIds += goId + ",";
+                    goNames += goTerms.get(goId).get(0) + ",";
+                }
             }
+            sb.append(goNames);
+            sb = this.deleteLastCh(sb, ",");
+            sb.append("\t");
+            sb.append(goIds);
+            sb = this.deleteLastCh(sb, ",");
 
 
 //			List<String> dbNames = new ArrayList<String>();
@@ -1339,10 +1354,10 @@ public class Snow extends BabelomicsTool {
 
         /** babelomics 5**/
         String dbName = "";
-        if(type.equalsIgnoreCase("proteins") || type.equalsIgnoreCase("transcripts"))
+        if (type.equalsIgnoreCase("proteins") || type.equalsIgnoreCase("transcripts"))
             dbName = "uniprot_swissprot_accession";
-        else if(type.equalsIgnoreCase("genes") || type.equalsIgnoreCase("vcf") )
-            dbName = "ensembl_gene";
+        else if (type.equalsIgnoreCase("genes") || type.equalsIgnoreCase("vcf"))
+            dbName = "WikiGene";
         DBName dbNameReturn = new DBName(dbName, dbName, dbName);
         /** end babelomics 5 **/
         return dbNameReturn;
@@ -1366,15 +1381,22 @@ public class Snow extends BabelomicsTool {
 //        return nodeId;
 
         /** Babelomics 5**/
-        return id;
+        String dbName = this.dbName.getDbname();
+        XrefManager xrefManager = new XrefManager(id, this.interactome);
+        Map<String, List<String>> xrefs = xrefManager.getXrefs(dbName);
+        String idDbname = id;
+        if(!xrefs.get(id).isEmpty()){
+            idDbname = xrefs.get(id).get(0);
+        }
+        return idDbname;
         /** end Babelomics 5**/
     }
 
     private StringBuilder deleteLastCh(StringBuilder sb, String ch) {
         StringBuilder sbReturn = new StringBuilder();
         if (!sb.toString().equals("")) {
-            //System.out.println(sb);
-            sb.deleteCharAt(sb.lastIndexOf(ch));
+            if (sb.lastIndexOf(ch) >= 0)
+                sb.deleteCharAt(sb.lastIndexOf(ch));
         }
         return sbReturn.append(sb.toString());
     }

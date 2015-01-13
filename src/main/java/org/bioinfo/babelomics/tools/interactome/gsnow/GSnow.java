@@ -747,8 +747,10 @@ public class GSnow extends SnowTool {
         StringBuilder sb = new StringBuilder();
         String tab = "\t";
         sb.append("#input_id").append(tab).append("id").append(tab).append("type").append(tab).append("rank").append(tab).append("bet").append(tab).append("clust").append(tab);
-        sb.append("conn").append(tab).append("go").append(tab).append("kegg").append(System.getProperty("line.separator"));
+        sb.append("conn").append(tab).append("go_name").append(tab).append("go_id").append(System.getProperty("line.separator"));
 
+        org.bioinfo.babelomics.utils.GOManager goManager = new org.bioinfo.babelomics.utils.GOManager();
+        Map<String, List<String>> goTerms = goManager.getTerms();
         /** First significant no external nodes **/
         for (Node node : this.significantItem.getNodes()) {
             sb.append(node.getOriginalId()).append(tab);
@@ -756,7 +758,7 @@ public class GSnow extends SnowTool {
             String listType = node.isSeed() ? "seedlist" : "list";
             sb.append(listType).append(tab);
             sb.append(node.getValue()).append(tab);
-            sb.append(getSigleMcnInteractors(subProteinNetwork, node.getId()));
+            sb.append(getSingleMcnInteractors(subProteinNetwork, node.getId(),goTerms));
             sb.append(System.getProperty("line.separator"));
         }
         /** Second significant external nodes **/
@@ -769,13 +771,14 @@ public class GSnow extends SnowTool {
             sb.append("external").append(tab);
             /** Input value **/
             sb.append("-").append(tab);
-            sb.append(getSigleMcnInteractors(subProteinNetwork, id));
+            sb.append(getSingleMcnInteractors(subProteinNetwork, id,goTerms));
             sb.append(System.getProperty("line.separator"));
         }
         return sb.toString();
     }
 
-    private String getSigleMcnInteractors(ProteinNetwork subProteinNetwork, String id) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
+    private String getSingleMcnInteractors(ProteinNetwork subProteinNetwork, String id, Map<String, List<String>> goTerms) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
+//        GODBManager gof = new GODBManager(dbConnector);
         StringBuilder sb = new StringBuilder();
         String tab = "\t";
         ProteinVertex prVertex = subProteinNetwork.getInteractomeGraph().getVertex(id);
@@ -783,45 +786,55 @@ public class GSnow extends SnowTool {
         sb.append(prVertex.getClusteringCoefficient()).append(tab);
         sb.append(subProteinNetwork.getInteractomeGraph().getDegreeOf(prVertex)).append(tab);
 
-//        if (xrefDBMan.getDBConnector().getDbConnection().getDatabase() != null) {
         if (this.interactome != null) {
-//            List<String> dbNames = new ArrayList<String>();
-//            dbNames.add("go");
-//            dbNames.add("kegg");
-//            AnnotationDBManager annotationMng = new AnnotationDBManager(dbConnector);
 
-//            XRef xrefEns = xrefDBMan.getByDBName(id, dbNames);
 
             List<String> ids = new ArrayList<String>();
             ids.add(id);
             XrefManager xrefManager = new XrefManager(ids, this.interactome);
             Map<String, List<String>> xrefs = xrefManager.getXrefs("go");
-            for (String key : xrefs.keySet()) {
+            String goNames = "";
+            String goIds = "";
+            if (!xrefs.isEmpty()) {
+                for (String goId : xrefs.get(id)) {
 //                System.out.println("key = " + key);
 //                System.out.println("xrefs.get(key) = " + xrefs.get(key));
-                sb.append(xrefs.get(key)).append(",");
+                    goIds += goId + ",";
+                    goNames += goTerms.get(goId).get(0) + ",";
+                }
             }
+            sb.append(goNames);
+            sb = this.deleteLastCh(sb, ",");
+            sb.append("\t");
+            sb.append(goIds);
+            sb = this.deleteLastCh(sb, ",");
 
-//            List<XRefItem> xrefitemListGO = xrefEns.getXrefItems().get("go");
-//            if (xrefitemListGO != null && !xrefitemListGO.isEmpty()) {
-//                for (XRefItem xrefitem : xrefitemListGO) {
-//                    GO go = gof.getByAccesion(xrefitem.getDisplayName());
-//                    sb.append(go.getName()).append(",");
-//                }
-//                sb = this.deleteLastCh(sb, ",");
-//            }
+
+//			List<String> dbNames = new ArrayList<String>();
+//			dbNames.add("go");
+//			dbNames.add("kegg");
+//			AnnotationDBManager annotationMng = new AnnotationDBManager(dbConnector);
+//			Map<String, String> keggItems  = annotationMng.getAnnotationTermNames("kegg");
+//			XRef xrefEns  = xrefDBMan.getByDBName(id, dbNames);
+//			List<XRefItem> xrefitemListGO = xrefEns.getXrefItems().get("go");
+//			if(xrefitemListGO != null && !xrefitemListGO.isEmpty()){
+//				for(XRefItem xrefitem : xrefitemListGO){
+//					GO go = gof.getByAccesion(xrefitem.getDisplayName());
+//					sb.append(go.getName()).append(",");
+//				}
+//				sb = this.deleteLastCh(sb, ",");
+//			}
 //
-//            Map<String, String> keggItems = annotationMng.getAnnotationTermNames("kegg");
-//            List<XRefItem> xrefitemListKegg = xrefEns.getXrefItems().get("kegg");
-//            if (xrefitemListKegg != null && !xrefitemListKegg.isEmpty()) {
-//                sb.append(tab);
-//                for (XRefItem xrefitem : xrefitemListKegg) {
-//                    if (keggItems.containsKey(xrefitem.getDisplayName())) {
-//                        sb.append(keggItems.get(xrefitem.getDisplayName())).append(",");
-//                    }
-//                }
-//                sb = this.deleteLastCh(sb, ",");
-//            }
+//			List<XRefItem> xrefitemListKegg = xrefEns.getXrefItems().get("kegg");
+//			if(xrefitemListKegg != null && !xrefitemListKegg.isEmpty()){
+//				sb.append(tab);
+//				for(XRefItem xrefitem : xrefitemListKegg){
+//					if(keggItems.containsKey(xrefitem.getDisplayName())){
+//						sb.append(keggItems.get(xrefitem.getDisplayName())).append(",");
+//					}
+//				}
+//				sb = this.deleteLastCh(sb, ",");
+//			}
         }
         return sb.toString();
     }

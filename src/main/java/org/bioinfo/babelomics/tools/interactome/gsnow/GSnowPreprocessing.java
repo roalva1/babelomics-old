@@ -269,7 +269,7 @@ public class GSnowPreprocessing {
         if (type.equalsIgnoreCase("proteins") || type.equalsIgnoreCase("transcripts"))
             dbName = "uniprot_swissprot_accession";
         else if (type.equalsIgnoreCase("genes") || type.equalsIgnoreCase("vcf"))
-            dbName = "ensembl_gene";
+            dbName = "WikiGene";
         DBName dbNameReturn = new DBName(dbName, dbName, dbName);
         /** end babelomics 5 **/
         return dbNameReturn;
