@@ -1,19 +1,72 @@
 package org.bioinfo.babelomics.tools.interactome;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.bioinfo.babelomics.BabelomicsMain;
+import org.bioinfo.commons.io.utils.IOUtils;
+import org.bioinfo.commons.utils.ListUtils;
+import org.bioinfo.math.stats.inference.KolmogorovSmirnovTest;
+import org.bioinfo.networks.protein.KSTest;
 import org.junit.Test;
 
 public class SnowTest {
     String BABELOMICS_HOME = System.getenv("BABELOMICS_HOME");
 
-    @Test
+//    @Test
     public void testTest() {
         System.out.println("I am a test!!");
     }
 
-    @Test
+    //@Test
+    public void pruebaKolmogorov() throws IOException {
+        List<String> list1String = IOUtils.readLines("/tmp/babelomics/result_list_1_topo.txt");
+        List<String> list2String = IOUtils.readLines("/tmp/babelomics/hsa_alldb_curatedphysical_genes_interactome_nr_topo.txt");
+
+        List<Double> list1 = new ArrayList<Double>();
+        Map<String, String[]> list1Map = new HashMap<String, String[]>();
+        for (String ss : list1String) {
+            if (ss.startsWith("#")) continue;
+            String[] fields = ss.split("\t");
+            list1Map.put(fields[1], fields);
+            list1.add(Double.parseDouble(fields[2]));
+        }
+
+        List<Double> list2 = new ArrayList<Double>();
+        for (String ss : list2String) {
+            if (ss.startsWith("#")) continue;
+            String[] fields = ss.split("\t");
+            if (!list1Map.containsKey(fields[0])) {
+                list2.add(Double.parseDouble(fields[1]));
+            }
+        }
+//        System.out.println("list2 = " + list2);
+
+//        KolmogorovSmirnovTest ksTest = new KolmogorovSmirnovTest();
+//        ksTest.compute(ListUtils.toDoubleArray(list1), ListUtils.toDoubleArray(list2));
+
+        KSTest kstest = new KSTest();
+        System.out.println(kstest.resultKolmogorovSmirnov(ListUtils.toDoubleArray(list2), ListUtils.toDoubleArray(list1), "greater").getPValue());
+
+
+//        setwd("Downloads/babelomics/")
+//
+//        # TEST betweenness for "Role of list within interactome of reference"
+//        list <- read.table("result_list_1_topo.txt", stringsAsFactors = F)
+//        random <- read.table("hsa_alldb_curatedphysical_genes_interactome_nr_topo.txt", stringsAsFactors = F)
+//        random.bet <- random$V2[ ! random$V1 %in% list$V2 ]
+//        list.bet <- list$V3
+//
+//        ks.test(random.bet, list.bet, alternative = "g")
+//        boxplot(random.bet, list.bet, ylim=c(0, 0.04))
+
+    }
+
+        @Test
     public void testExample1() {
         //opt/babelomics/babelomics.sh --tool snow --outdir /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5974 --log-file /httpd/bioinfo/wum_sessions_v0.7/4164/jobs/5974/job.log --list2 none --list1 /opt/babelomics/example/brca1_overexp_up.txt --side less --images  --randoms 500 --components true --intermediate 1 --interactome hsa --group curated --type genes --o-name result
 
@@ -28,7 +81,7 @@ public class SnowTest {
                 "--interactome", "hsa",
                 "--group", "curated",
                 "--type", "genes",
-                "--list1", BABELOMICS_HOME + "/example/brca1_overexp_up.txt",
+//                "--list1", BABELOMICS_HOME + "/example/brca1_overexp_up.txt",
                 "--list1", BABELOMICS_HOME + "/example/K562_symbol.txt",
                 "--side", "less",
                 "--intermediate", "1",

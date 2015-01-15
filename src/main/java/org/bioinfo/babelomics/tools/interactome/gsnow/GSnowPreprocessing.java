@@ -267,7 +267,7 @@ public class GSnowPreprocessing {
         /** babelomics 5**/
         String dbName = "";
         if (type.equalsIgnoreCase("proteins") || type.equalsIgnoreCase("transcripts"))
-            dbName = "uniprot_swissprot_accession";
+            dbName = "uniprotkb_acc";
         else if (type.equalsIgnoreCase("genes") || type.equalsIgnoreCase("vcf"))
             dbName = "WikiGene";
         DBName dbNameReturn = new DBName(dbName, dbName, dbName);
@@ -279,7 +279,7 @@ public class GSnowPreprocessing {
 
         String dbName = "";
         if (type.equalsIgnoreCase("proteins") || type.equalsIgnoreCase("transcripts"))
-            dbName = "uniprot_swissprot_accession";
+            dbName = "uniprotkb_acc";
         else if (type.equalsIgnoreCase("genes") || type.equalsIgnoreCase("vcf"))
             dbName = "ensembl_gene";
 //		System.out.println("DBNAME:"+dbName);
