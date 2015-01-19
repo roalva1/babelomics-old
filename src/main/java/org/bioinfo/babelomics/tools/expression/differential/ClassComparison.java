@@ -41,7 +41,7 @@ public class ClassComparison extends BabelomicsTool {
 	private double foldChangeValue = 2;
 
 	private int minDisplay = 10;
-	private int maxDisplay = 500;
+	private int maxDisplay = Integer.MAX_VALUE;
 	private String msg = "";
 
 	public ClassComparison() {
@@ -331,15 +331,72 @@ public class ClassComparison extends BabelomicsTool {
 
 	private void setFoldChangeResults(Dataset subDataset, String test, String testLabel, double[] res, String className) throws InvalidIndexException, IOException {
 
+
 		int[] columnOrder = ListUtils.order(subDataset.getVariables().getByName(className).getValues());
 		int[] rowOrder = ListUtils.order(ArrayUtils.toList(res), true);
 
 		DataFrame dataFrame = new DataFrame(subDataset.getFeatureNames().size(), 0);
 		dataFrame.addColumn(test, ListUtils.ordered(ArrayUtils.toStringList(res), rowOrder));
-		dataFrame.setRowNames(ListUtils.ordered(subDataset.getFeatureNames(), rowOrder));	
+		dataFrame.setRowNames(ListUtils.ordered(subDataset.getFeatureNames(), rowOrder));
 		FeatureData featureData = new FeatureData(dataFrame);
 		File file = new File(outdir + "/" + test + "_foldchange.txt");
 		IOUtils.write(file, dataFrame.toString(true, true));
+
+		/** Get significative terms, babelomics 5 **/
+		List<String> featureNames = new ArrayList<String>();
+		List<String> featureValues = new ArrayList<String>();
+
+		List<String> featureNamesUp = new ArrayList<String>();
+		List<String> featureNamesDown = new ArrayList<String>();
+
+		 for (String rowName : dataFrame.getRowNames()) {
+                List<String> row = dataFrame.getRow(rowName);
+                double stats = Double.parseDouble(row.get(0));
+				if(stats >= foldChangeValue){
+					featureNames.add(rowName);
+					featureValues.add(row.get(0));
+					if(stats>=0)
+					featureNamesUp.add(rowName);
+					else
+					featureNamesDown.add(rowName);
+				}
+		 }
+
+
+		dataFrame = new DataFrame(featureNames.size(), 0);
+		dataFrame.addColumn(test, featureValues);
+		dataFrame.setRowNames(featureNames);
+
+		file = new File(outdir + "/" + test + "_foldchange_significative.txt");
+		IOUtils.write(file, dataFrame.toString(true, true));
+
+		file = new File(outdir + "/" + test + "_foldchange_significative_up.txt");
+		IOUtils.write(file, featureNamesUp);
+
+		file = new File(outdir + "/" + test + "_foldchange_significative_down.txt");
+		IOUtils.write(file, featureNamesDown);
+
+
+//
+//		List<String> featuresUp = new ArrayList<String>();
+//		List<String> featuresDown = new ArrayList<String>();
+//		for (String rowName : dataFrame.getRowNames()) {
+//                List<String> row = dataFrame.getRow(rowName);
+//                double stats = Double.parseDouble(row.get(0));
+//                if(stats>=foldChangeValue){
+//
+//
+////                    featuresUp.add(rowName);
+////                else
+////                    featuresDown.add(rowName);
+//				}
+//            }
+//			file = new File(tool.getOutdir() + "/" + test + "_significative_table_up.txt");
+//			IOUtils.write(file, featuresUp);
+//			file = new File(tool.getOutdir() + "/" + test + "_significative_table_down.txt");
+//			IOUtils.write(file, featuresDown);
+
+
 		//featureData.save(file);
 		if ( file.exists() ) {
 			result.addOutputItem(new Item(test + "_foldchange", file.getName(), testLabel + " fold-change output file", TYPE.FILE, new ArrayList<String>(), new HashMap<String, String>(), testLabel + " fold-change.Output files"));			

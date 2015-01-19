@@ -32,18 +32,18 @@ public class FunctionalDbDescriptor {
 	}
 	
 	protected void initFromFunctionalFilter(final FunctionalFilter filter){
-		String levels;
+		//String levels;
 		// Untitled
 		title = "Untitled";
 		// GO
 		if(filter instanceof GOFilter) {						
 			GOFilter goFilter = (GOFilter) filter;
-			if(goFilter.getMinLevel()==goFilter.getMaxLevel()) {
-				levels = "(level " + goFilter.getMinLevel() + ")";
-			} else{
-				levels = "(levels from " + goFilter.getMinLevel() + " to " + goFilter.getMaxLevel() + ")"; 
-			}						
-			title = "GO " + goFilter.getNamespace().replace("_", " ") + " " + levels;
+//			if(goFilter.getMinLevel()==goFilter.getMaxLevel()) {
+//				levels = "(level " + goFilter.getMinLevel() + ")";
+//			} else{
+//				levels = "(levels from " + goFilter.getMinLevel() + " to " + goFilter.getMaxLevel() + ")";
+//			}
+			title = "GO " + goFilter.getNamespace().replace("_", " ");// + " " + levels;
 			name = "go_" + goFilter.getNamespace() + "_" + goFilter.getMinLevel() + "_" + goFilter.getMaxLevel();
 			prefix = "go";			
 			description = getDefaultDescription(filter, title);			

@@ -166,9 +166,12 @@ public class FatiGO {
         logger.println("OK");
 
         logger.print("preparing list union...");
-        List<String> all = new ArrayList<String>(list1.size() + list2.size());
+        List<String> all = new ArrayList<String>();
+
         all.addAll(list1);
-        all.addAll(list2);
+        if (!this.mode.equalsIgnoreCase(modeTypes.list2genome.name())) {
+            all.addAll(list2);
+        }
 
         //logger.println("list2_annotation.size: " + InfraredUtils.getAnnotations(dbConnector, list2, filter).size());
 
@@ -176,6 +179,7 @@ public class FatiGO {
         logger.println("getting annotations from file system");
         String db = "";
         if (!isYourAnnotations) {
+
 
             if (filter instanceof GOFilter) {
                 db = ((GOFilter) filter).getNamespace();
@@ -191,8 +195,23 @@ public class FatiGO {
             }
 
             System.out.println("db = " + db);
+
+
             XrefManager xrefManager = new XrefManager(all, this.species);
             Map<String, List<String>> xrefs = xrefManager.getXrefs(db);
+
+            if (this.mode.equalsIgnoreCase(modeTypes.list2genome.name())) {
+                Set<String> list2set = new HashSet<String>();
+                list2set.addAll(list2);
+                AnnotationManager annoManager = new AnnotationManager(this.species);
+                Map<String, List<String>> annots = annoManager.getIdAnnotationsGenome(db);
+                System.out.println("entro");
+                for (String s : annots.keySet()) {
+                    if (list2set.contains(s))
+                        xrefs.put(s, annots.get(s));
+                }
+            }
+
             annotations = xrefManager.filter(xrefs, filter);
 //            System.out.println("annotations = " + annotations);
 
