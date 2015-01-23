@@ -44,8 +44,9 @@ public class FunctionalDbDescriptor {
 //				levels = "(levels from " + goFilter.getMinLevel() + " to " + goFilter.getMaxLevel() + ")";
 //			}
 			title = "GO " + goFilter.getNamespace().replace("_", " ");// + " " + levels;
-			name = "go_" + goFilter.getNamespace() + "_" + goFilter.getMinLevel() + "_" + goFilter.getMaxLevel();
-			prefix = "go";			
+//			name = "go_" + goFilter.getNamespace() + "_" + goFilter.getMinLevel() + "_" + goFilter.getMaxLevel();
+			name = "go_" + goFilter.getNamespace();
+			prefix = "go";
 			description = getDefaultDescription(filter, title);			
 			if(goFilter.isPropagated()) {
 				description+= ", each term parent within levels has been included";

@@ -240,30 +240,30 @@ public class DiffExpressionUtils {
 		File redirectionFile;
 		File rankedListFile = new File(outDir + "/" + test + "_ranked_list.txt");
 		DiffExpressionUtils.generateRankedList(dataFrame.getRowNames(), dataFrame.getColumn(colName), colName, rankedListFile);
-		if ( rankedListFile.exists() ) {
-			redirectionFile = new File(outDir + "/fatiscan.redirection");
-			createFatiScanRedirectionFile(redirectionFile, rankedListFile);
-			if ( redirectionFile.exists() ) {
-				//				tags = "DATA,RANKED,REDIRECTION(" + redirectionFile.getName() + ":Send to FatiScan tool...)";
-				//				result.addOutputItem(new Item(test + "_ranked_list_file", rankedListFile.getName(), "Send ranked list to FatiScan tool", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
-				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiScan tool...)";
-				result.addOutputItem(new Item(test + "_fatiscan", "", "Send ranked list to FatiScan tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
-			}
-		}
+//		if ( rankedListFile.exists() ) {
+//			redirectionFile = new File(outDir + "/fatiscan.redirection");
+//			createFatiScanRedirectionFile(redirectionFile, rankedListFile);
+//			if ( redirectionFile.exists() ) {
+//				//				tags = "DATA,RANKED,REDIRECTION(" + redirectionFile.getName() + ":Send to FatiScan tool...)";
+//				//				result.addOutputItem(new Item(test + "_ranked_list_file", rankedListFile.getName(), "Send ranked list to FatiScan tool", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
+//				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to Gene set enrichment tool...)";
+//				result.addOutputItem(new Item(test + "_fatiscan", "", "Send ranked list to Gene set enrichment tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
+//			}
+//		}
 
 		// preparing significant list (top and bottom)
 		//
 		File topListFile = new File(outDir + "/" + test + "_top_list.txt");
 		File bottomListFile = new File(outDir + "/" + test + "_bottom_list.txt");
 		DiffExpressionUtils.generateSignificantLists(dataFrame.getRowNames(), dataFrame.getColumn("adj. p-value"), 0.005, topListFile, bottomListFile);
-		if ( topListFile.exists() || bottomListFile.exists() ) {
-			redirectionFile = new File(outDir + "/fatigo.redirection");
-			createFatiGORedirectionFile(redirectionFile, topListFile, bottomListFile);
-			if ( redirectionFile.exists() ) {
-				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
-				result.addOutputItem(new Item(test + "_fatigo", "", "Send significative results to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
-			}
-		}
+//		if ( topListFile.exists() || bottomListFile.exists() ) {
+//			redirectionFile = new File(outDir + "/fatigo.redirection");
+//			createFatiGORedirectionFile(redirectionFile, topListFile, bottomListFile);
+//			if ( redirectionFile.exists() ) {
+//				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to Single enrichment tool...)";
+//				result.addOutputItem(new Item(test + "_fatigo", "", "Send significative results to Single enrichment tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
+//			}
+//		}
 	}
 
 	public static void createFatiGoRedirection(List<String> names, double[] statistic, String test, Result result, String outDir) throws IOException, InvalidIndexException {
@@ -307,7 +307,7 @@ public class DiffExpressionUtils {
 			File redirectionFile = new File(outDir + "/" + test + "_top_bottom.fatigo.redirection");
 			createFatiGoRedirectionFile(redirectionFile, topListFile, bottomListFile);
 			if ( redirectionFile.exists() ) {
-				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
+				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to Single enrichment tool...)";
 				result.addOutputItem(new Item(test + "_top_genome_fatigo", "", "Send top list vs bottom list to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), groupPrefix + "Continue processing"));
 			}
 		}
@@ -315,7 +315,7 @@ public class DiffExpressionUtils {
 			File redirectionFile = new File(outDir + "/" + test + "_top_genome.fatigo.redirection");
 			createFatiGoRedirectionFile(redirectionFile, topListFile);
 			if ( redirectionFile.exists() ) {
-				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
+				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to Single enrichment tool...)";
 				result.addOutputItem(new Item(test + "_top_genome_fatigo", "", "Send top list vs genome to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), groupPrefix + "Continue processing"));
 			}
 		}
@@ -323,7 +323,7 @@ public class DiffExpressionUtils {
 			File redirectionFile = new File(outDir + "/" + test + "_bottom_genome.fatigo.redirection");
 			createFatiGoRedirectionFile(redirectionFile, bottomListFile);
 			if ( redirectionFile.exists() ) {
-				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiGO tool...)";
+				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to Single enrichment tool...)";
 				result.addOutputItem(new Item(test + "_bottom_genome_fatigo", "", "Send bottom list vs genome to FatiGO tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), groupPrefix + "Continue processing"));
 			}
 		}
@@ -384,16 +384,16 @@ public class DiffExpressionUtils {
 		File redirectionFile;
 		File rankedListFile = new File(outDir + "/" + test + "_ranked_list.txt");
 		DiffExpressionUtils.generateRankedList(dataFrame.getRowNames(), dataFrame.getColumn(colName), colName, rankedListFile);
-		if ( rankedListFile.exists() ) {
-			redirectionFile = new File(outDir + "/fatiscan.redirection");
-			createFatiScanRedirectionFile(redirectionFile, rankedListFile);
-			if ( redirectionFile.exists() ) {
-				//				tags = "DATA,RANKED,REDIRECTION(" + redirectionFile.getName() + ":Send to FatiScan tool...)";
-				//				result.addOutputItem(new Item(test + "_ranked_list_file", rankedListFile.getName(), "Send ranked list to FatiScan tool", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
-				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to FatiScan tool...)";
-				result.addOutputItem(new Item(test + "_fatiscan", "", "Send ranked list to FatiScan tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), groupPrefix + "Continue processing"));
-			}
-		}
+//		if ( rankedListFile.exists() ) {
+//			redirectionFile = new File(outDir + "/fatiscan.redirection");
+//			createFatiScanRedirectionFile(redirectionFile, rankedListFile);
+//			if ( redirectionFile.exists() ) {
+//				//				tags = "DATA,RANKED,REDIRECTION(" + redirectionFile.getName() + ":Send to FatiScan tool...)";
+//				//				result.addOutputItem(new Item(test + "_ranked_list_file", rankedListFile.getName(), "Send ranked list to FatiScan tool", TYPE.FILE, StringUtils.toList(tags, ","), new HashMap<String, String>(2), "Continue processing"));
+//				tags = "REDIRECTION(" + redirectionFile.getName() + ":Send to Gene set enrichment tool...)";
+//				result.addOutputItem(new Item(test + "_fatiscan", "", "Send ranked list to Gene set enrichment tool", TYPE.TEXT, StringUtils.toList(tags, ","), new HashMap<String, String>(2), groupPrefix + "Continue processing"));
+//			}
+//		}
 	}
 
 	public static void createFatiScanRedirectionFile(File redirectionFile, File rankedListFile) {

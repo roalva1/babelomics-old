@@ -205,7 +205,6 @@ public class FatiGO {
                 list2set.addAll(list2);
                 AnnotationManager annoManager = new AnnotationManager(this.species);
                 Map<String, List<String>> annots = annoManager.getIdAnnotationsGenome(db);
-                System.out.println("entro");
                 for (String s : annots.keySet()) {
                     if (list2set.contains(s))
                         xrefs.put(s, annots.get(s));
