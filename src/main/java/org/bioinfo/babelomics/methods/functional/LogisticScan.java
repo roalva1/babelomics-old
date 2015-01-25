@@ -1,7 +1,6 @@
 package org.bioinfo.babelomics.methods.functional;
 
 import java.io.IOException;
-import java.org.bioinfo.babelomics.utils.InterproManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;

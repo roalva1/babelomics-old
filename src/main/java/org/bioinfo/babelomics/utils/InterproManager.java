@@ -1,4 +1,4 @@
-package java.org.bioinfo.babelomics.utils;
+package org.bioinfo.babelomics.utils;
 
 import org.bioinfo.commons.io.utils.IOUtils;
 
@@ -26,8 +26,8 @@ public class InterproManager {
                 String fields[] = goTerm.split("\t");
                 List<String> values = new ArrayList<String>();
                 values.add(fields[1]);
-                values.add(fields[2]);
-                values.add(fields[3]);
+//values.add(fields[2]);
+  //              values.add(fields[3]);
                 terms.put(fields[0],values);
             }
 
