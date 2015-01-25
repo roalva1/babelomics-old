@@ -121,6 +121,8 @@ public class FatiGO {
         this.testMode = testMode;
         this.duplicatesMode = duplicatesMode;
         this.isYourAnnotations = true;
+                this.mode = modeTypes.list2list.name();
+
     }
 
     // Your annotations one list constructor
