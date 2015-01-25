@@ -13,6 +13,7 @@ import org.bioinfo.math.result.TestResultList;
 import org.bioinfo.math.stats.MultipleTestCorrection;
 import org.bioinfo.math.stats.inference.FisherExactTest;
 import org.bioinfo.babelomics.utils.GOManager;
+import org.bioinfo.babelomics.utils.InterproManager;
 
 public class TwoListFisherTest extends FunctionalTest {
 
@@ -113,9 +114,17 @@ public class TwoListFisherTest extends FunctionalTest {
                 Map<String, List<String>> goTerms = new HashMap<String, List<String>>();
                 goTerms = goManager.getTerms();
 
+                InterproManager ipManager = new InterproManager();
+                Map<String, List<String>> ipTerms = new HashMap<String, List<String>>();
+                ipTerms = ipManager.getTerms();
+
                 String termId = terms.get(i);
                 if (goTerms.containsKey(termId)) {
                     String name = goTerms.get(termId).get(0);
+                    termId = name + "(" + termId + ")";
+                }
+                if (ipTerms.containsKey(termId)) {
+                    String name = ipTerms.get(termId).get(0);
                     termId = name + "(" + termId + ")";
                 }
 

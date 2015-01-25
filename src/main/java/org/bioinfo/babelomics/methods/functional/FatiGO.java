@@ -121,9 +121,9 @@ public class FatiGO {
         this.testMode = testMode;
         this.duplicatesMode = duplicatesMode;
         this.isYourAnnotations = true;
-                this.mode = modeTypes.list2list.name();
+        this.mode = modeTypes.list2list.name();
         this.species = species;
-System.out.println("");
+        System.out.println("");
     }
 
     // Your annotations one list constructor
@@ -222,8 +222,8 @@ System.out.println("");
 //            annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
         }
         this.termSizes = new HashMap<String, Integer>();
-        if(!db.equals("") && !this.species.equals("none"))
-        this.termSizes = getAnnotationsTermSizesInGenome(db, this.species);
+        if (!db.equals("") && !this.species.equals("none"))
+            this.termSizes = getAnnotationsTermSizesInGenome(db, this.species);
 
         /** Add go name to id **/
 //        Map<String, List<String>> goTerms = new HashMap<String, List<String>>();

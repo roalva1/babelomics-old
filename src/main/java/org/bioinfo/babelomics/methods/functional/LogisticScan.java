@@ -1,6 +1,7 @@
 package org.bioinfo.babelomics.methods.functional;
 
 import java.io.IOException;
+import java.org.bioinfo.babelomics.utils.InterproManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import org.bioinfo.infrared.funcannot.filter.GOFilter;
 import org.bioinfo.babelomics.utils.XrefManager;
 import org.bioinfo.babelomics.utils.AnnotationManager;
 import org.bioinfo.babelomics.utils.GOManager;
+import org.bioinfo.babelomics.utils.InterproManager;
 import org.bioinfo.infrared.funcannot.filter.GOSlimFilter;
 import org.bioinfo.infrared.funcannot.filter.InterproFilter;
 import org.bioinfo.babelomics.utils.filters.ReconFilter;
@@ -189,6 +191,11 @@ public class LogisticScan extends GeneSetAnalysis {
         Map<String, List<String>> goTerms = new HashMap<String, List<String>>();
         goTerms = goManager.getTerms();
 
+        InterproManager ipManager = new InterproManager();
+        Map<String, List<String>> ipTerms = new HashMap<String, List<String>>();
+        ipTerms = ipManager.getTerms();
+
+
         // run rows
         int termSize, termSizeInGenome;
         List<String> genes;
@@ -222,6 +229,10 @@ public class LogisticScan extends GeneSetAnalysis {
 
                 if (goTerms.containsKey(term)) {
                     String name = goTerms.get(term).get(0);
+                    term = name + "(" + term + ")";
+                }
+                if (ipTerms.containsKey(term)) {
+                    String name = ipTerms.get(term).get(0);
                     term = name + "(" + term + ")";
                 }
                 GeneSetAnalysisTestResult gseaTest = new GeneSetAnalysisTestResult(term, termSize, termSizeInGenome, genes, converged, logRatio, adjPValue);
