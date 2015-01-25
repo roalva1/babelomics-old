@@ -114,7 +114,7 @@ public class FatiGO {
     }
 
     // Your annotations two list constructor
-    public FatiGO(List<String> list1, List<String> list2, FeatureList<AnnotationItem> annotations, int testMode, int duplicatesMode) {
+    public FatiGO(List<String> list1, List<String> list2, FeatureList<AnnotationItem> annotations, int testMode, int duplicatesMode, String species) {
         this.list1 = list1;
         this.list2 = list2;
         this.annotations = annotations;
@@ -123,7 +123,7 @@ public class FatiGO {
         this.isYourAnnotations = true;
                 this.mode = modeTypes.list2list.name();
         this.species = species;
-
+System.out.println("");
     }
 
     // Your annotations one list constructor
@@ -221,7 +221,8 @@ public class FatiGO {
             /** Set term sizes **/
 //            annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
         }
-
+        this.termSizes = new HashMap<String, Integer>();
+        if(!db.equals("") && !this.species.equals("none"))
         this.termSizes = getAnnotationsTermSizesInGenome(db, this.species);
 
         /** Add go name to id **/

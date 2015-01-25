@@ -256,7 +256,7 @@ public class FatiGOTool extends FunctionalProfilingTool{
 
 		// init test
 		FatiGO fatigo = null;
-		if(list2!=null) fatigo = new FatiGO(idList1, idList2, yourAnnotations, testMode, duplicatesMode);
+		if(list2!=null) fatigo = new FatiGO(idList1, idList2, yourAnnotations, testMode, duplicatesMode, species);
 		//else if(isRestOfGenome()) fatigo = new FatiGO(idList1,yourAnnotations);
 		else fatigo = new FatiGO(idList1,yourAnnotations);
 
