@@ -122,6 +122,7 @@ public class FatiGO {
         this.duplicatesMode = duplicatesMode;
         this.isYourAnnotations = true;
                 this.mode = modeTypes.list2list.name();
+        this.species = species;
 
     }
 
