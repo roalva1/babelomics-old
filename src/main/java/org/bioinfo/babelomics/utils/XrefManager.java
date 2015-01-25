@@ -254,6 +254,14 @@ public class XrefManager {
                 auxSpecies = "mmusculus";
             if (species.equalsIgnoreCase("rno"))
                 auxSpecies = "rnorvegicus";
+            if (species.equalsIgnoreCase("dme"))
+                                auxSpecies = "dmelanogaster";
+            if (species.equalsIgnoreCase("sce"))
+                auxSpecies = "scerevisiae";
+            if (species.equalsIgnoreCase("cel"))
+               auxSpecies = "celegans";
+            if (species.equalsIgnoreCase("ath"))
+              auxSpecies = "athaliana";
 
             this.uri += auxSpecies + "/feature/id/";
 
