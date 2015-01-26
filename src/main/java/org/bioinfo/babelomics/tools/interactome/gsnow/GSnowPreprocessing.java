@@ -268,8 +268,18 @@ public class GSnowPreprocessing {
         String dbName = "";
         if (type.equalsIgnoreCase("proteins") || type.equalsIgnoreCase("transcripts"))
             dbName = "uniprotkb_acc";
-        else if (type.equalsIgnoreCase("genes") || type.equalsIgnoreCase("vcf"))
-            dbName = "hgnc_symbol";
+        else if (type.equalsIgnoreCase("genes") || type.equalsIgnoreCase("vcf")) {
+            if (this.interactome.equalsIgnoreCase("hsa"))
+                dbName = "hgnc_symbol";
+            if (this.interactome.equalsIgnoreCase("mmu"))
+                dbName = "mgi_symbol";
+            if (this.interactome.equalsIgnoreCase("dme"))
+                dbName = "uniprotkb/swissprot";
+            if (this.interactome.equalsIgnoreCase("sce"))
+                dbName = "sgd";
+            if (this.interactome.equalsIgnoreCase("ath"))
+                dbName = "uniprotkb/swissprot";
+        }
         DBName dbNameReturn = new DBName(dbName, dbName, dbName);
         /** end babelomics 5 **/
         return dbNameReturn;

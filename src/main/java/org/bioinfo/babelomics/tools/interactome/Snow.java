@@ -83,6 +83,9 @@ public class Snow extends BabelomicsTool {
 
     //private String wBinPath;
 
+    /** goterms **/
+    Map<String, List<String>> goTerms;
+
     @Override
     public void initOptions() {
         options.addOption(OptionFactory.createOption("interactome", "Interactome: hsa, sce or own (for you own interactome)", true));
@@ -114,6 +117,12 @@ public class Snow extends BabelomicsTool {
 
     @Override
     protected void execute() {
+
+             /** Get goterms**/
+           GOManager goManager = new GOManager();
+            goTerms = goManager.getTerms();
+
+
         File f = null;
         this.decimalFormat = "#.####";
         this.listMaxSize = 500;
@@ -1252,8 +1261,6 @@ public class Snow extends BabelomicsTool {
         String tab = "\t";
         sb.append("#input_id").append(tab).append("id").append(tab).append("type").append(tab).append("rank").append(tab).append("bet").append(tab).append("clust").append(tab);
         sb.append("conn").append(tab).append("go_name").append(tab).append("go_id").append(System.getProperty("line.separator"));
-        GOManager goManager = new GOManager();
-        Map<String, List<String>> goTerms = goManager.getTerms();
         /** First significant no external nodes **/
         for (ProteinVertex pr : subProteinNetwork.getInteractomeGraph().getAllVertices()) {
 
@@ -1267,7 +1274,7 @@ public class Snow extends BabelomicsTool {
                 listType = "external";
             sb.append(listType).append(tab);
             sb.append(pr.getRelativeBetweenness()).append(tab);
-            sb.append(getSingleMcnInteractors(subProteinNetwork, pr.getId(), goTerms));
+            sb.append(getSingleMcnInteractors(subProteinNetwork, pr.getId()));
             sb.append(System.getProperty("line.separator"));
         }
 //		/** Second significant external nodes **/
@@ -1286,7 +1293,7 @@ public class Snow extends BabelomicsTool {
         return sb.toString();
     }
 
-    private String getSingleMcnInteractors(ProteinNetwork subProteinNetwork, String id, Map<String, List<String>> goTerms) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
+    private String getSingleMcnInteractors(ProteinNetwork subProteinNetwork, String id) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 //        GODBManager gof = new GODBManager(dbConnector);
         StringBuilder sb = new StringBuilder();
         String tab = "\t";
@@ -1308,15 +1315,19 @@ public class Snow extends BabelomicsTool {
                 for (String goId : xrefs.get(id)) {
 //                System.out.println("key = " + key);
 //                System.out.println("xrefs.get(key) = " + xrefs.get(key));
-                    goIds += goId + ",";
-                    goNames += goTerms.get(goId).get(0) + ",";
+                    goIds += goId + "|";
+                    String goTerm = "";
+                    if(goTerms.get(goId)!=null)
+                        goTerm = goTerms.get(goId).get(0);
+
+                    goNames +=  goTerm + "|";
                 }
             }
             sb.append(goNames);
-            sb = this.deleteLastCh(sb, ",");
+            sb = this.deleteLastCh(sb, "|");
             sb.append("\t");
             sb.append(goIds);
-            sb = this.deleteLastCh(sb, ",");
+            sb = this.deleteLastCh(sb, "|");
 
 
 //			List<String> dbNames = new ArrayList<String>();
@@ -1393,8 +1404,20 @@ public class Snow extends BabelomicsTool {
         String dbName = "";
         if (type.equalsIgnoreCase("proteins") || type.equalsIgnoreCase("transcripts"))
             dbName = "uniprotkb_acc";
-        else if (type.equalsIgnoreCase("genes") || type.equalsIgnoreCase("vcf"))
-            dbName = "hgnc_symbol";
+        else if (type.equalsIgnoreCase("genes") || type.equalsIgnoreCase("vcf")) {
+            if(this.interactome.equalsIgnoreCase("hsa"))
+                dbName = "hgnc_symbol";
+            if(this.interactome.equalsIgnoreCase("mmu"))
+                dbName = "mgi_symbol";
+            if(this.interactome.equalsIgnoreCase("dme"))
+                dbName = "uniprotkb/swissprot";
+            if(this.interactome.equalsIgnoreCase("sce"))
+                dbName = "sgd";
+            if(this.interactome.equalsIgnoreCase("ath"))
+                dbName = "uniprotkb/swissprot";
+        }
+        System.out.println("interatome = " + interactome);
+        System.out.println("dbName = " + dbName);
         DBName dbNameReturn = new DBName(dbName, dbName, dbName);
         /** end babelomics 5 **/
         return dbNameReturn;
