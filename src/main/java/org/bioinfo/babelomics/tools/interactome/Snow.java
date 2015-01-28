@@ -1410,11 +1410,11 @@ public class Snow extends BabelomicsTool {
             if(this.interactome.equalsIgnoreCase("mmu"))
                 dbName = "mgi_symbol";
             if(this.interactome.equalsIgnoreCase("dme"))
-                dbName = "uniprotkb/swissprot";
+                dbName = "EntrezGene";
             if(this.interactome.equalsIgnoreCase("sce"))
                 dbName = "sgd";
             if(this.interactome.equalsIgnoreCase("ath"))
-                dbName = "uniprotkb/swissprot";
+                dbName = "EntrezGene";
         }
         System.out.println("interatome = " + interactome);
         System.out.println("dbName = " + dbName);

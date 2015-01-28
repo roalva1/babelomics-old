@@ -202,7 +202,7 @@ public class FatiGO {
 
             XrefManager xrefManager = new XrefManager(all, this.species);
             Map<String, List<String>> xrefs = xrefManager.getXrefs(db);
-
+//            System.out.println("xrefs = " + xrefs);
             if (this.mode.equalsIgnoreCase(modeTypes.list2genome.name())) {
                 Set<String> list2set = new HashSet<String>();
                 list2set.addAll(list2);
