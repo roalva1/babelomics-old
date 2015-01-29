@@ -656,28 +656,28 @@ public class Snow extends BabelomicsTool {
 
             //result.addOutputItem(new Item("list_inter_kol_param_bet",  Double.toString(getPValue(relBetList1, relBetInter, side)), "P-value betweenness: List "+symbol+" Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test.List - Interactome"));
             String pvalue = formatPvalue(StringUtils.decimalFormat(getPValue(relBetInter, relBetList1, side), decimalFormat));
-            result.addOutputItem(new Item("list_inter_kol_param_bet", pvalue, "Relative betweenness: List " + symbol + " Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(), "Network parameters evaluation.Role of list within interactome of reference.Betweenness"));
+            result.addOutputItem(new Item("list_inter_kol_param_bet", pvalue, "Relative betweenness: List " + symbol + " Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(), "Network parameters evaluation.Role of your list within the whole interactome.Betweenness"));
 
 //            mean = MathUtils.mean(ListUtils.toDoubleArray(connList1));
 //            symbol = getSymbol(mean, proteinNetwork.getMeanConnections());
             //result.addOutputItem(new Item("list_inter_kol_param_conn",  Double.toString(getPValue(connList1, connInter, side)), "P-value connections: List "+symbol+" Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test.List - Interactome"));
             pvalue = formatPvalue(StringUtils.decimalFormat(getPValue(connInter, connList1, side), decimalFormat));
-            result.addOutputItem(new Item("list_inter_kol_param_conn", pvalue, "Connections: List " + symbol + " Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(), "Network parameters evaluation.Role of list within interactome of reference.Connections"));
+            result.addOutputItem(new Item("list_inter_kol_param_conn", pvalue, "Connections: List " + symbol + " Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(), "Network parameters evaluation.Role of your list within the whole interactome.Connections"));
 
 //            mean = MathUtils.mean(ListUtils.toDoubleArray(clustList1));
 //            symbol = getSymbol(mean, proteinNetwork.getMeanClust());
             //result.addOutputItem(new Item("list_inter_kol_param_clu",  Double.toString(getPValue(clustList1, clustInter, side)), "P-value clustering: List "+symbol+" Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(),new HashMap<String,String>(),"Statistic results.Kolmogorov-Smirnov test.List - Interactome"));
             pvalue = formatPvalue(StringUtils.decimalFormat(getPValue(clustInter, clustList1, side), decimalFormat));
-            result.addOutputItem(new Item("list_inter_kol_param_clu", pvalue, "Clustering: List " + symbol + " Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(), "Network parameters evaluation.Role of list within interactome of reference.Clustering coeff"));
+            result.addOutputItem(new Item("list_inter_kol_param_clu", pvalue, "Clustering: List " + symbol + " Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String, String>(), "Network parameters evaluation.Role of your list within the whole interactome.Clustering coeff"));
 
         }
 //		else
 //			result.addOutputItem(new Item("list_inter_kol_param", "Empty results", "List - Interactome", Item.TYPE.MESSAGE, new ArrayList<String>(), new HashMap<String,String>(), "Statistic results.Kolmogorov-Smirnov test"));
 
         if (images) {
-            createImages(outputFileName + "_list_inter_relBet", relBetList1, "list1", relBetInter, "inter", "list_inter_relBet", "Plot", "Network parameters evaluation.Role of list within interactome of reference.Betweenness", "Relative Betweenness");
-            createImages(outputFileName + "_list_inter_conn", connList1, "list1", connInter, "inter", "list_inter_conn", "Plot", "Network parameters evaluation.Role of list within interactome of reference.Connections", "Connections");
-            createImages(outputFileName + "_list_inter_clust", clustList1, "list1", clustInter, "inter", "list_inter_clust", "Plot", "Network parameters evaluation.Role of list within interactome of reference.Clustering coeff", "Clustering coeff");
+            createImages(outputFileName + "_list_inter_relBet", relBetList1, "list1", relBetInter, "inter", "list_inter_relBet", "Plot", "Network parameters evaluation.Role of your list within the whole interactome.Betweenness", "Relative Betweenness");
+            createImages(outputFileName + "_list_inter_conn", connList1, "list1", connInter, "inter", "list_inter_conn", "Plot", "Network parameters evaluation.Role of your list within the whole interactome.Connections", "Connections");
+            createImages(outputFileName + "_list_inter_clust", clustList1, "list1", clustInter, "inter", "list_inter_clust", "Plot", "Network parameters evaluation.Role of your list within the whole interactome.Clustering coeff", "Clustering coeff");
         }
         createOutputTopoList(list, this.mapList1, "1");
         logger.debug("Finished 1st Analysis..................");
