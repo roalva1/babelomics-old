@@ -134,6 +134,7 @@ public class FatiGO {
         this.testMode = FisherExactTest.GREATER;
         this.duplicatesMode = REMOVE_REF;
         this.isYourAnnotations = true;
+        this.mode = modeTypes.list2rest.name();
     }
 
 
@@ -221,9 +222,10 @@ public class FatiGO {
             /** Set term sizes **/
 //            annotations = InfraredUtils.getAnnotations(dbConnector, all, filter);
         }
-        this.termSizes = new HashMap<String, Integer>();
-        if (!db.equals("") && !this.species.equals("none"))
+        if (!db.equals("") && !this.species.equals("none")) {
+//            this.termSizes = new HashMap<String, Integer>();
             this.termSizes = getAnnotationsTermSizesInGenome(db, this.species);
+        }
 
         /** Add go name to id **/
 //        Map<String, List<String>> goTerms = new HashMap<String, List<String>>();

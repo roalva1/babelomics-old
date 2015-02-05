@@ -20,6 +20,17 @@ public class TwoListFisherTest extends FunctionalTest {
     public final static double DEFAULT_PVALUE_THRESHOLD = 0.05;
 
     private List<TwoListFisherTestResult> results;
+    Map<String, List<String>> goTerms;
+    Map<String, List<String>> ipTerms;
+    public TwoListFisherTest(){
+        GOManager goManager = new GOManager();
+        goTerms = new HashMap<String, List<String>>();
+        goTerms = goManager.getTerms();
+
+        InterproManager ipManager = new InterproManager();
+        ipTerms = new HashMap<String, List<String>>();
+        ipTerms = ipManager.getTerms();
+    }
 
     @Override
     public void test(List<String> list1, List<String> list2, FeatureList<AnnotationItem> annotations, int testMode) {
@@ -110,13 +121,7 @@ public class TwoListFisherTest extends FunctionalTest {
                     termSizeInGenome = termSizes.get(terms.get(i));
                 }
 
-                GOManager goManager = new GOManager();
-                Map<String, List<String>> goTerms = new HashMap<String, List<String>>();
-                goTerms = goManager.getTerms();
 
-                InterproManager ipManager = new InterproManager();
-                Map<String, List<String>> ipTerms = new HashMap<String, List<String>>();
-                ipTerms = ipManager.getTerms();
 
                 String termId = terms.get(i);
                 if (goTerms.containsKey(termId)) {
