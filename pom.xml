@@ -134,6 +134,31 @@
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>appassembler-maven-plugin</artifactId>
+                <version>1.9</version>
+                <configuration>
+                    <!-- Set the target configuration directory to be used in the bin scripts -->
+                    <configurationSourceDirectory>conf</configurationSourceDirectory>
+                    <configurationDirectory>conf</configurationDirectory>
+                    <copyConfigurationDirectory>true</copyConfigurationDirectory>
+
+                    <binFolder>bin</binFolder>
+
+                    <assembleDirectory>${project.build.directory}/babelomics</assembleDirectory>
+                    <extraJvmArguments>-Xms64m -Xmx6144m -XX:MaxPermSize=6144m -Xss50M -Djava.net.preferIPv4Stack=true</extraJvmArguments>
+                    <platforms>
+                        <platform>unix</platform>
+                    </platforms>
+                    <programs>
+                        <program>
+                            <mainClass>org.bioinfo.babelomics.BabelomicsMain</mainClass>
+                            <id>babelomics</id>
+                        </program>
+                    </programs>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <distributionManagement>
