@@ -414,6 +414,7 @@ public class GSnow extends SnowTool {
         int sizeRandomCutoffValue = 50;
         /** This variable is used for knowing the amount of executions that we are runnning **/
         int maxExecutions = 5;
+
         List<GSnowItem> gsnowItemsList = getMaxRelatives();
         Collections.sort(gsnowItemsList);
 
@@ -427,6 +428,7 @@ public class GSnow extends SnowTool {
             if (gSnowItem.getNodes().size() < sizeRandomCutoffValue || gSnowItem.getNodes().size() == sizeRandomCutoffValue) {
                 randomsNumber = 1000;
             }
+
             int vertexToAdd = gSnowItem.getNodes().size() - seedList.size();
             List<Double> valueList = new ArrayList<Double>();
             for (int j = 0; j < randomsNumber; j++) {

@@ -307,8 +307,15 @@ public class GSnowPreprocessing {
         Node n = null;
         List<String> listNodes = new ArrayList<String>();
         for (Node node : nodes) {
-            listNodes.add(node.getOriginalId());
+            if(node.getOriginalId().contains(" ") || node.getOriginalId().contains("/")){
+                notMatchNodes.add(node.getOriginalId());
+            }
+            else
+                listNodes.add(node.getOriginalId());
         }
+
+
+
         XrefManager xrefManager = new XrefManager(listNodes, interactome);
         Map<String, List<String>> xrefList = xrefManager.getXrefs(dbName);
         for (Node node : nodes) {

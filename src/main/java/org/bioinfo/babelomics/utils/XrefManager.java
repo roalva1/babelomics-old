@@ -107,8 +107,10 @@ public class XrefManager {
         int numberIds = 0;
         StringBuilder batch = new StringBuilder();
         for (String id : list) {
-            if (id.contains("/"))
+            if (id.contains("/") || id.contains("\"") || id.contains("\'") || id.contains(" ")) {
+
                 continue;
+            }
             if (numberIds == requests) {
                 this.fillXref(batch, db);
                 numberIds = 0;
