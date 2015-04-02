@@ -222,7 +222,8 @@ public class ClassComparison extends BabelomicsTool {
 			DiffExpressionUtils.createFatiScanRedirection(dataFrame, test, "statistic", result, outdir);
 		} catch (Exception e) {
 			e.printStackTrace();
-			abort("exception_executet_classcomparison", "ERROR", "Error running t-test", "");
+			System.out.println("e.getMessage() = " + e.getMessage());
+			abort("exception_executet_classcomparison", "ERROR", e.getMessage(), "");
 		}
 	}
 
